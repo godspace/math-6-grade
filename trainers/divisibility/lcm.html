@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тренажёр НОК - Найди общие кратные</title>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --accent: #f72585;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --success: #4cc9f0;
+            --warning: #ffd166;
+            --selected: #7209b7;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: var(--light);
+        }
+        
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .instructions {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .task-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .numbers {
+            font-size: 2.5rem;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .number-box {
+            background-color: var(--accent);
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        
+        button {
+            padding: 12px 25px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .show-btn {
+            background-color: var(--warning);
+            color: var(--dark);
+        }
+        
+        .check-btn {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .next-btn {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .visualization {
+            margin-top: 30px;
+            background-color: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            padding: 20px;
+        }
+        
+        .multiples-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .number-label {
+            font-weight: bold;
+            width: 80px;
+            text-align: center;
+            font-size: 1.2rem;
+        }
+        
+        .multiples {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            flex: 1;
+            justify-content: center;
+            min-height: 50px;
+        }
+        
+        .multiple {
+            padding: 8px 15px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            cursor: pointer;
+            opacity: 0;
+            transform: scale(0);
+            animation: appear 0.5s forwards;
+        }
+        
+        @keyframes appear {
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .multiple:hover {
+            transform: scale(1.1);
+        }
+        
+        .selected {
+            background-color: var(--selected);
+            transform: scale(1.1);
+            box-shadow: 0 0 10px var(--selected);
+        }
+        
+        .smallest {
+            background-color: var(--success);
+            color: white;
+            transform: scale(1.2);
+            animation: glow 1.5s infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { box-shadow: 0 0 5px var(--success); }
+            to { box-shadow: 0 0 20px var(--success); }
+        }
+        
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            text-align: center;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 1.2rem;
+        }
+        
+        .correct {
+            background-color: rgba(76, 201, 240, 0.3);
+            color: var(--success);
+        }
+        
+        .incorrect {
+            background-color: rgba(247, 37, 133, 0.3);
+            color: var(--accent);
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 15px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--warning);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .numbers {
+                font-size: 2rem;
+            }
+            
+            .number-box {
+                width: 70px;
+                height: 70px;
+            }
+            
+            .multiples-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .number-label {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Найди НОК</h1>
+            <p class="instructions">Найди общие кратные чисел и выбери наименьшее</p>
+        </header>
+        
+        <div class="task-container">
+            <div class="numbers">
+                <div class="number-box" id="num1">12</div>
+                <span>и</span>
+                <div class="number-box" id="num2">18</div>
+            </div>
+            
+            <div class="buttons">
+                <button class="show-btn" id="show">Показать кратные</button>
+                <button class="check-btn" id="check" disabled>Проверить НОК</button>
+                <button class="next-btn" id="next">Дальше</button>
+            </div>
+            
+            <div class="feedback" id="feedback"></div>
+        </div>
+        
+        <div class="visualization">
+            <div class="multiples-row">
+                <div class="number-label" id="label1">12:</div>
+                <div class="multiples" id="multiples1">
+                    <!-- Кратные первого числа -->
+                </div>
+            </div>
+            
+            <div class="multiples-row">
+                <div class="number-label" id="label2">18:</div>
+                <div class="multiples" id="multiples2">
+                    <!-- Кратные второго числа -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value" id="correct-count">0</div>
+                <div>Правильно</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="total-count">0</div>
+                <div>Всего</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="success-rate">0%</div>
+                <div>Успех</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Элементы DOM
+        const num1Element = document.getElementById('num1');
+        const num2Element = document.getElementById('num2');
+        const label1Element = document.getElementById('label1');
+        const label2Element = document.getElementById('label2');
+        const showButton = document.getElementById('show');
+        const checkButton = document.getElementById('check');
+        const nextButton = document.getElementById('next');
+        const feedbackElement = document.getElementById('feedback');
+        const multiples1Container = document.getElementById('multiples1');
+        const multiples2Container = document.getElementById('multiples2');
+        const correctCountElement = document.getElementById('correct-count');
+        const totalCountElement = document.getElementById('total-count');
+        const successRateElement = document.getElementById('success-rate');
+        
+        // Статистика
+        let correctCount = 0;
+        let totalCount = 0;
+        
+        // Текущие числа
+        let currentNum1, currentNum2, currentLCM;
+        
+        // Для пошагового показа кратных
+        let currentStep = 0;
+        let multiples1 = [];
+        let multiples2 = [];
+        let selectedMultiples = [];
+        let answered = false;
+        
+        // Инициализация
+        function init() {
+            generateNewNumbers();
+            updateStats();
+            
+            // Обработчики событий
+            showButton.addEventListener('click', showNextMultiple);
+            checkButton.addEventListener('click', checkAnswer);
+            nextButton.addEventListener('click', generateNewNumbers);
+        }
+        
+        // Генерация новых чисел с общими кратными
+        function generateNewNumbers() {
+            // Очистка предыдущего состояния
+            feedbackElement.textContent = '';
+            feedbackElement.className = 'feedback';
+            multiples1Container.innerHTML = '';
+            multiples2Container.innerHTML = '';
+            currentStep = 0;
+            selectedMultiples = [];
+            answered = false;
+            
+            // Включение кнопок
+            showButton.disabled = false;
+            checkButton.disabled = true;
+            
+            // Генерация чисел с общими кратными
+            generateNumbersWithCommonMultiples();
+            
+            // Обновление отображения чисел
+            num1Element.textContent = currentNum1;
+            num2Element.textContent = currentNum2;
+            label1Element.textContent = `${currentNum1}:`;
+            label2Element.textContent = `${currentNum2}:`;
+            
+            // Вычисление НОК
+            currentLCM = calculateLCM(currentNum1, currentNum2);
+            
+            // Подготовка кратных чисел
+            prepareMultiples();
+        }
+        
+        // Генерация чисел, у которых точно есть общие кратные
+        function generateNumbersWithCommonMultiples() {
+            // Создаем базовое число
+            const base = Math.floor(Math.random() * 6) + 2; // от 2 до 7
+            const multiplier1 = Math.floor(Math.random() * 4) + 2; // от 2 до 5
+            const multiplier2 = Math.floor(Math.random() * 4) + 2; // от 2 до 5
+            
+            // Убедимся, что множители разные
+            while (multiplier1 === multiplier2) {
+                multiplier2 = Math.floor(Math.random() * 4) + 2;
+            }
+            
+            currentNum1 = base * multiplier1;
+            currentNum2 = base * multiplier2;
+            
+            // Проверяем, чтобы числа были в разумных пределах
+            if (currentNum1 > 30 || currentNum2 > 30) {
+                generateNumbersWithCommonMultiples();
+            }
+        }
+        
+        // Вычисление НОК
+        function calculateLCM(a, b) {
+            // Используем формулу: НОК(a, b) = |a * b| / НОД(a, b)
+            return Math.abs(a * b) / calculateGCD(a, b);
+        }
+        
+        // Вычисление НОД (алгоритм Евклида)
+        function calculateGCD(a, b) {
+            if (b === 0) {
+                return a;
+            }
+            return calculateGCD(b, a % b);
+        }
+        
+        // Подготовка кратных чисел
+        function prepareMultiples() {
+            multiples1 = [];
+            multiples2 = [];
+            
+            // Генерируем кратные до НОК + несколько следующих
+            const maxMultiples = 12;
+            for (let i = 1; i <= maxMultiples; i++) {
+                multiples1.push(currentNum1 * i);
+                multiples2.push(currentNum2 * i);
+            }
+        }
+        
+        // Показать следующее кратное
+        function showNextMultiple() {
+            if (currentStep < 12) {
+                // Добавляем кратное для первого числа
+                if (currentStep < multiples1.length) {
+                    const multiple1 = multiples1[currentStep];
+                    const element1 = createMultipleElement(multiple1, 1);
+                    multiples1Container.appendChild(element1);
+                }
+                
+                // Добавляем кратное для второго числа
+                if (currentStep < multiples2.length) {
+                    const multiple2 = multiples2[currentStep];
+                    const element2 = createMultipleElement(multiple2, 2);
+                    multiples2Container.appendChild(element2);
+                }
+                
+                currentStep++;
+                
+                // Активируем кнопку проверки, если есть общие кратные
+                if (hasCommonMultiples()) {
+                    checkButton.disabled = false;
+                }
+                
+                // Если показали все кратные, отключаем кнопку
+                if (currentStep >= 12) {
+                    showButton.disabled = true;
+                }
+            }
+        }
+        
+        // Создание элемента кратного числа
+        function createMultipleElement(value, listNum) {
+            const element = document.createElement('div');
+            element.className = 'multiple';
+            element.textContent = value;
+            element.dataset.value = value;
+            element.dataset.list = listNum;
+            
+            // Добавляем обработчик клика
+            element.addEventListener('click', () => {
+                if (answered) return;
+                
+                const multipleValue = parseInt(element.dataset.value);
+                
+                // Проверяем, является ли кратное общим
+                if (isCommonMultiple(multipleValue)) {
+                    // Переключаем выделение
+                    if (element.classList.contains('selected')) {
+                        element.classList.remove('selected');
+                        selectedMultiples = selectedMultiples.filter(v => v !== multipleValue);
+                    } else {
+                        element.classList.add('selected');
+                        selectedMultiples.push(multipleValue);
+                    }
+                    
+                    // Обновляем выделение в обоих списках
+                    updateSelection(multipleValue);
+                } else {
+                    // Если выбрано не общее кратное, показываем сообщение
+                    feedbackElement.textContent = 'Это не общее кратное!';
+                    feedbackElement.className = 'feedback incorrect';
+                    setTimeout(() => {
+                        if (!answered) feedbackElement.textContent = '';
+                    }, 1500);
+                }
+            });
+            
+            return element;
+        }
+        
+        // Проверяет, является ли число общим кратным
+        function isCommonMultiple(value) {
+            return multiples1.includes(value) && multiples2.includes(value);
+        }
+        
+        // Обновляет выделение числа в обоих списках
+        function updateSelection(value) {
+            const allMultiples = document.querySelectorAll('.multiple');
+            allMultiples.forEach(el => {
+                if (parseInt(el.dataset.value) === value) {
+                    if (selectedMultiples.includes(value)) {
+                        el.classList.add('selected');
+                    } else {
+                        el.classList.remove('selected');
+                    }
+                }
+            });
+        }
+        
+        // Проверяет, есть ли общие кратные среди показанных
+        function hasCommonMultiples() {
+            const currentMultiples1 = Array.from(multiples1Container.querySelectorAll('.multiple'))
+                .map(el => parseInt(el.dataset.value));
+            const currentMultiples2 = Array.from(multiples2Container.querySelectorAll('.multiple'))
+                .map(el => parseInt(el.dataset.value));
+            
+            return currentMultiples1.some(value => currentMultiples2.includes(value));
+        }
+        
+        // Проверка ответа
+        function checkAnswer() {
+            if (selectedMultiples.length === 0) {
+                feedbackElement.textContent = 'Выбери общие кратные числа!';
+                feedbackElement.className = 'feedback incorrect';
+                return;
+            }
+            
+            totalCount++;
+            answered = true;
+            
+            // Находим наименьшее выбранное кратное
+            const userAnswer = Math.min(...selectedMultiples);
+            
+            if (userAnswer === currentLCM) {
+                feedbackElement.textContent = '✓ Правильно! Это наименьшее общее кратное!';
+                feedbackElement.className = 'feedback correct';
+                correctCount++;
+                
+                // Подсвечиваем правильный ответ
+                document.querySelectorAll(`.multiple[data-value="${currentLCM}"]`).forEach(el => {
+                    el.classList.add('smallest');
+                });
+            } else {
+                feedbackElement.textContent = `✗ Это не НОК. Наименьшее общее кратное: ${currentLCM}`;
+                feedbackElement.className = 'feedback incorrect';
+                
+                // Подсвечиваем правильный ответ
+                document.querySelectorAll(`.multiple[data-value="${currentLCM}"]`).forEach(el => {
+                    el.classList.add('smallest');
+                });
+            }
+            
+            // Отключаем кнопки
+            showButton.disabled = true;
+            checkButton.disabled = true;
+            
+            updateStats();
+        }
+        
+        // Обновление статистики
+        function updateStats() {
+            correctCountElement.textContent = correctCount;
+            totalCountElement.textContent = totalCount;
+            
+            const successRate = totalCount > 0 ? Math.round((correctCount / totalCount) * 100) : 0;
+            successRateElement.textContent = `${successRate}%`;
+        }
+        
+        // Запуск приложения
+        init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мастер Дробей: Живое Сокращение</title>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --success: #2ec4b6;
+            --warning: #ff9f1c;
+            --danger: #e71d36;
+            --bg-gradient: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+            --card-bg: rgba(255, 255, 255, 0.95);
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            background: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            width: 100%;
+            max-width: 1000px;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* Шапка и прогресс */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .level-badges {
+            display: flex;
+            gap: 10px;
+        }
+
+        .lvl-badge {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #fff;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .lvl-badge.active { background: var(--primary); transform: scale(1.2); box-shadow: 0 0 10px var(--primary); }
+        .lvl-badge.completed { background: var(--success); }
+
+        .stats-box {
+            background: #f8f9fa;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: bold;
+            color: var(--primary);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        h1 { margin: 0; color: #2d3436; font-size: 1.8rem; }
+        .subtitle { color: #636e72; margin-top: 5px; }
+
+        /* Рабочая область */
+        .work-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            min-height: 300px;
+        }
+
+        .fraction-row {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            font-size: 2rem;
+            font-weight: bold;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .fraction {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 80px;
+        }
+
+        .frac-num, .frac-den { padding: 5px; }
+        .frac-line { width: 100%; height: 4px; background: #333; border-radius: 2px; }
+        
+        .operator { font-size: 2.5rem; color: var(--primary); }
+
+        /* Область разложения */
+        .factorization-area {
+            background: #fff;
+            padding: 25px;
+            border-radius: 16px;
+            border: 2px dashed #ccc;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            transition: border-color 0.3s;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.03);
+        }
+
+        .factors-container {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+            min-height: 60px;
+        }
+
+        .factor-input {
+            width: 60px;
+            height: 60px;
+            font-size: 1.5rem;
+            text-align: center;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            outline: none;
+            transition: all 0.2s;
+            font-weight: bold;
+            color: #333;
+            background: #fff;
+        }
+
+        .factor-input:focus { 
+            border-color: var(--primary); 
+            box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.2); 
+            z-index: 2;
+            position: relative;
+        }
+
+        /* --- СТИЛИ ДЛЯ ЖИВОГО СОКРАЩЕНИЯ --- */
+        
+        /* Базовый стиль для сокращенной пары */
+        .factor-input.live-cancelled {
+            text-decoration: line-through; /* Зачеркивание */
+            color: #aaa;                   /* Серый цвет текста (игнор) */
+            border-color: transparent;     /* Убираем акцент с рамки */
+            opacity: 0.8;
+            transform: scale(0.95);        /* Чуть уменьшаем */
+        }
+
+        /* Цвета пар (очень бледные, чтобы не отвлекать, но различать) */
+        .pair-color-0 { background-color: #f2f2f2; } /* Просто серый */
+        .pair-color-1 { background-color: #e3f2fd; } /* Бледно-голубой */
+        .pair-color-2 { background-color: #fce4ec; } /* Бледно-розовый */
+        .pair-color-3 { background-color: #e8f5e9; } /* Бледно-зеленый */
+        .pair-color-4 { background-color: #fff3e0; } /* Бледно-оранжевый */
+
+        /* Статусы проверки (финальные) */
+        .factor-input.correct { border-color: var(--success) !important; color: var(--success) !important; background: #fff !important; text-decoration: none; opacity: 1; transform: scale(1); }
+        .factor-input.wrong { border-color: var(--danger) !important; background: #ffebeb !important; animation: shake 0.4s; }
+
+        .big-fraction-line {
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #ccc, #999, #ccc);
+            border-radius: 2px;
+            margin: 5px 0;
+        }
+
+        /* Финальный ответ */
+        .final-answer {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #fff;
+            padding: 15px;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: 1px solid #eee;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: bold;
+            box-shadow: 0 10px 20px rgba(67, 97, 238, 0.3);
+        }
+
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 15px 25px rgba(67, 97, 238, 0.4); }
+        .btn:active { transform: translateY(-1px); }
+        
+        .btn-check { background: linear-gradient(45deg, var(--success), #20bf6b); }
+        .btn-next { background: linear-gradient(45deg, var(--primary), #4834d4); display: none; }
+
+        .feedback {
+            height: 30px;
+            font-weight: bold;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .victory-modal {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.98);
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            animation: fadeIn 0.5s;
+        }
+
+        .trophy { font-size: 100px; margin-bottom: 20px; animation: bounce 2s infinite; }
+        .cert-title { font-size: 2.5rem; color: var(--primary); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; }
+        
+        @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
+        @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
+        @keyframes bounce { 0%, 100% {transform: translateY(0);} 50% {transform: translateY(-20px);} }
+        
+        canvas { position: absolute; top: 0; left: 0; pointer-events: none; }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <div>
+            <h1>Мастер Умножения Дробей</h1>
+            <div class="subtitle" id="levelDescription">Уровень 1: Разминка</div>
+        </div>
+        <div class="level-badges">
+            <div class="lvl-badge active" id="badge1">1</div>
+            <div class="lvl-badge" id="badge2">2</div>
+            <div class="lvl-badge" id="badge3">3</div>
+            <div class="lvl-badge" id="badge4">4</div>
+            <div class="lvl-badge" id="badge5">5</div>
+        </div>
+        <div class="stats-box">
+            Счёт: <span id="score">0</span> | Ошибки: <span id="errors">0</span>
+        </div>
+    </div>
+
+    <div class="work-area">
+        <div class="fraction-row">
+            <div class="fraction">
+                <div class="frac-num" id="n1">?</div>
+                <div class="frac-line"></div>
+                <div class="frac-den" id="d1">?</div>
+            </div>
+            <div class="operator">×</div>
+            <div class="fraction">
+                <div class="frac-num" id="n2">?</div>
+                <div class="frac-line"></div>
+                <div class="frac-den" id="d2">?</div>
+            </div>
+            <div class="operator">=</div>
+            
+            <div class="factorization-area" id="factorArea">
+                <div class="factors-container" id="numFactorsInputs"></div>
+                <div class="big-fraction-line"></div>
+                <div class="factors-container" id="denFactorsInputs"></div>
+            </div>
+
+            <div class="operator">=</div>
+
+            <div class="final-answer">
+                <div class="fraction">
+                    <input type="number" class="factor-input" id="finalNum" placeholder="?">
+                    <div class="frac-line"></div>
+                    <input type="number" class="factor-input" id="finalDen" placeholder="?">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 30px;">
+        <div class="feedback" id="feedbackMsg">Отлично!</div>
+        <br>
+        <button class="btn btn-check" id="checkBtn">Проверить</button>
+        <button class="btn btn-next" id="nextBtn">Следующий пример ➡</button>
+    </div>
+
+    <div class="victory-modal" id="victoryScreen">
+        <canvas id="confettiCanvas"></canvas>
+        <div class="trophy">🏆</div>
+        <div class="cert-title">СЕРТИФИКАТ МАСТЕРА</div>
+        <h2>Курс "Умножение и сокращение дробей" пройден!</h2>
+        <div class="cert-stats">
+            <div>Верных решений: <span id="finalScore" style="color:var(--success)">0</span></div>
+            <div>Ошибок: <span id="finalErrors" style="color:var(--danger)">0</span></div>
+        </div>
+        <br>
+        <button class="btn" onclick="location.reload()">Начать заново</button>
+    </div>
+</div>
+
+<script>
+const LEVELS = {
+    1: { name: "Новичок", desc: "Простое сокращение (числа до 10)", multiplierPool: [2, 3, 5], numCommon: 1, maxVal: 10 },
+    2: { name: "Ученик", desc: "Таблица умножения (две пары)", multiplierPool: [2, 3, 4, 5, 6], numCommon: 2, maxVal: 20 },
+    3: { name: "Специалист", desc: "Составные числа", multiplierPool: [2, 3, 5, 7], numCommon: 2, maxVal: 30 },
+    4: { name: "Мастер", desc: "Крупные числа", multiplierPool: [2, 3, 5, 7, 11], numCommon: 3, maxVal: 50 },
+    5: { name: "Легенда", desc: "Сложное разложение", multiplierPool: [2, 3, 5, 7, 11, 13], numCommon: 3, maxVal: 100 }
+};
+
+let state = {
+    level: 1,
+    tasksCompletedInLevel: 0,
+    tasksToAdvance: 3,
+    score: 0,
+    errors: 0,
+    currentTask: null
+};
+
+function getRandomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function pickRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function gcd(a, b) { return b == 0 ? a : gcd(b, a % b); }
+
+function primeFactors(n) {
+    const factors = [];
+    if (n === 1) return factors; 
+    let d = 2;
+    let temp = n;
+    while (d * d <= temp) {
+        while (temp % d === 0) {
+            factors.push(d);
+            temp /= d;
+        }
+        d++;
+    }
+    if (temp > 1) factors.push(temp);
+    return factors;
+}
+
+function generateTask() {
+    const config = LEVELS[state.level];
+    let ansNum, ansDen;
+    do {
+        ansNum = getRandomInt(1, Math.min(10, config.maxVal / 2));
+        ansDen = getRandomInt(2, Math.min(10, config.maxVal / 2));
+    } while (gcd(ansNum, ansDen) !== 1);
+
+    let commonFactors = [];
+    for(let i=0; i < config.numCommon; i++) commonFactors.push(pickRandom(config.multiplierPool));
+
+    let allNumFactors = [...primeFactors(ansNum), ...commonFactors].sort(() => Math.random() - 0.5);
+    let allDenFactors = [...primeFactors(ansDen), ...commonFactors].sort(() => Math.random() - 0.5);
+
+    let splitNum = getRandomInt(1, allNumFactors.length > 1 ? allNumFactors.length - 1 : 1);
+    let splitDen = getRandomInt(1, allDenFactors.length > 1 ? allDenFactors.length - 1 : 1);
+    
+    if(allNumFactors.length === 1) splitNum = 1; 
+    
+    let n1 = allNumFactors.slice(0, splitNum).reduce((a,b)=>a*b, 1);
+    let n2 = allNumFactors.slice(splitNum).length > 0 ? allNumFactors.slice(splitNum).reduce((a,b)=>a*b, 1) : 1;
+
+    let d1 = allDenFactors.slice(0, splitDen).reduce((a,b)=>a*b, 1);
+    let d2 = allDenFactors.slice(splitDen).length > 0 ? allDenFactors.slice(splitDen).reduce((a,b)=>a*b, 1) : 1;
+
+    let expectedNumFactors = [...primeFactors(n1), ...primeFactors(n2)]; 
+    if(n1===1 && n2===1) expectedNumFactors = [1];
+    if(expectedNumFactors.length === 0) expectedNumFactors = [1];
+
+    let expectedDenFactors = [...primeFactors(d1), ...primeFactors(d2)];
+    if(d1===1 && d2===1) expectedDenFactors = [1];
+    
+    state.currentTask = {
+        n1, d1, n2, d2,
+        expectedNumFactors: expectedNumFactors.sort((a,b)=>a-b),
+        expectedDenFactors: expectedDenFactors.sort((a,b)=>a-b),
+        finalNum: ansNum,
+        finalDen: ansDen
+    };
+
+    renderTask();
+}
+
+function renderTask() {
+    const t = state.currentTask;
+    document.getElementById('n1').textContent = t.n1;
+    document.getElementById('d1').textContent = t.d1;
+    document.getElementById('n2').textContent = t.n2;
+    document.getElementById('d2').textContent = t.d2;
+
+    document.getElementById('levelDescription').textContent = `${LEVELS[state.level].name}: ${LEVELS[state.level].desc}`;
+    
+    for(let i=1; i<=5; i++) {
+        const b = document.getElementById(`badge${i}`);
+        b.className = 'lvl-badge';
+        if(i < state.level) b.classList.add('completed');
+        if(i === state.level) b.classList.add('active');
+    }
+
+    createInputs('numFactorsInputs', t.expectedNumFactors.length);
+    createInputs('denFactorsInputs', t.expectedDenFactors.length);
+
+    document.getElementById('finalNum').value = '';
+    document.getElementById('finalDen').value = '';
+    document.getElementById('finalNum').className = 'factor-input';
+    document.getElementById('finalDen').className = 'factor-input';
+
+    document.getElementById('checkBtn').style.display = 'inline-block';
+    document.getElementById('nextBtn').style.display = 'none';
+    
+    setFeedback("");
+}
+
+function createInputs(containerId, count) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
+    const inputsCount = count === 0 ? 1 : count;
+    
+    for(let i=0; i < inputsCount; i++) {
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.className = 'factor-input';
+        // Добавляем слушатель события для "Живого сокращения"
+        input.addEventListener('input', updateLiveCancellation);
+        
+        if (i < inputsCount - 1) {
+             const span = document.createElement('span');
+             span.textContent = '×';
+             span.style.color = '#777';
+             container.appendChild(input);
+             container.appendChild(span);
+        } else {
+            container.appendChild(input);
+        }
+    }
+}
+
+/**
+ * ФУНКЦИЯ ЖИВОГО СОКРАЩЕНИЯ
+ * Срабатывает при каждом нажатии клавиши
+ */
+function updateLiveCancellation() {
+    // 1. Получаем все инпуты
+    const nInputs = Array.from(document.querySelectorAll('#numFactorsInputs .factor-input'));
+    const dInputs = Array.from(document.querySelectorAll('#denFactorsInputs .factor-input'));
+
+    // 2. Сбрасываем стили перед пересчетом
+    [...nInputs, ...dInputs].forEach(inp => {
+        inp.classList.remove('live-cancelled', 'pair-color-0', 'pair-color-1', 'pair-color-2', 'pair-color-3', 'pair-color-4');
+        inp.style.backgroundColor = ''; // сброс
+    });
+
+    // 3. Ищем пары
+    let colorIndex = 0; // Для выбора цвета пары
+    const dTakenIndices = new Set(); // Чтобы не сокращать одно число с двумя разными
+
+    nInputs.forEach(nInp => {
+        const nVal = parseInt(nInp.value);
+        if (isNaN(nVal)) return;
+
+        // Ищем пару в знаменателе
+        for (let i = 0; i < dInputs.length; i++) {
+            if (dTakenIndices.has(i)) continue; // Этот знаменатель уже сокращен
+
+            const dVal = parseInt(dInputs[i].value);
+            if (nVal === dVal) {
+                // ПАРА НАЙДЕНА!
+                dTakenIndices.add(i);
+                
+                // Применяем стили "Зачеркнуто" и цвет пары
+                const colorClass = `pair-color-${colorIndex % 5}`;
+                
+                nInp.classList.add('live-cancelled', colorClass);
+                dInputs[i].classList.add('live-cancelled', colorClass);
+                
+                colorIndex++;
+                break; // Выходим из цикла по знаменателю, пара найдена
+            }
+        }
+    });
+}
+
+document.getElementById('checkBtn').addEventListener('click', checkAnswer);
+document.getElementById('nextBtn').addEventListener('click', nextTask);
+
+function checkAnswer() {
+    const t = state.currentTask;
+    let allCorrect = true;
+
+    const userNumInputs = document.querySelectorAll('#numFactorsInputs .factor-input');
+    const userNumVals = Array.from(userNumInputs).map(i => parseInt(i.value)).filter(n => !isNaN(n)).sort((a,b)=>a-b);
+    
+    const userDenInputs = document.querySelectorAll('#denFactorsInputs .factor-input');
+    const userDenVals = Array.from(userDenInputs).map(i => parseInt(i.value)).filter(n => !isNaN(n)).sort((a,b)=>a-b);
+
+    const numOk = JSON.stringify(userNumVals) === JSON.stringify(t.expectedNumFactors);
+    const denOk = JSON.stringify(userDenVals) === JSON.stringify(t.expectedDenFactors);
+
+    // При проверке, если все верно, убираем "зачеркивание" и показываем чистый зеленый (опционально), 
+    // но в данном случае лучше оставить зачеркивание, чтобы учитель видел логику, 
+    // но добавить зеленую рамку успеха.
+    // Однако по логике, если ответ верный, то инпуты закрашиваются в "success"
+    
+    if(!numOk || !denOk) {
+        userNumInputs.forEach(inp => inp.classList.add('wrong'));
+        userDenInputs.forEach(inp => inp.classList.add('wrong'));
+        allCorrect = false;
+    } else {
+        // Если множители верны, мы НЕ сбрасываем зачеркивание, чтобы было видно красоту решения.
+        // Просто добавим класс успеха, который переопределит рамку.
+    }
+
+    const uFinalNum = parseInt(document.getElementById('finalNum').value);
+    const uFinalDen = parseInt(document.getElementById('finalDen').value);
+    const finalNumEl = document.getElementById('finalNum');
+    const finalDenEl = document.getElementById('finalDen');
+
+    if (uFinalNum === t.finalNum) finalNumEl.classList.add('correct');
+    else { finalNumEl.classList.add('wrong'); allCorrect = false; }
+
+    if (uFinalDen === t.finalDen) finalDenEl.classList.add('correct');
+    else { finalDenEl.classList.add('wrong'); allCorrect = false; }
+
+    if (allCorrect) {
+        setFeedback("Верно! Молодец! 🌟", "success");
+        state.score++;
+        state.tasksCompletedInLevel++;
+        document.getElementById('score').textContent = state.score;
+        document.getElementById('checkBtn').style.display = 'none';
+        
+        if(state.tasksCompletedInLevel >= state.tasksToAdvance) {
+            document.getElementById('nextBtn').textContent = state.level < 5 ? "Следующий уровень! 🆙" : "Получить сертификат! 🏆";
+        } else {
+            document.getElementById('nextBtn').textContent = "Следующий пример ➡";
+        }
+        document.getElementById('nextBtn').style.display = 'inline-block';
+        
+    } else {
+        setFeedback("Есть ошибки. Проверь вычисления.", "error");
+        state.errors++;
+        document.getElementById('errors').textContent = state.errors;
+    }
+}
+
+function nextTask() {
+    if (state.tasksCompletedInLevel >= state.tasksToAdvance) {
+        if (state.level === 5) {
+            showVictory();
+            return;
+        }
+        state.level++;
+        state.tasksCompletedInLevel = 0;
+    }
+    generateTask();
+}
+
+function setFeedback(msg, type) {
+    const el = document.getElementById('feedbackMsg');
+    el.textContent = msg;
+    el.style.opacity = 1;
+    el.style.color = type === 'error' ? '#e71d36' : '#2ec4b6';
+}
+
+function showVictory() {
+    document.getElementById('victoryScreen').style.display = 'flex';
+    document.getElementById('finalScore').textContent = state.score;
+    document.getElementById('finalErrors').textContent = state.errors;
+    startConfetti();
+}
+
+function startConfetti() {
+    const canvas = document.getElementById('confettiCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const pieces = [];
+    const colors = ['#f00', '#0f0', '#00f', '#ff0', '#0ff', '#f0f'];
+
+    for(let i=0; i<300; i++) {
+        pieces.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height - canvas.height,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            size: Math.random() * 10 + 5,
+            speed: Math.random() * 5 + 2,
+            angle: Math.random() * Math.PI * 2,
+            spin: Math.random() * 0.2 - 0.1
+        });
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        pieces.forEach(p => {
+            p.y += p.speed;
+            p.angle += p.spin;
+            p.x += Math.sin(p.angle) * 2;
+            if(p.y > canvas.height) p.y = -20;
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.angle);
+            ctx.fillStyle = p.color;
+            ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size);
+            ctx.restore();
+        });
+        requestAnimationFrame(animate);
+    }
+    animate();
+}
+
+generateTask();
+</script>
+</body>
+</html>

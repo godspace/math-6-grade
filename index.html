@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Математика 6 класс | Тренажёры</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f4f8; margin: 0; padding: 20px; color: #333; }
+        header { text-align: center; margin-bottom: 40px; }
+        h1 { color: #2c3e50; margin-bottom: 5px; }
+        .subtitle { color: #7f8c8d; }
+
+        .container { max-width: 800px; margin: 0 auto; }
+
+        /* Стиль карточки-аккордеона */
+        details {
+            background: white;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border: 1px solid #e1e8ed;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        details[open] {
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+            border-color: #3498db;
+        }
+
+        /* Заголовок карточки (на что нажимаем) */
+        summary {
+            padding: 20px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            list-style: none; /* Убирает стандартный треугольник */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #fff;
+        }
+
+        summary::-webkit-details-marker { display: none; } /* Для Safari/Chrome */
+
+        summary:hover { background-color: #f8fbff; color: #2980b9; }
+
+        /* Иконка-стрелочка */
+        summary::after {
+            content: '+'; 
+            font-size: 1.5rem; 
+            color: #bdc3c7;
+            font-weight: 300;
+            transition: transform 0.2s;
+        }
+        
+        details[open] summary::after { 
+            content: '−'; 
+            transform: rotate(0deg); 
+            color: #e74c3c;
+        }
+
+        /* Стиль списка ссылок внутри */
+        .links-list {
+            padding: 0;
+            margin: 0;
+            border-top: 1px solid #eee;
+        }
+
+        .links-list a {
+            display: block;
+            padding: 15px 20px;
+            text-decoration: none;
+            color: #555;
+            border-bottom: 1px solid #f5f5f5;
+            transition: background 0.2s;
+            padding-left: 40px; /* Отступ слева для красоты */
+            position: relative;
+        }
+
+        .links-list a:last-child { border-bottom: none; }
+        .links-list a:hover { background-color: #f0f7fa; color: #2980b9; }
+        
+        /* Маркер перед ссылкой */
+        .links-list a::before {
+            content: '•';
+            position: absolute;
+            left: 20px;
+            color: #3498db;
+        }
+
+        .emoji { margin-right: 15px; font-size: 1.4rem; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Тренажёры по математике</h1>
+    <p class="subtitle">6 класс</p>
+</header>
+
+<div class="container">
+
+    <details>
+        <summary><span style="display:flex; align-items:center;"><span class="emoji">🔢</span> Делимость чисел</span></summary>
+        <div class="links-list">
+            <a href="trainers/divisibility/primes.html">Разложение на множители</a>
+            <a href="trainers/divisibility/signs.html">Признаки делимости</a>
+            <a href="trainers/divisibility/gcd.html">НОД</a>
+            <a href="trainers/divisibility/lcm.html">НОК</a>
+        </div>
+    </details>
+
+    <details>
+        <summary><span style="display:flex; align-items:center;"><span class="emoji">🍰</span> Обыкновенные дроби</span></summary>
+        <div class="links-list">
+            <a href="trainers/fractions/comparison.html">Сравнение дробей</a>
+            <a href="trainers/fractions/addition.html">Сложение дробей</a>
+            <a href="trainers/fractions/multiplication.html">Умножение дробей</a>
+            <a href="trainers/fractions/division.html">Деление дробей</a>
+        </div>
+    </details>
+
+    <details>
+        <summary><span style="display:flex; align-items:center;"><span class="emoji">🚚</span> Задачи на движение</span></summary>
+        <div class="links-list">
+            <a href="trainers/motion/motion.html">Движение навстречу и вдогонку</a>
+
+        </div>
+    </details>
+
+    <details>
+        <summary><span style="display:flex; align-items:center;"><span class="emoji">⚖️</span> Пропорции и Проценты</span></summary>
+        <div class="links-list">
+            <a href="trainers/percents/percent-of.html">Процент от числа</a>
+            <a href="trainers/percents/number-by.html">Число по проценту</a>
+            <a href="trainers/percents/ratio.html">Отношение в процентах</a>
+        </div>
+    </details>
+
+    <details>
+        <summary><span style="display:flex; align-items:center;"><span class="emoji">📐</span> Геометрия: Фигуры</span></summary>
+        <div class="links-list">
+            <a href="trainers/geometry/pi.html">Число π</a>
+            <a href="trainers/geometry/perimeter-area.html">Периметр и Площадь</a>
+        </div>
+    </details>
+
+    <details>
+        <summary><span style="display:flex; align-items:center;"><span class="emoji">🌡️</span> Рациональные числа</span></summary>
+        <div class="links-list">
+            <a href="trainers/rational/coordinates-pro.html">Координатная прямая</a>
+        </div>
+    </details>
+
+    <details>
+        <summary><span style="display:flex; align-items:center;"><span class="emoji">✖️</span> Уравнения</span></summary>
+        <div class="links-list">
+            <a href="trainers/equations/equations.html">Решение задач</a>
+            <a href="trainers/equations/equations-test.html">Решение задач - Тест</a>
+        </div>
+    </details>
+
+</div>
+
+</body>
+</html>

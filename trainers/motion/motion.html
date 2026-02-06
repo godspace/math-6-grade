@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тренажёр: Движение 6.0 (Pro)</title>
+    <style>
+        :root {
+            --sky: #e3f2fd;
+            --road: #455a64;
+            --grass: #81c784;
+            --line-color: #2c3e50;
+            --accent: #d35400;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background-color: #f5f7fa;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 10px;
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 960px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- ПАНЕЛЬ ВЫБОРА РЕЖИМА --- */
+        .tabs {
+            display: flex;
+            background: #eceff1;
+            padding: 5px;
+            gap: 5px;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: transparent;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #78909c;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .tab-btn:hover { background: #fff; color: #455a64; }
+        .tab-btn.active {
+            background: white;
+            color: #1e88e5;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        /* --- БЛОК ЗАДАЧИ --- */
+        .task-area {
+            padding: 25px 40px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+        .condition-text {
+            font-size: 1.15rem;
+            color: #37474f;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+        .question-text {
+            font-size: 1.25rem;
+            color: #d32f2f;
+            font-weight: 700;
+            background: #ffebee;
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+        }
+        .highlight {
+            color: #1976d2;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        /* --- СЦЕНА --- */
+        .scene {
+            position: relative;
+            width: 100%;
+            height: 300px; /* Увеличили высоту для "воздуха" */
+            background: linear-gradient(to bottom, var(--sky) 65%, var(--grass) 65%);
+            overflow: hidden;
+            user-select: none;
+        }
+
+        /* Дорога */
+        .road {
+            position: absolute;
+            top: 65%;
+            width: 100%;
+            height: 105px; /* Высота дороги */
+            background: var(--road);
+            border-top: 4px solid #cfd8dc;
+            border-bottom: 4px solid #cfd8dc;
+        }
+        .road-dashed {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            border-top: 4px dashed #cfd8dc;
+            opacity: 0.5;
+        }
+
+        /* Флажки пунктов */
+        .city-marker {
+            position: absolute;
+            top: -50px; /* Над дорогой */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0.7;
+            font-weight: bold;
+            color: #2c3e50;
+            z-index: 1;
+        }
+        .city-pole { width: 2px; height: 50px; background: #333; }
+        .city-flag { font-size: 24px; line-height: 1; }
+
+        /* --- РАЗМЕРНАЯ ЛИНИЯ (ВЫНОСКА) --- */
+        /* Она теперь живет НАД дорогой, в небе, чтобы не перекрывать машины */
+        .dimension-line-container {
+            position: absolute;
+            top: -70px; /* Высоко над дорогой */
+            height: 40px;
+            z-index: 20;
+            pointer-events: none;
+            /* Позиционирование через JS (left/width) */
+        }
+        
+        .dim-line {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            border-bottom: 2px solid var(--line-color);
+        }
+        /* Засечки */
+        .dim-line::before, .dim-line::after {
+            content: ''; position: absolute; bottom: 0; width: 2px; height: 15px; background: var(--line-color);
+        }
+        .dim-line::before { left: 0; }
+        .dim-line::after { right: 0; }
+
+        /* Пунктирные линии от машин к размерной линии (проекция) */
+        .projection-line {
+            position: absolute;
+            top: 100%; /* От линии вниз */
+            width: 1px;
+            height: 100px; /* До середины дороги */
+            border-left: 1px dashed rgba(0,0,0,0.3);
+        }
+        .proj-left { left: 0; }
+        .proj-right { right: 0; }
+
+        /* Текст с километрами */
+        .dim-label {
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fff;
+            padding: 2px 10px;
+            border-radius: 12px;
+            border: 1px solid #ccc;
+            font-weight: bold;
+            color: var(--line-color);
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        /* --- МАШИНЫ --- */
+        .vehicle-wrapper {
+            position: absolute;
+            top: 15px; /* Отступ от верха дороги */
+            width: 0; /* Точка отсчета */
+            height: 0;
+            z-index: 10;
+            will-change: transform; /* Оптимизация для плавности */
+        }
+
+        .vehicle-body {
+            position: absolute;
+            top: 0;
+            left: -40px; /* Центрируем относительно точки координат */
+            width: 80px;
+            height: 60px;
+            text-align: center;
+            font-size: 50px;
+            line-height: 1;
+        }
+
+        /* Подписи авто */
+        .vehicle-tag {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            background: rgba(255,255,255,0.9);
+            padding: 2px 6px;
+            border-radius: 4px;
+            white-space: nowrap;
+            font-weight: bold;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        /* Отражение для поворота */
+        .face-right { transform: scaleX(-1); }
+        .face-left { transform: scaleX(1); }
+        /* Текст не должен зеркалиться */
+        .face-right .vehicle-tag { transform: translateX(-50%) scaleX(-1); } 
+
+        /* --- УПРАВЛЕНИЕ --- */
+        .controls {
+            padding: 20px;
+            background: #f5f5f5;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+
+        input[type="number"] {
+            padding: 12px;
+            font-size: 18px;
+            width: 120px;
+            border: 2px solid #b0bec5;
+            border-radius: 8px;
+            text-align: center;
+            transition: border 0.3s;
+        }
+        input:focus { border-color: #1e88e5; outline: none; }
+
+        .btn {
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+            transition: transform 0.1s, background 0.2s;
+        }
+        .btn:active { transform: scale(0.98); }
+        
+        .btn-check { background-color: #43a047; }
+        .btn-check:hover { background-color: #2e7d32; }
+        
+        .btn-next { background-color: #1e88e5; display: none; }
+        .btn-next:hover { background-color: #1565c0; }
+
+        .feedback-area {
+            min-height: 30px;
+            text-align: center;
+            padding-bottom: 10px;
+            background: #f5f5f5;
+            font-weight: bold;
+        }
+        .msg-success { color: #2e7d32; }
+        .msg-error { color: #c62828; }
+
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+    
+    <div class="tabs">
+        <button class="tab-btn active" onclick="Game.setMode('meet', this)">Навстречу друг другу</button>
+        <button class="tab-btn" onclick="Game.setMode('apart', this)">В разные стороны</button>
+        <button class="tab-btn" onclick="Game.setMode('chase', this)">Вдогонку</button>
+    </div>
+
+    <div class="task-area">
+        <div class="condition-text" id="conditionText">...</div>
+        <div class="question-text" id="questionText">...</div>
+    </div>
+
+    <div class="scene">
+        <div class="road">
+            <div class="road-dashed"></div>
+            
+            <div class="city-marker" id="cityA" style="left: 5%">
+                <div class="city-flag">🚩</div>
+                <div class="city-pole"></div>
+                <span>A</span>
+            </div>
+            
+            <div class="city-marker" id="cityB" style="left: 95%">
+                <div class="city-flag">🏁</div>
+                <div class="city-pole"></div>
+                <span>B</span>
+            </div>
+
+            <div id="dimContainer" class="dimension-line-container">
+                <div class="dim-line"></div>
+                <div class="dim-label" id="dimLabel">? км</div>
+                <div class="projection-line proj-left"></div>
+                <div class="projection-line proj-right"></div>
+            </div>
+
+            <div id="car1" class="vehicle-wrapper">
+                <div class="vehicle-body">
+                    <div class="vehicle-tag">Авто</div>
+                    🚗
+                </div>
+            </div>
+
+            <div id="car2" class="vehicle-wrapper">
+                <div class="vehicle-body">
+                    <div class="vehicle-tag">Грузовик</div>
+                    🚛
+                </div>
+            </div>
+
+        </div>
+    </div>
+    
+    <div class="feedback-area" id="feedback"></div>
+
+    <div class="controls">
+        <label style="font-size: 1.1rem; color: #555;">Ответ:</label>
+        <input type="number" id="inpAnswer" placeholder="...">
+        <span style="font-weight: bold; color: #555;">км</span>
+        <button class="btn btn-check" id="btnCheck">ПРОВЕРИТЬ</button>
+        <button class="btn btn-next" id="btnNext">СЛЕДУЮЩАЯ >></button>
+    </div>
+</div>
+
+<script>
+    const Game = {
+        state: {
+            mode: 'meet',
+            data: null,
+            animating: false
+        },
+        ui: {
+            car1: document.getElementById('car1'), // Обертка
+            car1Body: document.querySelector('#car1 .vehicle-body'), // Тело для поворота
+            car2: document.getElementById('car2'),
+            car2Body: document.querySelector('#car2 .vehicle-body'),
+            dimContainer: document.getElementById('dimContainer'),
+            dimLabel: document.getElementById('dimLabel'),
+            condition: document.getElementById('conditionText'),
+            question: document.getElementById('questionText'),
+            inp: document.getElementById('inpAnswer'),
+            btnCheck: document.getElementById('btnCheck'),
+            btnNext: document.getElementById('btnNext'),
+            feedback: document.getElementById('feedback'),
+            cityA: document.getElementById('cityA'),
+            cityB: document.getElementById('cityB')
+        },
+
+        init() {
+            this.ui.btnCheck.addEventListener('click', () => this.check());
+            this.ui.btnNext.addEventListener('click', () => this.generate());
+            this.generate();
+        },
+
+        setMode(mode, btn) {
+            if (this.state.animating) return;
+            this.state.mode = mode;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            this.generate();
+        },
+
+        generate() {
+            // Сброс UI
+            this.state.animating = false;
+            this.ui.inp.value = '';
+            this.ui.inp.disabled = false;
+            this.ui.btnCheck.style.display = 'block';
+            this.ui.btnNext.style.display = 'none';
+            this.ui.feedback.textContent = '';
+            
+            // Генерация чисел
+            const t = Math.floor(Math.random() * 3) + 2; // 2..4 часа
+            const v1 = (Math.floor(Math.random() * 4) + 6) * 10; // 60..90
+            const v2 = (Math.floor(Math.random() * 4) + 4) * 10; // 40..70
+
+            let sStart, sEnd, condTxt, questTxt;
+            let p1_start, p2_start, p1_end, p2_end; // Позиции в %
+            let dir1, dir2; // 1 (вправо) или -1 (влево)
+
+            // Настройка отображения флагов (нужны не везде)
+            this.ui.cityA.style.opacity = 0;
+            this.ui.cityB.style.opacity = 0;
+
+            if (this.state.mode === 'meet') {
+                this.ui.cityA.style.opacity = 1;
+                this.ui.cityB.style.opacity = 1;
+                this.ui.cityA.style.left = '5%';
+                this.ui.cityB.style.left = '95%';
+
+                const distTravelled = (v1 + v2) * t;
+                const gap = Math.floor(Math.random() * 40 + 20);
+                sStart = distTravelled + gap;
+                sEnd = gap;
+
+                condTxt = `Расстояние между пунктами А и Б равно <span class="highlight">${sStart} км</span>. <br>
+                           Из них одновременно навстречу друг другу выехали автомобиль (${v1} км/ч) и грузовик (${v2} км/ч).`;
+                questTxt = `Какое расстояние будет между ними через ${t} ч?`;
+
+                p1_start = 5;  p1_end = 5 + (v1*t / sStart * 90);
+                p2_start = 95; p2_end = 95 - (v2*t / sStart * 90);
+                dir1 = 1; dir2 = -1;
+
+            } else if (this.state.mode === 'apart') {
+                // Старт из центра
+                this.ui.cityA.style.opacity = 1;
+                this.ui.cityA.querySelector('span').textContent = 'Старт';
+                this.ui.cityA.style.left = '50%';
+
+                sStart = 0;
+                sEnd = (v1 + v2) * t;
+                
+                condTxt = `Из одного пункта одновременно в противоположных направлениях выехали 
+                           автомобиль (${v1} км/ч) и грузовик (${v2} км/ч).`;
+                questTxt = `На каком расстоянии друг от друга они окажутся через ${t} ч?`;
+
+                // 80% экрана - это sEnd
+                const scale = 80 / sEnd;
+                p1_start = 50; p1_end = 50 - (v1*t * scale);
+                p2_start = 50; p2_end = 50 + (v2*t * scale);
+                dir1 = -1; dir2 = 1;
+
+            } else if (this.state.mode === 'chase') {
+                const vFast = Math.max(v1, v2);
+                const vSlow = Math.min(v1, v2);
+                
+                sStart = (vFast - vSlow) * t + 50;
+                sEnd = sStart - (vFast - vSlow) * t;
+
+                condTxt = `Грузовик едет со скоростью ${vSlow} км/ч. <br>
+                           Позади него на расстоянии <span class="highlight">${sStart} км</span> едет автомобиль (${vFast} км/ч).`;
+                questTxt = `Каким станет расстояние между ними через ${t} ч?`;
+
+                const totalDist = vFast * t + sStart; 
+                const scale = 85 / totalDist;
+
+                p1_start = 5; p1_end = 5 + (vFast*t * scale);
+                p2_start = 5 + (sStart*scale); p2_end = p2_start + (vSlow*t * scale);
+                dir1 = 1; dir2 = 1;
+            }
+
+            this.state.data = { sStart, sEnd, p1_start, p2_start, p1_end, p2_end, dir1, dir2 };
+            
+            this.ui.condition.innerHTML = condTxt;
+            this.ui.question.innerHTML = questTxt;
+            this.ui.dimLabel.textContent = sStart + " км";
+
+            this.renderScene(0); // 0% прогресса
+        },
+
+        check() {
+            const val = parseFloat(this.ui.inp.value);
+            if (isNaN(val)) return;
+
+            const correct = this.state.data.sEnd;
+            const isCorrect = Math.abs(val - correct) <= 2;
+
+            this.ui.inp.disabled = true;
+            this.ui.btnCheck.style.display = 'none';
+            this.state.animating = true;
+
+            this.animate(isCorrect, correct);
+        },
+
+        animate(isCorrect, correctVal) {
+            const startT = performance.now();
+            const duration = 2500; // 2.5 сек
+
+            const step = (now) => {
+                let progress = (now - startT) / duration;
+                if (progress > 1) progress = 1;
+
+                this.renderScene(progress);
+                
+                // Интерполяция числа на линии
+                const curDist = this.state.data.sStart + (this.state.data.sEnd - this.state.data.sStart) * progress;
+                this.ui.dimLabel.textContent = Math.round(curDist) + " км";
+
+                if (progress < 1) {
+                    requestAnimationFrame(step);
+                } else {
+                    this.finish(isCorrect, correctVal);
+                }
+            };
+            requestAnimationFrame(step);
+        },
+
+        renderScene(progress) {
+            const d = this.state.data;
+            
+            // Интерполяция позиций
+            // Используем CSS Translate для супер-плавности (в %)
+            const cur1 = d.p1_start + (d.p1_end - d.p1_start) * progress;
+            const cur2 = d.p2_start + (d.p2_end - d.p2_start) * progress;
+
+            // Двигаем обертки через left (или transform, но left в % удобнее для layout)
+            // Но чтобы было плавно, лучше left менять в requestAnimationFrame - это норм.
+            this.ui.car1.style.left = cur1 + '%';
+            this.ui.car2.style.left = cur2 + '%';
+
+            // Поворот (transform scaleX)
+            this.setOrientation(this.ui.car1Body, d.dir1);
+            this.setOrientation(this.ui.car2Body, d.dir2);
+
+            // Размерная линия
+            const minX = Math.min(cur1, cur2);
+            const maxX = Math.max(cur1, cur2);
+            const w = maxX - minX;
+
+            this.ui.dimContainer.style.left = minX + '%';
+            this.ui.dimContainer.style.width = w + '%';
+            
+            // Если слишком узко, прячем линию
+            this.ui.dimContainer.style.opacity = w < 2 ? 0 : 1;
+        },
+
+        setOrientation(el, dir) {
+            el.className = 'vehicle-body ' + (dir === 1 ? 'face-right' : 'face-left');
+        },
+
+        finish(success, val) {
+            this.ui.btnNext.style.display = 'block';
+            this.ui.dimLabel.textContent = Math.round(val) + " км";
+            
+            if(success) {
+                this.ui.feedback.innerHTML = `<span class="msg-success">Верно! Молодец!</span>`;
+            } else {
+                this.ui.feedback.innerHTML = `<span class="msg-error">Ошибка. Правильный ответ: ${Math.round(val)} км</span>`;
+            }
+        }
+    };
+
+    Game.init();
+</script>
+
+</body>
+</html>

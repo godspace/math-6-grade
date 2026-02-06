@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Итоговая контрольная работа: Уравнения</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --error: #c0392b;
+            --light: #ecf0f1;
+            --dark: #34495e;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--primary);
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        /* --- ЭКРАНЫ --- */
+        .screen { display: none; width: 100%; max-width: 950px; padding: 20px; box-sizing: border-box; }
+        .screen.active { display: block; }
+
+        /* --- ЛОГИН --- */
+        .login-box {
+            background: white; padding: 40px; border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; margin-top: 10vh;
+        }
+        input[type="text"] {
+            font-size: 1.2rem; padding: 10px; border: 2px solid #bdc3c7; border-radius: 5px; width: 80%; margin: 10px 0;
+        }
+
+        /* --- ВЕРХНЯЯ ПАНЕЛЬ (ОБНОВЛЕННАЯ) --- */
+        .top-container {
+            background: white; padding: 15px; border-radius: 10px; margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .top-info-row {
+            display: flex; justify-content: space-between; align-items: center; font-size: 1.1rem;
+        }
+        .criteria-row {
+            display: flex; gap: 5px; height: 24px; border-radius: 12px; overflow: hidden;
+        }
+        .crit-item {
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 0.75rem; font-weight: bold;
+            transition: opacity 0.3s;
+        }
+        /* Пропорции шкалы (для 20 задач) */
+        .c-2 { width: 50%; background: var(--error); } /* 0-9 задач */
+        .c-3 { width: 20%; background: var(--warning); } /* 10-13 задач */
+        .c-4 { width: 20%; background: var(--accent); }  /* 14-17 задач */
+        .c-5 { width: 10%; background: var(--success); } /* 18-20 задач */
+
+        /* --- НАВИГАЦИЯ --- */
+        .nav-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; margin-bottom: 20px; }
+        @media (max-width: 600px) { .nav-grid { grid-template-columns: repeat(5, 1fr); } }
+
+        .nav-btn {
+            background: #bdc3c7; border: none; padding: 8px; border-radius: 4px;
+            cursor: pointer; font-weight: bold; font-size: 0.9rem; color: white;
+        }
+        .nav-btn.active { background: var(--accent); transform: scale(1.1); box-shadow: 0 0 5px var(--accent); }
+        .nav-btn.filled { background: var(--dark); } 
+
+        /* --- ЗАДАЧА --- */
+        .problem-area {
+            background: white; padding: 30px; border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05); min-height: 400px;
+        }
+        .task-text { font-size: 1.35rem; margin-bottom: 25px; padding-left: 15px; border-left: 6px solid var(--accent); line-height: 1.5; }
+
+        /* --- DRAG & DROP --- */
+        .equation-zone {
+            min-height: 80px; background: #f8f9fa; border: 2px dashed #bdc3c7;
+            border-radius: 8px; display: flex; flex-wrap: wrap; align-items: center; padding: 10px; gap: 8px; margin-bottom: 20px;
+        }
+        .card {
+            background: white; border: 1px solid #bdc3c7; border-bottom-width: 3px;
+            padding: 5px 14px; border-radius: 6px; font-weight: bold; cursor: grab; font-size: 1.3rem;
+            min-width: 20px; text-align: center;
+        }
+        .card.number { color: var(--primary); border-color: #95a5a6; }
+        .card.variable { background: #e8f6f3; color: #16a085; border-color: #1abc9c; }
+        .card.operator { background: #fef9e7; color: #d35400; border-color: #f39c12; }
+        .card:active { cursor: grabbing; transform: translateY(2px); border-bottom-width: 1px;}
+
+        .dock { margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee; }
+        .dock-label { font-size: 0.85rem; color: #7f8c8d; text-transform: uppercase; margin-bottom: 8px; display: block; font-weight: bold;}
+        .card-row { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+
+        .answer-block { display: flex; align-items: center; gap: 10px; background: #eee; padding: 15px; border-radius: 8px; }
+        .answer-input { width: 100px; padding: 5px; font-size: 1.2rem; text-align: center; }
+
+        .btn { padding: 10px 25px; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem; font-weight: bold; color: white; transition: 0.2s; }
+        .btn-blue { background: var(--accent); }
+        .btn-red { background: var(--error); }
+        .btn-gray { background: #95a5a6; }
+        .btn:hover { opacity: 0.9; }
+        .controls { display: flex; justify-content: space-between; margin-top: 20px; }
+
+        /* --- УЧИТЕЛЬСКАЯ --- */
+        .teacher-panel { margin-top: 20px; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; background: white; font-size: 0.9rem; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: var(--primary); color: white; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+        .detail-row { display: none; background-color: #fff; }
+        .detail-row.open { display: table-row; }
+        .detail-content { padding: 15px; border-left: 5px solid var(--accent); }
+
+        /* --- РЕЗУЛЬТАТЫ --- */
+        .result-card { border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 5px; background: white; }
+        .res-correct { border-left: 5px solid var(--success); }
+        .res-wrong { border-left: 5px solid var(--error); }
+    </style>
+</head>
+<body>
+
+    <div id="screen-login" class="screen active">
+        <div class="login-box">
+            <h1>Контрольная работа</h1>
+            <p style="font-size: 1.1rem; color: #7f8c8d;">Тема: "Математическое моделирование"</p>
+            <input type="text" id="studentName" placeholder="Введите Фамилию и Имя" autocomplete="off">
+            <br><br>
+            <button class="btn btn-blue" onclick="startExam()">Начать работу</button>
+            <div style="margin-top: 50px; font-size: 0.8rem; color: #95a5a6;">
+                <span style="cursor: pointer;" onclick="toggleTeacherLogin()">🔒 Журнал учителя</span>
+            </div>
+            <div id="teacherLoginArea" style="display:none; margin-top:10px;">
+                <input type="password" id="teacherPass" placeholder="Пароль" style="width: 150px;">
+                <button class="btn btn-gray" onclick="enterTeacherPanel()">Войти</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-exam" class="screen">
+        <div class="top-container">
+            <div class="top-info-row">
+                <div>Ученик: <b id="displayStudentName"></b></div>
+                <div id="timer">Время: 00:00</div>
+            </div>
+            <div class="criteria-row" title="Шкала оценки">
+                <div class="crit-item c-2">до 9 задач: "2"</div>
+                <div class="crit-item c-3">10-13 задач: "3"</div>
+                <div class="crit-item c-4">14-17 задач: "4"</div>
+                <div class="crit-item c-5">18+: "5"</div>
+            </div>
+        </div>
+
+        <div class="nav-grid" id="navGrid"></div>
+
+        <div class="problem-area">
+            <div class="task-text" id="taskText">Загрузка...</div>
+
+            <div>
+                <span class="dock-label">Поле для составления уравнения:</span>
+                <div class="equation-zone" id="dropZone"></div>
+            </div>
+
+            <div class="answer-block">
+                <span>Ответ задачи: x = </span>
+                <input type="number" class="answer-input" id="answerInput" placeholder="?" oninput="saveCurrentProgress()">
+            </div>
+
+            <div class="dock">
+                <span class="dock-label">Числа и переменные:</span>
+                <div class="card-row" id="valuesContainer"></div>
+
+                <span class="dock-label">Знаки действий:</span>
+                <div class="card-row">
+                    <div class="card operator" draggable="true" data-val="+">+</div>
+                    <div class="card operator" draggable="true" data-val="-">-</div>
+                    <div class="card operator" draggable="true" data-val="*">*</div>
+                    <div class="card operator" draggable="true" data-val="/">/</div>
+                    <div class="card operator" draggable="true" data-val="=">=</div>
+                    <div class="card operator" draggable="true" data-val="(">(</div>
+                    <div class="card operator" draggable="true" data-val=")">)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-gray" onclick="prevQuestion()">← Назад</button>
+            <button class="btn btn-red" onclick="finishExamConfirm()">ЗАВЕРШИТЬ РАБОТУ</button>
+            <button class="btn btn-blue" onclick="nextQuestion()">Вперед →</button>
+        </div>
+    </div>
+
+    <div id="screen-results" class="screen">
+        <div class="login-box" style="width:100%; max-width:800px; text-align: left;">
+            <h1 style="text-align: center;">Результаты</h1>
+            <div style="text-align:center; padding: 20px; background: #f8f9fa; border-radius: 10px; margin-bottom: 20px;">
+                <div id="scoreDisplay"></div>
+                <div style="margin-top:10px; font-size:0.9rem; color:#7f8c8d;">Результат сохранен в журнал учителя</div>
+            </div>
+            <div id="detailedResults"></div>
+            <button class="btn btn-blue" onclick="location.reload()" style="margin-top:20px; display:block; margin-left:auto; margin-right:auto;">На главный экран</button>
+        </div>
+    </div>
+
+    <div id="screen-teacher" class="screen">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h1>👨‍🏫 Подробный журнал работ</h1>
+            <button class="btn btn-gray" onclick="location.reload()">Выйти</button>
+        </div>
+        <p style="font-size:0.9rem; color:#7f8c8d;">* Удаление записей отключено в целях сохранности истории.</p>
+        
+        <div class="teacher-panel">
+            <table id="teacherTable">
+                <thead>
+                    <tr>
+                        <th>Ученик</th>
+                        <th>Статус</th>
+                        <th>Баллы</th>
+                        <th>Оценка</th>
+                        <th>Начало</th>
+                        <th>Конец</th>
+                        <th>Время</th>
+                        <th>Детали</th>
+                    </tr>
+                </thead>
+                <tbody id="teacherTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+<script>
+    /* ================= КОНФИГУРАЦИЯ ================= */
+    const TOTAL_QUESTIONS = 20;
+    let currentUser = "";
+    let currentQIndex = 0;
+    let timerInterval = null;
+    let session = null;
+    const r = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+    /* ================= ГЕНЕРАТОР ЗАДАЧ ================= */
+    function generateVariant() {
+        const questions = [];
+        const add = (text, x) => {
+            const nums = text.match(/\d+([.,]\d+)?/g) || [];
+            questions.push({ text: text, solveX: parseFloat(x), extractedNums: nums, userEq: [], userAns: "" });
+        };
+
+        // 1-5 (База)
+        let a = r(15, 40), b = r(10, 30); add(`Я задумал число. Если к нему прибавить ${a}, то получится ${b+a}. Какое число я задумал?`, b);
+        let area = r(20, 60), side = r(4, 10); area = side * r(5, 12); add(`Площадь прямоугольника равна ${area} см², а одна из его сторон равна ${side} см. Найдите длину другой стороны (x).`, area/side);
+        let total = r(50, 90), sub = r(10, 30); add(`Из неизвестного числа вычли ${sub} и получили ${total - sub}. Чему равно неизвестное число?`, total);
+        let div_a = r(3,8), div_b = r(6,12); add(`Я задумал число, разделил его на ${div_a} и получил ${div_b}. Какое число я задумал?`, div_a * div_b);
+        let perim = r(10, 20) * 3; add(`Периметр равностороннего треугольника равен ${perim} см. Обозначьте сторону за x и найдите её длину.`, perim/3);
+
+        // 6-10 (Моделирование)
+        let leg = r(10, 25), base = r(5, 15); add(`Периметр равнобедренного треугольника равен ${2*leg+base} см, а его основание равно ${base} см. Найдите длину боковой стороны.`, leg);
+        let price = r(20, 50), count = 3, money = price*count + r(15, 60); add(`Маша купила ${count} шоколадки по ${price} рублей. После покупки у неё осталось ${money - price*count} рублей. Сколько денег (x) было у Маши изначально?`, money);
+        let k = r(3, 8), m = r(5, 20), val = r(5, 12); add(`Задуманное число умножили на ${k}, затем к произведению прибавили ${m} и получили ${val*k+m}. Найдите задуманное число.`, val);
+        let part1 = r(100, 300), sold = r(20, 50), added = r(10, 40); add(`На складе было x кг муки. После того как продали ${sold} кг и привезли ещё ${added} кг, на складе стало ${part1 - sold + added} кг. Сколько муки было вначале?`, part1);
+        let v1 = r(50, 70), v2 = r(60, 80), t = r(2, 5); add(`Из двух городов навстречу друг другу выехали два автомобиля. Скорость первого ${v1} км/ч, скорость второго ${v2} км/ч. Расстояние между городами ${(v1+v2)*t} км. Через сколько часов (x) они встретятся?`, t);
+
+        // 11-15 (Сюжеты)
+        let son = r(8, 15); add(`Отец старше сына в 4 раза. Сумма их возрастов равна ${son + 4*son} лет. Сколько лет сыну (x)?`, son);
+        let speedBoat = r(12, 18), speedRiver = r(2, 4), time = 3; add(`Катер прошёл по течению реки за ${time} часа расстояние ${(speedBoat+speedRiver)*time} км. Собственная скорость катера ${speedBoat} км/ч. Найдите скорость течения реки (x).`, speedRiver);
+        add(`Найдите корень уравнения: 100 : (x - 5) = 20`, 10);
+        let width = r(10, 30), length = width + r(5, 15); add(`Периметр прямоугольного участка равен ${2*(width+length)} м. Его длина на ${length-width} м больше ширины (x). Найдите ширину.`, width);
+        let num1 = r(10, 20), d1 = 5, d2 = 10; add(`Сумма трех чисел равна ${num1 + (num1+d1) + (num1+d2)}. Первое число x, второе на ${d1} больше первого, а третье на ${d2} больше первого. Найдите x.`, num1);
+
+        // 16-20 (Профи)
+        let x16 = r(5, 15), factor = r(3, 6), sub16 = r(1, 4), right16 = factor * (x16 - sub16);
+        add(`Решите уравнение, используя распределительное свойство: ${factor} * (x - ${sub16}) = ${right16}`, x16);
+        let x17 = 10, A = r(5, 15), B = 20 - A; 
+        add(`На первой полке было в 3 раза больше книг, чем на второй (x). Когда с первой полки сняли ${A} книг, а на вторую поставили ${B} книг, их стало поровну. Сколько книг было на второй полке изначально?`, x17);
+        let totalMoney = r(1, 5) * 1000, percent = 40, remain = totalMoney * 0.6;
+        add(`Турист потратил ${percent}% имевшихся у него денег, и у него осталось ${remain} рублей. Сколько денег (x) было у туриста?`, totalMoney);
+        let riverV = 2, boatV = 14; 
+        add(`Катер проходит одно и то же расстояние по течению реки за 3 часа, а против течения — за 4 часа. Скорость течения реки ${riverV} км/ч. Найдите собственную скорость катера (x).`, boatV);
+        let x20 = r(3, 9), neededSum = 5 * x20, RHS_offset = r(5, neededSum - 5), LHS_offset = neededSum - RHS_offset;
+        add(`Найдите корень уравнения: 4x + 3x - ${LHS_offset} = 2x + ${RHS_offset}`, x20);
+
+        return questions;
+    }
+
+    /* ================= СИСТЕМА ================= */
+    function loadState() {
+        const saved = localStorage.getItem('mathExam_v3_db');
+        return saved ? JSON.parse(saved) : {}; 
+    }
+    function saveDB(db) {
+        localStorage.setItem('mathExam_v3_db', JSON.stringify(db));
+    }
+
+    function startExam() {
+        const nameInput = document.getElementById('studentName');
+        const name = nameInput.value.trim();
+        if (!name) { alert("Пожалуйста, введите Фамилию и Имя!"); return; }
+        
+        currentUser = name;
+        const db = loadState();
+
+        if (db[name] && db[name].status === 'finished') {
+            alert("Этот ученик уже сдал работу!"); return;
+        }
+
+        if (db[name]) {
+            if(!confirm(`Найдена незавершенная работа для ${name}. Продолжить?`)) return;
+            session = db[name];
+        } else {
+            session = { user: name, status: "in_progress", startTime: Date.now(), questions: generateVariant() };
+            db[name] = session;
+            saveDB(db);
+        }
+
+        document.getElementById('displayStudentName').textContent = currentUser;
+        switchScreen('screen-exam');
+        initNavGrid();
+        loadQuestion(0);
+        startTimer();
+    }
+
+    function saveCurrentProgress() {
+        if (!session) return;
+        const q = session.questions[currentQIndex];
+        q.userAns = document.getElementById('answerInput').value;
+        q.userEq = Array.from(document.getElementById('dropZone').children).map(c => c.dataset.val);
+        const db = loadState(); db[currentUser] = session; saveDB(db);
+        updateNavStatus(currentQIndex);
+    }
+
+    /* ================= ИНТЕРФЕЙС ================= */
+    function switchScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    function initNavGrid() {
+        const grid = document.getElementById('navGrid'); grid.innerHTML = '';
+        for (let i = 0; i < TOTAL_QUESTIONS; i++) {
+            const btn = document.createElement('button');
+            btn.className = 'nav-btn'; btn.textContent = i + 1;
+            btn.onclick = () => { saveCurrentProgress(); loadQuestion(i); };
+            btn.id = `nav-btn-${i}`; grid.appendChild(btn);
+        }
+        updateAllNavStatuses();
+    }
+
+    function updateNavStatus(idx) {
+        const q = session.questions[idx];
+        const btn = document.getElementById(`nav-btn-${idx}`);
+        if (q.userAns !== "" || q.userEq.length > 0) btn.classList.add('filled');
+        else btn.classList.remove('filled');
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        if(document.getElementById(`nav-btn-${currentQIndex}`)) document.getElementById(`nav-btn-${currentQIndex}`).classList.add('active');
+    }
+    function updateAllNavStatuses() { session.questions.forEach((q, i) => updateNavStatus(i)); }
+
+    function loadQuestion(idx) {
+        currentQIndex = idx;
+        const q = session.questions[idx];
+        document.getElementById('taskText').innerHTML = q.text;
+        document.getElementById('answerInput').value = q.userAns;
+
+        const dropZone = document.getElementById('dropZone'); dropZone.innerHTML = '';
+        q.userEq.forEach(val => {
+            let type = 'number';
+            if (['+', '-', '*', '/', '=', '(', ')'].includes(val)) type = 'operator';
+            else if (val === 'x') type = 'variable';
+            createDraggableCard(val, type, dropZone);
+        });
+
+        const valuesContainer = document.getElementById('valuesContainer'); valuesContainer.innerHTML = '';
+        createDraggableCard('x', 'variable', valuesContainer, true);
+        if (q.extractedNums) {
+            [...new Set(q.extractedNums)].forEach(n => createDraggableCard(n.replace(',', '.'), 'number', valuesContainer, true));
+        }
+        updateAllNavStatuses();
+    }
+
+    function createDraggableCard(text, type, container, isSource = false) {
+        const el = document.createElement('div'); el.className = `card ${type}`; el.draggable = true; el.textContent = text; el.dataset.val = text;
+        if (isSource) {
+            el.addEventListener('dragstart', (e) => { e.dataTransfer.setData('text/plain', JSON.stringify({val: text, type: type})); e.dataTransfer.effectAllowed = 'copy'; });
+        } else {
+            el.onclick = function() { this.remove(); saveCurrentProgress(); };
+        }
+        container.appendChild(el);
+    }
+    function nextQuestion() { if (currentQIndex < TOTAL_QUESTIONS - 1) { saveCurrentProgress(); loadQuestion(currentQIndex + 1); } }
+    function prevQuestion() { if (currentQIndex > 0) { saveCurrentProgress(); loadQuestion(currentQIndex - 1); } }
+
+    /* ================= DRAG & DROP ================= */
+    document.addEventListener('DOMContentLoaded', () => {
+        const dropZone = document.getElementById('dropZone');
+        document.querySelectorAll('.card.operator').forEach(el => {
+            el.addEventListener('dragstart', (e) => { e.dataTransfer.setData('text/plain', JSON.stringify({val: el.dataset.val, type: 'operator'})); });
+        });
+        dropZone.addEventListener('dragover', e => e.preventDefault());
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const dataRaw = e.dataTransfer.getData('text/plain'); if (!dataRaw) return;
+            const data = JSON.parse(dataRaw);
+            createDraggableCard(data.val, data.type, dropZone);
+            saveCurrentProgress();
+        });
+    });
+
+    /* ================= ЗАВЕРШЕНИЕ ================= */
+    function startTimer() {
+        const timerEl = document.getElementById('timer');
+        timerInterval = setInterval(() => {
+            const diff = Math.floor((Date.now() - session.startTime) / 1000);
+            const m = Math.floor(diff / 60).toString().padStart(2, '0');
+            const s = (diff % 60).toString().padStart(2, '0');
+            timerEl.textContent = `Время: ${m}:${s}`;
+        }, 1000);
+    }
+
+    function finishExamConfirm() {
+        saveCurrentProgress();
+        const empty = session.questions.filter(q => q.userAns === "").length;
+        if (confirm(`Завершить работу?${empty > 0 ? `\n\nНе решено задач: ${empty}` : ''}`)) finishExam();
+    }
+
+    function finishExam() {
+        clearInterval(timerInterval);
+        session.status = "finished";
+        session.finishTime = Date.now();
+        
+        let correctCount = 0;
+        session.questions.forEach(q => {
+            const userVal = parseFloat(q.userAns.replace(',', '.'));
+            q.isCorrect = Math.abs(userVal - q.solveX) < 0.1;
+            if (q.isCorrect) correctCount++;
+        });
+
+        session.score = correctCount;
+        saveDB({ ...loadState(), [currentUser]: session });
+        showResults();
+    }
+
+    function showResults() {
+        switchScreen('screen-results');
+        const pct = Math.round((session.score / TOTAL_QUESTIONS) * 100);
+        let mark = 2;
+        if (pct >= 50) mark = 3;
+        if (pct >= 70) mark = 4;
+        if (pct >= 90) mark = 5;
+
+        let color = '#e74c3c';
+        if(mark===3) color='#f39c12';
+        if(mark===4) color='#3498db';
+        if(mark===5) color='#27ae60';
+
+        document.getElementById('scoreDisplay').innerHTML = `
+            Верно заданий: ${session.score} из ${TOTAL_QUESTIONS}<br>
+            <span style="font-size: 4rem; color: ${color}; font-weight:bold;">${mark}</span>
+        `;
+
+        const container = document.getElementById('detailedResults');
+        container.innerHTML = '';
+        session.questions.forEach((q, i) => {
+            const div = document.createElement('div');
+            div.className = `result-card ${q.isCorrect ? 'res-correct' : 'res-wrong'}`;
+            div.innerHTML = `
+                <b>№${i+1}</b> ${q.isCorrect ? '<span style="color:green">Верно</span>' : '<span style="color:red">Ошибка</span>'}<br>
+                <small>${q.text}</small><br>
+                Ответ: <b>${q.userAns}</b> (Правильно: ${q.solveX})
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    /* ================= ПАНЕЛЬ УЧИТЕЛЯ ================= */
+    function toggleTeacherLogin() {
+        const area = document.getElementById('teacherLoginArea');
+        area.style.display = area.style.display === 'none' ? 'block' : 'none';
+    }
+    function enterTeacherPanel() {
+        if (document.getElementById('teacherPass').value === '1234') {
+            renderTeacherTable();
+            switchScreen('screen-teacher');
+        } else alert('Неверный пароль');
+    }
+    
+    function renderTeacherTable() {
+        const db = loadState();
+        const tbody = document.getElementById('teacherTableBody');
+        tbody.innerHTML = '';
+        
+        Object.keys(db).forEach((name, index) => {
+            const s = db[name];
+            
+            let duration = "...";
+            if (s.finishTime && s.startTime) {
+                const diffMin = Math.floor((s.finishTime - s.startTime) / 60000);
+                duration = diffMin + " мин.";
+            }
+
+            let mark = "-";
+            if (s.status === 'finished') {
+                const pct = (s.score / TOTAL_QUESTIONS) * 100;
+                if (pct < 50) mark = 2;
+                else if (pct < 70) mark = 3;
+                else if (pct < 90) mark = 4;
+                else mark = 5;
+            }
+
+            const tr = document.createElement('tr');
+            const startStr = new Date(s.startTime).toLocaleTimeString();
+            const endStr = s.finishTime ? new Date(s.finishTime).toLocaleTimeString() : "-";
+            
+            tr.innerHTML = `
+                <td><b>${s.user}</b></td>
+                <td>${s.status === 'finished' ? '<span style="color:green">Сдал</span>' : '<span style="color:orange">Пишет...</span>'}</td>
+                <td>${s.status === 'finished' ? s.score : '0'} / ${TOTAL_QUESTIONS}</td>
+                <td style="font-weight:bold; font-size:1.1rem;">${mark}</td>
+                <td>${startStr}</td>
+                <td>${endStr}</td>
+                <td>${duration}</td>
+                <td><button class="btn btn-blue" style="padding:4px 8px; font-size:0.8rem" onclick="toggleDetail('detail-${index}')">Просмотр</button></td>
+            `;
+            tbody.appendChild(tr);
+
+            const detailTr = document.createElement('tr');
+            detailTr.className = 'detail-row';
+            detailTr.id = `detail-${index}`;
+            
+            let answersHtml = s.questions.map((q, i) => {
+                const eqStr = q.userEq.join(' ') || "(пусто)";
+                return `<div style="margin-bottom:5px; padding-bottom:5px; border-bottom:1px solid #eee;">
+                    <b>№${i+1}</b> ${q.isCorrect ? '✅' : '❌'} | Ответ: ${q.userAns} (Верно: ${q.solveX}) | Уравнение: ${eqStr}
+                </div>`;
+            }).join('');
+
+            detailTr.innerHTML = `<td colspan="8">
+                <div class="detail-content">
+                    <h4>Подробности: ${s.user}</h4>
+                    ${answersHtml}
+                </div>
+            </td>`;
+            tbody.appendChild(detailTr);
+        });
+    }
+
+    function toggleDetail(id) {
+        const row = document.getElementById(id);
+        row.classList.toggle('open');
+    }
+</script>
+</body>
+</html>

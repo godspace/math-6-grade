@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мастер Координат Pro (Fixed)</title>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --accent: #f72585;
+            --bg-body: #edf2f4;
+            --bg-card: #ffffff;
+            --text-main: #2b2d42;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-body);
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            color: var(--text-main);
+            /* Запрет зума на мобильных для удобства игры */
+            touch-action: manipulation; 
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 900px;
+            background: var(--bg-card);
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- TABS --- */
+        .tabs-header {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            padding: 0 10px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            background: transparent;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #8d99ae;
+            cursor: pointer;
+            transition: 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            background: #fff;
+        }
+
+        /* --- TASK --- */
+        .task-area {
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .score-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #e0e7ff;
+            color: var(--primary);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .question {
+            font-size: 1.4rem;
+            margin-bottom: 8px;
+        }
+
+        .math-tag {
+            background: #eef2ff;
+            color: var(--primary);
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-weight: bold;
+            border: 1px solid #c7d2fe;
+        }
+
+        .feedback {
+            height: 24px;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        .correct { color: #10b981; }
+        .wrong { color: #ef4444; }
+
+        /* --- CANVAS --- */
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            height: 260px;
+            background: radial-gradient(circle, #fff 0%, #fcfcfc 100%);
+            border-top: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+        }
+        
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            /* КРИТИЧЕСКИ ВАЖНО ДЛЯ МОБИЛЬНЫХ: отключает скролл страницы при касании канваса */
+            touch-action: none; 
+            cursor: grab;
+        }
+        canvas:active { cursor: grabbing; }
+
+        /* --- CONTROLS --- */
+        .controls {
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            min-height: 80px;
+            background: #fff;
+        }
+
+        input {
+            padding: 10px;
+            font-size: 1.2rem;
+            width: 120px;
+            text-align: center;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+        }
+        input:focus { border-color: var(--primary); outline: none; }
+
+        .btn {
+            padding: 10px 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .btn:active { transform: scale(0.96); }
+        .btn-check { background: var(--primary); }
+        .btn-next { background: #374151; display: none; }
+
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="tabs-header">
+        <button class="tab-btn active" onclick="App.setMode('locate')">📍 Найти точку</button>
+        <button class="tab-btn" onclick="App.setMode('read')">👀 Координата</button>
+        <button class="tab-btn" onclick="App.setMode('distance')">📏 Расстояние</button>
+    </div>
+
+    <div class="task-area">
+        <div class="score-badge">Счёт: <span id="scoreVal">0</span></div>
+        <div class="question" id="questionBox">Загрузка...</div>
+        <div class="feedback" id="feedbackBox"></div>
+    </div>
+
+    <div class="canvas-container">
+        <canvas id="gameCanvas"></canvas>
+    </div>
+
+    <div class="controls" id="controlsBox"></div>
+</div>
+
+<script>
+    const App = {
+        canvas: document.getElementById('gameCanvas'),
+        ctx: null,
+        width: 0,
+        height: 0,
+        dpr: 1,
+
+        state: {
+            mode: 'locate',
+            score: 0,
+            scale: 50,      // пикселей на единицу
+            offsetX: 0,     // центр экрана
+            
+            points: [],     // объекты { val, label, color, draggable }
+            
+            target: 0,      // цель (для locate)
+            correct: 0,     // правильный ответ (для read/distance)
+            
+            isDragging: false,
+            dragItem: null,
+            solved: false
+        },
+
+        ui: {
+            question: document.getElementById('questionBox'),
+            feedback: document.getElementById('feedbackBox'),
+            score: document.getElementById('scoreVal'),
+            controls: document.getElementById('controlsBox')
+        },
+
+        init() {
+            this.ctx = this.canvas.getContext('2d');
+            
+            // Настройка экрана
+            this.handleResize();
+            window.addEventListener('resize', () => this.handleResize());
+
+            // --- ОБРАБОТЧИКИ СОБЫТИЙ (MOUSE & TOUCH) ---
+            const startHandler = (e) => this.onDown(e);
+            const moveHandler = (e) => this.onMove(e);
+            const endHandler = (e) => this.onUp(e);
+
+            this.canvas.addEventListener('mousedown', startHandler);
+            this.canvas.addEventListener('touchstart', startHandler, {passive: false});
+
+            window.addEventListener('mousemove', moveHandler);
+            window.addEventListener('touchmove', moveHandler, {passive: false});
+
+            window.addEventListener('mouseup', endHandler);
+            window.addEventListener('touchend', endHandler);
+
+            this.setMode('locate');
+            this.loop();
+        },
+
+        handleResize() {
+            const rect = this.canvas.parentElement.getBoundingClientRect();
+            this.width = rect.width;
+            this.height = rect.height;
+            
+            // Работа с Retina дисплеями
+            this.dpr = window.devicePixelRatio || 1;
+            this.canvas.width = this.width * this.dpr;
+            this.canvas.height = this.height * this.dpr;
+            
+            // Масштабируем контекст, чтобы рисовать в логических пикселях
+            this.ctx.scale(this.dpr, this.dpr);
+            
+            this.state.offsetX = this.width / 2;
+        },
+
+        setMode(mode) {
+            this.state.mode = mode;
+            this.state.score = 0;
+            this.ui.score.textContent = 0;
+            
+            // UI табов
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            const idx = mode === 'locate' ? 0 : mode === 'read' ? 1 : 2;
+            document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+
+            this.nextLevel();
+        },
+
+        nextLevel() {
+            this.state.solved = false;
+            this.state.points = [];
+            this.ui.feedback.textContent = '';
+            this.ui.controls.innerHTML = '';
+
+            const btnCheck = document.createElement('button');
+            btnCheck.className = 'btn btn-check';
+            btnCheck.textContent = 'ПРОВЕРИТЬ';
+            btnCheck.onclick = () => this.check();
+
+            const btnNext = document.createElement('button');
+            btnNext.className = 'btn btn-next';
+            btnNext.textContent = 'ДАЛЬШЕ →';
+            btnNext.onclick = () => this.nextLevel();
+            this.btnNextRef = btnNext;
+            this.btnCheckRef = btnCheck;
+
+            // Генерация
+            const isDecimal = Math.random() > 0.5;
+            this.state.scale = isDecimal ? 200 : 50; // Масштаб (Zoom)
+
+            if (this.state.mode === 'locate') {
+                let val = isDecimal 
+                    ? parseFloat((Math.random() * 2.4 - 1.2).toFixed(1)) 
+                    : Math.floor(Math.random() * 16 - 8);
+                
+                this.state.target = val;
+                this.ui.question.innerHTML = `Перетащи флажок в точку <span class="math-tag">A(${val})</span>`;
+
+                // Случайная позиция старта (не в ответе)
+                let start = 0;
+                do {
+                    start = isDecimal ? (Math.random()*2 - 1) : Math.floor(Math.random()*10 - 5);
+                } while(Math.abs(start - val) < 0.5);
+
+                this.state.points.push({
+                    val: start, label: 'A', color: '#f72585', draggable: true
+                });
+
+                this.ui.controls.appendChild(btnCheck);
+                this.ui.controls.appendChild(btnNext);
+
+            } else if (this.state.mode === 'read') {
+                let val = isDecimal 
+                    ? parseFloat((Math.random() * 2.4 - 1.2).toFixed(1)) 
+                    : Math.floor(Math.random() * 14 - 7);
+                
+                this.state.correct = val;
+                this.ui.question.innerHTML = `Какая координата у точки <span class="math-tag" style="color:#4361ee">K</span>?`;
+
+                this.state.points.push({
+                    val: val, label: 'K', color: '#4361ee', draggable: false
+                });
+
+                const inp = document.createElement('input');
+                inp.type = 'number';
+                inp.id = 'ansInput';
+                this.ui.controls.appendChild(inp);
+                this.ui.controls.appendChild(btnCheck);
+                this.ui.controls.appendChild(btnNext);
+                setTimeout(()=>inp.focus(), 100);
+
+            } else { // distance
+                let a = isDecimal ? parseFloat((Math.random()*2-1).toFixed(1)) : Math.floor(Math.random()*12-6);
+                let b = isDecimal ? parseFloat((Math.random()*2-1).toFixed(1)) : Math.floor(Math.random()*12-6);
+                if (a===b) b = a+2;
+                
+                this.state.correct = parseFloat(Math.abs(a - b).toFixed(2));
+                this.ui.question.innerHTML = `Найди расстояние между <span class="math-tag">A(${a})</span> и <span class="math-tag">B(${b})</span>`;
+                
+                this.state.points.push({ val: a, label: 'A', color: '#7209b7', draggable: false });
+                this.state.points.push({ val: b, label: 'B', color: '#7209b7', draggable: false });
+
+                const inp = document.createElement('input');
+                inp.type = 'number';
+                inp.id = 'ansInput';
+                this.ui.controls.appendChild(inp);
+                this.ui.controls.appendChild(btnCheck);
+                this.ui.controls.appendChild(btnNext);
+            }
+        },
+
+        check() {
+            if (this.state.solved) return;
+            let isOk = false;
+            let rightAns = '';
+
+            if (this.state.mode === 'locate') {
+                const p = this.state.points[0];
+                const diff = Math.abs(p.val - this.state.target);
+                // Допуск
+                isOk = diff < (this.state.scale > 100 ? 0.05 : 0.15);
+                rightAns = this.state.target;
+                if (isOk) p.val = this.state.target; // Примагнитить визуально
+                else {
+                    // Показать где надо было
+                    this.state.points.push({
+                        val: this.state.target, label: '✔', color: '#10b981', draggable: false, ghost: true
+                    });
+                }
+            } else {
+                const inp = document.getElementById('ansInput');
+                const val = parseFloat(inp.value);
+                if(isNaN(val)) return;
+                isOk = Math.abs(val - this.state.correct) < 0.001;
+                rightAns = this.state.correct;
+            }
+
+            if (isOk) {
+                this.ui.feedback.innerHTML = '<span class="correct">Верно! Молодец.</span>';
+                this.state.score++;
+                this.ui.score.textContent = this.state.score;
+            } else {
+                this.ui.feedback.innerHTML = `<span class="wrong">Ошибка. Правильно: ${rightAns}</span>`;
+            }
+
+            this.state.solved = true;
+            this.btnCheckRef.style.display = 'none';
+            this.btnNextRef.style.display = 'block';
+        },
+
+        // --- ЛОГИКА ВВОДА (FIXED) ---
+        getPos(e) {
+            const rect = this.canvas.getBoundingClientRect();
+            // Берем первый палец или мышь
+            const cx = e.touches ? e.touches[0].clientX : e.clientX;
+            // Важно: возвращаем логические пиксели (CSS pixels)
+            return cx - rect.left;
+        },
+
+        onDown(e) {
+            if (this.state.solved) return;
+            // e.preventDefault(); // Можно не отменять дефолт тут, чтобы работали инпуты вне канваса
+            
+            const x = this.getPos(e);
+            const ox = this.state.offsetX;
+            const sc = this.state.scale;
+
+            // Поиск точки под курсором
+            for (let p of this.state.points) {
+                if (p.draggable) {
+                    const px = ox + p.val * sc;
+                    // Зона клика +/- 40px (логических)
+                    if (Math.abs(x - px) < 40) {
+                        this.state.isDragging = true;
+                        this.state.dragItem = p;
+                        this.canvas.style.cursor = 'grabbing';
+                        return;
+                    }
+                }
+            }
+        },
+
+        onMove(e) {
+            if (!this.state.isDragging) return;
+            e.preventDefault(); // Блокируем скролл только при драге
+
+            const x = this.getPos(e);
+            const ox = this.state.offsetX;
+            const sc = this.state.scale;
+
+            // Обратная проекция: пиксели -> значение
+            let rawVal = (x - ox) / sc;
+
+            // Магнитная сетка (Snap)
+            const step = (sc > 100) ? 0.1 : 0.5;
+            const snapped = Math.round(rawVal / step) * step;
+            
+            // Если близко к делению, магнитим
+            if (Math.abs(rawVal - snapped) < step * 0.4) {
+                rawVal = snapped;
+            }
+
+            // Границы экрана
+            const maxVal = (this.width - ox) / sc;
+            const minVal = -ox / sc;
+            rawVal = Math.max(minVal + 0.5, Math.min(maxVal - 0.5, rawVal));
+
+            this.state.dragItem.val = rawVal;
+        },
+
+        onUp(e) {
+            this.state.isDragging = false;
+            this.state.dragItem = null;
+            this.canvas.style.cursor = 'grab';
+        },
+
+        // --- ОТРИСОВКА ---
+        loop() {
+            this.draw();
+            requestAnimationFrame(() => this.loop());
+        },
+
+        draw() {
+            const ctx = this.ctx;
+            const w = this.width;
+            const h = this.height;
+            const ox = this.state.offsetX;
+            const sc = this.state.scale;
+            const cy = h / 2 + 20;
+
+            // Очистка
+            ctx.clearRect(0, 0, w, h);
+
+            // 1. Ось
+            ctx.beginPath();
+            ctx.moveTo(0, cy);
+            ctx.lineTo(w, cy);
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Стрелка
+            ctx.beginPath();
+            ctx.moveTo(w-10, cy-5);
+            ctx.lineTo(w, cy);
+            ctx.lineTo(w-10, cy+5);
+            ctx.fill();
+
+            // 2. Деления
+            const minV = -ox/sc;
+            const maxV = (w-ox)/sc;
+            
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            ctx.font = 'bold 14px sans-serif';
+            ctx.fillStyle = '#6b7280';
+
+            // Целые
+            for (let i = Math.floor(minV); i <= Math.ceil(maxV); i++) {
+                const px = ox + i * sc;
+                ctx.beginPath();
+                ctx.moveTo(px, cy-8);
+                ctx.lineTo(px, cy+8);
+                ctx.strokeStyle = '#333';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.fillText(i, px, cy+15);
+            }
+
+            // Дробные (если зум большой)
+            if (sc > 80) {
+                const step = sc > 180 ? 0.1 : 0.5;
+                for (let j = Math.floor(minV/step); j <= Math.ceil(maxV/step); j++) {
+                    const v = j * step;
+                    if (Math.abs(Math.round(v)-v) < 0.001) continue;
+                    const px = ox + v * sc;
+                    ctx.beginPath();
+                    ctx.moveTo(px, cy-4);
+                    ctx.lineTo(px, cy+4);
+                    ctx.strokeStyle = '#9ca3af';
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                }
+            }
+
+            // 3. Дуга расстояния
+            if (this.state.mode === 'distance' && this.state.points.length >= 2) {
+                const p1 = this.state.points[0];
+                const p2 = this.state.points[1];
+                const x1 = ox + p1.val * sc;
+                const x2 = ox + p2.val * sc;
+                const mid = (x1+x2)/2;
+                
+                ctx.beginPath();
+                ctx.moveTo(x1, cy-40);
+                ctx.quadraticCurveTo(mid, cy-80, x2, cy-40);
+                ctx.strokeStyle = '#7209b7';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5,5]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                // Текст расстояния
+                const txt = this.state.solved ? this.state.correct : "?";
+                ctx.fillStyle = "#fff";
+                ctx.fillRect(mid-15, cy-80, 30, 20); // подложка
+                ctx.fillStyle = "#7209b7";
+                ctx.fillText(txt, mid, cy-75);
+            }
+
+            // 4. Точки (Капли)
+            for (let p of this.state.points) {
+                const x = ox + p.val * sc;
+                const y = cy;
+                
+                ctx.globalAlpha = p.ghost ? 0.5 : 1;
+                
+                // Ножка
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(x, y-35);
+                ctx.strokeStyle = p.color;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Голова
+                ctx.beginPath();
+                ctx.arc(x, y-35, 14, Math.PI-0.5, 0.5); // Верхняя часть
+                ctx.lineTo(x, y); // Острие вниз
+                ctx.fillStyle = p.color;
+                
+                // Тень
+                ctx.shadowColor = 'rgba(0,0,0,0.3)';
+                ctx.shadowBlur = 5;
+                ctx.shadowOffsetY = 3;
+                ctx.fill();
+                ctx.shadowColor = 'transparent';
+
+                // Лейбл
+                ctx.fillStyle = '#fff';
+                ctx.fillText(p.label, x, y-42);
+
+                // Обводка активной точки
+                if (p.draggable && !this.state.solved) {
+                    ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+                ctx.globalAlpha = 1;
+            }
+        }
+    };
+
+    App.init();
+</script>
+</body>
+</html>

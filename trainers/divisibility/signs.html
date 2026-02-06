@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тренажер по признакам делимости</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        
+        .description {
+            background-color: #e8f4f8;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .mode-selector {
+            display: flex;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .mode-btn {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            background-color: #ecf0f1;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .mode-btn.active {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .mode-btn:hover:not(.active) {
+            background-color: #d6dbdf;
+        }
+        
+        .exercise-container {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .question {
+            font-size: 18px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .options {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .option {
+            padding: 10px;
+            background-color: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 5px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        
+        .option:hover {
+            border-color: #3498db;
+            background-color: #e3f2fd;
+        }
+        
+        .option.selected {
+            background-color: #3498db;
+            color: white;
+            border-color: #2980b9;
+        }
+        
+        .option.correct {
+            background-color: #2ecc71;
+            border-color: #27ae60;
+            color: white;
+        }
+        
+        .option.incorrect {
+            background-color: #e74c3c;
+            border-color: #c0392b;
+            color: white;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .control-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            white-space: nowrap;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        
+        button.secondary {
+            background-color: #95a5a6;
+        }
+        
+        button.secondary:hover {
+            background-color: #7f8c8d;
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+        }
+        
+        .result.correct {
+            background-color: #d5f4e6;
+            color: #27ae60;
+            display: block;
+        }
+        
+        .result.incorrect {
+            background-color: #fadbd8;
+            color: #c0392b;
+            display: block;
+        }
+        
+        .hint {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #2c3e50;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            white-space: nowrap;
+            z-index: 10;
+            display: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .option:hover .hint {
+            display: block;
+        }
+        
+        .hint:after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: #2c3e50;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .explanation {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .explanation.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <h1>Тренажер по признакам делимости</h1>
+    
+    <div class="description">
+        <p>Изучите признаки делимости чисел в интерактивном режиме. Выберите один из двух вариантов тренировки.</p>
+    </div>
+    
+    <div class="mode-selector">
+        <button class="mode-btn active" data-mode="divisor">Выбрать подходящий делитель</button>
+        <button class="mode-btn" data-mode="dividend">Выбрать подходящие делимые</button>
+    </div>
+    
+    <div class="exercise-container">
+        <div class="question" id="question">Какие из этих чисел делятся на 12?</div>
+        
+        <div class="options" id="options">
+            <!-- Варианты ответов будут сгенерированы скриптом -->
+        </div>
+        
+        <div class="controls">
+            <div class="control-group">
+                <button id="check-btn">Проверить</button>
+                <button id="show-answer-btn" class="secondary">Показать ответ</button>
+            </div>
+            <button id="next-btn">Следующий вопрос</button>
+        </div>
+        
+        <div class="result" id="result"></div>
+        
+        <div class="explanation" id="explanation">
+            <!-- Объяснение будет добавлено скриптом -->
+        </div>
+    </div>
+    
+    <div class="stats">
+        <div class="stat-item">
+            <div class="stat-label">Вопросов пройдено</div>
+            <div class="stat-value" id="questions-count">0</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-label">Правильных ответов</div>
+            <div class="stat-value" id="correct-count">0</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-label">Точность</div>
+            <div class="stat-value" id="accuracy">0%</div>
+        </div>
+    </div>
+
+    <script>
+        // Объект с признаками делимости
+        const divisibilityRules = {
+            2: "Число делится на 2, если его последняя цифра чётная (0, 2, 4, 6, 8).",
+            3: "Число делится на 3, если сумма его цифр делится на 3.",
+            4: "Число делится на 4, если число из двух последних цифр делится на 4.",
+            5: "Число делится на 5, если оно оканчивается на 0 или 5.",
+            6: "Число делится на 6, если оно делится на 2 и на 3 одновременно.",
+            8: "Число делится на 8, если число из трёх последних цифр делится на 8.",
+            9: "Число делится на 9, если сумма его цифр делится на 9.",
+            10: "Число делится на 10, если оно оканчивается на 0."
+        };
+
+        // Функции проверки делимости
+        const divisibilityCheckers = {
+            2: (num) => num % 2 === 0,
+            3: (num) => {
+                const sum = String(num).split('').reduce((acc, digit) => acc + parseInt(digit), 0);
+                return sum % 3 === 0;
+            },
+            4: (num) => {
+                const lastTwo = parseInt(String(num).slice(-2));
+                return lastTwo % 4 === 0;
+            },
+            5: (num) => num % 5 === 0,
+            6: (num) => divisibilityCheckers[2](num) && divisibilityCheckers[3](num),
+            8: (num) => {
+                const lastThree = parseInt(String(num).slice(-3));
+                return lastThree % 8 === 0;
+            },
+            9: (num) => {
+                const sum = String(num).split('').reduce((acc, digit) => acc + parseInt(digit), 0);
+                return sum % 9 === 0;
+            },
+            10: (num) => num % 10 === 0
+        };
+
+        // Элементы DOM
+        const modeButtons = document.querySelectorAll('.mode-btn');
+        const questionElement = document.getElementById('question');
+        const optionsContainer = document.getElementById('options');
+        const checkButton = document.getElementById('check-btn');
+        const showAnswerButton = document.getElementById('show-answer-btn');
+        const nextButton = document.getElementById('next-btn');
+        const resultElement = document.getElementById('result');
+        const explanationElement = document.getElementById('explanation');
+        const questionsCountElement = document.getElementById('questions-count');
+        const correctCountElement = document.getElementById('correct-count');
+        const accuracyElement = document.getElementById('accuracy');
+
+        // Переменные состояния
+        let currentMode = 'divisor';
+        let currentQuestion = {};
+        let selectedOptions = [];
+        let questionsCount = 0;
+        let correctCount = 0;
+        let answerShown = false;
+
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', () => {
+            setupEventListeners();
+            generateQuestion();
+            updateStats();
+        });
+
+        // Настройка обработчиков событий
+        function setupEventListeners() {
+            modeButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    modeButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    currentMode = button.dataset.mode;
+                    generateQuestion();
+                });
+            });
+
+            checkButton.addEventListener('click', checkAnswer);
+            showAnswerButton.addEventListener('click', showAnswer);
+            nextButton.addEventListener('click', generateQuestion);
+        }
+
+        // Генерация нового вопроса
+        function generateQuestion() {
+            resetUI();
+            
+            if (currentMode === 'divisor') {
+                generateDivisorQuestion();
+            } else {
+                generateDividendQuestion();
+            }
+            
+            questionsCount++;
+            updateStats();
+        }
+
+        // Генерация вопроса на выбор делителя
+        function generateDivisorQuestion() {
+            // Генерируем случайное число от 100 до 2000
+            const number = Math.floor(Math.random() * 1901) + 100;
+            
+            // Выбираем случайные делители (4 варианта)
+            const divisors = Object.keys(divisibilityRules).map(Number);
+            
+            // Находим все правильные делители для числа
+            const correctDivisors = divisors.filter(divisor => divisibilityCheckers[divisor](number));
+            
+            // Убедимся, что есть хотя бы один правильный делитель
+            if (correctDivisors.length === 0) {
+                // Если нет правильных делителей, попробуем сгенерировать другое число
+                generateDivisorQuestion();
+                return;
+            }
+            
+            // Выбираем один правильный делитель случайным образом
+            const correctDivisor = correctDivisors[Math.floor(Math.random() * correctDivisors.length)];
+            
+            // Создаем варианты ответов (3 неправильных + 1 правильный)
+            const options = [correctDivisor];
+            
+            // Счетчик для предотвращения бесконечного цикла
+            let attempts = 0;
+            const maxAttempts = 50;
+            
+            while (options.length < 4 && attempts < maxAttempts) {
+                attempts++;
+                const randomDivisor = divisors[Math.floor(Math.random() * divisors.length)];
+                
+                // Проверяем, что делитель не правильный и еще не добавлен
+                if (!options.includes(randomDivisor) && !divisibilityCheckers[randomDivisor](number)) {
+                    options.push(randomDivisor);
+                }
+            }
+            
+            // Если не удалось собрать достаточно вариантов, добавляем любые доступные
+            if (options.length < 4) {
+                const remainingDivisors = divisors.filter(d => !options.includes(d));
+                const needed = 4 - options.length;
+                options.push(...remainingDivisors.slice(0, needed));
+            }
+            
+            // Перемешиваем варианты
+            shuffleArray(options);
+            
+            // Сохраняем вопрос
+            currentQuestion = {
+                type: 'divisor',
+                number: number,
+                correctAnswers: [correctDivisor],
+                options: options
+            };
+            
+            // Отображаем вопрос
+            questionElement.textContent = `На какое из этих чисел делится ${number}?`;
+            
+            // Отображаем варианты ответов
+            renderOptions(options, 'divisor');
+        }
+
+        // Генерация вопроса на выбор делимых
+        function generateDividendQuestion() {
+            // Выбираем случайный делитель
+            const divisors = Object.keys(divisibilityRules).map(Number);
+            const divisor = divisors[Math.floor(Math.random() * divisors.length)];
+            
+            // Генерируем числа, которые делятся и не делятся на выбранный делитель
+            const numbers = [];
+            const correctNumbers = [];
+            
+            // Добавляем 2-3 числа, которые делятся на делитель
+            const correctCount = Math.floor(Math.random() * 2) + 2;
+            
+            // Счетчик для предотвращения бесконечного цикла
+            let attempts = 0;
+            const maxAttempts = 100;
+            
+            for (let i = 0; i < correctCount && attempts < maxAttempts; i++) {
+                attempts++;
+                let num;
+                do {
+                    // Генерируем число, которое точно делится на делитель
+                    const multiplier = Math.floor(Math.random() * 50) + 10;
+                    num = divisor * multiplier;
+                } while (numbers.includes(num) && attempts < maxAttempts);
+                
+                if (!numbers.includes(num)) {
+                    numbers.push(num);
+                    correctNumbers.push(num);
+                }
+            }
+            
+            // Если не удалось сгенерировать достаточно правильных чисел, добавляем простые кратные
+            if (correctNumbers.length < 2) {
+                for (let i = 1; i <= 3; i++) {
+                    const num = divisor * (10 + i);
+                    if (!numbers.includes(num)) {
+                        numbers.push(num);
+                        correctNumbers.push(num);
+                        if (correctNumbers.length >= 2) break;
+                    }
+                }
+            }
+            
+            // Добавляем 2-3 числа, которые не делятся на делитель
+            const incorrectCount = 5 - correctNumbers.length;
+            
+            for (let i = 0; i < incorrectCount && attempts < maxAttempts; i++) {
+                attempts++;
+                let num;
+                do {
+                    // Генерируем число, которое точно не делится на делитель
+                    const base = Math.floor(Math.random() * 200) + 100;
+                    num = base + (Math.floor(Math.random() * (divisor - 1)) + 1);
+                } while (numbers.includes(num) || divisibilityCheckers[divisor](num));
+                
+                if (!numbers.includes(num)) {
+                    numbers.push(num);
+                }
+            }
+            
+            // Если не удалось сгенерировать достаточно неправильных чисел, добавляем любые
+            if (numbers.length < 5) {
+                const needed = 5 - numbers.length;
+                for (let i = 0; i < needed; i++) {
+                    let num;
+                    do {
+                        num = Math.floor(Math.random() * 200) + 100;
+                    } while (numbers.includes(num) || divisibilityCheckers[divisor](num));
+                    
+                    numbers.push(num);
+                }
+            }
+            
+            // Перемешиваем числа
+            shuffleArray(numbers);
+            
+            // Сохраняем вопрос
+            currentQuestion = {
+                type: 'dividend',
+                divisor: divisor,
+                correctAnswers: correctNumbers,
+                options: numbers
+            };
+            
+            // Отображаем вопрос
+            questionElement.textContent = `Какие из этих чисел делятся на ${divisor}?`;
+            
+            // Отображаем варианты ответов
+            renderOptions(numbers, 'dividend', divisor);
+        }
+
+        // Отображение вариантов ответов
+        function renderOptions(options, type, divisor = null) {
+            optionsContainer.innerHTML = '';
+            options.forEach(value => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                optionElement.textContent = value;
+                optionElement.dataset.value = value;
+                
+                // Добавляем подсказку
+                const hintElement = document.createElement('div');
+                hintElement.className = 'hint';
+                
+                if (type === 'divisor') {
+                    hintElement.textContent = divisibilityRules[value];
+                } else {
+                    hintElement.textContent = divisibilityRules[divisor];
+                }
+                
+                optionElement.appendChild(hintElement);
+                
+                optionElement.addEventListener('click', () => toggleOption(optionElement));
+                optionsContainer.appendChild(optionElement);
+            });
+        }
+
+        // Переключение выбора варианта
+        function toggleOption(optionElement) {
+            if (answerShown) return; // Не позволяем менять выбор после показа ответа
+            
+            const value = parseInt(optionElement.dataset.value);
+            
+            if (optionElement.classList.contains('selected')) {
+                optionElement.classList.remove('selected');
+                selectedOptions = selectedOptions.filter(opt => opt !== value);
+            } else {
+                optionElement.classList.add('selected');
+                selectedOptions.push(value);
+            }
+            
+            // Активируем кнопку проверки, если выбран хотя бы один вариант
+            checkButton.disabled = selectedOptions.length === 0;
+        }
+
+        // Проверка ответа
+        function checkAnswer() {
+            const correctAnswers = currentQuestion.correctAnswers;
+            const isCorrect = arraysEqual(selectedOptions.sort(), correctAnswers.sort());
+            
+            // Отмечаем правильные и неправильные ответы
+            highlightAnswers(correctAnswers);
+            
+            // Показываем результат
+            if (isCorrect) {
+                resultElement.textContent = 'Правильно!';
+                resultElement.className = 'result correct';
+                correctCount++;
+            } else {
+                resultElement.textContent = 'Неправильно. Попробуйте ещё раз.';
+                resultElement.className = 'result incorrect';
+            }
+            
+            // Показываем объяснение
+            showExplanation();
+            
+            // Блокируем кнопку проверки и активируем кнопку показа ответа
+            checkButton.disabled = true;
+            showAnswerButton.disabled = true;
+            answerShown = true;
+            
+            updateStats();
+        }
+
+        // Показать правильный ответ
+        function showAnswer() {
+            const correctAnswers = currentQuestion.correctAnswers;
+            
+            // Отмечаем правильные ответы
+            highlightAnswers(correctAnswers);
+            
+            // Показываем объяснение
+            showExplanation();
+            
+            // Блокируем кнопки
+            checkButton.disabled = true;
+            showAnswerButton.disabled = true;
+            answerShown = true;
+            
+            // Показываем сообщение
+            resultElement.textContent = 'Правильный ответ показан';
+            resultElement.className = 'result correct';
+        }
+
+        // Подсветка правильных и неправильных ответов
+        function highlightAnswers(correctAnswers) {
+            const optionElements = document.querySelectorAll('.option');
+            optionElements.forEach(option => {
+                const value = parseInt(option.dataset.value);
+                
+                if (correctAnswers.includes(value)) {
+                    option.classList.add('correct');
+                } else if (selectedOptions.includes(value)) {
+                    option.classList.add('incorrect');
+                }
+            });
+        }
+
+        // Показать объяснение
+        function showExplanation() {
+            explanationElement.innerHTML = '';
+            explanationElement.classList.add('show');
+            
+            if (currentQuestion.type === 'divisor') {
+                const number = currentQuestion.number;
+                const divisor = currentQuestion.correctAnswers[0];
+                
+                const explanation = document.createElement('p');
+                explanation.innerHTML = `<strong>Объяснение:</strong> ${number} делится на ${divisor}, потому что ${getDivisibilityExplanation(number, divisor)}`;
+                explanationElement.appendChild(explanation);
+            } else {
+                const divisor = currentQuestion.divisor;
+                
+                const explanation = document.createElement('p');
+                explanation.innerHTML = `<strong>Признак делимости на ${divisor}:</strong> ${divisibilityRules[divisor]}`;
+                explanationElement.appendChild(explanation);
+                
+                const numbersExplanation = document.createElement('p');
+                numbersExplanation.innerHTML = `<strong>Правильные ответы:</strong> ${currentQuestion.correctAnswers.join(', ')}`;
+                explanationElement.appendChild(numbersExplanation);
+            }
+        }
+
+        // Получить объяснение делимости конкретного числа
+        function getDivisibilityExplanation(number, divisor) {
+            switch(divisor) {
+                case 2:
+                    const lastDigit = number % 10;
+                    return `последняя цифра ${lastDigit} является чётной.`;
+                case 3:
+                    const sum3 = String(number).split('').reduce((acc, digit) => acc + parseInt(digit), 0);
+                    return `сумма цифр (${String(number).split('').join('+')} = ${sum3}) делится на 3.`;
+                case 4:
+                    const lastTwo4 = parseInt(String(number).slice(-2));
+                    return `число из двух последних цифр (${lastTwo4}) делится на 4.`;
+                case 5:
+                    return `число оканчивается на ${number % 10}.`;
+                case 6:
+                    return `число делится на 2 и на 3 одновременно.`;
+                case 8:
+                    const lastThree8 = parseInt(String(number).slice(-3));
+                    return `число из трёх последних цифр (${lastThree8}) делится на 8.`;
+                case 9:
+                    const sum9 = String(number).split('').reduce((acc, digit) => acc + parseInt(digit), 0);
+                    return `сумма цифр (${String(number).split('').join('+')} = ${sum9}) делится на 9.`;
+                case 10:
+                    return `число оканчивается на 0.`;
+                default:
+                    return `число удовлетворяет признаку делимости на ${divisor}.`;
+            }
+        }
+
+        // Сброс интерфейса
+        function resetUI() {
+            selectedOptions = [];
+            resultElement.className = 'result';
+            explanationElement.className = 'explanation';
+            checkButton.disabled = true;
+            showAnswerButton.disabled = false;
+            answerShown = false;
+        }
+
+        // Обновление статистики
+        function updateStats() {
+            questionsCountElement.textContent = questionsCount;
+            correctCountElement.textContent = correctCount;
+            const accuracy = questionsCount > 0 ? Math.round((correctCount / questionsCount) * 100) : 0;
+            accuracyElement.textContent = `${accuracy}%`;
+        }
+
+        // Вспомогательные функции
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function arraysEqual(a, b) {
+            if (a.length !== b.length) return false;
+            for (let i = 0; i < a.length; i++) {
+                if (a[i] !== b[i]) return false;
+            }
+            return true;
+        }
+    </script>
+</body>
+</html>

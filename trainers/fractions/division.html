@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Математика: Деление Дробей</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Палитра "Умная Школа" */
+            --bg-app: #f0f4f8;
+            --primary: #5c6ac4;      /* Индиго - основной */
+            --primary-light: #e0e6ff;
+            --accent: #f47c7c;       /* Коралл - для действия (переворот) */
+            --success: #47b881;      /* Мята - успех */
+            --text-main: #2d3436;
+            --text-light: #636e72;
+            --card-shadow: 0 10px 25px rgba(148, 163, 184, 0.3);
+            --input-bg: #ffffff;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: var(--bg-app);
+            color: var(--text-main);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 1100px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        /* --- ВЕРХНЯЯ ПАНЕЛЬ --- */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 15px 30px;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .level-info h2 { margin: 0; font-size: 1.5rem; color: var(--primary); }
+        .level-info span { font-size: 0.9rem; color: var(--text-light); font-weight: 700; }
+
+        .progress-track {
+            display: flex;
+            gap: 8px;
+        }
+
+        .pill {
+            width: 40px; height: 10px;
+            border-radius: 5px;
+            background: #dfe6e9;
+            transition: all 0.4s ease;
+        }
+        .pill.active { background: var(--primary); transform: scaleY(1.3); }
+        .pill.done { background: var(--success); }
+
+        .score-badge {
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-weight: 900;
+        }
+
+        /* --- ИГРОВОЕ ПОЛЕ (ГРИД) --- */
+        .game-board {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+        }
+
+        /* Карточка шага */
+        .step-card {
+            background: white;
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+
+        .step-label {
+            position: absolute;
+            top: -12px; left: 30px;
+            background: var(--primary);
+            color: white;
+            padding: 4px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 10px rgba(92, 106, 196, 0.3);
+        }
+
+        /* --- ШАГ 1: УРАВНЕНИЕ (FLEX ROW) --- */
+        .equation-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .static-fraction {
+            font-size: 2rem;
+            font-weight: 900;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-main);
+        }
+        
+        .operator-icon {
+            font-size: 2rem;
+            color: var(--primary);
+            margin: 0 10px;
+        }
+
+        /* Зона ввода дроби */
+        .fraction-input-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 80px;
+            position: relative;
+        }
+
+        .frac-line {
+            width: 100%; height: 4px;
+            background: var(--text-main);
+            border-radius: 2px;
+            margin: 6px 0;
+        }
+
+        .input-num {
+            width: 100%; height: 60px;
+            border: 2px solid #e1e4e8;
+            border-radius: 12px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            text-align: center;
+            color: var(--text-main);
+            transition: all 0.2s;
+            background: #fcfcfc;
+        }
+        
+        .input-num:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 4px var(--primary-light);
+            transform: translateY(-2px);
+        }
+
+        /* Спец. стиль для перевернутой дроби */
+        .flip-highlight .input-num {
+            border-color: var(--accent);
+            background: #fff5f5;
+        }
+        .flip-highlight .input-num:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px #ffe3e3;
+        }
+        .flip-hint {
+            position: absolute;
+            bottom: -25px;
+            font-size: 0.7rem;
+            color: var(--accent);
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        /* --- ШАГ 2: РАЗЛОЖЕНИЕ --- */
+        .factors-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            padding-top: 10px;
+        }
+
+        .factors-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 50px;
+        }
+
+        .factor-input {
+            width: 50px; height: 50px;
+            border: 2px solid #e1e4e8;
+            border-radius: 10px;
+            font-size: 1.4rem;
+            text-align: center;
+            font-weight: 700;
+            color: var(--text-light);
+        }
+
+        .big-line {
+            width: 300px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 2px;
+        }
+
+        /* --- ЖИВОЕ СОКРАЩЕНИЕ (Стили) --- */
+        .live-cancelled {
+            text-decoration: line-through;
+            opacity: 0.5;
+            background-color: #f1f2f6;
+            border-color: transparent;
+            transform: scale(0.9);
+        }
+        /* Цвета пар */
+        .pair-0 { box-shadow: 0 0 0 2px #fdcb6e; background: #fff7d6; }
+        .pair-1 { box-shadow: 0 0 0 2px #00cec9; background: #e0fffe; }
+        .pair-2 { box-shadow: 0 0 0 2px #e17055; background: #ffe6de; }
+
+        /* --- ШАГ 3: ОТВЕТ --- */
+        .result-wrapper {
+            display: flex;
+            justify-content: center;
+        }
+
+        /* --- НИЖНЯЯ ПАНЕЛЬ --- */
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .feedback-msg {
+            min-height: 24px;
+            font-weight: 800;
+            font-size: 1.1rem;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .btn-main {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            font-size: 1.2rem;
+            font-weight: 900;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: 'Nunito', sans-serif;
+            box-shadow: 0 8px 20px rgba(92, 106, 196, 0.4);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .btn-main:hover { transform: translateY(-4px); box-shadow: 0 12px 25px rgba(92, 106, 196, 0.5); }
+        .btn-main:active { transform: scale(0.98); }
+        
+        .btn-success { background: var(--success); box-shadow: 0 8px 20px rgba(71, 184, 129, 0.4); }
+        .btn-success:hover { box-shadow: 0 12px 25px rgba(71, 184, 129, 0.5); }
+
+        /* Состояния валидации */
+        .input-num.error, .factor-input.error { border-color: var(--accent); background: #fff0f0; animation: shake 0.4s; }
+        .input-num.valid, .factor-input.valid { border-color: var(--success); color: var(--success); background: #f0fff4; }
+
+        @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
+
+        /* Мобильная адаптация */
+        @media (max-width: 768px) {
+            .equation-wrapper { gap: 10px; }
+            .static-fraction { font-size: 1.5rem; }
+            .input-num { width: 50px; height: 50px; font-size: 1.2rem; }
+            .fraction-input-group { width: 50px; }
+        }
+
+        /* Победный экран */
+        .victory-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.98);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        .victory-icon { font-size: 5rem; margin-bottom: 20px; animation: bounce 2s infinite; }
+        @keyframes bounce { 0%, 100% {transform: translateY(0);} 50% {transform: translateY(-20px);} }
+
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    
+    <div class="top-bar">
+        <div class="level-info">
+            <h2 id="levelName">Уровень 1</h2>
+            <span id="levelDesc">Целое число : Дробь</span>
+        </div>
+        <div class="progress-track">
+            <div class="pill active" id="p1"></div>
+            <div class="pill" id="p2"></div>
+            <div class="pill" id="p3"></div>
+            <div class="pill" id="p4"></div>
+            <div class="pill" id="p5"></div>
+        </div>
+        <div class="score-badge">
+            ★ <span id="scoreVal">0</span>
+        </div>
+    </div>
+
+    <div class="game-board">
+        
+        <div class="step-card">
+            <div class="step-label">Шаг 1: Преврати деление в умножение</div>
+            
+            <div class="equation-wrapper">
+                
+                <div id="problemDisplay" style="display: flex; align-items: center; gap: 15px;">
+                    </div>
+
+                <div style="color: #cbd5e0; font-size: 1.5rem;">➔</div>
+
+                <div class="fraction-input-group">
+                    <input type="number" class="input-num" id="in_n1" placeholder="?">
+                    <div class="frac-line"></div>
+                    <input type="number" class="input-num" id="in_d1" placeholder="?">
+                </div>
+
+                <div class="operator-icon">×</div>
+
+                <div class="fraction-input-group flip-highlight">
+                    <input type="number" class="input-num" id="in_n2" placeholder="?">
+                    <div class="frac-line"></div>
+                    <input type="number" class="input-num" id="in_d2" placeholder="?">
+                    <div class="flip-hint">Переверни меня! ⤴</div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="step-card">
+            <div class="step-label" style="background: var(--text-light);">Шаг 2: Разложи и сократи</div>
+            
+            <div class="factors-container">
+                <div class="factors-row" id="numFactorsRow"></div>
+                
+                <div class="big-line"></div>
+                
+                <div class="factors-row" id="denFactorsRow"></div>
+            </div>
+        </div>
+
+        <div class="step-card" style="text-align: center;">
+            <div class="step-label" style="background: var(--success);">Шаг 3: Ответ</div>
+            <div class="result-wrapper">
+                <div class="fraction-input-group">
+                    <input type="number" class="input-num" id="res_n" placeholder="?">
+                    <div class="frac-line"></div>
+                    <input type="number" class="input-num" id="res_d" placeholder="?">
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="controls">
+        <div class="feedback-msg" id="feedback"></div>
+        <button class="btn-main" id="actionBtn">
+            <span>Проверить</span>
+        </button>
+    </div>
+
+</div>
+
+<div class="victory-overlay" id="victoryScreen">
+    <div class="victory-icon">🎓</div>
+    <h1 style="color: var(--primary); font-size: 2.5rem;">Курс пройден!</h1>
+    <p style="font-size: 1.2rem; color: var(--text-light);">Ты мастерски справился с делением дробей.</p>
+    <br>
+    <button class="btn-main btn-success" onclick="location.reload()">Начать заново</button>
+</div>
+
+<script>
+    /**
+     * КОНФИГУРАЦИЯ И ЛОГИКА
+     * (Полностью сохранена логика, улучшен рендер)
+     */
+    
+    const LEVELS = {
+        1: { name: "Уровень 1", desc: "Деление Целого на Дробь", type: "whole_div_frac", tasks: 3 },
+        2: { name: "Уровень 2", desc: "Деление Дроби на Целое", type: "frac_div_whole", tasks: 3 },
+        3: { name: "Уровень 3", desc: "Дробь на Дробь (Простые)", type: "frac_div_frac", tasks: 4 },
+        4: { name: "Уровень 4", desc: "Сложное сокращение", type: "cross_cancel", tasks: 5 },
+        5: { name: "Уровень 5", desc: "Мастер деления", type: "master", tasks: 5 }
+    };
+
+    let state = {
+        lvl: 1,
+        currentTaskIndex: 0, // внутри уровня
+        score: 0,
+        task: null,
+        isChecked: false
+    };
+
+    // --- ГЕНЕРАТОР МАТЕМАТИКИ ---
+    
+    function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+    function gcd(a, b) { return b==0 ? a : gcd(b, a%b); }
+    
+    function getFactors(n) {
+        if(n<=1) return [1];
+        let res = [], d = 2, t = n;
+        while(d*d <= t) {
+            while(t%d===0) { res.push(d); t/=d; }
+            d++;
+        }
+        if(t>1) res.push(t);
+        return res;
+    }
+
+    function generateTask() {
+        const type = LEVELS[state.lvl].type;
+        // Генерируем "обратную" задачу (умножение), чтобы ответы были красивые
+        let n1, d1, n2, d2;
+
+        if (type === "whole_div_frac") {
+            // W : (N/D) -> W/1 * D/N
+            n1 = rand(2, 6); d1 = 1;
+            // Чтобы сокращалось: n1 и n2 (в делении это будет знаменатель) должны иметь общий делитель
+            let common = 2;
+            n2 = rand(1, 4); d2 = rand(2, 5) * common;
+            n1 = n1 * common; 
+        } else if (type === "frac_div_whole") {
+            // (N/D) : W -> N/D * 1/W
+            let W = rand(2, 5);
+            n2 = 1; d2 = W;
+            n1 = W * rand(1, 3); d1 = rand(2, 8);
+        } else {
+            // Дробь на дробь
+            let common = rand(2, 4);
+            n1 = rand(1, 5) * (state.lvl > 3 ? common : 1);
+            d1 = rand(2, 8);
+            n2 = rand(1, 5);
+            d2 = rand(2, 8) * (state.lvl > 3 ? common : 1);
+        }
+
+        // Задача: (n1/d1) : (d2/n2)
+        // Решение: (n1/d1) * (n2/d2)
+        
+        let t = {
+            problem: {
+                left: { n: n1, d: d1, isWhole: d1===1 },
+                right: { n: d2, d: n2, isWhole: n2===1 } // Делитель до переворота
+            },
+            mult: { n1, d1, n2, d2 }, // После переворота
+            factors: {
+                nums: [...getFactors(n1), ...getFactors(n2)].filter(x=>x>1).sort((a,b)=>a-b),
+                dens: [...getFactors(d1), ...getFactors(d2)].filter(x=>x>1).sort((a,b)=>a-b)
+            }
+        };
+
+        // Если factors пусты (были единицы), вернем [1]
+        if(t.factors.nums.length===0) t.factors.nums=[1];
+        if(t.factors.dens.length===0) t.factors.dens=[1];
+
+        // Ответ
+        let fn = n1*n2, fd = d1*d2;
+        let common = gcd(fn, fd);
+        t.result = { n: fn/common, d: fd/common };
+
+        state.task = t;
+        state.isChecked = false;
+        render();
+    }
+
+    // --- РЕНДЕРИНГ ---
+
+    function render() {
+        const t = state.task;
+        
+        // 1. Обновление шапки
+        document.getElementById('levelName').textContent = LEVELS[state.lvl].name;
+        document.getElementById('levelDesc').textContent = LEVELS[state.lvl].desc;
+        document.getElementById('scoreVal').textContent = state.score;
+
+        // Прогресс бар
+        for(let i=1; i<=5; i++) {
+            let el = document.getElementById('p'+i);
+            el.className = 'pill';
+            if(i < state.lvl) el.classList.add('done');
+            if(i === state.lvl) el.classList.add('active');
+        }
+
+        // 2. Условие (Problem Display)
+        const pDisp = document.getElementById('problemDisplay');
+        pDisp.innerHTML = '';
+        
+        // Левое число
+        pDisp.innerHTML += renderFractionHTML(t.problem.left);
+        pDisp.innerHTML += `<div class="operator-icon">:</div>`;
+        // Правое число
+        pDisp.innerHTML += renderFractionHTML(t.problem.right);
+        pDisp.innerHTML += `<div class="operator-icon">=</div>`;
+
+        // 3. Очистка полей ввода
+        clearInputs();
+
+        // 4. Генерация полей для множителей
+        genFactorInputs('numFactorsRow', t.factors.nums.length);
+        genFactorInputs('denFactorsRow', t.factors.dens.length);
+
+        // Сброс кнопки
+        const btn = document.getElementById('actionBtn');
+        btn.innerHTML = '<span>Проверить</span>';
+        btn.className = 'btn-main';
+        btn.onclick = checkAnswer;
+
+        document.getElementById('feedback').textContent = '';
+        document.getElementById('feedback').style.opacity = '0';
+    }
+
+    function renderFractionHTML(obj) {
+        if(obj.isWhole) return `<div class="static-fraction">${obj.n}</div>`;
+        return `
+            <div class="static-fraction">
+                <div style="border-bottom: 3px solid var(--text-main); padding: 0 5px;">${obj.n}</div>
+                <div>${obj.d}</div>
+            </div>`;
+    }
+
+    function clearInputs() {
+        document.querySelectorAll('input').forEach(i => {
+            i.value = '';
+            i.className = i.classList.contains('factor-input') ? 'factor-input' : 'input-num';
+            i.disabled = false;
+        });
+    }
+
+    function genFactorInputs(id, count) {
+        const div = document.getElementById(id);
+        div.innerHTML = '';
+        for(let i=0; i<count; i++) {
+            let inp = document.createElement('input');
+            inp.type = 'number';
+            inp.className = 'factor-input';
+            inp.placeholder = '?';
+            inp.addEventListener('input', updateLiveCancel);
+            div.appendChild(inp);
+            if(i < count-1) {
+                let span = document.createElement('span');
+                span.innerHTML = '×';
+                span.style.color = '#cbd5e0';
+                div.appendChild(span);
+            }
+        }
+    }
+
+    // --- ЖИВОЕ СОКРАЩЕНИЕ ---
+
+    function updateLiveCancel() {
+        // Очистка стилей
+        document.querySelectorAll('.factor-input').forEach(el => {
+            el.classList.remove('live-cancelled', 'pair-0', 'pair-1', 'pair-2');
+        });
+
+        const nInps = Array.from(document.querySelectorAll('#numFactorsRow .factor-input'));
+        const dInps = Array.from(document.querySelectorAll('#denFactorsRow .factor-input'));
+        
+        let pairIdx = 0;
+        let takenD = new Set();
+
+        nInps.forEach(n => {
+            let val = parseInt(n.value);
+            if(!val) return;
+            
+            for(let i=0; i<dInps.length; i++) {
+                if(takenD.has(i)) continue;
+                if(parseInt(dInps[i].value) === val) {
+                    takenD.add(i);
+                    let cls = `pair-${pairIdx % 3}`;
+                    n.classList.add('live-cancelled', cls);
+                    dInps[i].classList.add('live-cancelled', cls);
+                    pairIdx++;
+                    break;
+                }
+            }
+        });
+    }
+
+    // --- ПРОВЕРКА ---
+
+    function checkAnswer() {
+        const t = state.task;
+        let isError = false;
+
+        // 1. Проверка Умножения (переворот)
+        const v_n1 = parseInt(document.getElementById('in_n1').value);
+        const v_d1 = parseInt(document.getElementById('in_d1').value);
+        const v_n2 = parseInt(document.getElementById('in_n2').value); // Перевернутый числитель
+        const v_d2 = parseInt(document.getElementById('in_d2').value); // Перевернутый знам
+
+        validateInput('in_n1', v_n1 === t.mult.n1);
+        validateInput('in_d1', v_d1 === t.mult.d1);
+        // Главная проверка - перевернули ли?
+        validateInput('in_n2', v_n2 === t.mult.n2); 
+        validateInput('in_d2', v_d2 === t.mult.d2);
+
+        if(v_n1 !== t.mult.n1 || v_d1 !== t.mult.d1 || v_n2 !== t.mult.n2 || v_d2 !== t.mult.d2) isError = true;
+
+        // 2. Проверка Множителей
+        const userNums = getVals('#numFactorsRow input');
+        const userDens = getVals('#denFactorsRow input');
+        const expNums = t.factors.nums.join(',');
+        const expDens = t.factors.dens.join(',');
+
+        const numRowValid = userNums === expNums;
+        const denRowValid = userDens === expDens;
+
+        styleFactors('numFactorsRow', numRowValid);
+        styleFactors('denFactorsRow', denRowValid);
+
+        if(!numRowValid || !denRowValid) isError = true;
+
+        // 3. Ответ
+        const r_n = parseInt(document.getElementById('res_n').value);
+        const r_d = parseInt(document.getElementById('res_d').value);
+        
+        validateInput('res_n', r_n === t.result.n);
+        validateInput('res_d', r_d === t.result.d);
+
+        if(r_n !== t.result.n || r_d !== t.result.d) isError = true;
+
+        // Итог
+        const fb = document.getElementById('feedback');
+        fb.style.opacity = '1';
+
+        if(isError) {
+            fb.textContent = "Есть ошибки! Проверь красные поля.";
+            fb.style.color = "var(--accent)";
+        } else {
+            fb.textContent = "Отлично! Всё верно!";
+            fb.style.color = "var(--success)";
+            state.score += 10;
+            state.currentTaskIndex++;
+            
+            // Блокируем инпуты
+            document.querySelectorAll('input').forEach(i => i.disabled = true);
+
+            // Меняем кнопку
+            const btn = document.getElementById('actionBtn');
+            btn.innerHTML = '<span>Дальше ➡</span>';
+            btn.className = 'btn-main btn-success';
+            btn.onclick = nextTask;
+        }
+    }
+
+    function nextTask() {
+        if(state.currentTaskIndex >= LEVELS[state.lvl].tasks) {
+            if(state.lvl >= 5) {
+                document.getElementById('victoryScreen').style.display = 'flex';
+                return;
+            }
+            state.lvl++;
+            state.currentTaskIndex = 0;
+        }
+        generateTask();
+    }
+
+    // Хелперы валидации
+    function validateInput(id, isValid) {
+        const el = document.getElementById(id);
+        if(isValid) {
+            el.classList.remove('error');
+            el.classList.add('valid');
+        } else {
+            el.classList.remove('valid');
+            el.classList.add('error');
+        }
+    }
+
+    function getVals(sel) {
+        return Array.from(document.querySelectorAll(sel))
+            .map(i => parseInt(i.value))
+            .sort((a,b)=>a-b)
+            .join(',');
+    }
+
+    function styleFactors(rowId, isValid) {
+        document.querySelectorAll(`#${rowId} input`).forEach(el => {
+            if(!isValid) el.classList.add('error');
+            else el.classList.remove('error'); // не добавляем valid чтобы не сбивать цвет сокращения
+        });
+    }
+
+    // Старт
+    generateTask();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Число Пи: Эксперимент</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --accent: #dc2626;
+            --dark: #1e293b;
+            --bg: #f8fafc;
+            --success: #16a34a;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            overflow: hidden;
+        }
+
+        .main-container {
+            width: 1000px;
+            height: 700px;
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            display: flex;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            position: relative;
+        }
+
+        /* КАНВАС */
+        .canvas-section {
+            flex-grow: 1;
+            position: relative;
+            background: #f1f5f9;
+            background-image: 
+                linear-gradient(#e2e8f0 1px, transparent 1px),
+                linear-gradient(90deg, #e2e8f0 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        /* САЙДБАР */
+        .sidebar {
+            width: 320px; /* Чуть шире для текста */
+            background: #ffffff;
+            border-left: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            padding: 25px;
+            z-index: 2;
+        }
+
+        /* Заголовок приложения */
+        .app-title {
+            margin: 0 0 15px 0;
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--dark);
+            letter-spacing: -0.03em;
+        }
+
+        /* Инструкция */
+        .instructions {
+            background: #f1f5f9;
+            padding: 15px 20px 15px 30px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border: 1px solid #e2e8f0;
+        }
+        .instructions ol {
+            margin: 0;
+            padding: 0;
+            list-style: decimal;
+            color: #475569;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        .instructions li {
+            margin-bottom: 6px;
+        }
+        .instructions li:last-child {
+            margin-bottom: 0;
+        }
+
+        .sidebar h2 {
+            margin: 0 0 15px 0;
+            font-size: 1.1rem;
+            color: var(--dark);
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Журнал */
+        .log-list { 
+            flex-grow: 1; 
+            overflow-y: auto; 
+            padding-right: 5px;
+        }
+        .log-list::-webkit-scrollbar { width: 4px; }
+        .log-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+        .log-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 12px;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.9rem;
+            color: #475569;
+            animation: slideIn 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .log-item::before {
+            content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+            background: var(--cyl-color, #cbd5e1);
+        }
+        .log-item strong { display: block; margin-bottom: 5px; margin-left: 8px; color: var(--dark); }
+        .log-row { display: flex; justify-content: space-between; margin-left: 8px; }
+        .log-pi { 
+            margin-top: 8px; text-align: right; font-weight: bold; 
+            color: var(--primary); border-top: 1px dashed #cbd5e1; padding-top: 4px;
+        }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+
+        .sidebar-footer { margin-top: 20px; display: none; }
+
+        /* ПАНЕЛЬ УПРАВЛЕНИЯ */
+        .controls {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            min-width: 420px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            padding: 15px 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #e2e8f0;
+            gap: 40px;
+            z-index: 10;
+            transition: opacity 0.5s;
+        }
+        .controls.disabled { opacity: 0.5; pointer-events: none; }
+
+        .formula-container {
+            display: flex; align-items: center; gap: 20px;
+            font-family: 'Roboto Mono', monospace; font-size: 2.2rem; font-weight: 700; color: var(--dark);
+        }
+        .fraction { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .numerator {
+            border-bottom: 3px solid var(--dark); padding-bottom: 2px; color: #cbd5e1; 
+            min-width: 90px; text-align: center; transition: color 0.3s;
+        }
+        .numerator.active { color: var(--accent); }
+        .denominator {
+            padding-top: 2px; color: #cbd5e1; min-width: 90px; text-align: center; transition: color 0.3s;
+        }
+        .denominator.active { color: var(--primary); }
+        .equals-sign { opacity: 0; transition: opacity 0.3s; color: #94a3b8; }
+        .result-val { opacity: 0; color: #16a34a; transition: opacity 0.3s; }
+        .visible { opacity: 1; }
+
+        button {
+            background: var(--dark); color: white; border: none; padding: 14px 32px;
+            border-radius: 14px; font-weight: 600; font-size: 1.1rem; cursor: pointer;
+            transition: 0.2s; white-space: nowrap; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        button:hover { background: #334155; transform: translateY(-1px); }
+        button:disabled { background: #cbd5e1; cursor: not-allowed; opacity: 0.8; transform: none; box-shadow: none; }
+        
+        .summary-btn { 
+            background: var(--success); width: 100%; animation: pulse 2s infinite;
+        }
+        .summary-btn:hover { background: #15803d; }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(22, 163, 74, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
+        }
+
+        .overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.95); display: none;
+            flex-direction: column; justify-content: center; align-items: center; z-index: 20;
+        }
+        .card {
+            background: white; padding: 50px; border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); text-align: center;
+            max-width: 500px; border: 1px solid #e2e8f0;
+        }
+        .big-number { font-size: 4.5rem; font-weight: 800; color: var(--primary); margin: 15px 0; }
+
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+    <div class="canvas-section">
+        <canvas id="simCanvas"></canvas>
+        
+        <div class="controls" id="uiPanel">
+            <div class="formula-container">
+                <div class="fraction">
+                    <div id="uiNum" class="numerator">C</div>
+                    <div id="uiDen" class="denominator">d</div>
+                </div>
+                <div id="uiEq" class="equals-sign">=</div>
+                <div id="uiRes" class="result-val">?</div>
+            </div>
+
+            <button id="mainBtn" onclick="handleClick()">Далее</button>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <h1 class="app-title">Число Пи</h1>
+        
+        <div class="instructions">
+            <ol>
+                <li>Измерь длину окружности</li>
+                <li>Измерь диаметр окружности</li>
+                <li>Найди отношение длины к диаметру</li>
+            </ol>
+        </div>
+
+        <h2>📒 Журнал</h2>
+        <div class="log-list" id="logList">
+            <div style="padding:10px; color:#94a3b8; font-size:0.9rem;">
+                Здесь будут записи.
+            </div>
+        </div>
+        
+        <div class="sidebar-footer" id="sidebarFooter">
+            <button class="summary-btn" onclick="showFinal()">ПОДВЕСТИ ИТОГ</button>
+        </div>
+    </div>
+
+    <div class="overlay" id="finalOverlay">
+        <div class="card">
+            <h2 style="margin-top:0">🎉 Результаты</h2>
+            <p>Эксперимент завершен.</p>
+            <p style="margin-top:30px; color:#64748b; font-size:0.85rem; text-transform:uppercase; font-weight:bold;">Среднее значение</p>
+            <div class="big-number" id="avgResult">3.1415</div>
+            <p style="color:#64748b; font-size:0.9rem;">
+                Вывод: отношение C / d всегда постоянно.
+            </p>
+            <button onclick="location.reload()" style="margin-top:25px; width:100%">Начать заново</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('simCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    const dpr = window.devicePixelRatio || 1;
+    const width = 680; // Ширина канваса (1000 total - 320 sidebar)
+    const height = 700;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    ctx.scale(dpr, dpr);
+    canvas.style.width = width + "px";
+    canvas.style.height = height + "px";
+
+    // --- ГЕНЕРАЦИЯ ---
+    const CYL_COLORS = [
+        { main: '#64748b', light: '#94a3b8', name: 'Стальной' },
+        { main: '#059669', light: '#34d399', name: 'Изумрудный' },
+        { main: '#7c3aed', light: '#a78bfa', name: 'Фиолетовый' },
+        { main: '#ea580c', light: '#fb923c', name: 'Медный' },
+        { main: '#db2777', light: '#f472b6', name: 'Розовый' },
+        { main: '#0891b2', light: '#22d3ee', name: 'Бирюзовый' }
+    ];
+
+    function generateExperiments() {
+        const rounds = [];
+        let r1 = Math.floor(Math.random() * (45 - 35) + 35);
+        let c1 = CYL_COLORS[Math.floor(Math.random() * CYL_COLORS.length)];
+        rounds.push({ r: r1, color: c1, label: 'Малый' });
+
+        let r2 = Math.floor(Math.random() * (70 - 55) + 55);
+        let c2 = CYL_COLORS[Math.floor(Math.random() * CYL_COLORS.length)];
+        while(c2 === c1) c2 = CYL_COLORS[Math.floor(Math.random() * CYL_COLORS.length)];
+        rounds.push({ r: r2, color: c2, label: 'Средний' });
+
+        let r3 = Math.floor(Math.random() * (95 - 80) + 80);
+        let c3 = CYL_COLORS[Math.floor(Math.random() * CYL_COLORS.length)];
+        while(c3 === c1 || c3 === c2) c3 = CYL_COLORS[Math.floor(Math.random() * CYL_COLORS.length)];
+        rounds.push({ r: r3, color: c3, label: 'Большой' });
+        return rounds;
+    }
+
+    const EXPERIMENTS = generateExperiments();
+    const RULER = { x: 30, y: 350, len: 620, height: 70 };
+
+    // --- СОСТОЯНИЕ ---
+    let roundIdx = 0;
+    let resultsHistory = [];
+    
+    let state = {
+        phase: 'C', 
+        val: 0,
+        targetVal: 0,
+        isDragging: false,
+        measuredC: 0,
+        measuredD: 0,
+        introActive: true,
+        introStart: 0
+    };
+
+    let currentGeo = {}; 
+
+    // --- INIT ---
+    function initRound() {
+        const exp = EXPERIMENTS[roundIdx];
+        
+        currentGeo = {
+            r: exp.r,
+            d: exp.r * 2,
+            c: Math.PI * exp.r * 2,
+            cx: width / 2,
+            cy: 180,
+            color: exp.color
+        };
+
+        state.phase = 'C';
+        state.val = 0;
+        state.targetVal = 0;
+        state.measuredC = 0;
+        state.measuredD = 0;
+        
+        if (roundIdx === 0) {
+            state.introActive = true;
+            state.introStart = Date.now();
+        } else {
+            state.introActive = false;
+        }
+        
+        updateUI();
+    }
+
+    // --- UI UPDATER ---
+    function updateUI() {
+        const btn = document.getElementById('mainBtn');
+        const num = document.getElementById('uiNum');
+        const den = document.getElementById('uiDen');
+        const eq = document.getElementById('uiEq');
+        const res = document.getElementById('uiRes');
+
+        num.classList.remove('active');
+        den.classList.remove('active');
+        
+        if (state.phase === 'C') {
+            num.classList.add('active'); 
+            num.innerText = state.val > 0 ? Math.round(state.val) : "C";
+            den.innerText = "d";
+            eq.classList.remove('visible');
+            res.classList.remove('visible');
+            btn.innerText = "Далее";
+            btn.disabled = true;
+        } 
+        else if (state.phase === 'D') {
+            den.classList.add('active'); 
+            num.innerText = Math.round(state.measuredC);
+            den.innerText = state.val > 0 ? Math.round(state.val) : "d";
+            eq.classList.remove('visible');
+            res.classList.remove('visible');
+            btn.innerText = "В журнал";
+            btn.disabled = true;
+        }
+        else if (state.phase === 'RESULT') {
+            const finalC = Math.round(state.measuredC);
+            const finalD = Math.round(state.measuredD);
+            
+            num.innerText = finalC;
+            den.innerText = finalD;
+            eq.classList.add('visible');
+            
+            // Расчет с честным делением целых чисел
+            const pi = finalC / finalD;
+            res.innerText = pi.toFixed(4);
+            res.classList.add('visible');
+
+            btn.innerText = "Записать";
+            btn.disabled = false;
+        }
+    }
+
+    function updateNumbersLive() {
+        const currentInt = Math.round(state.val);
+        if (state.phase === 'C') {
+            document.getElementById('uiNum').innerText = currentInt;
+        } else if (state.phase === 'D') {
+            document.getElementById('uiDen').innerText = currentInt;
+        }
+    }
+
+    window.handleClick = function() {
+        if (state.phase === 'C') {
+            state.measuredC = state.val;
+            state.phase = 'D';
+            state.val = 0;
+            state.targetVal = 0;
+            updateUI();
+        } 
+        else if (state.phase === 'RESULT') {
+            // Сохраняем округленный результат
+            const finalC = Math.round(state.measuredC);
+            const finalD = Math.round(state.measuredD);
+            const pi = finalC / finalD;
+            
+            if (resultsHistory.length <= roundIdx) {
+                resultsHistory.push(pi);
+                addLog(finalC, finalD, pi);
+            }
+
+            if (roundIdx === EXPERIMENTS.length - 1) {
+                document.getElementById('uiPanel').classList.add('disabled');
+                document.getElementById('mainBtn').innerText = "Готово";
+                document.getElementById('sidebarFooter').style.display = 'block';
+            } else {
+                roundIdx++;
+                initRound();
+            }
+        }
+    }
+
+    function addLog(c, d, pi) {
+        const list = document.getElementById('logList');
+        if (resultsHistory.length === 1) list.innerHTML = '';
+
+        const exp = EXPERIMENTS[roundIdx];
+        const div = document.createElement('div');
+        div.className = 'log-item';
+        div.style.setProperty('--cyl-color', exp.color.main);
+        
+        div.innerHTML = `
+            <strong>${roundIdx + 1}. ${exp.color.name}</strong>
+            <div class="log-row"><span>C:</span> <span>${c}</span></div>
+            <div class="log-row"><span>d:</span> <span>${d}</span></div>
+            <div class="log-pi">π ≈ ${pi.toFixed(4)}</div>
+        `;
+        list.appendChild(div);
+        list.scrollTop = list.scrollHeight;
+    }
+
+    function showFinal() {
+        const sum = resultsHistory.reduce((a,b)=>a+b, 0);
+        const avg = sum / resultsHistory.length;
+        document.getElementById('avgResult').innerText = avg.toFixed(4);
+        document.getElementById('finalOverlay').style.display = 'flex';
+    }
+
+    // --- ВЗАИМОДЕЙСТВИЕ ---
+    function getX(e) { return (e.clientX - canvas.getBoundingClientRect().left) * (width / canvas.clientWidth); }
+    function getY(e) { return (e.clientY - canvas.getBoundingClientRect().top) * (height / canvas.clientHeight); }
+
+    canvas.addEventListener('mousedown', (e) => {
+        if (state.introActive) {
+            state.introActive = false;
+            state.val = 0;
+            state.targetVal = 0;
+            updateNumbersLive();
+        }
+
+        if (state.phase === 'RESULT' || resultsHistory.length === EXPERIMENTS.length) return;
+        const mx = getX(e);
+        const handleX = RULER.x + state.val;
+        if (Math.abs(mx - handleX) < 50 && Math.abs(getY(e) - (RULER.y + 15)) < 50) {
+            state.isDragging = true;
+        }
+    });
+
+    window.addEventListener('mouseup', () => {
+        state.isDragging = false;
+        const limit = state.phase === 'C' ? currentGeo.c : currentGeo.d;
+        // Магнит
+        if (Math.abs(state.targetVal - limit) < 2) state.targetVal = limit;
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+        if (state.phase === 'RESULT' || resultsHistory.length === EXPERIMENTS.length) { 
+            canvas.style.cursor = 'default'; return; 
+        }
+        
+        const mx = getX(e);
+        const limit = state.phase === 'C' ? currentGeo.c : currentGeo.d;
+
+        if (state.isDragging) {
+            state.introActive = false;
+
+            let newVal = mx - RULER.x;
+            if (newVal < 0) newVal = 0;
+            if (newVal > limit) newVal = limit;
+            state.targetVal = newVal;
+            
+            state.val = newVal; 
+            updateNumbersLive();
+
+            const btn = document.getElementById('mainBtn');
+            const isDone = Math.abs(newVal - limit) < 0.5;
+
+            if (isDone) {
+                btn.disabled = false;
+                if (state.phase === 'D') {
+                    state.measuredD = newVal;
+                    state.phase = 'RESULT';
+                    updateUI();
+                }
+            } else {
+                btn.disabled = true;
+            }
+        }
+
+        const handleX = RULER.x + state.val;
+        if (Math.abs(mx - handleX) < 50 && Math.abs(getY(e) - (RULER.y + 15)) < 50) {
+            canvas.style.cursor = state.isDragging ? 'grabbing' : 'grab';
+        } else {
+            canvas.style.cursor = 'default';
+        }
+    });
+
+    // --- ОТРИСОВКА ---
+    function draw() {
+        ctx.clearRect(0, 0, width, height);
+        
+        if (state.introActive) {
+            const time = Date.now() - state.introStart;
+            const duration = 1800;
+            if (time < duration) {
+                const progress = time / duration;
+                const sine = Math.sin(progress * Math.PI); 
+                state.val = sine * 80;
+                updateNumbersLive();
+            } else {
+                state.introActive = false;
+                state.val = 0;
+                updateNumbersLive();
+            }
+        } else {
+            if (!state.isDragging) {
+                state.val += (state.targetVal - state.val) * 0.25;
+                updateNumbersLive();
+            }
+        }
+
+        drawRuler();
+        drawCylinderBase();
+
+        if (state.phase === 'C') drawPhaseC();
+        else if (state.phase === 'D' || state.phase === 'RESULT') drawPhaseD();
+
+        requestAnimationFrame(draw);
+    }
+
+    function drawRuler() {
+        const {x, y, len, height} = RULER;
+        const grad = ctx.createLinearGradient(0, y, 0, y + height);
+        grad.addColorStop(0, '#fef08a');
+        grad.addColorStop(1, '#eab308');
+
+        ctx.fillStyle = 'rgba(0,0,0,0.1)';
+        ctx.fillRect(x+8, y+8, len, height);
+        ctx.fillStyle = grad;
+        ctx.fillRect(x, y, len, height);
+        ctx.strokeStyle = '#ca8a04';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x, y, len, height);
+
+        ctx.fillStyle = '#1e293b';
+        ctx.font = '500 13px Roboto Mono';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+
+        ctx.beginPath();
+        for (let i = 0; i <= len; i += 2) { 
+            if (i % 10 !== 0) continue; 
+            const val = i;
+            let tickLen = 6;
+            let isCm = false;
+            if (val % 100 === 0) { tickLen = 18; isCm = true; }
+            else if (val % 50 === 0) { tickLen = 12; }
+            ctx.moveTo(x + i, y);
+            ctx.lineTo(x + i, y + tickLen);
+            if (isCm) ctx.fillText(val, x + i, y + 22);
+        }
+        ctx.stroke();
+    }
+
+    function drawCylinderBase() {
+        const {cx, cy, r, color} = currentGeo;
+        ctx.fillStyle = 'rgba(0,0,0,0.15)';
+        ctx.beginPath();
+        ctx.ellipse(cx, cy + r + 25, r, r/4, 0, 0, Math.PI*2);
+        ctx.fill();
+
+        const grad = ctx.createLinearGradient(cx-r, cy-r, cx+r, cy+r);
+        grad.addColorStop(0, color.light);
+        grad.addColorStop(1, color.main);
+
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI*2);
+        ctx.fillStyle = grad;
+        ctx.fill();
+        ctx.strokeStyle = color.main;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+    }
+
+    function drawSlider(color, val) {
+        const px = RULER.x + val;
+        const py = RULER.y;
+        ctx.beginPath(); ctx.moveTo(RULER.x, py); ctx.lineTo(px, py);
+        ctx.strokeStyle = color; ctx.lineWidth = 4; ctx.stroke();
+
+        ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px - 10, py - 15); ctx.lineTo(px + 10, py - 15);
+        ctx.closePath(); ctx.fillStyle = color; ctx.fill();
+        ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+    }
+
+    function drawPhaseC() {
+        const {cx, cy, r, c} = currentGeo;
+        const progress = state.val / c;
+        const col = '#dc2626';
+        const start = -Math.PI/2;
+        const end = start + (Math.PI * 2 * progress);
+        
+        ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, r, start, end);
+        ctx.fillStyle = 'rgba(220, 38, 38, 0.2)'; ctx.fill();
+        ctx.beginPath(); ctx.arc(cx, cy, r, start, end);
+        ctx.strokeStyle = col; ctx.lineWidth = 4; ctx.stroke();
+        drawSlider(col, state.val);
+    }
+
+    function drawPhaseD() {
+        const {cx, cy, r, d} = currentGeo;
+        const col = '#2563eb';
+        const startX = cx - r;
+        
+        ctx.beginPath(); ctx.moveTo(startX, cy); ctx.lineTo(startX + state.val, cy);
+        ctx.lineWidth = 4; ctx.strokeStyle = col; ctx.stroke();
+        
+        ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2);
+        ctx.strokeStyle = 'rgba(220, 38, 38, 0.2)'; ctx.lineWidth = 2; ctx.stroke();
+
+        drawSlider(col, state.val);
+    }
+
+    initRound();
+    draw();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Математический Путь: 20 Уникальных Шагов</title>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --secondary: #00cec9;
+            --accent: #fdcb6e;
+            --success: #00b894;
+            --error: #ff7675;
+            --bg: #dfe6e9;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Comic Sans MS', sans-serif;
+            background-color: var(--bg);
+            background-image: radial-gradient(#b2bec3 10%, transparent 11%);
+            background-size: 20px 20px;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            user-select: none;
+        }
+
+        .header {
+            width: 100%;
+            max-width: 850px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .level-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .level-badge {
+            background: var(--primary);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(108, 92, 231, 0.4);
+        }
+
+        .difficulty-label {
+            font-weight: bold;
+            color: #636e72;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+
+        .progress-bg {
+            width: 100%;
+            height: 16px;
+            background-color: #b2bec3;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 3px solid white;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--secondary), var(--success));
+            transition: width 0.6s ease-out;
+        }
+
+        .game-board {
+            width: 100%;
+            max-width: 850px;
+            background: white;
+            padding: 30px;
+            border-radius: 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .task-card {
+            background: #f1f2f6;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            color: #2d3436;
+            border-left: 8px solid var(--accent);
+        }
+
+        .drop-zone-container { margin-bottom: 25px; }
+
+        .label {
+            font-weight: bold;
+            color: #636e72;
+            margin-bottom: 8px;
+            display: block;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 1.2px;
+        }
+
+        .equation-builder {
+            min-height: 110px;
+            background-color: #f8f9fa;
+            border: 3px dashed #b2bec3;
+            border-radius: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            padding: 15px;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+        
+        .equation-builder.drag-over {
+            background-color: #e3f2fd;
+            border-color: var(--primary);
+            transform: scale(1.01);
+        }
+
+        .solve-area {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            background: #dfe6e9;
+            border-radius: 15px;
+            flex-wrap: wrap;
+        }
+
+        .solve-input {
+            width: 120px;
+            padding: 10px;
+            font-size: 1.4rem;
+            border: 3px solid #b2bec3;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: bold;
+            color: var(--primary);
+            outline: none;
+        }
+        .solve-input:focus { border-color: var(--secondary); background: white; }
+
+        .card-dock {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #f1f2f6;
+        }
+
+        .card-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: white;
+            border: 2px solid #dfe6e9;
+            border-bottom-width: 5px;
+            color: #2d3436;
+            padding: 8px 18px;
+            border-radius: 12px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: grab;
+            transition: all 0.1s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-width: 30px;
+        }
+
+        .card:active {
+            cursor: grabbing;
+            transform: translateY(3px);
+            border-bottom-width: 2px;
+        }
+
+        .card.variable { background: #a29bfe; color: white; border-color: #6c5ce7; }
+        .card.operator { background: #ffeaa7; color: #d35400; border-color: #fdcb6e; }
+        .card.number { color: var(--primary); border-color: var(--primary); }
+
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .btn:active { transform: scale(0.95); }
+        .btn-check { background: linear-gradient(45deg, var(--success), #00cec9); }
+        .btn-reset { background: #b2bec3; }
+
+        .feedback-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.96);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            border-radius: 25px;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .feedback-overlay.visible { opacity: 1; pointer-events: all; }
+        .success-title { font-size: 2.5rem; color: var(--success); margin-bottom: 10px; }
+        .next-btn { 
+            background: var(--primary); 
+            padding: 15px 50px; 
+            color: white; 
+            border: none; 
+            border-radius: 50px; 
+            font-size: 1.5rem; 
+            cursor: pointer; 
+            box-shadow: 0 10px 20px rgba(108, 92, 231, 0.4);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
+            20%, 40%, 60%, 80% { transform: translateX(8px); }
+        }
+        .shake { animation: shake 0.4s; }
+
+        canvas { position: fixed; top: 0; left: 0; pointer-events: none; z-index: 999; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="level-info">
+            <div class="level-badge" id="levelIndicator">Уровень 1</div>
+            <div class="difficulty-label" id="difficultyLabel">Начало</div>
+        </div>
+        <div class="progress-bg">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+    </div>
+
+    <div class="game-board" id="gameBoard">
+        <div class="task-card" id="problemText">Загрузка...</div>
+
+        <div class="drop-zone-container">
+            <span class="label">1. Составь уравнение (перетащи карточки):</span>
+            <div class="equation-builder" id="dropZone"></div>
+        </div>
+
+        <div class="solve-area">
+            <span class="label" style="margin:0; font-size: 1rem; margin-right: 15px;">2. Чему равен x?</span>
+            <span style="font-size: 1.5rem; font-weight: bold; color: #2d3436;">x = </span>
+            <input type="number" class="solve-input" id="solutionInput" placeholder="?" step="0.1">
+        </div>
+
+        <div class="card-dock">
+            <span class="label">Числа из задачи:</span>
+            <div class="card-group" id="problemCards"></div>
+            
+            <span class="label">Инструменты:</span>
+            <div class="card-group">
+                <div class="card operator" draggable="true" data-val="+">+</div>
+                <div class="card operator" draggable="true" data-val="-">-</div>
+                <div class="card operator" draggable="true" data-val="*">*</div>
+                <div class="card operator" draggable="true" data-val="/">/</div>
+                <div class="card operator" draggable="true" data-val="=">=</div>
+                <div class="card operator" draggable="true" data-val="(">(</div>
+                <div class="card operator" draggable="true" data-val=")">)</div>
+                <div class="card variable" draggable="true" data-val="x">x</div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="btn btn-reset" onclick="resetCurrentLevel()">Сброс</button>
+            <button class="btn btn-check" onclick="checkSolution()">ПРОВЕРИТЬ</button>
+        </div>
+
+        <div class="feedback-overlay" id="feedbackOverlay">
+            <div class="success-title">Верно!</div>
+            <div style="font-size: 1.2rem; margin-bottom: 20px; color: #636e72;" id="praiseText">Ты молодец</div>
+            <button class="next-btn" id="nextLevelBtn" onclick="nextLevel()">Дальше ➜</button>
+        </div>
+    </div>
+    
+    <canvas id="confettiCanvas"></canvas>
+
+<script>
+    function getRandomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    // --- ЛИНЕЙНЫЙ СПИСОК УРОВНЕЙ (Каждый тип задачи ровно 1 раз) ---
+    // Всего 20 уникальных задач по нарастающей сложности
+    
+    const LEVEL_SCENARIOS = [
+        /* === РАЗДЕЛ 1: РАЗМИНКА (4 задачи) === */
+        {
+            type: "warmup", label: "Разминка (1 действие)", color: "#00b894",
+            gen: () => { // 1. Сложение (x + a = b)
+                const x = getRandomInt(10, 50); const a = getRandomInt(10, 30);
+                return { text: `Задумали число, прибавили ${a} и получили ${x+a}. Какое число задумали?`, solveX: x };
+            }
+        },
+        {
+            type: "warmup", label: "Разминка (1 действие)", color: "#00b894",
+            gen: () => { // 2. Вычитание (x - a = b)
+                const a = getRandomInt(10, 20); const b = getRandomInt(15, 30);
+                return { text: `Из неизвестного числа вычли ${a} и получили ${b}. Найди это число.`, solveX: a+b };
+            }
+        },
+        {
+            type: "warmup", label: "Разминка (1 действие)", color: "#00b894",
+            gen: () => { // 3. Площадь (a * x = S)
+                const x = getRandomInt(5, 12); const a = getRandomInt(4, 9);
+                return { text: `Площадь прямоугольника ${x*a} см², одна сторона ${a} см. Найди другую (x).`, solveX: x };
+            }
+        },
+        {
+            type: "warmup", label: "Разминка (1 действие)", color: "#00b894",
+            gen: () => { // 4. Деление (x / a = b)
+                const a = getRandomInt(3, 8); const b = getRandomInt(5, 12);
+                return { text: `Число x уменьшили в ${a} раз и получили ${b}. Чему равен x?`, solveX: a*b };
+            }
+        },
+
+        /* === РАЗДЕЛ 2: БАЗА (4 задачи) === */
+        {
+            type: "grade3", label: "Основы моделирования", color: "#fdcb6e",
+            gen: () => { // 5. Периметр треугольника (2x + b = P)
+                const x = getRandomInt(10, 20); const b = getRandomInt(5, 15);
+                return { text: `Периметр равнобедренного треугольника ${2*x+b} см, основание ${b} см. Найди боковую сторону (x).`, solveX: x };
+            }
+        },
+        {
+            type: "grade3", label: "Основы моделирования", color: "#fdcb6e",
+            gen: () => { // 6. Магазин и сдача (Money - n*p = Change) => x - cost = change
+                const price = getRandomInt(20, 40); const count = 3; const total = price * count;
+                const money = total + getRandomInt(10, 50);
+                return { text: `Даша купила ${count} ручки по ${price} р. Сдача составила ${money - total} р. Сколько денег (x) было у Даши?`, solveX: money };
+            }
+        },
+        {
+            type: "grade3", label: "Основы моделирования", color: "#fdcb6e",
+            gen: () => { // 7. Линейная функция (ax + b = c)
+                const x = getRandomInt(5, 15); const a = getRandomInt(3, 6); const b = getRandomInt(10, 30);
+                return { text: `Я задумал число, умножил его на ${a}, прибавил ${b} и получил ${x*a+b}. Какое число я задумал?`, solveX: x };
+            }
+        },
+        {
+            type: "grade3", label: "Основы моделирования", color: "#fdcb6e",
+            gen: () => { // 8. Сумма частей (x + 4x = S)
+                const x = getRandomInt(5, 12); 
+                return { text: `В первом ящике яблок в 4 раза больше, чем во втором (x). Всего в двух ящиках ${x + 4*x} кг. Сколько во втором?`, solveX: x };
+            }
+        },
+
+        /* === РАЗДЕЛ 3: ДВИЖЕНИЕ И ИЗМЕНЕНИЯ (4 задачи) === */
+        {
+            type: "grade4", label: "Движение и процессы", color: "#0984e3",
+            gen: () => { // 9. Встречное движение (v1+v2)*t = S
+                const v1 = 60; const v2 = 80; const t = getRandomInt(2, 5);
+                return { text: `Машины выехали навстречу (60 км/ч и 80 км/ч). Расстояние ${(v1+v2)*t} км. Через сколько часов (x) они встретятся?`, solveX: t };
+            }
+        },
+        {
+            type: "grade4", label: "Движение и процессы", color: "#0984e3",
+            gen: () => { // 10. Движение по реке (v_lod + x)*t = S
+                const vBoat = 15; const vRiver = getRandomInt(2, 4); const t = 3;
+                return { text: `Катер плыл по течению ${t} ч. Скорость катера ${vBoat} км/ч, путь ${(vBoat+vRiver)*t} км. Найди скорость течения (x).`, solveX: vRiver };
+            }
+        },
+        {
+            type: "grade4", label: "Движение и процессы", color: "#0984e3",
+            gen: () => { // 11. Было/Стало (x - a + b = c)
+                const init = getRandomInt(50, 90); const sold = 20; const add = 15;
+                return { text: `На складе было x тонн. Увезли ${sold}, привезли ${add}. Стало ${init - sold + add}. Сколько было?`, solveX: init };
+            }
+        },
+        {
+            type: "grade4", label: "Движение и процессы", color: "#0984e3",
+            gen: () => { // 12. Разность кратных (5x - x = Diff)
+                const x = getRandomInt(10, 20);
+                return { text: `Папа тяжелее сына (x) в 5 раз. Разница в весе ${5*x - x} кг. Сколько весит сын?`, solveX: x };
+            }
+        },
+
+        /* === РАЗДЕЛ 4: СЛОЖНАЯ СТРУКТУРА (4 задачи) === */
+        {
+            type: "grade5", label: "Сложные конструкции", color: "#d63031",
+            gen: () => { // 13. Скобки как множитель (x+a)*m = c
+                const x = getRandomInt(5, 15); const a = 10; const m = 4;
+                return { text: `Задуманное число увеличили на ${a}, результат умножили на ${m} и получили ${(x+a)*m}. Найти число.`, solveX: x };
+            }
+        },
+        {
+            type: "grade5", label: "Сложные конструкции", color: "#d63031",
+            gen: () => { // 14. Неизвестный делитель A / (B - x) = C
+                const x = getRandomInt(2, 8); const b = x + 5; const c = 4;
+                return { text: `Если 100 разделить на разность (${b} - x), то получится ${(100/(b-x)).toFixed(0)}. Чему равен x? (Ответ целый)`, solveX: x };
+            }
+        },
+        {
+            type: "grade5", label: "Сложные конструкции", color: "#d63031",
+            gen: () => { // 15. Периметр прямоугольника 2(a+x)=P
+                const a = getRandomInt(10, 20); const b = getRandomInt(10, 20);
+                return { text: `Периметр участка ${2*(a+b)} м, ширина ${a} м. Найди длину (x).`, solveX: b };
+            }
+        },
+        {
+            type: "grade5", label: "Сложные конструкции", color: "#d63031",
+            gen: () => { // 16. Распределительный закон 3(x+2) = val
+                const x = 10; const val = 3*(x+2);
+                return { text: `Реши уравнение: 3 * (x + 2) = ${val}`, solveX: x };
+            }
+        },
+
+        /* === РАЗДЕЛ 5: ПРОФИ (4 задачи) === */
+        {
+            type: "profi", label: "Профи (6 класс)", color: "#6c5ce7",
+            gen: () => { // 17. Весы (перенос) 3x - 10 = x + 10
+                const x = 10; const diff = 5; // 3x - 5 = x + 15 (при x=10 -> 25=25)
+                return { text: `На первой полке книг в 3 раза больше (3*x). Если с неё убрать ${diff}, а на вторую (x) добавить 15, станет поровну. Найди x.`, solveX: x };
+            }
+        },
+        {
+            type: "profi", label: "Профи (6 класс)", color: "#6c5ce7",
+            gen: () => { // 18. Десятичные дроби 0.5x = 10
+                const x = 20;
+                return { text: `Половина числа (0.5 * x) равна 10. Чему равно само число?`, solveX: x };
+            }
+        },
+        {
+            type: "profi", label: "Профи (6 класс)", color: "#6c5ce7",
+            gen: () => { // 19. Проценты (повышение) x + 0.2x = 1.2x
+                const x = 100;
+                return { text: `Товар стоил x. Подорожал на 20% (стал 1.2 * x) и теперь стоит 120. Найди старую цену.`, solveX: x };
+            }
+        },
+        {
+            type: "profi", label: "Профи (6 класс)", color: "#6c5ce7",
+            gen: () => { // 20. Уравнение с двух сторон 5x - 20 = 3x
+                const x = 10; // 50 - 20 = 30
+                return { text: `Реши уравнение: 5 * x - 20 = 3 * x`, solveX: x };
+            }
+        }
+    ];
+
+    // --- ИГРОВАЯ ЛОГИКА ---
+    let currentLevel = 0;
+    let currentProblemData = null;
+    let isLevelSolved = false;
+    let draggedElement = null;
+    let draggedData = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        setupDragAndDrop();
+        initLevel(0);
+    });
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playSound(type) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        const now = audioCtx.currentTime;
+        if (type === 'success') {
+            osc.type = 'triangle'; osc.frequency.setValueAtTime(523.25, now); osc.frequency.setValueAtTime(659.25, now+0.1); osc.frequency.setValueAtTime(783.99, now+0.2); 
+            gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.01, now+0.4);
+            osc.start(now); osc.stop(now+0.4);
+        } else {
+            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, now); osc.frequency.linearRampToValueAtTime(100, now+0.2);
+            gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0.01, now+0.3);
+            osc.start(now); osc.stop(now+0.3);
+        }
+    }
+
+    function initLevel(levelIndex) {
+        currentLevel = levelIndex;
+        isLevelSolved = false;
+
+        if (currentLevel >= LEVEL_SCENARIOS.length) {
+            gameComplete();
+            return;
+        }
+        
+        const scenario = LEVEL_SCENARIOS[currentLevel];
+        
+        // UI Обновление
+        const badge = document.getElementById('levelIndicator');
+        badge.textContent = `Уровень ${currentLevel + 1} из ${LEVEL_SCENARIOS.length}`;
+        badge.style.background = scenario.color;
+        
+        const label = document.getElementById('difficultyLabel');
+        label.textContent = scenario.label;
+        label.style.color = scenario.color;
+
+        const progressPct = (currentLevel / LEVEL_SCENARIOS.length) * 100;
+        document.getElementById('progressBar').style.width = `${progressPct}%`;
+        
+        resetCurrentLevel();
+
+        // Генерация задачи
+        currentProblemData = scenario.gen();
+
+        // Форматирование текста
+        document.getElementById('problemText').innerHTML = currentProblemData.text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+
+        // Карточки
+        const cardsContainer = document.getElementById('problemCards');
+        cardsContainer.innerHTML = '';
+        const numbers = currentProblemData.text.match(/\d+([.,]\d+)?/g);
+        if (numbers) {
+            numbers.forEach(numStr => {
+                let val = numStr.replace(',', '.'); 
+                createCard(val, 'number', cardsContainer);
+            });
+        }
+    }
+
+    function resetCurrentLevel() {
+        document.getElementById('dropZone').innerHTML = '';
+        document.getElementById('solutionInput').value = '';
+        document.getElementById('solutionInput').style.backgroundColor = 'white';
+        document.getElementById('feedbackOverlay').classList.remove('visible');
+        isLevelSolved = false;
+    }
+
+    function createCard(text, type, container) {
+        const el = document.createElement('div');
+        el.className = `card ${type}`;
+        el.draggable = true;
+        el.textContent = text;
+        el.dataset.val = text;
+        container.appendChild(el);
+    }
+
+    function checkSolution() {
+        const dropZone = document.getElementById('dropZone');
+        const inputVal = document.getElementById('solutionInput').value;
+        const gameBoard = document.getElementById('gameBoard');
+
+        const triggerShake = () => {
+            playSound('error');
+            gameBoard.classList.remove('shake');
+            void gameBoard.offsetWidth;
+            gameBoard.classList.add('shake');
+        };
+
+        if (inputVal === '') { alert("Введи ответ для x!"); triggerShake(); return; }
+
+        const cards = Array.from(dropZone.children);
+        const equationParts = cards.map(c => c.dataset.val);
+
+        if (equationParts.length < 3 || !equationParts.includes('=')) {
+            alert("Уравнение не закончено! Перетащи числа и знаки."); triggerShake(); return;
+        }
+
+        const sides = equationParts.join('').split('=');
+        if (sides.length !== 2) { triggerShake(); return; }
+
+        const correctX = currentProblemData.solveX;
+        let equationCorrect = false;
+
+        try {
+            const leftExp = sides[0].replace(/x/g, `(${correctX})`);
+            const rightExp = sides[1].replace(/x/g, `(${correctX})`);
+            
+            const valLeft = new Function(`return ${leftExp}`)();
+            const valRight = new Function(`return ${rightExp}`)();
+
+            if (Math.abs(valLeft - valRight) < 0.01) {
+                if (!equationParts.includes('x')) {
+                    alert("Где же x в твоем уравнении?"); triggerShake(); return;
+                }
+                equationCorrect = true;
+            }
+        } catch (e) {
+            alert("Ошибка в записи уравнения."); triggerShake(); return;
+        }
+
+        const userX = parseFloat(inputVal.replace(',', '.'));
+        
+        if (equationCorrect && Math.abs(userX - correctX) < 0.1) {
+            levelPassed();
+        } else if (equationCorrect) {
+            alert("Уравнение верное, но x посчитан с ошибкой.");
+            document.getElementById('solutionInput').style.backgroundColor = '#fab1a0';
+            triggerShake();
+        } else {
+            alert("Уравнение не сходится.");
+            triggerShake();
+        }
+    }
+
+    function levelPassed() {
+        playSound('success');
+        isLevelSolved = true;
+        const praises = ["Молодец!", "Верно!", "Отлично!", "Супер!"];
+        document.getElementById('praiseText').textContent = praises[Math.floor(Math.random() * praises.length)];
+        document.getElementById('feedbackOverlay').classList.add('visible');
+        startConfetti();
+    }
+
+    function nextLevel() {
+        if (!isLevelSolved) return; 
+        stopConfetti();
+        initLevel(currentLevel + 1);
+    }
+
+    function gameComplete() {
+        document.getElementById('gameBoard').innerHTML = `
+            <div style="text-align:center; padding: 40px;">
+                <h1 style="color:var(--success); font-size:3rem;">🏆 КУРС ПРОЙДЕН!</h1>
+                <p style="font-size:1.5rem;">Ты решил все 20 типов задач.</p>
+                <button class="btn btn-check" onclick="location.reload()">Начать заново</button>
+            </div>
+        `;
+        startConfetti();
+        document.getElementById('progressBar').style.width = '100%';
+        document.getElementById('levelIndicator').textContent = "ФИНИШ";
+    }
+
+    function setupDragAndDrop() {
+        document.addEventListener('dragstart', (e) => {
+            if (e.target.classList.contains('card')) {
+                draggedElement = e.target;
+                draggedData = {
+                    val: e.target.dataset.val,
+                    type: e.target.classList.contains('operator') ? 'operator' : 
+                          e.target.classList.contains('variable') ? 'variable' : 'number',
+                    isClone: e.target.closest('.equation-builder') !== null
+                };
+                e.dataTransfer.effectAllowed = 'copyMove';
+                setTimeout(() => e.target.style.opacity = '0.5', 0);
+            }
+        });
+        document.addEventListener('dragend', (e) => {
+            if (e.target.classList.contains('card')) { e.target.style.opacity = '1'; draggedElement = null; }
+        });
+        const dropZone = document.getElementById('dropZone');
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+        dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('drag-over'); });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault(); dropZone.classList.remove('drag-over');
+            if (!draggedData) return;
+            if (draggedData.isClone) {
+                dropZone.appendChild(draggedElement);
+            } else {
+                const newCard = document.createElement('div');
+                newCard.className = `card ${draggedData.type}`;
+                newCard.textContent = draggedData.val;
+                newCard.dataset.val = draggedData.val;
+                newCard.draggable = true;
+                newCard.onclick = function() { this.remove(); };
+                dropZone.appendChild(newCard);
+            }
+        });
+    }
+
+    const canvas = document.getElementById("confettiCanvas");
+    const ctx = canvas.getContext("2d");
+    let confettiActive = false;
+    let particles = [];
+    function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    function startConfetti() {
+        if (confettiActive) return;
+        confettiActive = true;
+        particles = [];
+        for (let i = 0; i < 150; i++) particles.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height - canvas.height, color: `hsl(${Math.random()*360},100%,50%)`, size: Math.random()*10+5, speedY: Math.random()*3+3, speedX: Math.random()*2-1 });
+        animateConfetti();
+    }
+    function stopConfetti() { confettiActive = false; particles = []; ctx.clearRect(0, 0, canvas.width, canvas.height); }
+    function animateConfetti() {
+        if (!confettiActive) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach((p, i) => {
+            p.y += p.speedY; p.x += p.speedX;
+            ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, p.size, p.size);
+            if (p.y > canvas.height) particles[i].y = -10;
+        });
+        requestAnimationFrame(animateConfetti);
+    }
+</script>
+</body>
+</html>
