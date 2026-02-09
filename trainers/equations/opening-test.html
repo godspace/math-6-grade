@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Тренажер Уравнений: Классная работа</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root {
+            --bg-paper: #f8fafc;
+            --line-color: #cbd5e1;
+            --primary: #4f46e5;   
+            --accent: #0ea5e9;    
+            --success: #16a34a;
+            --danger: #dc2626;
+            --text: #1e293b;
+            --input-bg: #fff;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', sans-serif;
+            background-color: var(--bg-paper);
+            background-image: 
+                linear-gradient(var(--line-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--line-color) 1px, transparent 1px);
+            background-size: 25px 25px;
+            margin: 0; padding: 20px;
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh; color: var(--text);
+        }
+
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+
+        /* КОНТЕЙНЕР */
+        .quiz-container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            max-width: 700px;
+            width: 100%;
+            border: 2px solid #e2e8f0;
+            position: relative;
+            min-height: 350px;
+        }
+
+        /* ЭКРАН ВХОДА */
+        #login-screen {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 100%; padding-top: 40px;
+        }
+        .name-input {
+            width: 80%; padding: 15px; font-size: 1.2rem;
+            border: 2px solid var(--primary); border-radius: 10px;
+            margin-bottom: 25px; outline: none; text-align: center;
+            background: #eff6ff;
+        }
+
+        /* ЭКРАН ИГРЫ */
+        #game-interface { display: none; }
+
+        .header {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            margin-bottom: 25px; border-bottom: 2px solid #e2e8f0; padding-bottom: 15px;
+        }
+        .student-info { font-size: 0.9rem; color: #64748b; margin-top: 5px; font-weight: 600; }
+        .score-box {
+            background: var(--primary); color: white;
+            padding: 5px 15px; border-radius: 20px; font-weight: bold;
+        }
+
+        /* УРАВНЕНИЯ */
+        .main-eq {
+            font-size: 2rem; font-weight: 700; text-align: center;
+            margin-bottom: 30px; letter-spacing: 1px;
+            padding: 15px; background: #eff6ff; border-radius: 10px;
+            border: 2px dashed var(--accent); color: var(--primary);
+        }
+
+        .step-row {
+            display: flex; flex-direction: column; gap: 10px;
+            margin-bottom: 20px; opacity: 0.5; pointer-events: none; filter: grayscale(100%);
+            transition: all 0.3s ease;
+        }
+        .step-row.active { opacity: 1; pointer-events: all; filter: none; }
+        .step-label { font-size: 0.9rem; color: #64748b; font-weight: 600; text-transform: uppercase; }
+        
+        .equation-line {
+            display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+            font-size: 1.5rem; font-weight: bold;
+        }
+
+        .math-input {
+            width: 70px; padding: 5px; font-size: 1.3rem; text-align: center;
+            border: 2px solid #cbd5e1; border-radius: 8px; outline: none;
+            background: var(--input-bg); font-weight: bold;
+        }
+        .math-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2); }
+        .math-input.error { border-color: var(--danger); background: #fef2f2; animation: shake 0.4s; }
+        .math-input.correct { border-color: var(--success); background: #dcfce7; pointer-events: none; }
+
+        /* КНОПКИ */
+        .btn-check {
+            background: var(--success); color: white; border: none;
+            padding: 8px 20px; border-radius: 8px; font-size: 1rem; cursor: pointer;
+            font-weight: bold; box-shadow: 0 4px 0 #15803d;
+        }
+        .btn-check:active { transform: translateY(2px); box-shadow: 0 2px 0 #15803d; }
+        
+        .btn-start { background: var(--primary); width: 60%; font-size: 1.2rem; box-shadow: 0 4px 0 #3730a3; }
+
+        /* КНОПКА СТАТИСТИКИ (Скрытая/Секретная) */
+        .btn-stats-secret {
+            background: none; border: none; 
+            color: white; /* Невидима на белом фоне */
+            cursor: pointer; font-size: 0.8rem; margin-top: 30px;
+            user-select: none;
+        }
+        .btn-stats-secret:hover { color: #f1f5f9; } /* Чуть видна при наведении */
+
+        .btn-stats-visible {
+            background: none; border: none; color: #94a3b8;
+            cursor: pointer; font-size: 0.9rem; text-decoration: underline;
+            margin-top: 20px;
+        }
+
+        /* МОДАЛЬНОЕ ОКНО СТАТИСТИКИ */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 1000;
+            justify-content: center; align-items: center;
+        }
+        .modal-content {
+            background: white; padding: 30px; border-radius: 15px;
+            width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+        }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid #e2e8f0; padding: 10px; text-align: left; }
+        th { background: #f1f5f9; color: var(--primary); }
+        tr:nth-child(even) { background: #f8fafc; }
+
+        .btn-close-modal {
+            background: var(--primary); color: white; border: none;
+            padding: 8px 15px; border-radius: 5px; cursor: pointer; float: right;
+        }
+
+        .hidden { display: none; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+        .feedback-msg { text-align: center; font-weight: bold; margin-top: 10px; height: 20px; }
+        .success-msg { color: var(--success); }
+        .error-msg { color: var(--danger); }
+
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    
+    <div id="login-screen">
+        <h2 style="margin-bottom: 30px; color: var(--text);">Представьтесь</h2>
+        <input type="text" id="inp-student-name" class="name-input" placeholder="Фамилия и Имя" autocomplete="off">
+        <button class="btn-check btn-start" onclick="startTest()">Начать тест</button>
+        
+        <div style="width: 100%; text-align: left; margin-top: 40px;">
+            <button class="btn-stats-visible" onclick="showStatistics()">📊 Таблица результатов</button>
+        </div>
+    </div>
+
+    <div id="game-interface">
+        <div class="header">
+            <div>
+                <h2 style="margin:0">📝 Проверочная работа</h2>
+                <div id="student-display" class="student-info">Ученик: ...</div>
+            </div>
+            <div class="score-box">
+                <span>Решено: <span id="score">0</span></span>
+            </div>
+        </div>
+
+        <div id="main-equation" class="main-eq">Загрузка...</div>
+
+        <div class="step-row active" id="step-1">
+            <div class="step-label">Шаг 1: Раскрой скобки слева</div>
+            <div class="equation-line">
+                <input type="number" id="inp-s1-x" class="math-input" placeholder="?">
+                <span>x</span>
+                <span style="margin: 0 5px">+</span>
+                <input type="number" id="inp-s1-num" class="math-input" placeholder="?">
+                <span>=</span>
+                <span id="static-right-part" style="color: #64748b">...</span>
+                <button class="btn-check" onclick="checkStep1()">OK</button>
+            </div>
+            <div class="feedback-msg" id="msg-1"></div>
+        </div>
+
+        <div class="step-row" id="step-2">
+            <div class="step-label">Шаг 2: Иксы влево, числа вправо</div>
+            <div class="equation-line">
+                <input type="number" id="inp-s2-x" class="math-input" placeholder="?">
+                <span>x</span>
+                <span>=</span>
+                <input type="number" id="inp-s2-num" class="math-input" placeholder="?">
+                <button class="btn-check" onclick="checkStep2()">OK</button>
+            </div>
+            <div class="feedback-msg" id="msg-2"></div>
+        </div>
+
+        <div class="step-row" id="step-3">
+            <div class="step-label">Шаг 3: Корень</div>
+            <div class="equation-line">
+                <span>x = </span>
+                <input type="number" id="inp-s3-res" class="math-input" placeholder="?">
+                <button class="btn-check" onclick="checkStep3()">Проверить</button>
+            </div>
+            <div class="feedback-msg" id="msg-3"></div>
+        </div>
+
+        <button id="btn-next-level" class="btn-check hidden" style="width: 100%; margin-top: 20px; background: var(--primary); box-shadow: 0 4px 0 #3730a3;" onclick="nextLevel()">Следующее уравнение ➡</button>
+        
+        <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+            <button class="btn-stats-visible" style="color: var(--danger)" onclick="logout()">Завершить (Выход)</button>
+            <button class="btn-stats-secret" onclick="showStatistics()">Статистика</button>
+        </div>
+    </div>
+</div>
+
+<div id="stats-modal" class="modal-overlay">
+    <div class="modal-content">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h2 style="margin:0">Журнал результатов</h2>
+            <button class="btn-close-modal" onclick="closeStatistics()">Закрыть</button>
+        </div>
+        <p style="color:#64748b; font-size:0.9rem;">Данные хранятся в этом браузере.</p>
+        
+        <div style="max-height: 300px; overflow-y: auto;">
+            <table id="stats-table">
+                <thead>
+                    <tr>
+                        <th>Дата</th>
+                        <th>Ученик</th>
+                        <th>Решено</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    </tbody>
+            </table>
+        </div>
+        </div>
+</div>
+
+<script>
+    // --- DATABASE (Local Storage) ---
+    const DB_KEY = 'math_quiz_class_results';
+    
+    // Структура данных: Array of objects { id, name, score, timestamp }
+    let currentStudentId = null;
+    let score = 0;
+
+    function getDB() {
+        const raw = localStorage.getItem(DB_KEY);
+        return raw ? JSON.parse(raw) : [];
+    }
+
+    function saveDB(data) {
+        localStorage.setItem(DB_KEY, JSON.stringify(data));
+    }
+
+    function createSession(name) {
+        const db = getDB();
+        const newEntry = {
+            id: Date.now(),
+            name: name,
+            score: 0,
+            timestamp: new Date().toLocaleString()
+        };
+        db.push(newEntry);
+        saveDB(db);
+        currentStudentId = newEntry.id;
+        score = 0;
+        return newEntry;
+    }
+
+    function updateScoreInDB(newScore) {
+        const db = getDB();
+        const studentIdx = db.findIndex(item => item.id === currentStudentId);
+        if (studentIdx !== -1) {
+            db[studentIdx].score = newScore;
+            saveDB(db);
+        }
+    }
+
+    // --- СТАТИСТИКА UI ---
+    function showStatistics() {
+        const db = getDB();
+        const tbody = document.querySelector('#stats-table tbody');
+        tbody.innerHTML = '';
+
+        // Сортировка: новые сверху
+        db.sort((a, b) => b.id - a.id).forEach(entry => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td style="font-size: 0.8rem">${entry.timestamp}</td>
+                <td><strong>${entry.name}</strong></td>
+                <td style="color: var(--success); font-weight:bold; font-size:1.1rem; text-align:center;">${entry.score}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        if (db.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align:center">Нет записей</td></tr>';
+        }
+
+        document.getElementById('stats-modal').style.display = 'flex';
+    }
+
+    function closeStatistics() {
+        document.getElementById('stats-modal').style.display = 'none';
+    }
+
+    // Эта функция скрыта, но доступна через консоль (F12)
+    function clearStatistics() {
+        if(confirm("Вы уверены? Это удалит результаты ВСЕХ учеников из памяти браузера.")) {
+            localStorage.removeItem(DB_KEY);
+            alert("Журнал очищен.");
+            location.reload();
+        }
+    }
+
+    // --- ЛОГИКА ВХОДА ---
+    function startTest() {
+        const nameInp = document.getElementById('inp-student-name');
+        const name = nameInp.value.trim();
+        
+        if (name.length < 2) {
+            alert("Введите имя!");
+            return;
+        }
+
+        createSession(name);
+
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('game-interface').style.display = 'block';
+        document.getElementById('student-display').innerText = "Ученик: " + name;
+        document.getElementById('score').innerText = "0";
+        
+        initLevel();
+    }
+
+    function logout() {
+        if(confirm("Завершить работу?")) {
+            location.reload(); // Перезагрузка возвращает на экран входа
+        }
+    }
+
+    // --- ГЕНЕРАЦИЯ УРАВНЕНИЙ ---
+    let currentData = {};
+
+    function getRandomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+    function getRandomNonZero(min, max) {
+        let val = 0;
+        while (val === 0) val = getRandomInt(min, max);
+        return val;
+    }
+
+    function generateEquation() {
+        let ans = getRandomInt(-9, 9);
+        if (ans === 0) ans = getRandomInt(1, 5);
+
+        let mult = getRandomNonZero(-5, 5); 
+        let brackNum = getRandomNonZero(-9, 9);
+        
+        let leftX = mult;
+        let leftConst = mult * brackNum;
+
+        let rightX = getRandomNonZero(-5, 5);
+        while (rightX === leftX) { rightX = getRandomNonZero(-5, 5); }
+
+        let rightConst = (leftX * ans) + leftConst - (rightX * ans);
+
+        return {
+            mult: mult, brackNum: brackNum, rightX: rightX, rightConst: rightConst,
+            step1_x: leftX, step1_num: leftConst,
+            step2_x: leftX - rightX, step2_num: rightConst - leftConst, 
+            finalAns: ans
+        };
+    }
+
+    // --- УПРАВЛЕНИЕ ИНТЕРФЕЙСОМ ---
+    function initLevel() {
+        currentData = generateEquation();
+        
+        let signB = currentData.brackNum >= 0 ? '+' : '−';
+        let valB = Math.abs(currentData.brackNum);
+        
+        let rightPartStr = "";
+        if (currentData.rightX !== 0) rightPartStr += `${currentData.rightX}x`;
+        let signR = currentData.rightConst >= 0 ? '+' : '−';
+        
+        if (currentData.rightX !== 0) rightPartStr += ` ${signR} ${Math.abs(currentData.rightConst)}`;
+        else rightPartStr += `${currentData.rightConst}`;
+
+        const eqHTML = `${currentData.mult}(x ${signB} ${valB}) = ${rightPartStr}`;
+        document.getElementById('main-equation').innerHTML = eqHTML;
+        document.getElementById('static-right-part').innerText = rightPartStr;
+
+        resetInputs();
+        setStep(1);
+    }
+
+    function resetInputs() {
+        document.querySelectorAll('.math-input').forEach(i => {
+            i.value = ''; i.classList.remove('error', 'correct'); i.disabled = false;
+        });
+        document.querySelectorAll('.feedback-msg').forEach(m => { m.innerText = ''; m.className = 'feedback-msg'; });
+        document.querySelectorAll('.btn-check').forEach(b => b.classList.remove('hidden'));
+        document.getElementById('btn-next-level').classList.add('hidden');
+    }
+
+    function setStep(num) {
+        document.querySelectorAll('.step-row').forEach(row => row.classList.remove('active'));
+        const activeRow = document.getElementById(`step-${num}`);
+        if(activeRow) activeRow.classList.add('active');
+        setTimeout(() => {
+            const firstInput = activeRow.querySelector('.math-input');
+            if(firstInput) firstInput.focus();
+        }, 100);
+    }
+
+    // --- ПРОВЕРКИ ---
+    function validateInput(id, expectedVal) {
+        const input = document.getElementById(id);
+        const val = parseInt(input.value.replace(/\s/g, ''));
+        if (isNaN(val)) return false;
+        if (val === expectedVal) {
+            input.classList.add('correct'); input.classList.remove('error'); return true;
+        } else {
+            input.classList.add('error'); setTimeout(() => input.classList.remove('error'), 500); return false;
+        }
+    }
+
+    function checkStep1() {
+        if (validateInput('inp-s1-x', currentData.step1_x) && validateInput('inp-s1-num', currentData.step1_num)) {
+            msgSuccess('msg-1', "Верно!");
+            document.querySelector('#step-1 .btn-check').classList.add('hidden');
+            setStep(2);
+        } else { msgError('msg-1', "Ошибка в раскрытии скобок"); }
+    }
+
+    function checkStep2() {
+        if (validateInput('inp-s2-x', currentData.step2_x) && validateInput('inp-s2-num', currentData.step2_num)) {
+            msgSuccess('msg-2', "Верно!");
+            document.querySelector('#step-2 .btn-check').classList.add('hidden');
+            setStep(3);
+        } else { msgError('msg-2', "Ошибка в вычислениях"); }
+    }
+
+    function checkStep3() {
+        if (validateInput('inp-s3-res', currentData.finalAns)) {
+            msgSuccess('msg-3', "ПРАВИЛЬНО!");
+            document.querySelector('#step-3 .btn-check').classList.add('hidden');
+            document.getElementById('btn-next-level').classList.remove('hidden');
+            
+            score++;
+            document.getElementById('score').innerText = score;
+            document.getElementById('score').style.animation = "shake 0.5s";
+            
+            // ОБНОВЛЯЕМ БАЗУ
+            updateScoreInDB(score);
+        } else { msgError('msg-3', "Ошибка"); }
+    }
+
+    function msgSuccess(id, text) {
+        const m = document.getElementById(id); m.innerText = text; m.classList.add('success-msg');
+    }
+    function msgError(id, text) {
+        const m = document.getElementById(id); m.innerText = text; m.classList.add('error-msg');
+    }
+
+    function nextLevel() { initLevel(); }
+
+    // Keypresses
+    document.getElementById('inp-student-name').addEventListener('keypress', e => { if (e.key === 'Enter') startTest(); });
+    document.addEventListener('keypress', e => {
+        if (e.key === 'Enter') {
+            const activeStep = document.querySelector('.step-row.active');
+            if (activeStep) {
+                const btn = activeStep.querySelector('.btn-check');
+                if (btn && !btn.classList.contains('hidden')) btn.click();
+                else if (!document.getElementById('btn-next-level').classList.contains('hidden')) nextLevel();
+            }
+        }
+    });
+
+</script>
+</body>
+</html>
