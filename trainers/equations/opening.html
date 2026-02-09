@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Генератор Уравнений: Защита от 0x</title>
+    <style>
+        :root {
+            --bg-paper: #f8fafc;
+            --line-color: #cbd5e1;
+            --primary: #3b82f6;   
+            --accent: #f97316;    
+            --success: #22c55e;
+            --danger: #ef4444;
+            --text: #1e293b;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Segoe UI', sans-serif;
+            background-color: var(--bg-paper);
+            background-image: 
+                linear-gradient(var(--line-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--line-color) 1px, transparent 1px);
+            background-size: 25px 25px;
+            margin: 0; padding: 20px;
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh; color: var(--text); user-select: none;
+        }
+
+        /* ХЕДЕР */
+        .level-bar {
+            display: flex; gap: 8px; margin-bottom: 20px;
+            background: white; padding: 10px 15px; border-radius: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); flex-wrap: wrap; justify-content: center;
+        }
+        .level-dot {
+            width: 30px; height: 30px; background: #e2e8f0; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 0.9rem; font-weight: bold; color: #64748b;
+        }
+        .level-dot.active { background: var(--primary); color: white; transform: scale(1.2); box-shadow: 0 0 10px var(--primary); }
+        .level-dot.done { background: var(--success); color: white; }
+
+        /* ИНСТРУКЦИЯ */
+        .instruction-box {
+            background: white; padding: 15px 30px; border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 30px;
+            font-size: 1.2rem; font-weight: bold; color: var(--primary);
+            border: 2px solid transparent; text-align: center; max-width: 800px;
+            transition: all 0.3s;
+        }
+        .instruction-box.error { border-color: var(--danger); color: var(--danger); animation: shake 0.4s; }
+
+        /* ИГРОВОЕ ПОЛЕ */
+        #board { width: 100%; max-width: 900px; display: flex; flex-direction: column; gap: 20px; padding-bottom: 80px; }
+
+        .row {
+            display: flex; align-items: center; justify-content: center; gap: 15px;
+            padding: 20px; background: white; border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05); position: relative; flex-wrap: wrap;
+            transition: all 0.5s ease;
+        }
+        .row.history {
+            opacity: 0.6; transform: scale(0.95); filter: grayscale(100%);
+            pointer-events: none; background: #f1f5f9; border: 2px dashed #cbd5e1;
+        }
+
+        .side {
+            display: flex; align-items: center; gap: 12px; padding: 15px;
+            min-width: 220px; min-height: 90px; border: 2px dashed #cbd5e1;
+            border-radius: 12px; transition: background 0.3s; background: #f8fafc; justify-content: center;
+        }
+        .side.highlight { background: #eff6ff; border-color: var(--primary); }
+        .equals { font-size: 2rem; color: #94a3b8; font-weight: 900; }
+
+        /* КАРТОЧКИ */
+        .card {
+            display: inline-flex; align-items: center; padding: 8px 14px;
+            border-radius: 10px; background: white; box-shadow: 0 4px 0 #e2e8f0;
+            border: 2px solid #cbd5e1; font-size: 1.4rem; font-weight: bold;
+            cursor: grab; transition: transform 0.1s; position: relative;
+            transform-style: preserve-3d; margin: 5px;
+        }
+        .card:active { cursor: grabbing; transform: translateY(2px); box-shadow: 0 2px 0 #e2e8f0; }
+        .card[data-type="var"] { color: var(--primary); border-bottom: 4px solid #bfdbfe; }
+        .card[data-type="num"] { color: var(--accent); border-bottom: 4px solid #fed7aa; }
+
+        .sign { margin-right: 5px; font-weight: 900; color: #64748b; }
+        .card.alert-sign .sign { color: var(--danger); transform: scale(1.3); }
+
+        /* ЭЛЕМЕНТЫ СКОБОК */
+        .bracket-group {
+            display: flex; align-items: center; border: 2px solid #94a3b8;
+            padding: 10px; border-radius: 12px; background: white;
+        }
+        .multiplier {
+            width: 40px; height: 40px; border-radius: 50%; background: var(--accent);
+            color: white; display: flex; justify-content: center; align-items: center;
+            font-size: 1.2rem; margin-right: 10px; cursor: grab; z-index: 10;
+            box-shadow: 0 3px 0 #c2410c;
+        }
+        .target-slot {
+            padding: 5px 8px; border-radius: 6px; border: 2px dashed transparent; transition: all 0.3s;
+        }
+        .target-slot.active { background: #ffedd5; border-color: var(--accent); }
+        .target-slot.done { background: #dcfce7; color: #166534; font-weight: bold; border: none; }
+
+        /* АНИМАЦИИ */
+        .flipping { animation: coinFlip 0.8s cubic-bezier(0.45, 0, 0.55, 1) forwards; }
+        @keyframes coinFlip { 0% { transform: rotateY(0); } 50% { transform: rotateY(90deg) scale(1.1); } 100% { transform: rotateY(0); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+        .pop { animation: popAnim 0.4s ease-out; }
+        @keyframes popAnim { 50% { transform: scale(1.2); } }
+
+        /* ФИНАЛ */
+        #final-area {
+            display: none; flex-direction: column; align-items: center;
+            background: white; padding: 20px; border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1); margin-top: 20px;
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            z-index: 100; width: 90%; max-width: 400px;
+        }
+        input { font-size: 1.8rem; width: 100px; text-align: center; padding: 10px; border: 3px solid var(--primary); border-radius: 10px; }
+        .btn-check, .btn-next { margin-top: 15px; padding: 10px 25px; font-size: 1.2rem; color: white; border: none; border-radius: 10px; cursor: pointer; width: 100%; }
+        .btn-check { background: var(--success); box-shadow: 0 4px 0 #15803d; }
+        .btn-next { background: var(--primary); box-shadow: 0 4px 0 #1e40af; display: none; }
+        
+        #victory-screen {
+            display: none; position: fixed; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.9); z-index: 200; justify-content: center;
+            align-items: center; flex-direction: column; color: white; text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="level-bar" id="level-bar"></div>
+    <div class="instruction-box" id="instr">Генерация задания...</div>
+    <div id="board"></div>
+
+    <div id="final-area">
+        <h2 id="final-eq-label" style="margin:0 0 10px 0;">4x = 16</h2>
+        <div style="display: flex; gap: 10px; align-items: center; justify-content: center;">
+            <span style="font-size: 2rem; font-weight: bold;">x = </span>
+            <input type="number" id="answer-input" placeholder="?">
+        </div>
+        <button class="btn-check" onclick="checkFinalAnswer()">Проверить</button>
+        <button class="btn-next" onclick="loadNextLevel()">Следующий уровень ➡</button>
+    </div>
+
+    <div id="victory-screen">
+        <h1 style="font-size: 5rem; margin-bottom: 0;">🎲</h1>
+        <h1>КУРС ЗАВЕРШЕН!</h1>
+        <p>Каждое задание было уникальным.</p>
+        <button class="btn-check" onclick="location.reload()" style="max-width: 200px;">Новые примеры</button>
+    </div>
+
+<script>
+    // --- ГЕНЕРАТОР УРАВНЕНИЙ ---
+    function getRandomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function getRandomNonZero(min, max) {
+        let val = 0;
+        while (val === 0) val = getRandomInt(min, max);
+        return val;
+    }
+
+    // Эта функция создает параметры уровня на лету
+    function generateLevelData(levelNum) {
+        let ans, mult, brackNum, rightXCoeff, bracketExtra = null;
+        
+        // Базовые настройки диапазонов
+        switch(levelNum) {
+            case 1: 
+                ans = getRandomInt(2, 6);
+                mult = getRandomInt(2, 4);
+                brackNum = getRandomInt(1, 5);
+                rightXCoeff = -1 * getRandomInt(1, 2); 
+                break;
+            case 2: 
+                ans = getRandomInt(2, 9);
+                mult = getRandomInt(3, 5);
+                brackNum = getRandomInt(2, 6);
+                rightXCoeff = -1 * getRandomInt(1, 3);
+                break;
+            case 3: 
+                ans = getRandomInt(2, 8);
+                mult = getRandomInt(2, 5);
+                brackNum = -1 * getRandomInt(1, 5); 
+                rightXCoeff = -1 * getRandomInt(1, 3);
+                break;
+            case 4: 
+                ans = getRandomInt(2, 7);
+                mult = getRandomInt(3, 6);
+                brackNum = getRandomInt(1, 4);
+                rightXCoeff = getRandomInt(2, 4); 
+                break;
+            case 5: 
+                ans = -1 * getRandomInt(2, 6);
+                mult = getRandomInt(2, 4);
+                brackNum = getRandomInt(3, 8);
+                rightXCoeff = -1 * getRandomInt(1, 2);
+                break;
+            case 6: 
+                ans = getRandomInt(5, 15);
+                mult = getRandomInt(6, 10);
+                brackNum = getRandomNonZero(-3, 3);
+                rightXCoeff = getRandomNonZero(-5, 5);
+                break;
+            case 7: 
+                ans = 0;
+                mult = getRandomInt(3, 7);
+                brackNum = getRandomInt(2, 9);
+                rightXCoeff = getRandomNonZero(-3, 3);
+                break;
+            case 8: // Отрицательный множитель
+                ans = getRandomInt(2, 7);
+                mult = -1 * getRandomInt(2, 4);
+                brackNum = getRandomInt(1, 5);
+                rightXCoeff = getRandomInt(2, 5);
+                break;
+            case 9: // Отрицательный множитель + минус внутри
+                ans = getRandomInt(2, 8);
+                mult = -1 * getRandomInt(2, 5);
+                brackNum = -1 * getRandomInt(1, 6);
+                rightXCoeff = -1 * getRandomInt(1, 3);
+                break;
+            case 10: // BOSS
+                ans = getRandomInt(2, 5);
+                mult = getRandomInt(2, 4);
+                brackNum = getRandomNonZero(-3, 3);
+                rightXCoeff = 0; 
+                bracketExtra = { val: '2x', coeff: 2 }; 
+                break;
+        }
+
+        // --- ЗАЩИТА ОТ 0x = 0 (Исправление ошибки) ---
+        // Вычисляем, какой коэффициент при X получится СЛЕВА после раскрытия.
+        let leftXCoeff = mult;
+        if (levelNum === 10 && bracketExtra) {
+            leftXCoeff = mult * (1 + bracketExtra.coeff); // x + 2x = 3x -> mult * 3
+        }
+
+        // Если коэффициент справа равен коэффициенту слева, они уничтожатся.
+        // Меняем правый коэффициент, пока он не станет другим.
+        while (rightXCoeff === leftXCoeff) {
+            rightXCoeff = rightXCoeff + 1; // Просто сдвигаем
+        }
+        // ----------------------------------------------
+
+        // Вычисляем свободный член
+        let leftVal;
+        if (levelNum === 10) {
+            leftVal = mult * (ans + brackNum + (bracketExtra.coeff * ans));
+        } else {
+            leftVal = mult * (ans + brackNum);
+        }
+
+        const rightConst = leftVal - (rightXCoeff * ans);
+
+        // Формируем структуру
+        const rightSideArr = [{ val: rightConst, type: 'num' }];
+        
+        if (rightXCoeff !== 0) {
+            let sign = rightXCoeff > 0 ? '+' : '-';
+            let txt = Math.abs(rightXCoeff) === 1 ? 'x' : Math.abs(rightXCoeff) + 'x';
+            rightSideArr.push({ val: txt, sign: sign, type: 'var' });
+        }
+
+        return {
+            id: levelNum,
+            mult: mult,
+            bracket: { var: 'x', num: brackNum, extra: bracketExtra },
+            rightSide: rightSideArr,
+            ans: ans
+        };
+    }
+
+    // --- ПЕРЕМЕННЫЕ ИГРЫ ---
+    const TOTAL_LEVELS = 10;
+    let currentLevelIndex = 0;
+    let currentData = null;
+    let state = { step: 1, brackets: { x: false, num: false, extra: false } };
+
+    // DOM
+    const board = document.getElementById('board');
+    const instr = document.getElementById('instr');
+    const finalArea = document.getElementById('final-area');
+    const answerInput = document.getElementById('answer-input');
+    const btnCheck = document.querySelector('.btn-check');
+    const btnNext = document.querySelector('.btn-next');
+    const levelBar = document.getElementById('level-bar');
+
+    // --- ИНИЦИАЛИЗАЦИЯ ---
+    function initGame() {
+        levelBar.innerHTML = '';
+        for (let i = 0; i < TOTAL_LEVELS; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'level-dot';
+            dot.innerText = i + 1;
+            if (i === 0) dot.classList.add('active');
+            levelBar.appendChild(dot);
+        }
+        loadLevel(0);
+    }
+
+    function loadLevel(index) {
+        currentLevelIndex = index;
+        currentData = generateLevelData(index + 1);
+        
+        state = { step: 1, brackets: { x: false, num: false, extra: false } };
+        board.innerHTML = '';
+        finalArea.style.display = 'none';
+        btnCheck.style.display = 'block';
+        btnNext.style.display = 'none';
+        answerInput.value = '';
+        
+        document.querySelectorAll('.level-dot').forEach((dot, idx) => {
+            dot.classList.remove('active');
+            if (idx < index) dot.classList.add('done');
+            if (idx === index) dot.classList.add('active');
+        });
+
+        startStep1();
+    }
+
+    // --- ЭТАП 1: ФОНТАНЧИК ---
+    function startStep1() {
+        instr.innerText = `Уровень ${currentLevelIndex + 1}: Раскрой скобки.`;
+        instr.style.color = "var(--primary)";
+
+        const row = document.createElement('div');
+        row.className = 'row';
+        row.id = 'row-1';
+
+        const numSign = currentData.bracket.num >= 0 ? '+' : '−';
+        
+        let rightHTML = '';
+        currentData.rightSide.forEach((item, i) => {
+            let s = item.sign || (typeof item.val === 'number' && item.val < 0 ? '-' : '+');
+            let v = item.val;
+            if (typeof v === 'number' && v < 0) v = Math.abs(v);
+            if (i === 0 && s === '+' && !item.sign) s = ''; 
+            rightHTML += createStaticCard(s, v, item.type);
+        });
+
+        let extraHTML = '';
+        if (currentData.bracket.extra) {
+            extraHTML = `
+                <span class="sign-span" style="margin:0 8px; font-weight:bold">+</span>
+                <div class="target-slot" data-target="extra">${currentData.bracket.extra.val}</div>
+            `;
+        }
+
+        row.innerHTML = `
+            <div class="side">
+                <div class="multiplier" draggable="true" id="mult">${currentData.mult}</div>
+                <div class="bracket-group">
+                    (
+                    <div class="target-slot" data-target="x">${currentData.bracket.var}</div>
+                    <span class="sign-span" style="margin:0 8px; font-weight:bold">${numSign}</span>
+                    <div class="target-slot" data-target="num">${Math.abs(currentData.bracket.num)}</div>
+                    ${extraHTML}
+                    )
+                </div>
+            </div>
+            <div class="equals">=</div>
+            <div class="side">${rightHTML}</div>
+        `;
+
+        board.appendChild(row);
+        setupStep1Events(row);
+    }
+
+    function createStaticCard(sign, val, type) {
+        return `<div class="card" data-type="${type}" style="cursor:default">
+            <span class="sign">${sign}</span><span class="val">${val}</span>
+        </div>`;
+    }
+
+    function setupStep1Events(row) {
+        const mult = row.querySelector('#mult');
+        const slots = row.querySelectorAll('.target-slot');
+
+        mult.addEventListener('dragstart', () => {
+            slots.forEach(s => {
+                const t = s.dataset.target;
+                if (!state.brackets[t]) s.classList.add('active');
+            });
+        });
+        mult.addEventListener('dragend', () => slots.forEach(s => s.classList.remove('active')));
+
+        slots.forEach(slot => {
+            slot.addEventListener('dragover', e => e.preventDefault());
+            slot.addEventListener('drop', e => {
+                e.preventDefault();
+                const target = slot.dataset.target;
+                if (state.brackets[target]) return;
+
+                const multiplierVal = currentData.mult;
+                
+                if (target === 'x') {
+                    // Знак при X уже "вшит" в текст, если мультипликатор отрицательный
+                    // Например -3 * x = -3x. Для тренажера просто пишем число
+                    slot.innerText = multiplierVal + 'x';
+                    state.brackets.x = true;
+                } 
+                else if (target === 'num') {
+                    const product = multiplierVal * currentData.bracket.num;
+                    const signSpan = slot.previousElementSibling;
+                    if (product >= 0) signSpan.innerText = '+';
+                    else signSpan.innerText = '−';
+                    slot.innerText = Math.abs(product);
+                    state.brackets.num = true;
+                }
+                else if (target === 'extra') {
+                    const product = multiplierVal * currentData.bracket.extra.coeff;
+                    const signSpan = slot.previousElementSibling;
+                    if (product >= 0) signSpan.innerText = '+';
+                    else signSpan.innerText = '−';
+                    slot.innerText = Math.abs(product) + 'x';
+                    state.brackets.extra = true;
+                }
+                
+                slot.classList.add('done');
+                slot.classList.remove('active');
+
+                const needsExtra = !!currentData.bracket.extra;
+                if (state.brackets.x && state.brackets.num && (!needsExtra || state.brackets.extra)) {
+                    mult.style.opacity = '0';
+                    setTimeout(startStep2, 800);
+                }
+            });
+        });
+    }
+
+    // --- ЭТАП 2: СОРТИРОВКА ---
+    function startStep2() {
+        state.step = 2;
+        document.getElementById('row-1').classList.add('history');
+        instr.innerText = "Этап 2: Иксы — влево, числа — вправо.";
+
+        const row = document.createElement('div');
+        row.className = 'row';
+        row.innerHTML = `<div class="side" id="zone-left"></div><div class="equals">=</div><div class="side" id="zone-right"></div>`;
+        board.appendChild(row);
+
+        const lZone = row.querySelector('#zone-left');
+        const rZone = row.querySelector('#zone-right');
+
+        // Создаем левые
+        let xSign = currentData.mult >= 0 ? '+' : '-';
+        let xVal = Math.abs(currentData.mult) === 1 ? 'x' : Math.abs(currentData.mult) + 'x';
+        createInteractiveCard(lZone, xSign, xVal, 'var');
+        
+        const numVal = currentData.mult * currentData.bracket.num;
+        createInteractiveCard(lZone, numVal >= 0 ? '+' : '-', Math.abs(numVal), 'num');
+
+        if (currentData.bracket.extra) {
+             const exCoeff = currentData.mult * currentData.bracket.extra.coeff;
+             createInteractiveCard(lZone, exCoeff >= 0 ? '+' : '-', Math.abs(exCoeff) + 'x', 'var');
+        }
+
+        // Создаем правые
+        currentData.rightSide.forEach((item, i) => {
+            let s = item.sign || (typeof item.val === 'number' && item.val < 0 ? '-' : '+');
+            let v = item.val;
+            if (typeof v === 'number' && v < 0) v = Math.abs(v);
+            if (i === 0 && !item.sign && s === '+') s = '+';
+            createInteractiveCard(rZone, s, v, item.type);
+        });
+
+        setupDragSystem(lZone, rZone);
+    }
+
+    function createInteractiveCard(parent, sign, val, type) {
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.draggable = true;
+        div.dataset.type = type;
+        div.dataset.id = Math.random().toString(36).substr(2, 9);
+        div.innerHTML = `<span class="sign" data-val="${sign}">${sign}</span><span class="val">${val}</span>`;
+        parent.appendChild(div);
+    }
+
+    function setupDragSystem(lZone, rZone) {
+        const zones = [lZone, rZone];
+        let draggedItem = null;
+        let startZone = null;
+
+        zones.forEach(zone => {
+            zone.addEventListener('dragstart', e => {
+                if (!e.target.closest('.card')) return;
+                draggedItem = e.target.closest('.card');
+                startZone = zone;
+                draggedItem.classList.add('alert-sign');
+                setTimeout(() => draggedItem.style.opacity = '0.5', 0);
+                zones.forEach(z => z.classList.add('highlight'));
+            });
+            zone.addEventListener('dragend', () => {
+                if(draggedItem) { draggedItem.style.opacity = '1'; draggedItem.classList.remove('alert-sign'); }
+                zones.forEach(z => z.classList.remove('highlight'));
+                draggedItem = null;
+            });
+            zone.addEventListener('dragover', e => e.preventDefault());
+            zone.addEventListener('drop', e => {
+                e.preventDefault();
+                if (!draggedItem) return;
+                const targetCard = e.target.closest('.card');
+
+                if (targetCard && targetCard !== draggedItem) {
+                    if (state.step === 2) showError("Сначала расставь всё по местам!");
+                    else handleMerge(draggedItem, targetCard);
+                    return;
+                }
+                if (zone !== startZone) handleMagicFlip(draggedItem, zone);
+                else zone.appendChild(draggedItem);
+            });
+        });
+    }
+
+    function handleMagicFlip(card, targetZone) {
+        targetZone.appendChild(card);
+        card.style.opacity = '1';
+        setTimeout(() => {
+            card.classList.add('flipping');
+            setTimeout(() => {
+                const signEl = card.querySelector('.sign');
+                const newSign = signEl.dataset.val === '+' ? '-' : '+';
+                signEl.innerText = newSign;
+                signEl.dataset.val = newSign;
+                signEl.style.color = "var(--danger)";
+            }, 400);
+            setTimeout(() => {
+                card.classList.remove('flipping');
+                checkSortStatus();
+            }, 800);
+        }, 50);
+    }
+
+    function checkSortStatus() {
+        const lZone = document.getElementById('zone-left');
+        const rZone = document.getElementById('zone-right');
+        const leftOk = Array.from(lZone.children).every(c => c.dataset.type === 'var');
+        const rightOk = Array.from(rZone.children).every(c => c.dataset.type === 'num');
+        
+        if (leftOk && rightOk && lZone.children.length > 0 && rZone.children.length > 0) {
+            state.step = 3;
+            instr.innerText = "Этап 3: Соедини карточки.";
+            instr.style.color = "var(--success)";
+        }
+    }
+
+    // --- ЭТАП 3: СЛИЯНИЕ ---
+    function handleMerge(src, dest) {
+        if (src.dataset.type !== dest.dataset.type) {
+            showError("Нельзя складывать буквы с числами!");
+            return;
+        }
+
+        const val1 = parseVal(src);
+        const val2 = parseVal(dest);
+        const sum = val1 + val2;
+        const type = dest.dataset.type;
+        const newAbs = Math.abs(sum);
+        let newTxt = newAbs;
+        if (type === 'var') newTxt = (newAbs === 1 ? '' : newAbs) + 'x';
+
+        dest.querySelector('.val').innerText = newTxt;
+        const newSign = sum >= 0 ? '+' : '-';
+        dest.querySelector('.sign').innerText = newSign;
+        dest.querySelector('.sign').dataset.val = newSign;
+        dest.querySelector('.sign').style.color = "#64748b";
+        dest.classList.add('pop');
+        src.remove();
+
+        const lZone = document.getElementById('zone-left');
+        const rZone = document.getElementById('zone-right');
+        if (lZone.children.length === 1 && rZone.children.length === 1) setupFinal();
+    }
+
+    function parseVal(card) {
+        const sign = card.querySelector('.sign').dataset.val === '-' ? -1 : 1;
+        let txt = card.querySelector('.val').innerText.replace('x', '');
+        if (txt === '') txt = '1';
+        return parseInt(txt) * sign;
+    }
+
+    function setupFinal() {
+        state.step = 4;
+        instr.innerText = "Финал: Найди x.";
+        const lZone = document.getElementById('zone-left');
+        const rZone = document.getElementById('zone-right');
+        const lText = lZone.children[0].innerText.replace('+', '').trim();
+        const rText = rZone.children[0].innerText.replace('+', '').trim();
+        
+        document.getElementById('final-eq-label').innerText = `${lText} = ${rText}`;
+        document.querySelectorAll('.card').forEach(c => c.draggable = false);
+        finalArea.style.display = 'flex';
+        finalArea.style.animation = "popAnim 0.5s ease";
+    }
+
+    function checkFinalAnswer() {
+        const val = parseInt(answerInput.value);
+        if (val === currentData.ans) {
+            instr.innerText = "Верно!";
+            btnCheck.style.display = 'none';
+            btnNext.style.display = 'block';
+        } else {
+            showError("Подумай еще...");
+            answerInput.classList.add('error');
+            setTimeout(() => answerInput.classList.remove('error'), 500);
+        }
+    }
+
+    function loadNextLevel() {
+        if (currentLevelIndex + 1 < TOTAL_LEVELS) {
+            loadLevel(currentLevelIndex + 1);
+        } else {
+            document.getElementById('victory-screen').style.display = 'flex';
+        }
+    }
+
+    function showError(msg) {
+        const old = instr.innerText;
+        instr.innerText = msg;
+        instr.classList.add('error');
+        setTimeout(() => {
+            instr.classList.remove('error');
+            instr.innerText = old;
+        }, 1500);
+    }
+
+    initGame();
+</script>
+</body>
+</html>
