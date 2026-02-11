@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тренажёр: Смешанные Дроби (Пошаговый)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .fraction {
+            display: inline-block;
+            vertical-align: middle;
+            text-align: center;
+            font-size: 1.2em;
+            margin: 0 4px;
+            position: relative;
+        }
+        .top {
+            border-bottom: 2px solid currentColor;
+            display: block;
+            padding: 0 4px;
+            min-width: 24px;
+        }
+        .bottom {
+            display: block;
+            padding: 0 4px;
+            min-width: 24px;
+        }
+        .whole {
+            font-size: 1.5em;
+            font-weight: bold;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 4px;
+        }
+        /* Стили для полей ввода */
+        input[type=number] {
+            -moz-appearance: textfield;
+            text-align: center;
+        }
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .input-mini {
+            width: 50px;
+            height: 36px;
+            border: 2px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            text-align: center;
+            background-color: #fff;
+        }
+        .input-mini:focus {
+            border-color: #6366f1;
+            outline: none;
+            background-color: #eef2ff;
+        }
+        .input-whole-mini {
+            width: 45px;
+            height: 45px;
+            font-size: 1.3rem;
+            margin-right: 6px;
+        }
+        .step-container {
+            transition: all 0.3s ease;
+        }
+        .step-active {
+            background-color: #eef2ff;
+            border: 2px solid #6366f1;
+            transform: scale(1.02);
+        }
+        .step-completed {
+            background-color: #f0fdf4;
+            border: 2px solid #22c55e;
+            opacity: 0.9;
+        }
+        .arrow-divider {
+            font-size: 1.5rem;
+            color: #9ca3af;
+            margin: 0 10px;
+        }
+        
+        .fraction-wrapper {
+            position: relative;
+            display: inline-block;
+            margin-top: 25px;
+        }
+        .multiplier-group {
+            position: absolute;
+            top: -40px;
+            left: -12px;
+            display: flex;
+            align-items: flex-end;
+            z-index: 10;
+        }
+        .multiplier-slash {
+            font-size: 24px;
+            color: #6b7280;
+            font-weight: 300;
+            line-height: 1;
+            margin-right: 2px;
+            transform: rotate(10deg);
+        }
+        .input-mult {
+            width: 36px;
+            height: 32px;
+            border: 2px solid #9ca3af;
+            border-radius: 6px;
+            font-size: 1rem;
+            text-align: center;
+            color: #4b5563;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            background: white;
+        }
+        .input-mult:focus {
+            border-color: #6366f1;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+        .conversion-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #fff;
+            border: 1px dashed #cbd5e1;
+            border-radius: 12px;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .visual-mult {
+            color: #4f46e5;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .fade-in {
+            animation: fadeIn 0.4s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+<script src="../../assets/analytics.js"></script>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-2 sm:p-4">
+
+    <!-- Заголовок и счетчик -->
+    <div class="w-full max-w-3xl mb-4 flex justify-between items-center bg-white p-4 rounded-xl shadow-md">
+        <div>
+            <h1 class="text-xl sm:text-2xl font-bold text-indigo-600">Дроби: Шаг за шагом</h1>
+            <p class="text-gray-500 text-xs sm:text-sm">Решай примеры поэтапно</p>
+        </div>
+        <div class="text-right">
+            <div class="text-xs text-gray-500">Решено</div>
+            <div class="text-xl sm:text-2xl font-bold text-gray-800"><span id="score">0</span></div>
+        </div>
+    </div>
+
+    <!-- Основная область -->
+    <div class="w-full max-w-3xl bg-white rounded-2xl shadow-xl overflow-hidden relative min-h-[400px]">
+        
+        <!-- Верхняя панель: Исходное задание -->
+        <div class="bg-gray-50 p-6 border-b border-gray-100 text-center">
+            <div id="problem-title" class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">Загрузка...</div>
+            <div id="main-problem-display" class="text-3xl sm:text-4xl text-gray-800 font-bold flex justify-center items-center gap-4">
+                <!-- Пример -->
+            </div>
+        </div>
+
+        <!-- Контейнер шагов -->
+        <div id="steps-area" class="p-4 sm:p-8 space-y-6">
+            <!-- Шаги будут генерироваться здесь -->
+        </div>
+
+        <!-- Панель сообщений и кнопок -->
+        <div class="p-6 bg-gray-50 border-t border-gray-100">
+            <div id="feedback" class="hidden mb-4 text-center font-medium"></div>
+            
+            <div class="flex justify-center gap-4">
+                <button onclick="checkCurrentStep()" id="check-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-10 rounded-xl shadow-lg transform transition active:scale-95 text-lg">
+                    Проверить шаг
+                </button>
+                <button onclick="nextProblem()" id="next-btn" class="hidden bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-10 rounded-xl shadow-lg transform transition active:scale-95 text-lg">
+                    Следующий пример
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Глобальное состояние ---
+        let currentProblem = null;
+        let currentStepIndex = 0;
+        let score = 0;
+
+        // --- Утилиты ---
+        const getRandomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+        const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
+        const lcm = (a, b) => (a * b) / gcd(a, b);
+
+        // --- Рендеринг дробей ---
+        function renderFractionHTML(w, n, d, inputs = false, inputIds = {}) {
+            let html = '<div class="inline-flex items-center">';
+            
+            // Целая часть
+            if (inputs) {
+                if (inputIds.w && inputIds.w !== 'ignore') {
+                    html += `<input type="number" id="${inputIds.w}" class="input-mini input-whole-mini border-gray-300 focus:border-indigo-500" placeholder="?">`;
+                }
+            } else if (w !== 0 || (n === 0 && !inputs)) { 
+                 html += `<span class="whole">${w}</span>`;
+            }
+
+            // Дробная часть
+            if (inputs || n !== 0) {
+                html += `<div class="fraction">`;
+                if (inputs) {
+                    html += `<input type="number" id="${inputIds.n}" class="input-mini border-gray-300 focus:border-indigo-500 mb-1 block" placeholder="ч">`;
+                    html += `<div class="border-b-2 border-gray-400 w-full my-1"></div>`;
+                    html += `<input type="number" id="${inputIds.d}" class="input-mini border-gray-300 focus:border-indigo-500 mt-1 block" placeholder="з">`;
+                } else {
+                    html += `<span class="top">${n}</span><span class="bottom">${d}</span>`;
+                }
+                html += `</div>`;
+            }
+            html += '</div>';
+            return html;
+        }
+
+        function renderStaticMixed(w, n, d) {
+            if (n === 0) return `<span class="whole">${w}</span>`;
+            if (w === 0) return `<div class="fraction"><span class="top">${n}</span><span class="bottom">${d}</span></div>`;
+            return `<span class="whole">${w}</span><div class="fraction"><span class="top">${n}</span><span class="bottom">${d}</span></div>`;
+        }
+
+        window.updateMultDisplay = function(val, prefix) {
+            const displayVal = val ? val : '?';
+            const topEl = document.getElementById(prefix + '_top');
+            const btmEl = document.getElementById(prefix + '_btm');
+            if(topEl) topEl.innerText = displayVal;
+            if(btmEl) btmEl.innerText = displayVal;
+        };
+
+        // --- Генератор задач ---
+        function generateProblem() {
+            currentStepIndex = 0;
+            document.getElementById('steps-area').innerHTML = '';
+            document.getElementById('check-btn').classList.remove('hidden');
+            document.getElementById('next-btn').classList.add('hidden');
+            document.getElementById('feedback').classList.add('hidden');
+            
+            const type = getRandomInt(0, 3);
+            let p = { steps: [], type: type };
+
+            if (type === 0) { // Сложение
+                p.title = "Сложение: Разные знаменатели";
+                p.operator = '+';
+                p.d1 = [2,3,4][getRandomInt(0,2)];
+                p.d2 = [3,4,5,6][getRandomInt(0,3)];
+                if(p.d1 === p.d2) p.d2 += 1;
+                p.w1 = getRandomInt(1, 3); p.n1 = 1; 
+                p.w2 = getRandomInt(1, 3); p.n2 = 1;
+                
+                const cd = lcm(p.d1, p.d2);
+                const mult1 = cd / p.d1;
+                const mult2 = cd / p.d2;
+                const newN1 = p.n1 * mult1;
+                const newN2 = p.n2 * mult2;
+
+                p.steps.push({
+                    type: 'find_lcd',
+                    instruction: `Знаменатели разные (${p.d1} и ${p.d2}). Найди наименьший общий знаменатель (НОЗ).`,
+                    data: { d1: p.d1, d2: p.d2, targetD: cd }
+                });
+                
+                p.steps.push({
+                    type: 'lcd',
+                    instruction: `Домножь числитель и знаменатель каждой дроби на дополнительный множитель.`,
+                    data: { 
+                        targetD: cd, 
+                        srcN1: p.n1, srcD1: p.d1, mult1: mult1, targetN1: newN1,
+                        srcN2: p.n2, srcD2: p.d2, mult2: mult2, targetN2: newN2,
+                        w1: p.w1, w2: p.w2 
+                    }
+                });
+
+                p.steps.push({
+                    type: 'solve',
+                    instruction: 'Теперь выполни сложение.',
+                    data: { 
+                        w1: p.w1, n1: newN1, d1: cd, 
+                        w2: p.w2, n2: newN2, d2: cd,
+                        op: '+' 
+                    }
+                });
+
+            } else if (type === 1) { // Вычитание с заемом
+                p.title = "Вычитание: Занимаем единицу";
+                p.operator = '-';
+                p.d1 = getRandomInt(3, 8); p.d2 = p.d1;
+                p.w1 = getRandomInt(3, 6);
+                p.w2 = getRandomInt(1, p.w1 - 2);
+                p.n1 = 1; 
+                p.n2 = p.d1 - 1; 
+
+                p.steps.push({
+                    type: 'borrow',
+                    instruction: `Дробь ${p.n1}/${p.d1} меньше ${p.n2}/${p.d1}. Займи единицу у ${p.w1}.`,
+                    data: { 
+                        srcW: p.w1, srcN: p.n1, srcD: p.d1,
+                        targetW: p.w1 - 1, targetN: p.n1 + p.d1 
+                    }
+                });
+
+                p.steps.push({
+                    type: 'solve',
+                    instruction: 'Теперь выполни вычитание.',
+                    data: { 
+                        w1: p.w1 - 1, n1: p.n1 + p.d1, d1: p.d1,
+                        w2: p.w2, n2: p.n2, d2: p.d2,
+                        op: '-'
+                    }
+                });
+
+            } else if (type === 2) { // Вычитание из целого
+                p.title = "Вычитание из целого числа";
+                p.operator = '-';
+                p.w1 = getRandomInt(4, 8); p.n1 = 0; p.d1 = 1;
+                p.w2 = getRandomInt(1, p.w1 - 2);
+                p.d2 = getRandomInt(3, 9);
+                p.n2 = getRandomInt(1, p.d2 - 1);
+
+                p.steps.push({
+                    type: 'convert_whole',
+                    instruction: `Представь ${p.w1} как смешанное число со знаменателем ${p.d2}.`,
+                    data: { 
+                        srcW: p.w1, targetD: p.d2,
+                        targetW: p.w1 - 1, targetN: p.d2
+                    }
+                });
+
+                p.steps.push({
+                    type: 'solve',
+                    instruction: 'Выполни вычитание.',
+                    data: {
+                        w1: p.w1 - 1, n1: p.d2, d1: p.d2,
+                        w2: p.w2, n2: p.n2, d2: p.d2,
+                        op: '-'
+                    }
+                });
+
+            } else { // Сложное вычитание
+                p.title = "Сложное вычитание (Мастер)";
+                p.operator = '-';
+                
+                let valid = false;
+                while (!valid) {
+                    p.d1 = getRandomInt(2, 6);
+                    p.d2 = getRandomInt(2, 6);
+                    if (p.d1 === p.d2) continue; 
+                    
+                    p.w1 = getRandomInt(3, 9);
+                    p.w2 = getRandomInt(1, p.w1 - 2);
+                    
+                    p.n1 = getRandomInt(1, p.d1 - 1);
+                    p.n2 = getRandomInt(1, p.d2 - 1);
+                    
+                    const cdVal = lcm(p.d1, p.d2);
+                    const n1Val = p.n1 * (cdVal / p.d1);
+                    const n2Val = p.n2 * (cdVal / p.d2);
+                    
+                    if (n1Val < n2Val) valid = true; 
+                }
+                
+                const cd = lcm(p.d1, p.d2);
+                const mult1 = cd / p.d1;
+                const mult2 = cd / p.d2;
+                const newN1 = p.n1 * mult1;
+                const newN2 = p.n2 * mult2;
+
+                p.steps.push({
+                    type: 'find_lcd',
+                    instruction: `Сначала найди общий знаменатель для ${p.d1} и ${p.d2}.`,
+                    data: { d1: p.d1, d2: p.d2, targetD: cd }
+                });
+
+                p.steps.push({
+                    type: 'lcd',
+                    instruction: `Приведи дроби к знаменателю ${cd}.`,
+                    data: { 
+                        targetD: cd, 
+                        srcN1: p.n1, srcD1: p.d1, mult1: mult1, targetN1: newN1,
+                        srcN2: p.n2, srcD2: p.d2, mult2: mult2, targetN2: newN2,
+                        w1: p.w1, w2: p.w2 
+                    }
+                });
+
+                p.steps.push({
+                    type: 'borrow',
+                    instruction: `${newN1}/${cd} меньше ${newN2}/${cd}. Займи единицу у ${p.w1}.`,
+                    data: { 
+                        srcW: p.w1, srcN: newN1, srcD: cd,
+                        targetW: p.w1 - 1, targetN: newN1 + cd 
+                    }
+                });
+
+                p.steps.push({
+                    type: 'solve',
+                    instruction: 'Вычитай.',
+                    data: {
+                        w1: p.w1 - 1, n1: newN1 + cd, d1: cd,
+                        w2: p.w2, n2: newN2, d2: cd,
+                        op: '-'
+                    }
+                });
+            }
+
+            document.getElementById('problem-title').innerText = p.title;
+            const html1 = (type === 2) ? `<span class="whole">${p.w1}</span>` : renderStaticMixed(p.w1, p.n1, p.d1);
+            const html2 = renderStaticMixed(p.w2, p.n2, p.d2);
+            document.getElementById('main-problem-display').innerHTML = `${html1} <span class="mx-2 text-gray-400">${p.operator}</span> ${html2}`;
+
+            currentProblem = p;
+            renderStep(0);
+        }
+
+        // --- Рендеринг шага ---
+        function renderStep(index) {
+            const step = currentProblem.steps[index];
+            const container = document.getElementById('steps-area');
+            
+            const stepDiv = document.createElement('div');
+            stepDiv.id = `step-${index}`;
+            stepDiv.className = "bg-white p-4 rounded-xl shadow-sm border-2 border-indigo-100 step-active fade-in";
+            
+            let contentHtml = `<div class="font-bold text-indigo-800 mb-4 flex items-center"><span class="bg-indigo-100 text-indigo-600 rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm border border-indigo-200">${index + 1}</span> ${step.instruction}</div>`;
+            contentHtml += `<div class="flex flex-col items-center justify-center gap-4 text-2xl py-2 w-full">`;
+
+            if (step.type === 'find_lcd') {
+                contentHtml += `<div class="flex items-center gap-2">`;
+                contentHtml += `<span class="text-gray-600 mr-2 text-base">НОЗ(${step.data.d1}, ${step.data.d2}) = </span>`;
+                contentHtml += `<input type="number" id="input_lcd_${index}" class="input-mini border-gray-300 focus:border-indigo-500 font-bold text-indigo-600" style="width: 80px;" placeholder="?">`;
+                contentHtml += `</div>`;
+            
+            } else if (step.type === 'lcd') {
+                const makeExpansionRow = (w, n, d, multId, visPrefix, inputsObj) => {
+                    return `
+                    <div class="conversion-row w-full max-w-2xl relative">
+                        <div class="flex items-center gap-2">
+                             <span class="whole">${w}</span>
+                            <div class="fraction-wrapper">
+                                <div class="multiplier-group">
+                                    <span class="multiplier-slash">/</span>
+                                    <input type="number" id="${multId}" class="input-mult" placeholder="?" oninput="updateMultDisplay(this.value, '${visPrefix}')">
+                                </div>
+                                <div class="fraction">
+                                    <span class="top">${n}</span>
+                                    <span class="bottom">${d}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mx-2 text-gray-400 font-bold text-xl">=</div>
+
+                        <div class="flex items-center gap-2">
+                             <span class="whole text-gray-400">${w}</span>
+                             <div class="fraction text-xl text-gray-600">
+                                <span class="top border-b-2 border-gray-300 px-1">${n} · <span id="${visPrefix}_top" class="visual-mult">?</span></span>
+                                <span class="bottom px-1">${d} · <span id="${visPrefix}_btm" class="visual-mult">?</span></span>
+                             </div>
+                        </div>
+
+                        <div class="mx-2 text-gray-400 font-bold text-xl">=</div>
+
+                        <div class="flex items-center gap-2">
+                             <span class="whole">${w}</span>
+                             ${renderFractionHTML(0,0,0, true, {w:'ignore', n: inputsObj.n, d: inputsObj.d})}
+                        </div>
+                    </div>
+                    `;
+                };
+
+                contentHtml += makeExpansionRow(step.data.w1, step.data.srcN1, step.data.srcD1, `mult_${index}_1`, `exp_${index}_1`, {n:`s_n_${index}_1`, d:`s_d_${index}_1`});
+                contentHtml += makeExpansionRow(step.data.w2, step.data.srcN2, step.data.srcD2, `mult_${index}_2`, `exp_${index}_2`, {n:`s_n_${index}_2`, d:`s_d_${index}_2`});
+
+            } else if (step.type === 'borrow' || step.type === 'convert_whole') {
+                contentHtml += `<div class="flex items-center justify-center gap-4">`;
+                if (step.type === 'convert_whole') {
+                    contentHtml += `<span class="whole">${step.data.srcW}</span>`;
+                } else {
+                    contentHtml += renderStaticMixed(step.data.srcW, step.data.srcN, step.data.srcD);
+                }
+                
+                contentHtml += `<span class="arrow-divider">➜</span>`;
+                contentHtml += renderFractionHTML(0, 0, 0, true, {w:`s_w_${index}`, n:`s_n_${index}`, d:`s_d_${index}`});
+                contentHtml += `</div>`;
+            
+            } else if (step.type === 'solve') {
+                contentHtml += `<div class="flex items-center justify-center gap-2 flex-wrap">`;
+                contentHtml += renderStaticMixed(step.data.w1, step.data.n1, step.data.d1);
+                contentHtml += `<span class="mx-2 text-gray-400 font-bold">${step.data.op}</span>`;
+                contentHtml += renderStaticMixed(step.data.w2, step.data.n2, step.data.d2);
+                contentHtml += `<span class="mx-2 font-bold">=</span>`;
+                contentHtml += renderFractionHTML(0, 0, 0, true, {w:`res_w_${index}`, n:`res_n_${index}`, d:`res_d_${index}`});
+                contentHtml += `</div>`;
+            }
+
+            contentHtml += `</div>`;
+            stepDiv.innerHTML = contentHtml;
+            container.appendChild(stepDiv);
+
+            setTimeout(() => {
+                const firstInput = stepDiv.querySelector('input');
+                if(firstInput) firstInput.focus();
+            }, 100);
+        }
+
+        // --- Проверка шага ---
+        function checkCurrentStep() {
+            const step = currentProblem.steps[currentStepIndex];
+            const idx = currentStepIndex; // Короткий алиас для ID
+            const feedbackEl = document.getElementById('feedback');
+            let isCorrect = false;
+            let msg = "";
+
+            if (step.type === 'find_lcd') {
+                const val = parseInt(document.getElementById(`input_lcd_${idx}`).value);
+                if (val === step.data.targetD) {
+                    isCorrect = true;
+                } else {
+                    msg = `Наименьшее число, которое делится на ${step.data.d1} и на ${step.data.d2} — это...`;
+                }
+            }
+            else if (step.type === 'lcd') {
+                const m1 = parseInt(document.getElementById(`mult_${idx}_1`).value);
+                const n1 = parseInt(document.getElementById(`s_n_${idx}_1`).value);
+                const d1 = parseInt(document.getElementById(`s_d_${idx}_1`).value);
+                
+                const m2 = parseInt(document.getElementById(`mult_${idx}_2`).value);
+                const n2 = parseInt(document.getElementById(`s_n_${idx}_2`).value);
+                const d2 = parseInt(document.getElementById(`s_d_${idx}_2`).value);
+
+                const ok1 = (m1 === step.data.mult1) && (n1 === step.data.targetN1) && (d1 === step.data.targetD);
+                const ok2 = (m2 === step.data.mult2) && (n2 === step.data.targetN2) && (d2 === step.data.targetD);
+
+                if (ok1 && ok2) {
+                    isCorrect = true;
+                } else {
+                    if (d1 !== step.data.targetD || d2 !== step.data.targetD) {
+                        msg = `Знаменатель везде должен быть ${step.data.targetD}.`;
+                    } else if (m1 !== step.data.mult1 || m2 !== step.data.mult2) {
+                        msg = `Проверь дополнительные множители.`;
+                    } else {
+                        msg = `Проверь вычисление новых числителей.`;
+                    }
+                }
+            } 
+            else if (step.type === 'borrow' || step.type === 'convert_whole') {
+                const w = parseInt(document.getElementById(`s_w_${idx}`).value);
+                const n = parseInt(document.getElementById(`s_n_${idx}`).value);
+                const d = parseInt(document.getElementById(`s_d_${idx}`).value);
+
+                if (w === step.data.targetW && n === step.data.targetN && (d === step.data.srcD || d === step.data.targetD)) {
+                    isCorrect = true;
+                } else {
+                    msg = `Помни: 1 = ${step.data.srcD || step.data.targetD}/${step.data.srcD || step.data.targetD}. Добавь это к дробной части.`;
+                }
+            }
+            else if (step.type === 'solve') {
+                const w = parseInt(document.getElementById(`res_w_${idx}`).value || 0);
+                const n = parseInt(document.getElementById(`res_n_${idx}`).value || 0);
+                const d = parseInt(document.getElementById(`res_d_${idx}`).value || 1);
+
+                let correctNum, correctDenom = step.data.d1;
+                let correctWhole;
+                
+                if (step.data.op === '+') {
+                    correctWhole = step.data.w1 + step.data.w2;
+                    correctNum = step.data.n1 + step.data.n2;
+                } else {
+                    correctWhole = step.data.w1 - step.data.w2;
+                    correctNum = step.data.n1 - step.data.n2;
+                }
+
+                const userVal = w * d + n;
+                const correctVal = correctWhole * correctDenom + correctNum;
+                
+                if (userVal * correctDenom === correctVal * d) {
+                    isCorrect = true;
+                } else {
+                    msg = "Ошибка в финальном вычислении.";
+                }
+            }
+
+            if (isCorrect) {
+                const currentDiv = document.getElementById(`step-${currentStepIndex}`);
+                currentDiv.classList.remove('step-active');
+                currentDiv.classList.add('step-completed');
+                
+                const inputs = currentDiv.querySelectorAll('input');
+                inputs.forEach(inp => {
+                    inp.disabled = true;
+                    inp.classList.add('bg-green-50', 'text-green-800');
+                    if(inp.classList.contains('input-mult')) inp.style.borderColor = "#22c55e";
+                });
+
+                feedbackEl.classList.add('hidden');
+
+                currentStepIndex++;
+                if (currentStepIndex < currentProblem.steps.length) {
+                    renderStep(currentStepIndex);
+                } else {
+                    score++;
+                    document.getElementById('score').innerText = score;
+                    document.getElementById('check-btn').classList.add('hidden');
+                    document.getElementById('next-btn').classList.remove('hidden');
+                    feedbackEl.innerHTML = `<span class="text-green-600 text-lg">Молодец! Всё верно.</span>`;
+                    feedbackEl.classList.remove('hidden');
+                }
+            } else {
+                feedbackEl.innerHTML = `<span class="text-red-500">${msg}</span>`;
+                feedbackEl.classList.remove('hidden');
+            }
+        }
+
+        function nextProblem() {
+            generateProblem();
+        }
+
+        generateProblem();
+        
+        document.addEventListener('keydown', function(e) {
+            if(e.key === 'Enter') {
+                if(!document.getElementById('check-btn').classList.contains('hidden')) checkCurrentStep();
+                else if(!document.getElementById('next-btn').classList.contains('hidden')) nextProblem();
+            }
+        });
+
+    </script>
+</body>
+</html>
