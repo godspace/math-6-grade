@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Math Board Pro v3.0</title>
+    <style>
+        :root {
+            --bg-color: #f4f6f8;
+            --sidebar-bg: #ffffff;
+            --grid-color: #e0e0ea;
+            --grid-accent: #d0d0da;
+            --primary-color: #4f46e5; /* Индиго */
+            --primary-light: #eef2ff;
+            --text-color: #1e293b;
+            --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-floating: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --radius: 8px;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            background-color: var(--bg-color);
+            overflow: hidden;
+            color: var(--text-color);
+        }
+
+        /* --- САЙДБАР (Обновленный дизайн) --- */
+        #sidebar {
+            width: 260px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid #e2e8f0;
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            box-shadow: 10px 0 30px rgba(0,0,0,0.03);
+            z-index: 500;
+            position: relative;
+        }
+
+        .brand {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        /* Сетка инструментов */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 2 колонки */
+            gap: 10px;
+        }
+
+        .tools-grid.full { grid-template-columns: 1fr; } /* На всю ширину */
+
+        .palette-item {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            padding: 12px;
+            border-radius: var(--radius);
+            cursor: grab;
+            text-align: center;
+            font-size: 1.1rem;
+            font-family: 'Cambria Math', serif;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+        }
+
+        .palette-item:hover {
+            border-color: var(--primary-color);
+            background: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-soft);
+            color: var(--primary-color);
+        }
+
+        .palette-item:active { cursor: grabbing; transform: scale(0.98); }
+
+        /* Специальные стили для дробей в меню */
+        .preview-fraction {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 0.8em;
+            line-height: 1;
+        }
+        .preview-fraction span:first-child { border-bottom: 1px solid currentColor; padding: 0 4px; }
+
+        /* Кнопки управления */
+        .action-btn {
+            padding: 10px;
+            border: none;
+            border-radius: var(--radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.9rem;
+        }
+        .btn-danger { background: #fee2e2; color: #ef4444; }
+        .btn-danger:hover { background: #fecaca; }
+        
+        .btn-reset { background: #f1f5f9; color: #475569; margin-top: auto; }
+        .btn-reset:hover { background: #e2e8f0; }
+
+
+        /* --- РАБОЧАЯ ОБЛАСТЬ --- */
+        #viewport {
+            flex-grow: 1;
+            position: relative;
+            overflow: hidden;
+            cursor: default; /* Будет меняться JS-ом */
+        }
+
+        /* Поверхность, которую мы двигаем и зумим */
+        #surface {
+            position: absolute;
+            top: 0;
+            left: 0;
+            /* Точка трансформации важна для зума */
+            transform-origin: 0 0; 
+            /* Бесконечный фон */
+            width: 0; 
+            height: 0;
+            overflow: visible; 
+        }
+
+        /* Сетка фона */
+        #grid-bg {
+            position: fixed; /* Фон стоит, двигаем его паттерн через JS или CSS */
+            top: -5000px; left: -5000px;
+            width: 10000px; height: 10000px;
+            background-color: var(--bg-color);
+            background-image: 
+                linear-gradient(var(--grid-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 20px 20px;
+            pointer-events: none; /* Чтобы клики проходили сквозь фон к surface */
+            z-index: -1;
+        }
+
+        /* --- ЭЛЕМЕНТЫ --- */
+        .board-item {
+            position: absolute;
+            background: #fff;
+            padding: 8px 14px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-soft);
+            cursor: grab;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid transparent;
+            font-family: 'Cambria Math', 'Times New Roman', serif;
+            transition: box-shadow 0.2s;
+        }
+
+        .board-item.dragging {
+            box-shadow: var(--shadow-floating);
+            cursor: grabbing;
+            z-index: 1000 !important;
+            border-color: var(--primary-color);
+        }
+
+        .board-item.selected {
+            border-color: var(--primary-color);
+            background-color: rgba(79, 70, 229, 0.04);
+            z-index: 999;
+        }
+
+        /* Удаление */
+        .delete-btn {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 20px;
+            height: 20px;
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: 0.2s;
+            pointer-events: auto;
+        }
+        .board-item:hover .delete-btn { opacity: 1; }
+
+        /* Инпуты и дроби */
+        .smart-input {
+            border: none;
+            background: transparent;
+            font-family: inherit;
+            font-size: 24px;
+            text-align: center;
+            outline: none;
+            min-width: 20px;
+            width: 30px;
+            color: #0f172a;
+        }
+        
+        .fraction-box { display: flex; flex-direction: column; align-items: center; margin: 0 4px; }
+        .numerator { border-bottom: 2px solid #0f172a; padding: 0 4px 2px; display: flex; justify-content: center; }
+        .denominator { padding: 2px 4px 0; display: flex; justify-content: center; }
+        .mixed-container { display: flex; align-items: center; gap: 6px; }
+        .operator-text { font-size: 28px; font-weight: bold; color: #334155; padding: 0 4px;}
+
+        /* HUD (Интерфейс на экране) */
+        #hud {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(4px);
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid #cbd5e1;
+            font-size: 14px;
+            font-weight: 600;
+            color: #475569;
+            box-shadow: var(--shadow-soft);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+    </style>
+<script src="../../assets/analytics.js"></script>
+</head>
+<body>
+
+<div id="sidebar">
+    <div class="brand">
+        <span>📐 MathBoard</span>
+    </div>
+    
+    <div>
+        <div class="section-title">Числа</div>
+        <div class="tools-grid full">
+            <div class="palette-item" data-type="number">123</div>
+            <div class="palette-item" data-type="fraction">
+                <div class="preview-fraction"><span>x</span><span>y</span></div>
+            </div>
+            <div class="palette-item" data-type="mixed">
+                <span style="font-size: 0.8em; margin-right: 4px;">1</span>
+                <div class="preview-fraction"><span>1</span><span>2</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <div class="section-title">Операции</div>
+        <div class="tools-grid">
+            <div class="palette-item" data-type="op" data-val="+">+</div>
+            <div class="palette-item" data-type="op" data-val="-">−</div>
+            <div class="palette-item" data-type="op" data-val="×">×</div>
+            <div class="palette-item" data-type="op" data-val=":">:</div>
+            <div class="palette-item" data-type="op" data-val="=">=</div>
+        </div>
+    </div>
+
+    <div>
+        <div class="section-title">Группировка</div>
+        <div class="tools-grid">
+            <div class="palette-item" data-type="text" data-val="(">(</div>
+            <div class="palette-item" data-type="text" data-val=")">)</div>
+        </div>
+    </div>
+    
+    <button class="action-btn btn-reset" onclick="resetView()">🎯 Центр камеры</button>
+    <button class="action-btn btn-danger" onclick="clearAll()">🗑 Очистить всё</button>
+</div>
+
+<div id="viewport">
+    <div id="grid-bg"></div> <div id="surface">
+        </div>
+    
+    <div id="hud">
+        <span id="zoom-val">100%</span>
+        <span style="color:#ccc">|</span>
+        <span style="font-size: 12px; color: #888">Зажми фон чтобы двигать</span>
+    </div>
+</div>
+
+<script>
+    // --- State ---
+    const state = {
+        scale: 1,
+        panX: 0,
+        panY: 0,
+        isPanning: false,
+        startX: 0,
+        startY: 0,
+        zIndex: 100
+    };
+
+    const viewport = document.getElementById('viewport');
+    const surface = document.getElementById('surface');
+    const gridBg = document.getElementById('grid-bg');
+    const zoomVal = document.getElementById('zoom-val');
+
+    // Центрируем камеру при старте (примерно)
+    state.panX = viewport.clientWidth / 2;
+    state.panY = viewport.clientHeight / 2;
+    updateView();
+
+    // --- 1. PANNING (Перемещение камеры) ---
+
+    viewport.addEventListener('mousedown', (e) => {
+        // Если клик по самому вьюпорту или по сетке (но не по элементам доски)
+        if (e.target === viewport || e.target === surface || e.target === gridBg) {
+            state.isPanning = true;
+            state.startX = e.clientX - state.panX;
+            state.startY = e.clientY - state.panY;
+            viewport.style.cursor = 'grabbing';
+        }
+    });
+
+    window.addEventListener('mousemove', (e) => {
+        // Логика перемещения камеры
+        if (state.isPanning) {
+            e.preventDefault();
+            state.panX = e.clientX - state.startX;
+            state.panY = e.clientY - state.startY;
+            updateView();
+            return;
+        }
+
+        // Логика перетаскивания элемента (если активна)
+        if (dragState.activeItem) {
+            e.preventDefault();
+            // Текущая мышь в координатах мира
+            const worldPos = screenToWorld(e.clientX, e.clientY);
+            
+            dragState.activeItem.style.left = (worldPos.x - dragState.offsetX) + 'px';
+            dragState.activeItem.style.top = (worldPos.y - dragState.offsetY) + 'px';
+        }
+    });
+
+    window.addEventListener('mouseup', () => {
+        if (state.isPanning) {
+            state.isPanning = false;
+            viewport.style.cursor = 'default';
+        }
+        if (dragState.activeItem) {
+            // Snap to grid
+            snapItem(dragState.activeItem);
+            dragState.activeItem.classList.remove('dragging');
+            dragState.activeItem = null;
+        }
+    });
+
+    // --- 2. ZOOM (Масштабирование) ---
+
+    viewport.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const zoomIntensity = 0.001;
+        const delta = -e.deltaY * zoomIntensity;
+        const newScale = Math.min(Math.max(0.2, state.scale + delta), 4);
+
+        // Zoom towards mouse cursor logic
+        // 1. Координаты мыши до зума (в мире)
+        const mouseWorldBefore = screenToWorld(e.clientX, e.clientY);
+
+        // 2. Применяем зум
+        state.scale = newScale;
+
+        // 3. Корректируем pan, чтобы мышь осталась над той же точкой мира
+        // Формула: NewPan = MouseScreen - (MouseWorld * NewScale)
+        // Но так как у нас translate применяется ДО scale в transform origin (0,0),
+        // нам нужно просто сдвинуть pan так, чтобы точка под курсором осталась на месте.
+        // Более простой способ для transform-origin 0 0:
+        
+        // Пересчитываем pan смещение
+        const rect = viewport.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+        
+        // Смещение мира относительно мыши должно измениться пропорционально
+        state.panX = mouseX - (mouseX - state.panX) * (newScale / (state.scale - delta));
+        state.panY = mouseY - (mouseY - state.panY) * (newScale / (state.scale - delta));
+        
+        // *Упрощенная логика (без точного зума в курсор для надежности, если формула выше глючит)*:
+        // Просто обновляем масштаб. Для точного зума в курсор нужна более сложная матрица.
+        // Оставим простой зум от 0,0 (верх-лев) + ручной pan, или зум к центру.
+        // В данном коде: зум идет от transform-origin, который мы двигаем через pan.
+        
+        updateView();
+    }, { passive: false });
+
+
+    function updateView() {
+        // Двигаем поверхность
+        surface.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.scale})`;
+        
+        // Двигаем сетку фона (параллакс или просто синхрон)
+        // Чтобы сетка казалась бесконечной, используем background-position
+        gridBg.style.backgroundPosition = `${state.panX}px ${state.panY}px`;
+        gridBg.style.backgroundSize = `${20 * state.scale}px ${20 * state.scale}px`;
+
+        zoomVal.textContent = Math.round(state.scale * 100) + '%';
+    }
+
+    function resetView() {
+        state.scale = 1;
+        state.panX = viewport.clientWidth / 2 - 100; // Немного смещаем
+        state.panY = viewport.clientHeight / 2 - 100;
+        updateView();
+    }
+
+    // --- 3. MATH HELPERS ---
+
+    // Преобразует координаты экрана (мыши) в координаты внутри surface
+    function screenToWorld(screenX, screenY) {
+        const rect = viewport.getBoundingClientRect();
+        // Учитываем смещение вьюпорта
+        const viewportX = screenX - rect.left;
+        const viewportY = screenY - rect.top;
+        
+        // Обратная трансформация: (x - pan) / scale
+        return {
+            x: (viewportX - state.panX) / state.scale,
+            y: (viewportY - state.panY) / state.scale
+        };
+    }
+
+    // --- 4. ITEM LOGIC (Drag & Drop) ---
+    
+    let dragState = {
+        activeItem: null,
+        offsetX: 0,
+        offsetY: 0
+    };
+
+    // Создание элемента
+    function createItem(type, val, worldX, worldY) {
+        const item = document.createElement('div');
+        item.className = 'board-item';
+        item.style.zIndex = ++state.zIndex;
+        item.style.left = worldX + 'px';
+        item.style.top = worldY + 'px';
+
+        // Удаление
+        const del = document.createElement('div');
+        del.className = 'delete-btn';
+        del.innerHTML = '×';
+        del.onmousedown = (e) => { e.stopPropagation(); item.remove(); };
+        item.appendChild(del);
+
+        // Контент
+        if(type === 'number') {
+            item.appendChild(autoInput(''));
+            setTimeout(() => item.querySelector('input').focus(), 10);
+        } else if (type === 'fraction') {
+            item.appendChild(fractionDom());
+        } else if (type === 'mixed') {
+            const wrap = document.createElement('div');
+            wrap.className = 'mixed-container';
+            const intPart = document.createElement('div');
+            intPart.appendChild(autoInput(''));
+            intPart.style.fontSize = '1.2em';
+            wrap.appendChild(intPart);
+            wrap.appendChild(fractionDom());
+            item.appendChild(wrap);
+        } else {
+            const span = document.createElement('span');
+            span.className = 'operator-text';
+            span.textContent = val;
+            item.appendChild(span);
+        }
+
+        // События элемента
+        item.addEventListener('mousedown', (e) => {
+            if(e.target.tagName === 'INPUT') return;
+            e.stopPropagation(); // Не запускаем pan
+            startItemDrag(e, item, false);
+        });
+        
+        item.addEventListener('click', () => {
+             document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
+             item.classList.add('selected');
+        });
+
+        surface.appendChild(item);
+        return item;
+    }
+
+    function autoInput(val) {
+        const inp = document.createElement('input');
+        inp.className = 'smart-input';
+        inp.value = val;
+        inp.placeholder = '?';
+        const resize = () => inp.style.width = Math.max(30, (inp.value.length+1)*16) + 'px';
+        inp.addEventListener('input', resize);
+        setTimeout(resize,0);
+        return inp;
+    }
+
+    function fractionDom() {
+        const b = document.createElement('div');
+        b.className = 'fraction-box';
+        const n = document.createElement('div'); n.className='numerator'; n.appendChild(autoInput(''));
+        const d = document.createElement('div'); d.className='denominator'; d.appendChild(autoInput(''));
+        b.appendChild(n); b.appendChild(d);
+        return b;
+    }
+
+    // Drag Logic
+    document.querySelectorAll('.palette-item').forEach(p => {
+        p.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            const worldPos = screenToWorld(e.clientX, e.clientY);
+            const item = createItem(p.dataset.type, p.dataset.val, worldPos.x, worldPos.y);
+            startItemDrag(e, item, true);
+        });
+    });
+
+    function startItemDrag(e, item, isNew) {
+        if(e.button !== 0) return;
+        dragState.activeItem = item;
+        item.classList.add('dragging');
+
+        const worldPos = screenToWorld(e.clientX, e.clientY);
+        const itemLeft = parseFloat(item.style.left);
+        const itemTop = parseFloat(item.style.top);
+
+        if (isNew) {
+            // Центрируем
+            dragState.offsetX = item.offsetWidth / 2; // Приблизительно, т.к. размеры еще могут скакать
+            dragState.offsetY = item.offsetHeight / 2; 
+        } else {
+            dragState.offsetX = worldPos.x - itemLeft;
+            dragState.offsetY = worldPos.y - itemTop;
+        }
+    }
+
+    function snapItem(item) {
+        const grid = 20;
+        const x = parseFloat(item.style.left);
+        const y = parseFloat(item.style.top);
+        item.style.left = (Math.round(x/grid)*grid) + 'px';
+        item.style.top = (Math.round(y/grid)*grid) + 'px';
+    }
+
+    // Очистка
+    function clearAll() { if(confirm('Все удалить?')) surface.innerHTML = ''; }
+    
+    // Клавиатура
+    window.addEventListener('keydown', (e) => {
+        if((e.key === 'Delete' || e.key === 'Backspace') && document.activeElement.tagName !== 'INPUT') {
+            const s = document.querySelector('.selected');
+            if(s) s.remove();
+        }
+    });
+
+</script>
+</body>
+</html>
