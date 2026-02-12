@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тренажёр: Сложные выражения с дробями</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Nunito', sans-serif; background-color: #f3f4f6; }
+        .fraction { display: inline-block; vertical-align: middle; text-align: center; font-size: 1.1em; margin: 0 2px; position: relative; }
+        .top { border-bottom: 2px solid currentColor; display: block; padding: 0 2px; min-width: 20px; }
+        .bottom { display: block; padding: 0 2px; min-width: 20px; }
+        .whole { font-size: 1.4em; font-weight: bold; display: inline-block; vertical-align: middle; margin-right: 2px; }
+        .parens { font-size: 1.8em; vertical-align: middle; font-weight: 300; color: #4b5563; }
+        .operator { margin: 0 8px; font-weight: bold; color: #6b7280; font-size: 1.2em; vertical-align: middle; }
+        
+        .active-part { background-color: #eef2ff; border-radius: 8px; box-shadow: 0 0 0 4px #eef2ff; transition: all 0.3s; color: #4338ca; }
+        .dimmed { opacity: 0.5; filter: grayscale(100%); transition: all 0.3s; }
+        
+        input[type=number] { -moz-appearance: textfield; text-align: center; }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .input-mini { width: 50px; height: 36px; border: 2px solid #d1d5db; border-radius: 6px; font-size: 1.1rem; text-align: center; background: white; }
+        .input-mini:focus { border-color: #6366f1; outline: none; background-color: #eef2ff; }
+        .input-whole { width: 40px; height: 40px; font-size: 1.2rem; margin-right: 4px; }
+        
+        .step-card { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; border: 2px solid transparent; }
+        .step-active { border-color: #818cf8; box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.1); }
+        .step-done { border-color: #34d399; opacity: 0.8; }
+        
+        .sub-step { margin-top: 1rem; border-top: 1px dashed #e5e7eb; padding-top: 1rem; }
+        .fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+<script src="../../assets/analytics.js"></script>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4">
+
+    <!-- Header -->
+    <div class="w-full max-w-4xl mb-6 flex justify-between items-center bg-white p-4 rounded-xl shadow-md">
+        <div>
+            <h1 class="text-2xl font-bold text-indigo-700">Порядок действий</h1>
+            <p class="text-gray-500 text-sm">Все числа до 100</p>
+        </div>
+        <div class="text-right">
+            <div class="text-xs text-gray-500">Решено</div>
+            <div class="text-2xl font-bold text-gray-800"><span id="score">0</span></div>
+        </div>
+    </div>
+
+    <!-- Main Expression Display -->
+    <div class="w-full max-w-4xl bg-white rounded-2xl shadow-lg p-8 mb-8 text-center sticky top-2 z-10 border-b-4 border-indigo-100">
+        <div id="expression-display" class="text-4xl font-bold text-gray-800 flex justify-center items-center flex-wrap gap-y-4">
+            <!-- Dynamic Content -->
+        </div>
+        <div class="mt-4 text-sm text-gray-400 uppercase tracking-widest font-semibold" id="current-action-text">
+            Загрузка...
+        </div>
+    </div>
+
+    <!-- Steps Container -->
+    <div id="steps-container" class="w-full max-w-3xl space-y-6">
+        
+        <!-- Step 1: Parentheses -->
+        <div id="step-1" class="step-card hidden fade-in">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-lg text-indigo-800">1. Скобки: Вычитание</h3>
+                <span class="text-xs bg-indigo-100 text-indigo-600 px-2 py-1 rounded">Первое действие</span>
+            </div>
+            <div class="flex flex-col items-center gap-4">
+                <div class="text-2xl" id="step-1-expr"></div>
+                
+                <!-- Sub-step 1.1: LCD -->
+                <div id="s1-lcd-block" class="flex items-center gap-2 bg-gray-50 p-3 rounded-lg">
+                    <span class="text-gray-600 text-sm">Найди общий знаменатель:</span>
+                    <input type="number" id="inp_s1_lcd" class="input-mini w-20" placeholder="?">
+                    <button onclick="checkStep1LCD()" id="btn-s1-lcd" class="ml-2 bg-indigo-600 text-white px-4 py-1 rounded hover:bg-indigo-700 text-sm">OK</button>
+                </div>
+
+                <!-- Sub-step 1.2: Conversion -->
+                <div id="s1-conv-block" class="hidden flex flex-col items-center gap-3 sub-step w-full fade-in">
+                    <p class="text-sm text-gray-500">Приведи дроби к знаменателю <span id="s1-target-lcd" class="font-bold"></span>:</p>
+                    <div class="text-xl flex items-center gap-4">
+                        <!-- Fraction 1 converted -->
+                        <div class="flex items-center">
+                            <span class="whole" id="s1-w1"></span>
+                            <div class="flex flex-col items-center">
+                                <input type="number" id="inp_s1_conv_n1" class="input-mini mb-1" placeholder="?">
+                                <div class="border-b-2 border-gray-400 w-full"></div>
+                                <span class="s1-denom-display font-bold text-gray-600"></span>
+                            </div>
+                        </div>
+                        <span class="operator">-</span>
+                        <!-- Fraction 2 converted -->
+                        <div class="flex items-center">
+                            <span class="whole" id="s1-w2"></span>
+                            <div class="flex flex-col items-center">
+                                <input type="number" id="inp_s1_conv_n2" class="input-mini mb-1" placeholder="?">
+                                <div class="border-b-2 border-gray-400 w-full"></div>
+                                <span class="s1-denom-display font-bold text-gray-600"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="checkStep1Conv()" id="btn-s1-conv" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition mt-2">Проверить дроби</button>
+                </div>
+
+                <!-- Sub-step 1.3: Result -->
+                <div id="s1-res-block" class="hidden flex flex-col items-center gap-3 sub-step w-full fade-in">
+                    <p class="text-sm text-gray-500">Выполни вычитание:</p>
+                    <div class="flex items-center gap-2">
+                        <span class="text-gray-600 font-bold mr-2">=</span>
+                        <input type="number" id="inp_s1_w" class="input-mini input-whole hidden" placeholder="Цел">
+                        <div class="flex flex-col items-center">
+                            <input type="number" id="inp_s1_n" class="input-mini mb-1" placeholder="Числ">
+                            <div class="border-b-2 border-gray-400 w-full"></div>
+                            <input type="number" id="inp_s1_d" class="input-mini mt-1" placeholder="Знам">
+                        </div>
+                    </div>
+                    <button onclick="checkStep1Res()" id="btn-s1-res" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition">Проверить ответ</button>
+                </div>
+                
+                <!-- Sub-step 1.4: Simplification (Conditional) -->
+                <div id="s1-simp-block" class="hidden flex flex-col items-center gap-3 sub-step w-full fade-in">
+                    <p class="text-sm text-gray-500">Сократи полученную дробь:</p>
+                    <div class="flex items-center gap-2">
+                        <span class="text-gray-600 font-bold mr-2">=</span>
+                        <div class="flex flex-col items-center">
+                            <input type="number" id="inp_s1_simp_n" class="input-mini mb-1" placeholder="Числ">
+                            <div class="border-b-2 border-gray-400 w-full"></div>
+                            <input type="number" id="inp_s1_simp_d" class="input-mini mt-1" placeholder="Знам">
+                        </div>
+                    </div>
+                    <button onclick="checkStep1Simp()" id="btn-s1-simp" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition">Проверить</button>
+                </div>
+                
+                <div id="msg-step-1" class="hidden text-sm font-bold mt-2"></div>
+            </div>
+        </div>
+
+        <!-- Step 2: Multiplication -->
+        <div id="step-2" class="step-card hidden fade-in">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-lg text-indigo-800">2. Умножение</h3>
+                <span class="text-xs bg-indigo-100 text-indigo-600 px-2 py-1 rounded">Второе действие</span>
+            </div>
+            <div class="flex flex-col items-center gap-4">
+                <div class="text-2xl flex items-center gap-3" id="step-2-expr"></div>
+                
+                <!-- Sub-step 2: Result (Immediate) -->
+                <div id="s2-res-block" class="hidden flex flex-col items-center gap-3 sub-step w-full fade-in">
+                    <p class="text-sm text-gray-500">Умножь дроби и запиши результат:</p>
+                    <div class="flex items-center gap-2">
+                        <span class="text-gray-600 font-bold mr-2">=</span>
+                        <div class="flex flex-col items-center">
+                            <input type="number" id="inp_s2_n" class="input-mini mb-1" placeholder="Числ">
+                            <div class="border-b-2 border-gray-400 w-full"></div>
+                            <input type="number" id="inp_s2_d" class="input-mini mt-1" placeholder="Знам">
+                        </div>
+                    </div>
+                    <button onclick="checkStep2Res()" id="btn-step-2-res" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition">Проверить</button>
+                </div>
+
+                <div id="msg-step-2" class="hidden text-sm font-bold"></div>
+            </div>
+        </div>
+
+        <!-- Step 3: Addition -->
+        <div id="step-3" class="step-card hidden fade-in">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-lg text-indigo-800">3. Сложение (Итог)</h3>
+                <span class="text-xs bg-indigo-100 text-indigo-600 px-2 py-1 rounded">Третье действие</span>
+            </div>
+            <div class="flex flex-col items-center gap-4">
+                <div class="text-2xl flex items-center gap-3" id="step-3-expr"></div>
+                
+                <!-- Sub-step 3.1: LCD -->
+                <div id="s3-lcd-block" class="flex items-center gap-2 bg-gray-50 p-3 rounded-lg">
+                    <span class="text-gray-600 text-sm">Общий знаменатель:</span>
+                    <input type="number" id="inp_s3_lcd" class="input-mini w-20" placeholder="?">
+                    <button onclick="checkStep3LCD()" id="btn-s3-lcd" class="ml-2 bg-indigo-600 text-white px-4 py-1 rounded hover:bg-indigo-700 text-sm">OK</button>
+                </div>
+
+                <!-- Sub-step 3.2: Conversion -->
+                <div id="s3-conv-block" class="hidden flex flex-col items-center gap-3 sub-step w-full fade-in">
+                    <p class="text-sm text-gray-500">Приведи дроби к знаменателю <span id="s3-target-lcd" class="font-bold"></span>:</p>
+                    <div class="text-xl flex items-center gap-4">
+                        <!-- Fraction 1 (Product) -->
+                        <div class="flex items-center">
+                             <div class="flex flex-col items-center">
+                                <input type="number" id="inp_s3_conv_n1" class="input-mini mb-1" placeholder="?">
+                                <div class="border-b-2 border-gray-400 w-full"></div>
+                                <span class="s3-denom-display font-bold text-gray-600"></span>
+                            </div>
+                        </div>
+                        <span class="operator">+</span>
+                        <!-- Fraction 2 (M3) -->
+                        <div class="flex items-center">
+                            <span class="whole" id="s3-w2"></span>
+                            <div class="flex flex-col items-center">
+                                <input type="number" id="inp_s3_conv_n2" class="input-mini mb-1" placeholder="?">
+                                <div class="border-b-2 border-gray-400 w-full"></div>
+                                <span class="s3-denom-display font-bold text-gray-600"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="checkStep3Conv()" id="btn-s3-conv" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition mt-2">Проверить дроби</button>
+                </div>
+
+                <!-- Sub-step 3.3: Result -->
+                <div id="s3-res-block" class="hidden flex flex-col items-center gap-3 sub-step w-full fade-in">
+                    <p class="text-sm text-gray-500" id="s3-res-msg">Сложи числа:</p>
+                    <div class="flex items-center gap-2">
+                        <span class="text-gray-600 font-bold mr-2">=</span>
+                        <input type="number" id="inp_s3_w" class="input-mini input-whole" placeholder="Цел">
+                        <div class="flex flex-col items-center">
+                            <input type="number" id="inp_s3_n" class="input-mini mb-1" placeholder="Числ">
+                            <div class="border-b-2 border-gray-400 w-full"></div>
+                            <input type="number" id="inp_s3_d" class="input-mini mt-1" placeholder="Знам">
+                        </div>
+                    </div>
+                    <button onclick="checkStep3Res()" id="btn-s3-res" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition">Проверить ответ</button>
+                </div>
+
+                <!-- Sub-step 3.4: Final Simplification (New) -->
+                <div id="s3-simp-block" class="hidden flex flex-col items-center gap-3 sub-step w-full fade-in bg-yellow-50 p-4 rounded-xl">
+                    <p class="text-sm text-yellow-800 font-semibold">Упрости ответ (выдели целую часть и/или сократи):</p>
+                    <div class="flex items-center gap-2">
+                        <span class="text-gray-600 font-bold mr-2">Итого:</span>
+                        <input type="number" id="inp_s3_simp_w" class="input-mini input-whole" placeholder="Цел">
+                        <div class="flex flex-col items-center">
+                            <input type="number" id="inp_s3_simp_n" class="input-mini mb-1" placeholder="Числ">
+                            <div class="border-b-2 border-gray-400 w-full"></div>
+                            <input type="number" id="inp_s3_simp_d" class="input-mini mt-1" placeholder="Знам">
+                        </div>
+                    </div>
+                    <button onclick="checkStep3Simp()" id="btn-s3-simp" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition">Подтвердить</button>
+                </div>
+
+                <div id="msg-step-3" class="hidden text-sm font-bold mt-2"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Final Success / Next Button -->
+    <div id="final-area" class="w-full max-w-3xl mt-6 text-center hidden">
+        <div class="bg-green-100 text-green-800 p-4 rounded-xl mb-4 text-lg font-bold">
+            🎉 Пример решен верно! Отличная работа!
+        </div>
+        <button onclick="generateProblem()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-10 rounded-xl shadow-lg transform transition hover:-translate-y-1 text-lg">
+            Следующий пример
+        </button>
+    </div>
+
+    <script>
+        // --- Math Utilities ---
+        const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
+        const lcm = (a, b) => (a * b) / gcd(a, b);
+        const getRandomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+        // --- State ---
+        let problem = {};
+        let score = 0;
+
+        // --- Render Helpers ---
+        function renderMixed(w, n, d) {
+            let html = '';
+            if (w !== 0) html += `<span class="whole">${w}</span>`;
+            if (n !== 0) html += `<div class="fraction"><span class="top">${n}</span><span class="bottom">${d}</span></div>`;
+            return html || '0';
+        }
+
+        function renderFraction(n, d) {
+            return `<div class="fraction"><span class="top">${n}</span><span class="bottom">${d}</span></div>`;
+        }
+
+        // --- Problem Generation (Optimized for Small Numbers) ---
+        function generateProblem() {
+            let attempts = 0;
+            let success = false;
+            
+            while (!success && attempts < 200) {
+                attempts++;
+                try {
+                    // Reset UI
+                    document.querySelectorAll('.step-card').forEach(el => {
+                        el.classList.add('hidden');
+                        el.classList.remove('step-active', 'step-done');
+                    });
+                    document.querySelectorAll('.sub-step').forEach(el => el.classList.add('hidden'));
+                    document.getElementById('final-area').classList.add('hidden');
+                    document.querySelectorAll('input').forEach(i => { i.value = ''; i.disabled = false; i.classList.remove('bg-green-50', 'text-green-800', 'border-green-500'); });
+                    document.querySelectorAll('div[id^="msg-"]').forEach(d => { d.classList.add('hidden'); d.innerHTML = ''; });
+                    document.querySelectorAll('button').forEach(b => { b.classList.remove('hidden'); });
+
+                    // Generate Logic
+                    const lcds = [12, 18, 20, 24, 30, 36, 40, 48, 60]; 
+                    const L = lcds[getRandomInt(0, lcds.length - 1)];
+                    
+                    let d1, d2;
+                    if (L === 60) { d1 = 12; d2 = 20; }
+                    else if (L === 48) { d1 = 16; d2 = 12; }
+                    else if (L === 40) { d1 = 8; d2 = 20; }
+                    else if (L === 36) { d1 = 12; d2 = 18; }
+                    else if (L === 30) { d1 = 10; d2 = 15; }
+                    else if (L === 24) { d1 = 8; d2 = 12; }
+                    else if (L === 20) { d1 = 4; d2 = 10; }
+                    else if (L === 18) { d1 = 6; d2 = 9; }
+                    else { d1 = L/2; d2 = L/3; }
+
+                    const f1_d_opts = [5, 6, 8, 9, 10, 12, 15, 16, 18, 20, 24, 25];
+                    const f1_d = f1_d_opts[getRandomInt(0, f1_d_opts.length - 1)];
+                    const f1_n = getRandomInt(1, f1_d - 1); 
+                    
+                    let n1 = getRandomInt(1, d1-1);
+                    let n2 = getRandomInt(1, d2-1);
+                    if (n1/d1 <= n2/d2) { n1 = d1 - 1; n2 = 1; }
+                    
+                    const deltaNum = n1 * (L/d1) - n2 * (L/d2);
+                    const deltaDenom = L;
+                    
+                    if (deltaNum > 99 || deltaDenom > 99) continue;
+
+                    const w_base = getRandomInt(1, 5);
+                    const M1 = { w: w_base, n: n1, d: d1 };
+                    const M2 = { w: w_base, n: n2, d: d2 };
+
+                    const f1_common = gcd(f1_n, f1_d);
+                    const F1 = { n: f1_n/f1_common, d: f1_d/f1_common };
+
+                    const s1_gcd = gcd(deltaNum, deltaDenom);
+                    const simpRes1N = deltaNum / s1_gcd;
+                    const simpRes1D = deltaDenom / s1_gcd;
+
+                    const prodNumRaw = F1.n * simpRes1N;
+                    const prodDenomRaw = F1.d * simpRes1D;
+                    const prodCommon = gcd(prodNumRaw, prodDenomRaw);
+                    const prodNum = prodNumRaw / prodCommon;
+                    const prodDenom = prodDenomRaw / prodCommon;
+
+                    if (prodNum > 99 || prodDenom > 99) continue;
+
+                    const gcd_cross1 = gcd(F1.n, simpRes1D);
+                    const gcd_cross2 = gcd(simpRes1N, F1.d);
+                    
+                    const crossN1 = F1.n / gcd_cross1;
+                    const crossD2 = simpRes1D / gcd_cross1;
+                    const crossN2 = simpRes1N / gcd_cross2;
+                    const crossD1 = F1.d / gcd_cross2;
+
+                    let final_d3;
+                    if (prodDenom % 2 === 0) final_d3 = prodDenom;
+                    else final_d3 = prodDenom; 
+                    
+                    if (prodDenom * 2 < 50 && Math.random() > 0.5) final_d3 = prodDenom * 2;
+
+                    const w3 = getRandomInt(1, 5);
+                    const n3 = getRandomInt(1, final_d3 - 1);
+                    
+                    const M3 = { w: w3, n: n3, d: final_d3 };
+
+                    const finalLCD = lcm(prodDenom, final_d3);
+                    const sumNum = (prodNum * (finalLCD/prodDenom)) + (n3 * (finalLCD/final_d3));
+                    
+                    const finalTotalWhole = w3 + Math.floor(sumNum / finalLCD);
+                    const finalTotalNum = sumNum % finalLCD;
+                    const finalCommon = gcd(finalTotalNum, finalLCD);
+                    
+                    if (finalLCD > 99 || finalTotalNum > 99) continue;
+                    
+                    const s1_conv_n1 = n1 * (L/d1);
+                    const s1_conv_n2 = n2 * (L/d2);
+                    const s3_conv_n1 = prodNum * (finalLCD/prodDenom);
+                    const s3_conv_n2 = n3 * (finalLCD/final_d3);
+                    
+                    if (s1_conv_n1 > 99 || s1_conv_n2 > 99 || s3_conv_n1 > 99 || s3_conv_n2 > 99) continue;
+
+                    problem = {
+                        F1: F1, M1: M1, M2: M2, M3: M3,
+                        step1: { 
+                            lcd: L, resN: deltaNum, resD: deltaDenom, convN1: s1_conv_n1, convN2: s1_conv_n2,
+                            simpN: simpRes1N, simpD: simpRes1D, gcd: s1_gcd
+                        },
+                        step2: { 
+                            multN1: F1.n, multD1: F1.d, multN2: simpRes1N, multD2: simpRes1D,
+                            crossN1: crossN1, crossN2: crossN2, crossD1: crossD1, crossD2: crossD2,
+                            resN: prodNum, resD: prodDenom 
+                        },
+                        step3: { w: finalTotalWhole, n: finalTotalNum/finalCommon, d: finalLCD/finalCommon, lcd: finalLCD, convN1: s3_conv_n1, convN2: s3_conv_n2 }
+                    };
+                    
+                    success = true;
+
+                } catch (e) {
+                    console.error("Generation error", e);
+                }
+            }
+
+            if (success) {
+                renderExpression();
+                startStep1();
+            }
+        }
+
+        // --- Rendering ---
+        function renderExpression(highlight = 'none') {
+            const el = document.getElementById('expression-display');
+            const partF1 = `<span id="part-f1" class="${highlight === 'mult' ? 'active-part px-1' : ''}">${renderFraction(problem.F1.n, problem.F1.d)}</span>`;
+            const subPart = `${renderMixed(problem.M1.w, problem.M1.n, problem.M1.d)} <span class="operator">-</span> ${renderMixed(problem.M2.w, problem.M2.n, problem.M2.d)}`;
+            const partParens = `<span id="part-parens" class="${highlight === 'parens' ? 'active-part px-2' : ''}"><span class="parens">(</span>${subPart}<span class="parens">)</span></span>`;
+            const partM3 = `<span id="part-m3" class="${highlight === 'add' ? 'active-part px-2' : ''}">${renderMixed(problem.M3.w, problem.M3.n, problem.M3.d)}</span>`;
+            el.innerHTML = `${partF1} <span class="operator">·</span> ${partParens} <span class="operator">+</span> ${partM3}`;
+        }
+
+        function showMsg(id, html, type) {
+            const el = document.getElementById(id);
+            el.innerHTML = html;
+            el.classList.remove('hidden');
+            el.className = `mt-2 text-sm font-bold ${type === 'error' ? 'text-red-500' : 'text-green-600'}`;
+        }
+
+        // --- Step 1: Parentheses ---
+        function startStep1() {
+            const s1 = document.getElementById('step-1');
+            s1.classList.remove('hidden');
+            s1.classList.add('step-active');
+            document.getElementById('current-action-text').innerText = "1. Вычитание в скобках";
+            renderExpression('parens');
+            document.getElementById('step-1-expr').innerHTML = 
+                `${renderMixed(problem.M1.w, problem.M1.n, problem.M1.d)} <span class="operator">-</span> ${renderMixed(problem.M2.w, problem.M2.n, problem.M2.d)}`;
+        }
+
+        function checkStep1LCD() {
+            const val = parseInt(document.getElementById('inp_s1_lcd').value);
+            if (val === problem.step1.lcd) {
+                document.getElementById('inp_s1_lcd').disabled = true;
+                document.getElementById('btn-s1-lcd').classList.add('hidden');
+                showMsg('msg-step-1', 'Верный знаменатель!', 'success');
+                
+                document.getElementById('s1-conv-block').classList.remove('hidden');
+                document.getElementById('s1-target-lcd').innerText = problem.step1.lcd;
+                document.getElementById('s1-w1').innerText = problem.M1.w;
+                document.getElementById('s1-w2').innerText = problem.M2.w;
+                document.querySelectorAll('.s1-denom-display').forEach(el => el.innerText = problem.step1.lcd);
+                setTimeout(() => document.getElementById('inp_s1_conv_n1').focus(), 100);
+            } else {
+                showMsg('msg-step-1', 'Неверный общий знаменатель.', 'error');
+            }
+        }
+
+        function checkStep1Conv() {
+            const n1 = parseInt(document.getElementById('inp_s1_conv_n1').value);
+            const n2 = parseInt(document.getElementById('inp_s1_conv_n2').value);
+            
+            if (n1 === problem.step1.convN1 && n2 === problem.step1.convN2) {
+                document.getElementById('inp_s1_conv_n1').disabled = true;
+                document.getElementById('inp_s1_conv_n2').disabled = true;
+                document.getElementById('btn-s1-conv').classList.add('hidden');
+                showMsg('msg-step-1', 'Дроби приведены верно!', 'success');
+
+                document.getElementById('s1-res-block').classList.remove('hidden');
+                setTimeout(() => document.getElementById('inp_s1_n').focus(), 100);
+            } else {
+                showMsg('msg-step-1', 'Ошибка в числителях. Проверь дополнительные множители.', 'error');
+            }
+        }
+
+        function checkStep1Res() {
+            const n = parseInt(document.getElementById('inp_s1_n').value);
+            const d = parseInt(document.getElementById('inp_s1_d').value);
+            
+            // Should match unsimplified calculation first
+            if (n === problem.step1.resN && d === problem.step1.resD) {
+                document.getElementById('inp_s1_n').disabled = true;
+                document.getElementById('inp_s1_d').disabled = true;
+                document.getElementById('btn-s1-res').classList.add('hidden');
+                showMsg('msg-step-1', 'Верно!', 'success'); 
+                
+                // Check if simplification is needed
+                if (problem.step1.gcd > 1) {
+                    document.getElementById('s1-simp-block').classList.remove('hidden');
+                    setTimeout(() => document.getElementById('inp_s1_simp_n').focus(), 100);
+                } else {
+                    finishStep1();
+                }
+            } else {
+                showMsg('msg-step-1', 'Неверный результат вычитания. Проверь числители.', 'error');
+            }
+        }
+
+        function checkStep1Simp() {
+            const n = parseInt(document.getElementById('inp_s1_simp_n').value);
+            const d = parseInt(document.getElementById('inp_s1_simp_d').value);
+            
+            if (n === problem.step1.simpN && d === problem.step1.simpD) {
+                document.getElementById('inp_s1_simp_n').disabled = true;
+                document.getElementById('inp_s1_simp_d').disabled = true;
+                document.getElementById('btn-s1-simp').classList.add('hidden');
+                showMsg('msg-step-1', 'Дробь сокращена верно!', 'success'); 
+                finishStep1();
+            } else {
+                showMsg('msg-step-1', 'Ошибка в сокращении.', 'error');
+            }
+        }
+
+        function finishStep1() {
+            document.getElementById('step-1').classList.remove('step-active');
+            document.getElementById('step-1').classList.add('step-done');
+            startStep2();
+        }
+
+        // --- Step 2: Multiplication ---
+        function startStep2() {
+            const s2 = document.getElementById('step-2');
+            s2.classList.remove('hidden');
+            s2.classList.add('step-active');
+            document.getElementById('current-action-text').innerText = "2. Умножение на результат скобок";
+            
+            const el = document.getElementById('expression-display');
+            document.getElementById('part-parens').classList.add('dimmed');
+            document.getElementById('part-m3').classList.add('dimmed');
+            document.getElementById('part-f1').classList.add('active-part', 'px-1');
+            
+            // Use simplified result
+            const res1HTML = renderFraction(problem.step1.simpN, problem.step1.simpD);
+            document.getElementById('step-2-expr').innerHTML = 
+                `${renderFraction(problem.F1.n, problem.F1.d)} <span class="operator">·</span> ${res1HTML}`;
+            
+            document.getElementById('s2-res-block').classList.remove('hidden');
+            setTimeout(() => document.getElementById('inp_s2_n').focus(), 100);
+        }
+
+        function checkStep2Res() {
+            const userN = parseInt(document.getElementById('inp_s2_n').value);
+            const userD = parseInt(document.getElementById('inp_s2_d').value);
+
+            const correctN = problem.step2.resN;
+            const correctD = problem.step2.resD;
+
+            if (userN === correctN && userD === correctD) {
+                document.getElementById('step-2').classList.remove('step-active');
+                document.getElementById('step-2').classList.add('step-done');
+                document.getElementById('btn-step-2-res').classList.add('hidden');
+                document.getElementById('inp_s2_n').disabled = true;
+                document.getElementById('inp_s2_d').disabled = true;
+                showMsg('msg-step-2', 'Верно!', 'success');
+                startStep3();
+            } else if (userN * correctD === correctN * userD) {
+                showMsg('msg-step-2', 'Ответ верный, но не сокращен. Сократи дробь!', 'error'); 
+            } else {
+                showMsg('msg-step-2', 'Ошибка умножения.', 'error');
+            }
+        }
+
+        // --- Step 3: Addition ---
+        function startStep3() {
+            const s3 = document.getElementById('step-3');
+            s3.classList.remove('hidden');
+            s3.classList.add('step-active');
+            
+            const el = document.getElementById('expression-display');
+            // Remove previous highlights
+            document.getElementById('part-f1').classList.remove('active-part', 'px-1');
+            document.getElementById('part-f1').classList.add('dimmed');
+            document.getElementById('part-m3').classList.remove('dimmed');
+            document.getElementById('part-m3').classList.add('active-part', 'px-2');
+            
+            const res2HTML = renderFraction(problem.step2.resN, problem.step2.resD);
+            document.getElementById('step-3-expr').innerHTML = 
+                `${res2HTML} <span class="operator">+</span> ${renderMixed(problem.M3.w, problem.M3.n, problem.M3.d)}`;
+
+            const d1 = problem.step2.resD;
+            const d2 = problem.M3.d;
+
+            if (d1 === d2) {
+                 document.getElementById('current-action-text').innerText = "3. Сложение (знаменатели равны)";
+                 document.getElementById('s3-lcd-block').classList.add('hidden'); 
+                 document.getElementById('s3-conv-block').classList.add('hidden');
+                 document.getElementById('s3-res-block').classList.remove('hidden');
+                 document.getElementById('s3-res-msg').innerText = "Сложи числа (знаменатели уже одинаковые):";
+                 setTimeout(() => document.getElementById('inp_s3_w').focus(), 100);
+            } else {
+                 document.getElementById('current-action-text').innerText = "3. Сложение с третьим числом";
+                 document.getElementById('s3-lcd-block').classList.remove('hidden');
+                 document.getElementById('s3-conv-block').classList.add('hidden');
+                 document.getElementById('s3-res-block').classList.add('hidden');
+                 document.getElementById('s3-res-msg').innerText = "Сложи числа:";
+            }
+        }
+
+        function checkStep3LCD() {
+            const val = parseInt(document.getElementById('inp_s3_lcd').value);
+            if (val === problem.step3.lcd) {
+                document.getElementById('inp_s3_lcd').disabled = true;
+                document.getElementById('btn-s3-lcd').classList.add('hidden');
+                
+                document.getElementById('s3-conv-block').classList.remove('hidden');
+                document.getElementById('s3-target-lcd').innerText = problem.step3.lcd;
+                document.getElementById('s3-w2').innerText = problem.M3.w;
+                document.querySelectorAll('.s3-denom-display').forEach(el => el.innerText = problem.step3.lcd);
+                
+                showMsg('msg-step-3', '', 'success');
+                setTimeout(() => document.getElementById('inp_s3_conv_n1').focus(), 100);
+            } else {
+                showMsg('msg-step-3', 'Неверный общий знаменатель.', 'error');
+            }
+        }
+
+        function checkStep3Conv() {
+            const n1 = parseInt(document.getElementById('inp_s3_conv_n1').value);
+            const n2 = parseInt(document.getElementById('inp_s3_conv_n2').value);
+            
+            if (n1 === problem.step3.convN1 && n2 === problem.step3.convN2) {
+                document.getElementById('inp_s3_conv_n1').disabled = true;
+                document.getElementById('inp_s3_conv_n2').disabled = true;
+                document.getElementById('btn-s3-conv').classList.add('hidden');
+                
+                document.getElementById('s3-res-block').classList.remove('hidden');
+                showMsg('msg-step-3', '', 'success');
+                setTimeout(() => document.getElementById('inp_s3_w').focus(), 100);
+            } else {
+                showMsg('msg-step-3', 'Ошибка в числителях.', 'error');
+            }
+        }
+
+        function checkStep3Res() {
+            const w = parseInt(document.getElementById('inp_s3_w').value) || 0;
+            const n = parseInt(document.getElementById('inp_s3_n').value);
+            const d = parseInt(document.getElementById('inp_s3_d').value);
+            
+            const userImpN = w * d + n;
+            const correctImpN = problem.step3.w * problem.step3.d + problem.step3.n;
+            const correctD = problem.step3.d;
+            
+            if (userImpN * correctD === correctImpN * d) {
+                const isProper = n < d;
+                const isSimplified = gcd(n, d) === 1;
+                
+                if (n === 0) {
+                     finishStep3();
+                     return;
+                }
+
+                if (isProper && isSimplified) {
+                    showMsg('msg-step-3', 'Верно! Ответ полный и правильный.', 'success');
+                    finishStep3();
+                } else {
+                    document.getElementById('inp_s3_w').disabled = true;
+                    document.getElementById('inp_s3_n').disabled = true;
+                    document.getElementById('inp_s3_d').disabled = true;
+                    document.getElementById('btn-s3-res').classList.add('hidden');
+                    
+                    showMsg('msg-step-3', 'Ответ верный, но его нужно упростить.', 'warning');
+                    
+                    document.getElementById('s3-simp-block').classList.remove('hidden');
+                    setTimeout(() => document.getElementById('inp_s3_simp_w').focus(), 100);
+                }
+            } else {
+                showMsg('msg-step-3', 'Ошибка в сложении.', 'error');
+            }
+        }
+
+        function checkStep3Simp() {
+            const w = parseInt(document.getElementById('inp_s3_simp_w').value) || 0;
+            const n = parseInt(document.getElementById('inp_s3_simp_n').value);
+            const d = parseInt(document.getElementById('inp_s3_simp_d').value);
+            
+            if (w === problem.step3.w && n === problem.step3.n && d === problem.step3.d) {
+                 showMsg('msg-step-3', 'Отлично! Теперь все правильно.', 'success');
+                 finishStep3();
+            } else {
+                 showMsg('msg-step-3', 'Не совсем. Убедись, что дробь несократима и правильная.', 'error');
+            }
+        }
+
+        function finishStep3() {
+            document.getElementById('step-3').classList.remove('step-active');
+            document.getElementById('step-3').classList.add('step-done');
+            score++;
+            document.getElementById('score').innerText = score;
+            document.getElementById('final-area').classList.remove('hidden');
+        }
+
+        generateProblem();
+
+    </script>
+</body>
+</html>
