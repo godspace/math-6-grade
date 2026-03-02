@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тренажёр: Баланс телефона</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f8ff;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            max-width: 650px;
+            width: 100%;
+            text-align: center;
+        }
+        h1 {
+            color: #2c3e50;
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+        /* Шкала прогресса */
+        .progress-container {
+            width: 100%;
+            background-color: #ecf0f1;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            height: 10px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: #3498db;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .level-text {
+            font-weight: bold;
+            color: #7f8c8d;
+            margin-bottom: 15px;
+            display: block;
+        }
+        .task-box {
+            background-color: #ecf0f1;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 18px;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        
+        /* Блок конструирования выражения */
+        .expression-section {
+            background-color: #fffde7;
+            border: 2px dashed #f1c40f;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .parts-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .part-btn {
+            background-color: #fff;
+            border: 2px solid #bdc3c7;
+            padding: 8px 15px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .part-btn:hover { background-color: #ecf0f1; border-color: #95a5a6; }
+        .operator-btn { background-color: #e8f8f5; border-color: #1abc9c; color: #16a085; }
+        
+        .built-expression {
+            font-size: 24px;
+            font-weight: bold;
+            min-height: 40px;
+            padding: 10px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+        }
+        .built-part {
+            background-color: #ecf0f1;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .built-part:hover { background-color: #e74c3c; color: white; }
+
+        /* Блок слайдера */
+        .slider-section {
+            display: none;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #ecf0f1;
+        }
+        .slider-container {
+            position: relative;
+            margin: 30px 0;
+            padding: 0 10px;
+        }
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]:focus { outline: none; }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 12px;
+            cursor: pointer;
+            background: linear-gradient(to right, #e74c3c 0%, #e74c3c 50%, #2ecc71 50%, #2ecc71 100%);
+            border-radius: 6px;
+            border: 1px solid #bdc3c7;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            border: 3px solid #fff;
+            height: 30px;
+            width: 30px;
+            border-radius: 50%;
+            background: #34495e;
+            cursor: pointer;
+            -webkit-appearance: none;
+            margin-top: -10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        .scale-marks {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #7f8c8d;
+        }
+        .current-value-display {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        /* Кнопки и уведомления */
+        .btn {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            margin: 5px;
+        }
+        .btn:hover { background-color: #27ae60; }
+        .btn-blue { background-color: #3498db; }
+        .btn-blue:hover { background-color: #2980b9; }
+        .btn-clear { background-color: #95a5a6; }
+        .btn-clear:hover { background-color: #7f8c8d; }
+        
+        .feedback {
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 15px;
+            min-height: 24px;
+        }
+        .correct { color: #2ecc71; }
+        .incorrect { color: #e74c3c; }
+    </style>
+    <script src="../../assets/analytics.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <h1>Мобильный баланс</h1>
+    
+    <div class="progress-container">
+        <div class="progress-bar" id="progress-bar"></div>
+    </div>
+    <span class="level-text" id="level-display">Задание 1 из 10</span>
+    
+    <div class="task-box" id="task-text">Загрузка задания...</div>
+
+    <div class="expression-section" id="expr-section">
+        <p style="margin-top:0; font-weight:bold; color:#f39c12;">Шаг 1: Составь математическое выражение</p>
+        <div class="parts-container" id="parts-container">
+            </div>
+        <div class="built-expression" id="built-expression">
+            </div>
+        <div>
+            <button class="btn btn-clear" onclick="clearExpression()">Сбросить</button>
+            <button class="btn btn-blue" onclick="checkExpression()">Далее (Проверить)</button>
+        </div>
+        <div class="feedback" id="expr-feedback"></div>
+    </div>
+
+    <div class="slider-section" id="slider-section">
+        <p style="margin-top:0; font-weight:bold; color:#2ecc71;">Шаг 2: Вычисли и установи баланс</p>
+        <div class="current-value-display">
+            На слайдере: <span id="current-val">0</span> руб.
+        </div>
+        <div class="slider-container">
+            <input type="range" id="balance-slider" min="-100" max="100" step="1" value="0">
+            <div class="scale-marks">
+                <span>-100</span><span>-50</span><span>0</span><span>50</span><span>100</span>
+            </div>
+        </div>
+        <div>
+            <button class="btn" id="check-slider-btn" onclick="checkSlider()">Ответить</button>
+            <button class="btn btn-blue" id="next-level-btn" style="display:none;" onclick="nextLevel()">Следующее задание</button>
+        </div>
+        <div class="feedback" id="slider-feedback"></div>
+    </div>
+</div>
+
+<script>
+    const TOTAL_LEVELS = 10;
+    let currentLevel = 1;
+    let targetBalance = 0;
+    let expectedExpression = [];
+    let userExpression = [];
+
+    // Элементы DOM
+    const progressBar = document.getElementById('progress-bar');
+    const levelDisplay = document.getElementById('level-display');
+    const taskText = document.getElementById('task-text');
+    const partsContainer = document.getElementById('parts-container');
+    const builtExpressionDiv = document.getElementById('built-expression');
+    const exprSection = document.getElementById('expr-section');
+    const exprFeedback = document.getElementById('expr-feedback');
+    
+    const sliderSection = document.getElementById('slider-section');
+    const slider = document.getElementById('balance-slider');
+    const currentValDisplay = document.getElementById('current-val');
+    const sliderFeedback = document.getElementById('slider-feedback');
+    const checkSliderBtn = document.getElementById('check-slider-btn');
+    const nextLevelBtn = document.getElementById('next-level-btn');
+
+    slider.addEventListener('input', function() {
+        currentValDisplay.innerText = this.value;
+    });
+
+    function getRandomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    function generateLevel(level) {
+        let text = "";
+        let numbers = [];
+        expectedExpression = [];
+        userExpression = [];
+        
+        // Обновление прогресса
+        progressBar.style.width = `${((level - 1) / TOTAL_LEVELS) * 100}%`;
+        levelDisplay.innerText = `Задание ${level} из ${TOTAL_LEVELS}`;
+
+        // Логика заданий
+        if (level === 1) {
+            let topUp = getRandomInt(15, 80);
+            targetBalance = topUp;
+            text = `Твой баланс равен <b>0 руб.</b> Ты пополнил счёт на <b>${topUp} руб.</b>`;
+            numbers = ['0', topUp.toString()];
+            expectedExpression = ['0', '+', topUp.toString()];
+        } 
+        else if (level === 2) {
+            let start = getRandomInt(40, 100);
+            let spend = getRandomInt(10, start - 5);
+            targetBalance = start - spend;
+            text = `На счету было <b>${start} руб.</b> Ты потратил <b>${spend} руб.</b> на местный звонок.`;
+            numbers = [start.toString(), spend.toString()];
+            expectedExpression = [start.toString(), '-', spend.toString()];
+        }
+        else if (level === 3) {
+            let spend = getRandomInt(15, 70);
+            targetBalance = -spend;
+            text = `Баланс <b>0 руб.</b> Ты взял в долг (обещанный платеж) <b>${spend} руб.</b>`;
+            numbers = ['0', spend.toString()];
+            expectedExpression = ['0', '-', spend.toString()];
+        }
+        // Начиная с 4 уровня - ОБЯЗАТЕЛЬНО умножение
+        else {
+            // Распределение: 60% уход глубже в минус, 20% из плюса в минус, 20% частичное погашение долга
+            let type = getRandomInt(1, 5);
+            
+            if (type <= 3) {
+                // ВЫЧИТАНИЕ ИЗ ОТРИЦАТЕЛЬНОГО (Долг увеличивается)
+                let start = getRandomInt(-50, -5);
+                let cost = getRandomInt(3, 15);
+                let mult = getRandomInt(2, 5);
+                
+                // Защита от выхода за пределы шкалы (-100)
+                while(start - (cost * mult) < -100) { 
+                    mult--; 
+                    if(mult < 2) { cost--; mult = 2; } 
+                }
+                
+                targetBalance = start - (cost * mult);
+                
+                if (type === 1) {
+                    text = `Твой баланс <b>${start} руб.</b> Оператор списывал абонентскую плату по <b>${cost} руб.</b> в течение <b>${mult} дней.</b>`;
+                } else if (type === 2) {
+                    text = `У тебя задолженность <b>${start} руб.</b> Ты отправил <b>${mult} платных SMS</b> стоимостью <b>${cost} руб.</b> каждое.`;
+                } else {
+                    text = `Баланс <b>${start} руб.</b> Телефон скачал обновления в роуминге: <b>${mult} МБ</b> по цене <b>${cost} руб/МБ.</b>`;
+                }
+                
+                numbers = [start.toString(), cost.toString(), mult.toString()];
+                expectedExpression = [start.toString(), '-', cost.toString(), '*', mult.toString()];
+            } 
+            else if (type === 4) {
+                // Плюс -> Минус (Длинный звонок)
+                let start = getRandomInt(10, 40);
+                let cost = getRandomInt(5, 15);
+                let mins = getRandomInt(3, 7);
+                while(start - (cost * mins) < -100) mins--; 
+                targetBalance = start - (cost * mins);
+                text = `Баланс <b>${start} руб.</b> Ты говорил <b>${mins} мин.</b> по тарифу <b>${cost} руб/мин.</b>`;
+                numbers = [start.toString(), cost.toString(), mins.toString()];
+                expectedExpression = [start.toString(), '-', cost.toString(), '*', mins.toString()];
+            }
+            else {
+                // Минус -> Плюс/Меньший минус (Пополнение частями)
+                let start = getRandomInt(-90, -50);
+                let payment = getRandomInt(10, 20);
+                let times = getRandomInt(2, 4);
+                while(start + (payment * times) > 100) times--;
+                targetBalance = start + (payment * times);
+                text = `У тебя задолженность <b>${start} руб.</b> Ты пополнил счет <b>${times} раза</b> по <b>${payment} руб.</b>`;
+                numbers = [start.toString(), payment.toString(), times.toString()];
+                expectedExpression = [start.toString(), '+', payment.toString(), '*', times.toString()];
+            }
+        }
+
+        taskText.innerHTML = text;
+
+        // Подготовка кнопок-запчастей
+        let parts = [...numbers, '+', '-', '*'];
+        if (level > 3 && !parts.includes(':')) parts.push(':'); // Добавляем деление как ложный вариант
+        
+        partsContainer.innerHTML = '';
+        shuffleArray(parts).forEach(part => {
+            let btn = document.createElement('button');
+            btn.innerText = part;
+            btn.className = ['+', '-', '*', ':'].includes(part) ? 'part-btn operator-btn' : 'part-btn';
+            btn.onclick = () => addPartToExpression(part);
+            partsContainer.appendChild(btn);
+        });
+
+        // Сброс UI
+        renderExpression();
+        exprSection.style.display = 'block';
+        sliderSection.style.display = 'none';
+        exprFeedback.innerText = '';
+        sliderFeedback.innerText = '';
+        checkSliderBtn.style.display = 'inline-block';
+        nextLevelBtn.style.display = 'none';
+        slider.disabled = false;
+        
+        let initialVal = parseInt(expectedExpression[0]);
+        slider.value = isNaN(initialVal) ? 0 : initialVal;
+        currentValDisplay.innerText = slider.value;
+    }
+
+    function addPartToExpression(part) {
+        userExpression.push(part);
+        renderExpression();
+    }
+
+    function removePart(index) {
+        userExpression.splice(index, 1);
+        renderExpression();
+    }
+
+    function clearExpression() {
+        userExpression = [];
+        renderExpression();
+    }
+
+    function renderExpression() {
+        builtExpressionDiv.innerHTML = '';
+        if (userExpression.length === 0) {
+            builtExpressionDiv.innerHTML = '<span style="color:#bdc3c7; font-weight:normal;">Нажимай на запчасти выше...</span>';
+            return;
+        }
+        userExpression.forEach((part, index) => {
+            let span = document.createElement('span');
+            span.innerText = part;
+            span.className = 'built-part';
+            span.onclick = () => removePart(index);
+            builtExpressionDiv.appendChild(span);
+        });
+    }
+
+    function checkExpression() {
+        let userStr = userExpression.join('');
+        let expectedStr = expectedExpression.join('');
+        
+        // Допускаем перестановку множителей
+        let altExpectedStr = expectedStr;
+        if (expectedExpression.includes('*')) {
+            let mulIdx = expectedExpression.indexOf('*');
+            let altArray = [...expectedExpression];
+            altArray[mulIdx - 1] = expectedExpression[mulIdx + 1];
+            altArray[mulIdx + 1] = expectedExpression[mulIdx - 1];
+            altExpectedStr = altArray.join('');
+        }
+
+        if (userStr === expectedStr || userStr === altExpectedStr) {
+            exprFeedback.innerText = "Выражение составлено верно!";
+            exprFeedback.className = "feedback correct";
+            partsContainer.style.pointerEvents = 'none';
+            partsContainer.style.opacity = '0.5';
+            setTimeout(() => {
+                sliderSection.style.display = 'block';
+                sliderSection.scrollIntoView({ behavior: 'smooth' });
+            }, 500);
+        } else {
+            exprFeedback.innerText = "Ошибка в выражении. Внимательно перечитай условие!";
+            exprFeedback.className = "feedback incorrect";
+        }
+    }
+
+    function checkSlider() {
+        let userAnswer = parseInt(slider.value);
+        if (userAnswer === targetBalance) {
+            sliderFeedback.innerText = "Верно! Баланс установлен правильно.";
+            sliderFeedback.className = "feedback correct";
+            checkSliderBtn.style.display = "none";
+            nextLevelBtn.style.display = "inline-block";
+            slider.disabled = true;
+            
+            if (currentLevel === TOTAL_LEVELS) {
+                progressBar.style.width = '100%';
+                nextLevelBtn.innerText = "Завершить тренажёр";
+            }
+        } else {
+            sliderFeedback.innerText = `Неверно. Вы указали ${userAnswer} руб. Посчитай ещё раз!`;
+            sliderFeedback.className = "feedback incorrect";
+        }
+    }
+
+    function nextLevel() {
+        if (currentLevel < TOTAL_LEVELS) {
+            currentLevel++;
+            partsContainer.style.pointerEvents = 'auto';
+            partsContainer.style.opacity = '1';
+            generateLevel(currentLevel);
+        } else {
+            alert("Поздравляем! Тренажёр полностью пройден!");
+            currentLevel = 1;
+            partsContainer.style.pointerEvents = 'auto';
+            partsContainer.style.opacity = '1';
+            generateLevel(currentLevel);
+        }
+    }
+
+    window.onload = () => generateLevel(currentLevel);
+
+</script>
+</body>
+</html>
