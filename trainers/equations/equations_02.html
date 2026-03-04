@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тренажёр: Решение уравнений (6 класс)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            background-color: #f5f5f5;
+            /* Отступ сверху, чтобы контент не прятался под закрепленной панелью */
+            padding: 80px 20px 40px; 
+            font-size: 14pt;
+            line-height: 1.5;
+            color: #333;
+        }
+
+        /* Закрепленная панель прогресса */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: #ffffff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .progress-text {
+            font-weight: bold;
+            font-size: 14pt;
+            color: #2c3e50;
+            min-width: 150px;
+        }
+
+        .progress-wrapper {
+            flex-grow: 1;
+            height: 12px;
+            background: #e0e0e0;
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 0 20px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #27ae60;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        /* Основной контейнер */
+        .workbook {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 30px 40px;
+            border-radius: 12px;
+            border-top: 8px solid #2c3e50;
+        }
+
+        .task-container {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .task-container.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            font-size: 20pt;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #2c3e50;
+            padding-bottom: 10px;
+        }
+
+        .problem-box {
+            background-color: #e8f4f8;
+            padding: 15px 20px;
+            border-left: 5px solid #3498db;
+            margin-bottom: 30px;
+            font-size: 14pt;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .step {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fafafa;
+            display: none;
+        }
+
+        .step.active {
+            display: block;
+            animation: fadeIn 0.4s;
+        }
+
+        .step-title {
+            font-weight: bold;
+            font-size: 14pt;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            border-bottom: 1px dashed #ccc;
+            padding-bottom: 5px;
+        }
+
+        .expression {
+            margin: 10px 0;
+            font-size: 14pt;
+        }
+
+        .brief-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        .brief-table td {
+            padding: 8px 5px;
+            border: none;
+            border-bottom: 1px solid #ddd;
+        }
+        .brief-table td:first-child { width: 35%; font-weight: bold; }
+
+        .input-field {
+            width: 65px;
+            border: none;
+            border-bottom: 2px solid #3498db;
+            margin: 0 5px;
+            height: 1.8em;
+            font-size: 14pt;
+            text-align: center;
+            background: transparent;
+            outline: none;
+            transition: all 0.3s;
+        }
+        .input-large { width: 90px; }
+
+        .input-field:focus {
+            border-bottom: 2px solid #e67e22;
+            background-color: #fff3e0;
+        }
+
+        .input-field.correct {
+            border-bottom: 2px solid #27ae60;
+            background-color: #e8f8f5;
+            color: #27ae60;
+            font-weight: bold;
+            pointer-events: none;
+        }
+
+        .input-field.wrong {
+            border-bottom: 2px solid #e74c3c;
+            background-color: #fdedec;
+        }
+
+        .check-btn {
+            margin-top: 15px;
+            padding: 8px 16px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 12pt;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .check-btn:hover { background-color: #2980b9; }
+        
+        .next-task-btn {
+            margin-top: 20px;
+            padding: 12px 24px;
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 14pt;
+            cursor: pointer;
+            font-weight: bold;
+            display: inline-block;
+            transition: 0.3s;
+        }
+        .next-task-btn:hover { background-color: #219150; }
+
+        .success-msg {
+            color: #27ae60;
+            font-weight: bold;
+            margin-left: 15px;
+            display: none;
+        }
+
+        .final-answer {
+            text-align: center;
+            font-size: 15pt;
+            padding: 20px;
+            background-color: #fcf3cf;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+            border: 2px solid #f1c40f;
+        }
+        
+        .completion-screen {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        .completion-screen h1 { color: #27ae60; font-size: 28pt; margin-bottom: 20px; }
+    </style>
+<script src="../../assets/analytics.js"></script>
+</head>
+<body>
+
+<div class="top-bar">
+    <div class="progress-text" id="progress-text">Задача 1 из 6</div>
+    <div class="progress-wrapper">
+        <div class="progress-fill" id="progress-fill"></div>
+    </div>
+</div>
+
+<div class="workbook">
+
+    <div class="task-container active" id="task1">
+        <h2>Лист 1. Задача на части</h2>
+        <div class="problem-box">
+            <strong>Условие:</strong> Для приготовления компота берут <span class="v-a"></span> части яблок, <span class="v-b"></span> части изюма и <span class="v-c"></span> частей чернослива. Всего получилось <span class="v-T"></span> г смеси. Сколько граммов изюма взяли?
+        </div>
+        
+        <div class="step active">
+            <div class="step-title">1. Обозначь неизвестное</div>
+            <div class="expression">Пусть масса одной части равна <input type="text" class="input-field i-x"> г.</div>
+            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <span class="success-msg">✓ Верно!</span>
+        </div>
+
+        <div class="step">
+            <div class="step-title">2. Вырази массы продуктов</div>
+            <table class="brief-table">
+                <tr><td>Яблоки:</td><td><span class="v-a"></span> · <input type="text" class="input-field i-x"> = <input type="text" class="input-field i-ax"> г</td></tr>
+                <tr><td>Изюм:</td><td><span class="v-b"></span> · <input type="text" class="input-field i-x"> = <input type="text" class="input-field i-bx"> г</td></tr>
+                <tr><td>Чернослив:</td><td><span class="v-c"></span> · <input type="text" class="input-field i-x"> = <input type="text" class="input-field i-cx"> г</td></tr>
+            </table>
+            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <span class="success-msg">✓ Верно!</span>
+        </div>
+
+        <div class="step">
+            <div class="step-title">3. Составь уравнение (сумма масс равна общей массе)</div>
+            <div class="expression"><input type="text" class="input-field i-ax"> + <input type="text" class="input-field i-bx"> + <input type="text" class="input-field i-cx"> = <span class="v-T"></span></div>
+            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <span class="success-msg">✓ Верно!</span>
+        </div>
+
+        <div class="step">
+            <div class="step-title">4. Приведи подобные слагаемые</div>
+            <div class="expression">( <input type="text" class="input-field i-a"> + <input type="text" class="input-field i-b"> + <input type="text" class="input-field i-c"> ) · x = <span class="v-T"></span></div>
+            <div class="expression"><input type="text" class="input-field i-sum_abc"> · x = <span class="v-T"></span></div>
+            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <span class="success-msg">✓ Верно!</span>
+        </div>
+
+        <div class="step">
+            <div class="step-title">5. Найди x (одну часть)</div>
+            <div class="expression">x = <span class="v-T"></span> : <input type="text" class="input-field i-sum_abc"> = <input type="text" class="input-field input-large i-val_x"></div>
+            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <span class="success-msg">✓ Верно!</span>
+        </div>
+
+        <div class="step">
+            <div class="step-title">6. Найди массу изюма</div>
+            <div class="expression">Изюм: <span class="v-b"></span> · <input type="text" class="input-field input-large i-val_x"> = <input type="text" class="input-field input-large i-val_bx"> г</div>
+            <button class="check-btn" onclick="checkStep(this)">Готово!</button>
+        </div>
+
+        <div class="final-answer">
+            <strong>Ответ:</strong> изюма <strong><span class="v-val_bx"></span></strong> г.<br>
+            <button class="next-task-btn" onclick="nextTask()">Перейти к следующей задаче</button>
+        </div>
+    </div>
+
+    <div class="task-container" id="task2">
+        <h2>Лист 2. Задача на движение</h2>
+        <div class="problem-box">
+            <strong>Условие:</strong> Из двух городов, расстояние между которыми <span class="v-D"></span> км, выехали навстречу друг другу два поезда. Скорость одного неизвестна, а скорость другого на <span class="v-dV"></span> км/ч больше. Они встретились через <span class="v-t"></span> часа. Найдите скорость каждого поезда.
+        </div>
+
+        <div class="step active">
+            <div class="step-title">1. Обозначь неизвестное</div>
+            <div class="expression">Пусть скорость первого поезда <input type="text" class="input-field i-x"> км/ч.</div>
+            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <span class="success-msg">✓ Верно!</span>
+        </div>
+
+        <div class="step">
+            <div class="step-title">2. Вырази скорость второго и путь каждого</div>
+            <table class="brief-table">
+                <tr><td>Скорость второго:</td><td><input type="text" class="input-field i-x"> + <span class="v-dV"></span> км/ч</td></tr>
+                <tr><td>Путь первого за <span class="v-t"></span> ч:</td><td><span class="v-t"></span> · <input type="text" class="input-field i-x"> км</td></tr>
+                <tr><td>Путь второго за <span class="v-t"></span> ч:</td><td><span class="v-t"></span> · (<input type="text" class="input-field i-x"> + <span class="v-dV"></span>) км</td></tr>
+            </table>
+            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <span class="success-msg">✓ Верно!</span>
+        </div>
+
+        <div class="step">
+            <div class="step-title">3. Составь уравнение (сумма путей равна расстоянию)</div>
+            <div class="expression"><span class="v-t"></span>·<input type="text" class="input-field i-x"> + <span class="v-t"></span>·(<input type="text" class="input-field i-x"> + <span class="v-dV"></span>) = <span class="v-D"></span></div>
+            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <span class="success-msg">✓ Верно!</span>
+        </div>
+
+        <div class="step">
+            <div class="step-title">4. Раскрой скобки и приведи подобные</div>
+            <div class="expression"><input type="text" class="input-field i-tx"> + <input type="text" class="input-field i-tx"> + <span class="v-tdV"></span> = <span class="v-D"></span></div>
+            <div class="expression">(<input type="text" class="input-field i-t"> + <input type="text" class="input-field i-t">) · x + <span class="v-tdV"></span> = <span class="v-D"></span></div>
+            <div class="expression"><input type="text" class="input-field i-2t">·x + <span class="v-tdV"></span> = <span class="v-D"></span></div>
+            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <span class="success-msg">✓ Верно!</span>
+        </div>
+
+        <div class="step">
+            <div class="step-title">5. Реши уравнение</div>
+            <div class="expression"><input type="text" class="input-field i-2t">·x = <span class="v-D"></span> – <span class="v-tdV"></span></div>
+            <div class="expression"><input type="text" class="input-field i-2t">·x = <span class="v-D_minus_tdV"></span></div>
+            <div class="expression">x = <span class="v-D_minus_tdV"></span> : <input type="text" class="input-field i-2t"> = <input type="text" class="input-field i-val_x"></div>
+            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <span class="success-msg">✓ Верно!</span>
+        </div>
+
+        <div class="step">
+            <div class="step-title">6. Найди скорости</div>
+            <div class="expression">Первый поезд: <input type="text" class="input-field i-val_x"> км/ч</div>
+            <div class="expression">Второй поезд: <input type="text" class="input-field i-val_x"> + <span class="v-dV"></span> = <input type="text" class="input-field i-val_v2"> км/ч</div>
+            <button class="check-btn" onclick="checkStep(this)">Готово!</button>
+        </div>
+
+        <div class="final-answer">
+            <strong>Ответ:</strong> скорости поездов <strong><span class="v-val_x"></span></strong> км/ч и <strong><span class="v-val_v2"></span></strong> км/ч.<br>
+            <button class="next-task-btn" onclick="nextTask()">Перейти к следующей задаче</button>
+        </div>
+    </div>
+
+    <div class="task-container" id="task3">
+        <h2>Лист 3. Задача на равенство</h2>
+        <div class="problem-box">
+            <strong>Условие:</strong> В первой корзине яблок в <span class="v-m"></span> раза меньше, чем во второй. Если из второй переложить в первую <span class="v-k"></span> яблок, то яблок в корзинах станет поровну. Сколько яблок было первоначально?
+        </div>
+
+        <div class="step active">
+            <div class="step-title">1. Обозначь неизвестное</div>
+            <div class="expression">Пусть в первой корзине <input type="text" class="input-field i-x"> яблок.</div>
+            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <span class="success-msg">✓ Верно!</span>
+        </div>
+
+        <div class="step">
+            <div class="step-title">2. Вырази количество во второй корзине</div>
+            <div class="expression">Во второй корзине: <span class="v-m"></span> · <input type="text" class="input-field i-x"> = <input type="text" class="input-field i-mx"> ябл.</div>
+            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <span class="success-msg">✓ Верно!</span>
+        </div>
+
+        <div class="step">
+            <div class="step-title">3. Что станет после перекладывания?</div>
+            <table class="brief-table">
+                <tr><td>В первой станет:</td><td><input type="text" class="input-field i-x"> + <span class="v-k"></span></td></tr>
+                <tr><td>Во второй станет:</td><td><input type="text" class="input-field i-mx"> – <span class="v-k"></span></td></tr>
+            </table>
+            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <span class="success-msg">✓ Верно!</span>
+        </div>
+
+        <div class="step">
+            <div class="step-title">4. Составь уравнение (стало поровну)</div>
+            <div class="expression"><input type="text" class="input-field i-x"> + <span class="v-k"></span> = <input type="text" class="input-field i-mx"> – <span class="v-k"></span></div>
+            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <span class="success-msg">✓ Верно!</span>
+        </div>
+
+        <div class="step">
+            <div class="step-title">5. Перенеси слагаемые с "x" влево, числа вправо</div>
+            <div class="expression"><input type="text" class="input-field i-x"> – <input type="text" class="input-field i-mx"> = –<span class="v-k"></span> – <span class="v-k"></span></div>
+            <div class="expression">( <input type="text" class="input-field i-1"> – <input type="text" class="input-field i-m"> )·x = –<span class="v-2k"></span></div>
+            <div class="expression"><input type="text" class="input-field i-1_minus_m">·x = –<span class="v-2k"></span></div>
+            <div class="expression">x = (–<span class="v-2k"></span>) : (<input type="text" class="input-field i-1_minus_m">) = <input type="text" class="input-field i-val_x"></div>
+            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <span class="success-msg">✓ Верно!</span>
+        </div>
+
+        <div class="step">
+            <div class="step-title">6. Найди количество яблок</div>
+            <div class="expression">Первая корзина: <input type="text" class="input-field i-val_x"> ябл.</div>
+            <div class="expression">Вторая корзина: <span class="v-m"></span>·<input type="text" class="input-field i-val_x"> = <input type="text" class="input-field i-val_mx"> ябл.</div>
+            <button class="check-btn" onclick="checkStep(this)">Готово!</button>
+        </div>
+
+        <div class="final-answer">
+            <strong>Ответ:</strong> в первой <span class="v-val_x"></span> ябл., во второй <span class="v-val_mx"></span> ябл.<br>
+            <button class="next-task-btn" onclick="nextTask()">Перейти к следующей задаче</button>
+        </div>
+    </div>
+
+    <div class="task-container" id="task4">
+        <h2>Лист 4. Геометрическая задача</h2>
+        <div class="problem-box">
+            <strong>Условие:</strong> Длина отрезка AB равна <span class="v-L"></span> см. Точка C делит его на два отрезка AC и CB. Отрезок AC на <span class="v-d"></span> см длиннее отрезка CB. Найдите длину отрезка CB.
+        </div>
+
+        <div class="step active">
+            <div class="step-title">1. Обозначь меньший отрезок</div>
+            <div class="expression">Пусть длина CB = <input type="text" class="input-field i-x"> см.</div>
+            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <span class="success-msg">✓ Верно!</span>
+        </div>
+
+        <div class="step">
+            <div class="step-title">2. Вырази длину AC</div>
+            <div class="expression">AC = <input type="text" class="input-field input-large i-x_plus_d"> см.</div>
+            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <span class="success-msg">✓ Верно!</span>
+        </div>
+
+        <div class="step">
+            <div class="step-title">3. Составь уравнение (сумма отрезков равна AB)</div>
+            <div class="expression"><input type="text" class="input-field i-x"> + (<input type="text" class="input-field input-large i-x_plus_d">) = <span class="v-L"></span></div>
+            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <span class="success-msg">✓ Верно!</span>
+        </div>
+
+        <div class="step">
+            <div class="step-title">4. Приведи подобные</div>
+            <div class="expression"><input type="text" class="input-field i-x"> + <input type="text" class="input-field i-x"> + <span class="v-d"></span> = <span class="v-L"></span></div>
+            <div class="expression"><input type="text" class="input-field i-2">·x + <span class="v-d"></span> = <span class="v-L"></span></div>
+            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <span class="success-msg">✓ Верно!</span>
+        </div>
+
+        <div class="step">
+            <div class="step-title">5. Реши уравнение</div>
+            <div class="expression"><input type="text" class="input-field i-2">·x = <span class="v-L"></span> – <span class="v-d"></span></div>
+            <div class="expression"><input type="text" class="input-field i-2">·x = <span class="v-L_minus_d"></span></div>
+            <div class="expression">x = <span class="v-L_minus_d"></span> : <input type="text" class="input-field i-2"> = <input type="text" class="input-field i-val_x"></div>
+            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <span class="success-msg">✓ Верно!</span>
+        </div>
+
+        <div class="step">
+            <div class="step-title">6. Найди длины отрезков</div>
+            <div class="expression">CB = <input type="text" class="input-field i-val_x"> см</div>
+            <div class="expression">AC = <input type="text" class="input-field i-val_x"> + <span class="v-d"></span> = <input type="text" class="input-field i-val_AC"> см</div>
+            <button class="check-btn" onclick="checkStep(this)">Готово!</button>
+        </div>
+
+        <div class="final-answer">
+            <strong>Ответ:</strong> длина CB = <strong><span class="v-val_x"></span></strong> см.<br>
+            <button class="next-task-btn" onclick="nextTask()">Перейти к следующей задаче</button>
+        </div>
+    </div>
+
+    <div class="task-container" id="task5">
+        <h2>Лист 5. Задача на стоимость</h2>
+        <div class="problem-box">
+            <strong>Условие:</strong> За ручку, карандаш и линейку заплатили <span class="v-C"></span> рублей. Ручка стоит в <span class="v-m"></span> раза дороже карандаша, а линейка стоит на <span class="v-d"></span> рублей дешевле карандаша. Найдите цену карандаша.
+        </div>
+
+        <div class="step active">
+            <div class="step-title">1. Обозначь цену карандаша</div>
+            <div class="expression">Пусть карандаш стоит <input type="text" class="input-field i-x"> руб.</div>
+            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <span class="success-msg">✓ Верно!</span>
+        </div>
+
+        <div class="step">
+            <div class="step-title">2. Вырази цены остальных предметов</div>
+            <table class="brief-table">
+                <tr><td>Ручка:</td><td><span class="v-m"></span> · <input type="text" class="input-field i-x"> руб.</td></tr>
+                <tr><td>Линейка:</td><td><input type="text" class="input-field input-large i-x_minus_d"> руб.</td></tr>
+            </table>
+            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <span class="success-msg">✓ Верно!</span>
+        </div>
+
+        <div class="step">
+            <div class="step-title">3. Составь уравнение (сумма равна <span class="v-C"></span>)</div>
+            <div class="expression"><input type="text" class="input-field i-x"> + <input type="text" class="input-field i-mx"> + (<input type="text" class="input-field input-large i-x_minus_d">) = <span class="v-C"></span></div>
+            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <span class="success-msg">✓ Верно!</span>
+        </div>
+
+        <div class="step">
+            <div class="step-title">4. Приведи подобные</div>
+            <div class="expression"><input type="text" class="input-field i-x"> + <input type="text" class="input-field i-mx"> + <input type="text" class="input-field i-x"> – <span class="v-d"></span> = <span class="v-C"></span></div>
+            <div class="expression">( <input type="text" class="input-field i-1"> + <input type="text" class="input-field i-m"> + <input type="text" class="input-field i-1"> )·x – <span class="v-d"></span> = <span class="v-C"></span></div>
+            <div class="expression"><input type="text" class="input-field i-m_plus_2">·x – <span class="v-d"></span> = <span class="v-C"></span></div>
+            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <span class="success-msg">✓ Верно!</span>
+        </div>
+
+        <div class="step">
+            <div class="step-title">5. Реши уравнение</div>
+            <div class="expression"><input type="text" class="input-field i-m_plus_2">·x = <span class="v-C"></span> + <span class="v-d"></span></div>
+            <div class="expression"><input type="text" class="input-field i-m_plus_2">·x = <span class="v-C_plus_d"></span></div>
+            <div class="expression">x = <span class="v-C_plus_d"></span> : <input type="text" class="input-field i-m_plus_2"> = <input type="text" class="input-field i-val_x"></div>
+            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <span class="success-msg">✓ Верно!</span>
+        </div>
+
+        <div class="step">
+            <div class="step-title">6. Найди цену каждого предмета</div>
+            <div class="expression">Карандаш: <input type="text" class="input-field i-val_x"> руб.</div>
+            <div class="expression">Ручка: <span class="v-m"></span>·<input type="text" class="input-field i-val_x"> = <input type="text" class="input-field i-val_mx"> руб.</div>
+            <div class="expression">Линейка: <input type="text" class="input-field i-val_x"> – <span class="v-d"></span> = <input type="text" class="input-field i-val_ruler"> руб.</div>
+            <button class="check-btn" onclick="checkStep(this)">Готово!</button>
+        </div>
+
+        <div class="final-answer">
+            <strong>Ответ:</strong> карандаш стоит <strong><span class="v-val_x"></span></strong> руб.<br>
+            <button class="next-task-btn" onclick="nextTask()">Перейти к последней задаче</button>
+        </div>
+    </div>
+
+    <div class="task-container" id="task6">
+        <h2>Лист 6. Задача на покупку</h2>
+        <div class="problem-box">
+            <strong>Условие:</strong> За <span class="v-n1"></span> тетрадей и <span class="v-n2"></span> ручек заплатили <span class="v-C"></span> рублей. Тетрадь дороже ручки на <span class="v-d"></span> рублей. Найдите цену тетради и ручки.
+        </div>
+
+        <div class="step active">
+            <div class="step-title">1. Обозначь неизвестное</div>
+            <div class="expression">Пусть ручка стоит <input type="text" class="input-field i-x"> руб.</div>
+            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <span class="success-msg">✓ Верно!</span>
+        </div>
+
+        <div class="step">
+            <div class="step-title">2. Вырази цену тетради</div>
+            <div class="expression">Тетрадь стоит <input type="text" class="input-field input-large i-x_plus_d"> руб.</div>
+            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <span class="success-msg">✓ Верно!</span>
+        </div>
+
+        <div class="step">
+            <div class="step-title">3. Вырази стоимость всей покупки</div>
+            <table class="brief-table">
+                <tr><td>Стоимость <span class="v-n1"></span> тетрадей:</td><td><span class="v-n1"></span> · (<input type="text" class="input-field input-large i-x_plus_d">) руб.</td></tr>
+                <tr><td>Стоимость <span class="v-n2"></span> ручек:</td><td><span class="v-n2"></span> · <input type="text" class="input-field i-x"> руб.</td></tr>
+            </table>
+            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <span class="success-msg">✓ Верно!</span>
+        </div>
+
+        <div class="step">
+            <div class="step-title">4. Составь уравнение</div>
+            <div class="expression"><span class="v-n1"></span>·(<input type="text" class="input-field input-large i-x_plus_d">) + <span class="v-n2"></span>·<input type="text" class="input-field i-x"> = <span class="v-C"></span></div>
+            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <span class="success-msg">✓ Верно!</span>
+        </div>
+
+        <div class="step">
+            <div class="step-title">5. Раскрой скобки и приведи подобные</div>
+            <div class="expression"><input type="text" class="input-field i-n1x"> + <input type="text" class="input-field input-large i-n1d"> + <input type="text" class="input-field i-n2x"> = <span class="v-C"></span></div>
+            <div class="expression">(<input type="text" class="input-field i-n1"> + <input type="text" class="input-field i-n2">)·x + <span class="v-n1d"></span> = <span class="v-C"></span></div>
+            <div class="expression"><input type="text" class="input-field i-sum_nx"> + <span class="v-n1d"></span> = <span class="v-C"></span></div>
+            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <span class="success-msg">✓ Верно!</span>
+        </div>
+
+        <div class="step">
+            <div class="step-title">6. Реши уравнение</div>
+            <div class="expression"><input type="text" class="input-field i-sum_nx"> = <span class="v-C"></span> – <span class="v-n1d"></span></div>
+            <div class="expression"><input type="text" class="input-field i-sum_nx"> = <span class="v-C_minus_n1d"></span></div>
+            <div class="expression">x = <span class="v-C_minus_n1d"></span> : <input type="text" class="input-field i-sum_n"> = <input type="text" class="input-field i-val_x"></div>
+            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <span class="success-msg">✓ Верно!</span>
+        </div>
+
+        <div class="step">
+            <div class="step-title">7. Найди цены</div>
+            <div class="expression">Ручка: <input type="text" class="input-field i-val_x"> руб.</div>
+            <div class="expression">Тетрадь: <input type="text" class="input-field i-val_x"> + <span class="v-d"></span> = <input type="text" class="input-field i-val_note"> руб.</div>
+            <button class="check-btn" onclick="checkStep(this)">Завершить!</button>
+        </div>
+
+        <div class="final-answer">
+            <strong>Ответ:</strong> ручка стоит <span class="v-val_x"></span> руб., тетрадь стоит <span class="v-val_note"></span> руб.<br>
+            <button class="next-task-btn" onclick="finishAll()">Завершить тренажёр</button>
+        </div>
+    </div>
+
+    <div class="completion-screen" id="completion-screen">
+        <h1>🎉 Поздравляем! 🎉</h1>
+        <p>Вы успешно решили все 6 задач тренажёра и отлично потренировали уравнения!</p>
+    </div>
+
+</div>
+
+<script>
+    let currentTask = 1;
+    const totalTasks = 6;
+
+    // Вспомогательная функция внедрения данных в DOM
+    function inject(taskId, vars) {
+        for (let key in vars) {
+            // Заполняем текст
+            document.querySelectorAll(`#${taskId} .v-${key}`).forEach(el => el.textContent = vars[key]);
+            // Устанавливаем правильные ответы (data-ans)
+            document.querySelectorAll(`#${taskId} .i-${key}`).forEach(el => el.setAttribute('data-ans', vars[key]));
+        }
+    }
+
+    // Генерация всех случайных данных (ответы всегда целые)
+    function initAllTasks() {
+        // --- Задача 1 ---
+        let t1_a = Math.floor(Math.random()*3)+2; 
+        let t1_b = Math.floor(Math.random()*3)+2; 
+        let t1_c = Math.floor(Math.random()*4)+4; 
+        let t1_x = (Math.floor(Math.random()*15)+5)*10; 
+        let t1_T = (t1_a + t1_b + t1_c) * t1_x;
+        inject('task1', {
+            'a': t1_a, 'b': t1_b, 'c': t1_c, 'T': t1_T, 'x': 'x', 'val_x': t1_x,
+            'ax': t1_a+'x', 'bx': t1_b+'x', 'cx': t1_c+'x',
+            'val_ax': t1_a*t1_x, 'val_bx': t1_b*t1_x, 'val_cx': t1_c*t1_x,
+            'sum_abc': t1_a + t1_b + t1_c
+        });
+
+        // --- Задача 2 ---
+        let t2_t = Math.floor(Math.random()*3)+2; 
+        let t2_dV = (Math.floor(Math.random()*3)+2)*5; 
+        let t2_x = (Math.floor(Math.random()*7)+10)*5; 
+        let t2_D = t2_t*t2_x + t2_t*(t2_x + t2_dV);
+        inject('task2', {
+            'D': t2_D, 'dV': t2_dV, 't': t2_t, 'x': 'x', 'val_x': t2_x,
+            'tx': t2_t+'x', 'tdV': t2_t*t2_dV, '2t': 2*t2_t,
+            'D_minus_tdV': t2_D - t2_t*t2_dV, 'val_v2': t2_x + t2_dV
+        });
+
+        // --- Задача 3 ---
+        let t3_m = Math.floor(Math.random()*2)+4; // 4 или 5
+        let t3_x = (Math.floor(Math.random()*4)+2)*10; 
+        let t3_k = (t3_m - 1) * t3_x / 2; 
+        inject('task3', {
+            'm': t3_m, 'k': t3_k, 'x': 'x', 'mx': t3_m+'x',
+            '1': 1, '2k': 2*t3_k, '1_minus_m': 1 - t3_m,
+            'val_x': t3_x, 'val_mx': t3_m*t3_x
+        });
+
+        // --- Задача 4 ---
+        let t4_d = Math.floor(Math.random()*6)+3; 
+        let t4_x = Math.floor(Math.random()*15)+10; 
+        let t4_L = 2*t4_x + t4_d;
+        inject('task4', {
+            'L': t4_L, 'd': t4_d, 'x': 'x', 'x_plus_d': 'x+'+t4_d,
+            '2': 2, 'L_minus_d': t4_L - t4_d,
+            'val_x': t4_x, 'val_AC': t4_x + t4_d
+        });
+
+        // --- Задача 5 ---
+        let t5_m = Math.floor(Math.random()*3)+2; 
+        let t5_d = (Math.floor(Math.random()*3)+2)*5; 
+        let t5_x = t5_d + (Math.floor(Math.random()*5)+1)*5; 
+        let t5_C = (t5_m + 2)*t5_x - t5_d;
+        inject('task5', {
+            'C': t5_C, 'm': t5_m, 'd': t5_d, 'x': 'x', 'mx': t5_m+'x',
+            'x_minus_d': 'x-'+t5_d, '1': 1, 'm_plus_2': t5_m + 2,
+            'C_plus_d': t5_C + t5_d, 'val_x': t5_x,
+            'val_mx': t5_m*t5_x, 'val_ruler': t5_x - t5_d
+        });
+
+        // --- Задача 6 ---
+        let t6_n1 = Math.floor(Math.random()*4)+2; 
+        let t6_n2 = Math.floor(Math.random()*4)+3; 
+        let t6_d = (Math.floor(Math.random()*5)+2)*5; 
+        let t6_x = (Math.floor(Math.random()*6)+3)*5; 
+        let t6_C = t6_n1*(t6_x + t6_d) + t6_n2*t6_x;
+        inject('task6', {
+            'n1': t6_n1, 'n2': t6_n2, 'C': t6_C, 'd': t6_d,
+            'x': 'x', 'x_plus_d': 'x+'+t6_d,
+            'n1x': t6_n1+'x', 'n1d': t6_n1*t6_d, 'n2x': t6_n2+'x',
+            'sum_nx': (t6_n1+t6_n2)+'x', 'sum_n': t6_n1+t6_n2,
+            'C_minus_n1d': t6_C - t6_n1*t6_d, 'val_x': t6_x,
+            'val_note': t6_x + t6_d
+        });
+
+        updateProgress();
+    }
+
+    // Очистка ввода от пробелов, знаков умножения и кириллицы
+    function cleanStr(str) {
+        return str.trim().toLowerCase().replace(/х/g, 'x').replace(/\s+/g, '').replace(/\*/g, '');
+    }
+
+    // Проверка одного шага
+    function checkStep(btn) {
+        const step = btn.closest('.step');
+        const inputs = step.querySelectorAll('.input-field');
+        let allCorrect = true;
+
+        inputs.forEach(inp => {
+            const expected = cleanStr(inp.getAttribute('data-ans'));
+            const actual = cleanStr(inp.value);
+
+            let isCorrect = (actual === expected);
+            
+            // Засчитываем, если просят x+5, а ввели 5+x
+            if (!isCorrect && expected.includes('+')) {
+                let parts = expected.split('+');
+                if (parts.length === 2 && actual === parts[1] + '+' + parts[0]) {
+                    isCorrect = true;
+                }
+            }
+
+            if (isCorrect) {
+                inp.classList.add('correct');
+                inp.classList.remove('wrong');
+            } else {
+                inp.classList.add('wrong');
+                allCorrect = false;
+            }
+        });
+
+        if (allCorrect) {
+            btn.style.display = 'none';
+            const msg = step.querySelector('.success-msg');
+            if(msg) msg.style.display = 'inline';
+
+            const nextStep = step.nextElementSibling;
+            if (nextStep && nextStep.classList.contains('step')) {
+                nextStep.classList.add('active');
+            } else {
+                const finalBox = step.parentElement.querySelector('.final-answer');
+                if (finalBox) finalBox.style.display = 'block';
+                updateProgress(true); // заполняем шаг в прогрессе
+            }
+        }
+    }
+
+    function updateProgress(taskCompleted = false) {
+        let percent = ((currentTask - 1) / totalTasks) * 100;
+        if (taskCompleted) {
+            percent = (currentTask / totalTasks) * 100;
+        }
+        document.getElementById('progress-fill').style.width = percent + '%';
+        document.getElementById('progress-text').innerText = 'Задача ' + currentTask + ' из ' + totalTasks;
+    }
+
+    function nextTask() {
+        document.getElementById(`task${currentTask}`).classList.remove('active');
+        currentTask++;
+        if(currentTask <= totalTasks) {
+            document.getElementById(`task${currentTask}`).classList.add('active');
+            updateProgress();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    function finishAll() {
+        document.getElementById(`task${currentTask}`).classList.remove('active');
+        document.getElementById('completion-screen').style.display = 'block';
+        document.getElementById('progress-text').innerText = 'Все задачи решены!';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    window.onload = initAllTasks;
+</script>
+
+</body>
+</html>
