@@ -1,4 +1,4 @@
-# Оглавление ссылок (URL в скобках)
+Интерактивные тренажёры по математике 6 класс
 
 ## 🔢 Делимость чисел
 - Разложение на множители (https://godspace.github.io/math-6-grade/trainers/divisibility/primes.html)
