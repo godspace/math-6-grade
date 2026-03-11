@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Задача 3: Мешки с мукой</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+
+    <div class="nav-bar">
+        <a href="../equations_construct-2.html" class="back-link">← Вернуться в главное меню</a>
+    </div>
+
+    <h1>Задача 3: Мешки с мукой</h1>
+
+    <div id="stage1" class="stage active">
+        <h2>Этап 1: Соотнесите текст с математическим языком</h2>
+        <p>Перетащите выделенные фрагменты текста в пустые поля напротив подходящих выражений. Будьте внимательны, здесь есть лишние!</p>
+        
+        <div class="problem-text">
+            В первый мешок насыпали <span class="draggable-text" id="drag-kx" data-id="part-kx" draggable="true"></span> муки, чем <span class="draggable-text" data-id="part-x" draggable="true">во второй</span>. Если сложить массу муки в обоих мешках и <span class="draggable-text" id="drag-a" data-id="part-plusa" draggable="true"></span>, то общая масса <span class="draggable-text" id="drag-b" data-id="part-eqb" draggable="true"></span>. Сколько килограммов муки насыпали во второй мешок?
+        </div>
+
+        <div class="targets-container" id="targets-list"></div>
+    </div>
+
+    <div id="stage2" class="stage">
+        <h2>Этап 2: Составьте уравнение</h2>
+        <p>Расположите полученные блоки в правильном порядке, чтобы получилось верное уравнение.</p>
+        
+        <div class="equation-builder" id="eq-pieces-container"></div>
+
+        <div class="equation-builder" id="eq-drop-container">
+            <div class="eq-drop-zone" data-index="0"></div>
+            <div class="eq-drop-zone" data-index="1"></div>
+            <div class="eq-drop-zone" data-index="2"></div>
+            <div class="eq-drop-zone" data-index="3"></div>
+            <div class="eq-drop-zone" data-index="4"></div>
+        </div>
+        <button class="btn" onclick="checkEquation()">Проверить уравнение</button>
+        <span id="eq-feedback" class="feedback"></span>
+    </div>
+
+    <div id="stage3" class="stage">
+        <h2>Этап 3: Решите уравнение</h2>
+        <p>Уравнение составлено: <strong id="stage3-eq-display"></strong></p>
+        
+        <div class="solution-step">
+            1. Приведем подобные слагаемые: <br>
+            <input type="number" id="step1-input"> <span id="stage3-step1-text"></span>
+        </div>
+        <div class="solution-step">
+            2. Перенесем известные величины в правую часть: <br>
+            <span id="stage3-step2-text"></span> <input type="number" id="step2-input">
+        </div>
+        <div class="solution-step">
+            3. Найдем корень уравнения (массу муки во втором мешке): <br>
+            \(x =\) <input type="number" id="step3-input">
+        </div>
+        <button class="btn" onclick="checkSolution()">Проверить решение</button>
+        <span id="sol-feedback" class="feedback"></span>
+
+        <div id="success-actions" style="display: none; margin-top: 20px;">
+            <a href="../equations_construct-2.html" class="btn" style="background: #0984e3; text-decoration: none; display: inline-block;">★ Вернуться к списку задач</a>
+        </div>
+    </div>
+
+    <script>
+        // Глобальные переменные для текущей задачи
+        let taskK, taskA, taskB, taskX;
+        let correctMatches = 0;
+        let draggedEqPiece = null;
+        const currentEquation = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initProblem();
+        });
+
+        function initProblem() {
+            // 1. Генерируем значения (сначала корень, чтобы он был целым)
+            taskX = (Math.floor(Math.random() * 15) + 3) * 50; // Корень x: от 150 до 850 (шаг 50)
+            taskK = Math.floor(Math.random() * 4) + 2;         // Коэффициент k: от 2 до 5
+            taskA = (Math.floor(Math.random() * 15) + 4) * 50; // Добавка a: от 200 до 900 (шаг 50)
+            taskB = (taskK + 1) * taskX + taskA;               // Итоговая масса b
+
+            // 2. Заполняем текст задачи на Этапе 1
+            document.getElementById('drag-kx').textContent = `в ${taskK} раза больше`;
+            document.getElementById('drag-a').textContent = `добавить к ней еще ${taskA} кг`;
+            document.getElementById('drag-b').textContent = `составит ${taskB} кг`;
+
+            // 3. Генерируем варианты для Этапа 1
+            const mathExpressions = [
+                { id: 'part-x', math: '\\(x\\)', isFalse: false },
+                { id: 'part-kx', math: `\\(${taskK}x\\)`, isFalse: false },
+                { id: 'part-plusa', math: `\\(+ ${taskA}\\)`, isFalse: false },
+                { id: 'part-eqb', math: `\\(= ${taskB}\\)`, isFalse: false },
+                { id: 'false-1', math: `\\(x + ${taskK}\\)`, isFalse: true },
+                { id: 'false-2', math: `\\(- ${taskA}\\)`, isFalse: true }
+            ];
+
+            // Перемешиваем варианты ответов
+            mathExpressions.sort(() => Math.random() - 0.5);
+
+            const targetsList = document.getElementById('targets-list');
+            targetsList.innerHTML = ''; // Очищаем перед генерацией
+            
+            mathExpressions.forEach(expr => {
+                const row = document.createElement('div');
+                row.className = 'target-row';
+                row.innerHTML = `
+                    <div class="math-part">${expr.math}</div>
+                    <div class="drop-zone" data-accept="${expr.isFalse ? 'none' : expr.id}">Перетащите текст сюда</div>
+                `;
+                targetsList.appendChild(row);
+            });
+
+            // Навешиваем события Drag&Drop на текст Этапа 1
+            document.querySelectorAll('.draggable-text').forEach(item => {
+                item.addEventListener('dragstart', e => {
+                    e.dataTransfer.setData('text-id', e.target.dataset.id);
+                    e.dataTransfer.setData('text-content', e.target.textContent);
+                });
+            });
+
+            document.querySelectorAll('.drop-zone').forEach(zone => {
+                zone.addEventListener('dragover', e => {
+                    e.preventDefault();
+                    zone.classList.add('drag-over');
+                });
+                zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+                zone.addEventListener('drop', handleTextDrop);
+            });
+
+            // 4. Генерируем "запчасти" уравнения для Этапа 2
+            const eqPiecesContainer = document.getElementById('eq-pieces-container');
+            eqPiecesContainer.innerHTML = ''; // Очищаем
+
+            const eqPiecesData = [
+                { val: `${taskK}x`, math: `\\(${taskK}x\\)` },
+                { val: `+`, math: `\\(+\\)` },
+                { val: `x`, math: `\\(x\\)` },
+                { val: `+${taskA}`, math: `\\(+ ${taskA}\\)` },
+                { val: `=${taskB}`, math: `\\(= ${taskB}\\)` }
+            ];
+
+            // Алгоритм Фишера-Йетса для перемешивания кубиков уравнения
+            for (let i = eqPiecesData.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [eqPiecesData[i], eqPiecesData[j]] = [eqPiecesData[j], eqPiecesData[i]];
+            }
+
+            eqPiecesData.forEach(pieceData => {
+                const piece = document.createElement('div');
+                piece.className = 'eq-piece';
+                piece.draggable = true;
+                piece.dataset.val = pieceData.val;
+                piece.innerHTML = pieceData.math;
+                piece.addEventListener('dragstart', e => {
+                    draggedEqPiece = piece;
+                });
+                eqPiecesContainer.appendChild(piece);
+            });
+
+            // Настройка дроп-зон Этапа 2
+            document.querySelectorAll('.eq-drop-zone').forEach(zone => {
+                zone.addEventListener('dragover', e => e.preventDefault());
+                zone.addEventListener('drop', e => {
+                    e.preventDefault();
+                    if (!draggedEqPiece) return;
+                    zone.innerHTML = '';
+                    zone.appendChild(draggedEqPiece);
+                    zone.classList.add('filled');
+                    currentEquation[zone.dataset.index] = draggedEqPiece.dataset.val;
+                });
+            });
+
+            // Запускаем рендеринг формул через MathJax
+            MathJax.typesetPromise();
+        }
+
+        function handleTextDrop(e) {
+            const zone = e.target;
+            if(zone.classList.contains('correct')) return;
+
+            zone.classList.remove('drag-over');
+            const draggedId = e.dataTransfer.getData('text-id');
+            const draggedText = e.dataTransfer.getData('text-content');
+            const acceptedId = zone.dataset.accept;
+
+            if (draggedId === acceptedId) {
+                zone.textContent = draggedText;
+                zone.classList.add('correct');
+                correctMatches++;
+                if (correctMatches === 4) {
+                    setTimeout(() => {
+                        document.getElementById('stage2').classList.add('active');
+                        window.scrollTo({ top: document.getElementById('stage2').offsetTop, behavior: 'smooth' });
+                    }, 600);
+                }
+            } else {
+                zone.classList.add('error');
+                setTimeout(() => zone.classList.remove('error'), 500);
+            }
+        }
+
+        function checkEquation() {
+            const feedback = document.getElementById('eq-feedback');
+            const assembled = currentEquation.join('');
+            
+            // Проверка с учетом переместительного свойства сложения
+            const valid1 = `${taskK}x+x+${taskA}=${taskB}`;
+            const valid2 = `x+${taskK}x+${taskA}=${taskB}`;
+
+            if (assembled === valid1 || assembled === valid2) {
+                feedback.textContent = 'Отлично! Уравнение составлено верно.';
+                feedback.className = 'feedback success-text';
+                
+                // Подготавливаем тексты для Этапа 3 перед его открытием
+                document.getElementById('stage3-eq-display').innerHTML = `\\(${taskK}x + x + ${taskA} = ${taskB}\\)`;
+                document.getElementById('stage3-step1-text').innerHTML = `\\(x + ${taskA} = ${taskB}\\)`;
+                document.getElementById('stage3-step2-text').innerHTML = `\\(${taskK + 1}x =\\)`;
+                
+                MathJax.typesetPromise().then(() => {
+                    setTimeout(() => {
+                        document.getElementById('stage3').classList.add('active');
+                        window.scrollTo({ top: document.getElementById('stage3').offsetTop, behavior: 'smooth' });
+                    }, 800);
+                });
+            } else {
+                feedback.textContent = 'Где-то ошибка. Проверьте порядок блоков.';
+                feedback.className = 'feedback error-text';
+            }
+        }
+
+        function checkSolution() {
+            const step1 = document.getElementById('step1-input').value;
+            const step2 = document.getElementById('step2-input').value;
+            const step3 = document.getElementById('step3-input').value;
+            const feedback = document.getElementById('sol-feedback');
+
+            // Проверка ответов с динамическими переменными
+            const isStep1Correct = parseInt(step1) === (taskK + 1);
+            const isStep2Correct = parseInt(step2) === (taskB - taskA);
+            const isStep3Correct = parseInt(step3) === taskX;
+
+            if (isStep1Correct && isStep2Correct && isStep3Correct) {
+                feedback.textContent = `Задача решена абсолютно верно! Ответ: ${taskX} кг.`;
+                feedback.className = 'feedback success-text';
+                
+                // Записываем в память браузера, что Задача 3 выполнена
+                localStorage.setItem('task3_completed', 'true'); 
+                
+                // Показываем кнопку возврата в меню
+                document.getElementById('success-actions').style.display = 'block';
+                
+            } else {
+                feedback.textContent = 'В вычислениях есть ошибка. Проверьте каждый шаг.';
+                feedback.className = 'feedback error-text';
+                
+                // Прячем кнопку, если допущена ошибка
+                document.getElementById('success-actions').style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

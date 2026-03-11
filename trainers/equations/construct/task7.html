@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Задача 7: Катер и река</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        input.num-input {
+            width: 60px; padding: 6px; font-size: 1em;
+            border: 1px solid #ccc; border-radius: 4px; text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="nav-bar">
+        <a href="../equations_construct-2.html" class="back-link">← Вернуться в главное меню</a>
+    </div>
+
+    <h1>Задача 7: Катер и река (Движение по воде)</h1>
+
+    <div id="stage1" class="stage active">
+        <h2>Этап 1: Анализ условия</h2>
+        <p>Соотнесите смысловые части задачи с выражениями. <strong>Подсказка:</strong> пройденный путь — это время, умноженное на скорость (собственная скорость \(x\) \(\pm\) скорость течения).</p>
+        
+        <div class="problem-text">
+            Расстояние между двумя пунктами катер прошёл <span class="draggable-text" id="drag-down" data-id="part-down" draggable="true"></span>, а <span class="draggable-text" id="drag-up" data-id="part-up" draggable="true"></span>. Найдите <span class="draggable-text" data-id="part-x" draggable="true">собственную скорость катера</span>, если известно, что <span class="draggable-text" id="drag-vr" data-id="part-vr" draggable="true"></span>.
+        </div>
+
+        <div class="targets-container" id="targets-list"></div>
+    </div>
+
+    <div id="stage2" class="stage">
+        <h2>Этап 2: Составьте уравнение</h2>
+        <p>Соберите уравнение. Поскольку катер прошел одно и то же расстояние туда и обратно, мы можем приравнять путь по течению к пути против течения!</p>
+        
+        <div class="equation-builder" id="eq-pieces-container"></div>
+
+        <div class="equation-builder" id="eq-drop-container">
+            <div class="eq-drop-zone" data-index="0"></div>
+            <div class="eq-drop-zone" data-index="1"></div>
+            <div class="eq-drop-zone" data-index="2"></div>
+            <div class="eq-drop-zone" data-index="3"></div>
+            <div class="eq-drop-zone" data-index="4"></div>
+            <div class="eq-drop-zone" data-index="5"></div>
+            <div class="eq-drop-zone" data-index="6"></div>
+        </div>
+        <button class="btn" onclick="checkEquation()">Проверить уравнение</button>
+        <span id="eq-feedback" class="feedback"></span>
+    </div>
+
+    <div id="stage3" class="stage">
+        <h2>Этап 3: Решите уравнение</h2>
+        <p>Уравнение составлено: <strong id="stage3-eq-display"></strong></p>
+        
+        <div class="solution-step">
+            1. Раскроем скобки в обеих частях уравнения (умножим время на \(x\) и на скорость течения): <br>
+            <input type="number" id="step1-t1" class="num-input"> \(x \ + \ \) <input type="text" id="step1-v1" class="num-input" placeholder="0,0"> \(=\) 
+            <input type="number" id="step1-t2" class="num-input"> \(x \ - \ \) <input type="text" id="step1-v2" class="num-input" placeholder="0,0">
+        </div>
+        <div class="solution-step">
+            2. Перенесем \(x\) вправо (где их больше), а известные числа влево (чтобы избежать минусов):<br>
+            <input type="text" id="step2-val" class="num-input" style="width: 80px;" placeholder="0,0"> \(=\) 
+            <input type="number" id="step2-coef" class="num-input"> \(x\)
+        </div>
+        <div class="solution-step">
+            3. Найдем собственную скорость катера: <br>
+            \(x =\) <input type="number" id="step3-input-x" class="num-input"> км/ч
+        </div>
+        <button class="btn" onclick="checkSolution()">Проверить решение</button>
+        <span id="sol-feedback" class="feedback"></span>
+
+        <div id="success-actions" style="display: none; margin-top: 20px;">
+            <a href="../equations_construct-2.html" class="btn" style="background: #0984e3; text-decoration: none; display: inline-block;">★ Вернуться к списку задач</a>
+        </div>
+    </div>
+
+    <script>
+        let taskX, taskT1, taskT2, taskVr, taskVrStr;
+        let correctMatches = 0;
+        let draggedEqPiece = null;
+        const currentEquation = [];
+
+        function declOfNum(n, text_forms) {
+            n = Math.abs(n) % 100; var n1 = n % 10;
+            if (n > 10 && n < 20) return text_forms[2];
+            if (n1 > 1 && n1 < 5) return text_forms[1];
+            if (n1 == 1) return text_forms[0];
+            return text_forms[2];
+        }
+
+        document.addEventListener('DOMContentLoaded', initProblem);
+
+        function initProblem() {
+            // Готовые комбинации, дающие красивый целый корень x
+            const configs = [
+                { t1: 2, t2: 3, vr: 2 },
+                { t1: 3, t2: 4, vr: 2 },
+                { t1: 3, t2: 4, vr: 3 },
+                { t1: 4, t2: 5, vr: 2 },
+                { t1: 5, t2: 7, vr: 2.5 },
+                { t1: 3, t2: 5, vr: 2 },
+                { t1: 7, t2: 8, vr: 2 }
+            ];
+            
+            const cfg = configs[Math.floor(Math.random() * configs.length)];
+            taskT1 = cfg.t1;
+            taskT2 = cfg.t2;
+            taskVr = cfg.vr;
+            
+            // Формула: x = Vr * (t1 + t2) / (t2 - t1)
+            taskX = taskVr * (taskT1 + taskT2) / (taskT2 - taskT1);
+            taskVrStr = taskVr.toString().replace('.', ',');
+
+            // Заполняем текст
+            document.getElementById('drag-down').textContent = `по течению реки за ${taskT1} ${declOfNum(taskT1, ['час', 'часа', 'часов'])}`;
+            document.getElementById('drag-up').textContent = `против течения — за ${taskT2} ${declOfNum(taskT2, ['час', 'часа', 'часов'])}`;
+            document.getElementById('drag-vr').textContent = `скорость течения реки равна ${taskVrStr} км/ч`;
+
+            // Убираем пробелы после запятых в MathJax с помощью {,}
+            const cleanVr = taskVrStr.replace(',', '{,}');
+
+            const mathExpressions = [
+                { id: 'part-x', math: '\\(x\\)', isFalse: false },
+                { id: 'part-vr', math: `\\(${cleanVr}\\)`, isFalse: false },
+                { id: 'part-down', math: `\\(${taskT1}(x + ${cleanVr})\\)`, isFalse: false },
+                { id: 'part-up', math: `\\(${taskT2}(x - ${cleanVr})\\)`, isFalse: false },
+                { id: 'false-1', math: `\\(${taskT1}(x - ${cleanVr})\\)`, isFalse: true }, // Перепутан знак
+                { id: 'false-2', math: `\\(${taskT2}(x + ${cleanVr})\\)`, isFalse: true }  // Перепутан знак
+            ];
+
+            mathExpressions.sort(() => Math.random() - 0.5);
+            const list = document.getElementById('targets-list');
+            list.innerHTML = '';
+            mathExpressions.forEach(expr => {
+                const row = document.createElement('div');
+                row.className = 'target-row';
+                row.innerHTML = `<div class="math-part">${expr.math}</div><div class="drop-zone" data-accept="${expr.isFalse ? 'none' : expr.id}">Перетащите текст...</div>`;
+                list.appendChild(row);
+            });
+
+            setupDragAndDrop();
+            setupEquationPieces(cleanVr);
+            MathJax.typesetPromise();
+        }
+
+        function setupDragAndDrop() {
+            document.querySelectorAll('.draggable-text').forEach(item => {
+                item.addEventListener('dragstart', e => {
+                    e.dataTransfer.setData('text-id', e.target.dataset.id);
+                    e.dataTransfer.setData('text-content', e.target.textContent);
+                });
+            });
+            document.querySelectorAll('.drop-zone').forEach(zone => {
+                zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+                zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+                zone.addEventListener('drop', handleDrop);
+            });
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const zone = e.target;
+            zone.classList.remove('drag-over');
+            if(zone.classList.contains('correct')) return;
+
+            const id = e.dataTransfer.getData('text-id');
+            if (id === zone.dataset.accept) {
+                zone.textContent = e.dataTransfer.getData('text-content');
+                zone.classList.add('correct');
+                if (++correctMatches === 4) {
+                    setTimeout(() => { document.getElementById('stage2').classList.add('active'); window.scrollTo({ top: document.getElementById('stage2').offsetTop, behavior: 'smooth' }); }, 600);
+                }
+            } else {
+                zone.classList.add('error');
+                setTimeout(() => zone.classList.remove('error'), 500);
+            }
+        }
+
+        function setupEquationPieces(cleanVr) {
+            const container = document.getElementById('eq-pieces-container');
+            const data = [
+                { val: `${taskT1}`, math: `\\(${taskT1}\\)` },
+                { val: `*`, math: `\\(\\cdot\\)` },
+                { val: `(x+vr)`, math: `\\((x + ${cleanVr})\\)` },
+                { val: `=`, math: `\\(=\\)` },
+                { val: `${taskT2}`, math: `\\(${taskT2}\\)` },
+                { val: `*`, math: `\\(\\cdot\\)` },
+                { val: `(x-vr)`, math: `\\((x - ${cleanVr})\\)` }
+            ];
+            data.sort(() => Math.random() - 0.5);
+            data.forEach(d => {
+                const piece = document.createElement('div');
+                piece.className = 'eq-piece';
+                piece.draggable = true;
+                piece.dataset.val = d.val;
+                piece.innerHTML = d.math;
+                piece.addEventListener('dragstart', e => { draggedEqPiece = piece; });
+                container.appendChild(piece);
+            });
+
+            document.querySelectorAll('.eq-drop-zone').forEach(zone => {
+                zone.addEventListener('dragover', e => e.preventDefault());
+                zone.addEventListener('drop', e => {
+                    e.preventDefault();
+                    if (!draggedEqPiece) return;
+                    zone.innerHTML = '';
+                    zone.appendChild(draggedEqPiece);
+                    zone.classList.add('filled');
+                    currentEquation[zone.dataset.index] = draggedEqPiece.dataset.val;
+                });
+            });
+        }
+
+        function checkEquation() {
+            const res = currentEquation.filter(x => x).join('');
+            
+            const vLeft1 = `${taskT1}*(x+vr)`;
+            const vLeft2 = `(x+vr)*${taskT1}`;
+            const vRight1 = `${taskT2}*(x-vr)`;
+            const vRight2 = `(x-vr)*${taskT2}`;
+
+            const valid = [
+                `${vLeft1}=${vRight1}`, `${vLeft1}=${vRight2}`,
+                `${vLeft2}=${vRight1}`, `${vLeft2}=${vRight2}`,
+                `${vRight1}=${vLeft1}`, `${vRight1}=${vLeft2}`,
+                `${vRight2}=${vLeft1}`, `${vRight2}=${vLeft2}`
+            ];
+
+            if (valid.includes(res)) {
+                const f = document.getElementById('eq-feedback');
+                f.textContent = 'Отлично! Уравнение собрано верно.'; f.className = 'feedback success-text';
+                
+                const cleanVr = taskVrStr.replace(',', '{,}');
+                document.getElementById('stage3-eq-display').innerHTML = `\\(${taskT1}(x + ${cleanVr}) = ${taskT2}(x - ${cleanVr})\\)`;
+                setTimeout(() => { document.getElementById('stage3').classList.add('active'); window.scrollTo({ top: document.getElementById('stage3').offsetTop, behavior: 'smooth' }); MathJax.typesetPromise(); }, 600);
+            } else {
+                const f = document.getElementById('eq-feedback');
+                f.textContent = 'Ошибка. Приравняйте путь по течению к пути против течения.';
+                f.className = 'feedback error-text';
+            }
+        }
+
+        // Парсер для обработки запятой и точки в десятичных дробях
+        function parseLocalFloat(value) {
+            return parseFloat(value.replace(',', '.'));
+        }
+
+        function checkSolution() {
+            const s1t1 = parseInt(document.getElementById('step1-t1').value);
+            const s1v1 = parseLocalFloat(document.getElementById('step1-v1').value);
+            const s1t2 = parseInt(document.getElementById('step1-t2').value);
+            const s1v2 = parseLocalFloat(document.getElementById('step1-v2').value);
+            
+            const s2val = parseLocalFloat(document.getElementById('step2-val').value);
+            const s2coef = parseInt(document.getElementById('step2-coef').value);
+            
+            const s3x = parseInt(document.getElementById('step3-input-x').value);
+
+            const f = document.getElementById('sol-feedback');
+
+            // Ожидаемые значения
+            const expV1 = taskT1 * taskVr;
+            const expV2 = taskT2 * taskVr;
+
+            const isStep1Correct = s1t1 === taskT1 && s1v1 === expV1 && s1t2 === taskT2 && s1v2 === expV2;
+            const isStep2Correct = s2val === (expV1 + expV2) && s2coef === (taskT2 - taskT1);
+            const isStep3Correct = s3x === taskX;
+
+            if (isStep1Correct && isStep2Correct && isStep3Correct) {
+                f.textContent = 'Идеально!'; f.className = 'feedback success-text';
+                localStorage.setItem('task7_completed', 'true');
+                document.getElementById('success-actions').style.display = 'block';
+            } else {
+                f.textContent = 'Где-то ошибка. Внимательно проверьте умножение на десятичные дроби и перенос слагаемых.'; f.className = 'feedback error-text';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тренажёр: Составление уравнений</title>
+    <link rel="stylesheet" href="construct/style.css">
+
+    <script type="text/javascript">
+        (function(m,e,t,r,i,k,a){
+            m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+            m[i].l=1*new Date();
+            for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+            k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+        })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=106746549', 'ym');
+
+        ym(106746549, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
+    </script>
+    <noscript><div><img src="https://mc.yandex.ru/watch/106746549" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+    <style>
+        /* Стили для кнопки сброса (можно потом перенести в style.css) */
+        .reset-container {
+            text-align: center;
+            margin-top: 40px;
+            padding-bottom: 20px;
+        }
+        .btn-danger {
+            background: #ff7675;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1em;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .btn-danger:hover {
+            background: #d63031;
+        }
+    </style>
+</head>
+<body>
+    <h1>Математика 6 класс: Составление уравнений</h1>
+    <p style="text-align: center; color: #636e72;">Выберите задачу для тренировки. В каждой задаче генерируются уникальные числа!</p>
+
+    <div class="menu-grid">
+        <a href="construct/task1.html" id="card-task1" class="task-card">
+            <div class="task-title">Задача 1: Канцелярские товары</div>
+            <div class="task-desc">Простое уравнение на поиск цены одного предмета из набора.</div>
+        </a>
+        <a href="construct/task2.html" id="card-task2" class="task-card">
+            <div class="task-title">Задача 2: Проценты</div>
+            <div class="task-desc">Нахождение исходного числа по его проценту.</div>
+        </a>
+        <a href="construct/task3.html" id="card-task3" class="task-card">
+            <div class="task-title">Задача 3: Мешки с мукой</div>
+            <div class="task-desc">Уравнение с неизвестным и коэффициентом: "в ... раз больше".</div>
+        </a>
+        <a href="construct/task4.html" id="card-task4" class="task-card">
+            <div class="task-title">Задача 4: Вязание</div>
+            <div class="task-desc">Связь трех элементов: "в ... раз больше" и "на ... меньше".</div>
+        </a>
+        <a href="construct/task5.html" id="card-task5" class="task-card">
+            <div class="task-title">Задача 5: Кот и щенок</div>
+            <div class="task-desc">Движение в противоположных направлениях.</div>
+        </a>
+        <a href="construct/task6.html" id="card-task6" class="task-card">
+            <div class="task-title">Задача 6: Сундук и мешок</div>
+            <div class="task-desc">Изменение количества: перекладывание предметов.</div>
+        </a>
+        <a href="construct/task7.html" id="card-task7" class="task-card">
+            <div class="task-title">Задача 7: Катер и река</div>
+            <div class="task-desc">Движение по течению и против течения. Поиск собственной скорости.</div>
+        </a>
+        <a href="construct/task8.html" id="card-task8" class="task-card">
+            <div class="task-title">Задача 8: Лодка</div>
+            <div class="task-desc">Сравнение пройденных путей с известной скоростью в стоячей воде.</div>
+        </a>
+    </div>
+
+    <div class="reset-container">
+        <button class="btn-danger" onclick="resetProgress()">↻ Сбросить прогресс и начать заново</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Проверяем все 8 задач при загрузке страницы
+            for (let i = 1; i <= 8; i++) {
+                if (localStorage.getItem('task' + i + '_completed') === 'true') {
+                    const card = document.getElementById('card-task' + i);
+                    if (card) {
+                        card.classList.add('completed');
+                    }
+                }
+            }
+        });
+
+        // Функция сброса с подтверждением
+        function resetProgress() {
+            const isConfirmed = confirm('Вы уверены, что хотите стереть свои результаты? Все решённые задачи снова станут нерешёнными. Это действие нельзя отменить.');
+            
+            if (isConfirmed) {
+                // Удаляем метки о прохождении из памяти браузера
+                for (let i = 1; i <= 8; i++) {
+                    localStorage.removeItem('task' + i + '_completed');
+                }
+                // Перезагружаем страницу, чтобы карточки снова стали обычными
+                location.reload();
+            }
+        }
+    </script>
+</body>
+</html>

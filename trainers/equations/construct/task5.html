@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Задача 5: Кот и щенок</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        /* Локальные стили: делаем кубики чуть уже, чтобы 11 штук красиво влезли в ряд */
+        #stage2 .eq-drop-zone { width: 42px; height: 42px; padding: 0; font-size: 1.1em; }
+        #stage2 .eq-piece { padding: 8px 10px; font-size: 1.1em; }
+        #stage2 .equation-builder { gap: 6px; justify-content: center; }
+    </style>
+</head>
+<body>
+
+    <div class="nav-bar">
+        <a href="../equations_construct-2.html" class="back-link">← Вернуться в главное меню</a>
+    </div>
+
+    <h1>Задача 5: Кот и щенок (Движение)</h1>
+
+    <div id="stage1" class="stage active">
+        <h2>Этап 1: Соотнесите текст с математическим языком</h2>
+        <p>Перетащите выделенные фрагменты к соответствующим выражениям.</p>
+        
+        <div class="problem-text">
+            Кот и щенок находились на расстоянии <span class="draggable-text" id="drag-d0" data-id="part-d0" draggable="true"></span> друг от друга и одновременно побежали в противоположных направлениях. Скорость кота составляет <span class="draggable-text" id="drag-vc" data-id="part-vc" draggable="true"></span>, а скорость щенка — <span class="draggable-text" id="drag-vd" data-id="part-vd" draggable="true"></span>. Через <span class="draggable-text" data-id="part-x" draggable="true">сколько секунд</span> расстояние между ними увеличится до <span class="draggable-text" id="drag-s" data-id="part-s" draggable="true"></span>?
+        </div>
+
+        <div class="targets-container" id="targets-list"></div>
+    </div>
+
+    <div id="stage2" class="stage">
+        <h2>Этап 2: Составьте уравнение</h2>
+        <p>Соберите уравнение из запчастей. <strong>Подсказка:</strong> чтобы найти пройденный путь, нужно скорость умножить (\(\cdot\)) на время (\(x\)). Сложите путь кота, путь щенка и их начальное расстояние!</p>
+        
+        <div class="equation-builder" id="eq-pieces-container"></div>
+
+        <div class="equation-builder" id="eq-drop-container">
+            <div class="eq-drop-zone" data-index="0"></div>
+            <div class="eq-drop-zone" data-index="1"></div>
+            <div class="eq-drop-zone" data-index="2"></div>
+            <div class="eq-drop-zone" data-index="3"></div>
+            <div class="eq-drop-zone" data-index="4"></div>
+            <div class="eq-drop-zone" data-index="5"></div>
+            <div class="eq-drop-zone" data-index="6"></div>
+            <div class="eq-drop-zone" data-index="7"></div>
+            <div class="eq-drop-zone" data-index="8"></div>
+            <div class="eq-drop-zone" data-index="9"></div>
+            <div class="eq-drop-zone" data-index="10"></div>
+        </div>
+        <button class="btn" onclick="checkEquation()">Проверить уравнение</button>
+        <span id="eq-feedback" class="feedback"></span>
+    </div>
+
+    <div id="stage3" class="stage">
+        <h2>Этап 3: Решите уравнение</h2>
+        <p>Уравнение составлено: <strong id="stage3-eq-display"></strong></p>
+        
+        <div class="solution-step">
+            1. Приведем подобные слагаемые (сложим скорости, узнаем скорость их удаления друг от друга): <br>
+            <input type="number" id="step1-input-coef"> \(x \ + \ \) <span id="stage3-d0-text"></span> \(= \) <span id="stage3-s-text"></span>
+        </div>
+        <div class="solution-step">
+            2. Перенесем начальное расстояние в правую часть с противоположным знаком (вычтем его из общего пути):<br>
+            <input type="number" id="step2-input-coef"> \(x =\) 
+            <input type="number" id="step2-input-val">
+        </div>
+        <div class="solution-step">
+            3. Найдем корень уравнения (время в пути): <br>
+            \(x =\) <input type="number" id="step3-input-x"> сек.
+        </div>
+        <button class="btn" onclick="checkSolution()">Проверить решение</button>
+        <span id="sol-feedback" class="feedback"></span>
+
+        <div id="success-actions" style="display: none; margin-top: 20px;">
+            <a href="../equations_construct-2.html" class="btn" style="background: #0984e3; text-decoration: none; display: inline-block;">★ Вернуться к списку задач</a>
+        </div>
+    </div>
+
+    <script>
+        let taskX, taskVc, taskVd, taskD0, taskS;
+        let correctMatches = 0;
+        let draggedEqPiece = null;
+        const currentEquation = [];
+
+        // Склонение слов
+        function declOfNum(n, text_forms) {
+            n = Math.abs(n) % 100; 
+            var n1 = n % 10;
+            if (n > 10 && n < 20) { return text_forms[2]; }
+            if (n1 > 1 && n1 < 5) { return text_forms[1]; }
+            if (n1 == 1) { return text_forms[0]; }
+            return text_forms[2];
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initProblem();
+        });
+
+        function initProblem() {
+            // 1. Генерируем значения
+            taskX = Math.floor(Math.random() * 11) + 5;  
+            taskVc = Math.floor(Math.random() * 5) + 3;  
+            taskVd = Math.floor(Math.random() * 5) + 2;  
+            
+            if (taskVc === taskVd) taskVc++; 
+            
+            taskD0 = Math.floor(Math.random() * 11) + 2; 
+            
+            taskS = taskD0 + (taskVc * taskX) + (taskVd * taskX);
+
+            // 2. Заполняем текст
+            document.getElementById('drag-d0').textContent = `${taskD0} ${declOfNum(taskD0, ['метр', 'метра', 'метров'])}`;
+            document.getElementById('drag-vc').textContent = `${taskVc} м/с`;
+            document.getElementById('drag-vd').textContent = `${taskVd} м/с`;
+            document.getElementById('drag-s').textContent = `${taskS} ${declOfNum(taskS, ['метр', 'метра', 'метров'])}`;
+            
+            document.getElementById('stage3-d0-text').textContent = taskD0;
+            document.getElementById('stage3-s-text').textContent = taskS;
+
+            // 3. Варианты для Этапа 1
+            const mathExpressions = [
+                { id: 'part-x', math: '\\(x\\)', isFalse: false },              
+                { id: 'part-d0', math: `\\(${taskD0}\\)`, isFalse: false },     
+                { id: 'part-vc', math: `\\(${taskVc}\\)`, isFalse: false },     
+                { id: 'part-vd', math: `\\(${taskVd}\\)`, isFalse: false },     
+                { id: 'part-s', math: `\\(= ${taskS}\\)`, isFalse: false },     
+                { id: 'false-1', math: `\\(${taskVc} + ${taskVd}\\)`, isFalse: true },
+                { id: 'false-2', math: `\\(${taskS}x\\)`, isFalse: true }
+            ];
+
+            mathExpressions.sort(() => Math.random() - 0.5);
+
+            const targetsList = document.getElementById('targets-list');
+            targetsList.innerHTML = ''; 
+            
+            mathExpressions.forEach(expr => {
+                const row = document.createElement('div');
+                row.className = 'target-row';
+                row.innerHTML = `
+                    <div class="math-part">${expr.math}</div>
+                    <div class="drop-zone" data-accept="${expr.isFalse ? 'none' : expr.id}">Перетащите текст сюда</div>
+                `;
+                targetsList.appendChild(row);
+            });
+
+            // Навешиваем Drag&Drop (Этап 1)
+            document.querySelectorAll('.draggable-text').forEach(item => {
+                item.addEventListener('dragstart', e => {
+                    e.dataTransfer.setData('text-id', e.target.dataset.id);
+                    e.dataTransfer.setData('text-content', e.target.textContent);
+                });
+            });
+
+            document.querySelectorAll('.drop-zone').forEach(zone => {
+                zone.addEventListener('dragover', e => {
+                    e.preventDefault();
+                    zone.classList.add('drag-over');
+                });
+                zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+                zone.addEventListener('drop', handleTextDrop);
+            });
+
+            // 4. Генерируем 11 декомпозированных блоков (Этап 2)
+            const eqPiecesContainer = document.getElementById('eq-pieces-container');
+            eqPiecesContainer.innerHTML = ''; 
+
+            const eqPiecesData = [
+                { val: `${taskVc}`, math: `\\(${taskVc}\\)` },
+                { val: `${taskVd}`, math: `\\(${taskVd}\\)` },
+                { val: `${taskD0}`, math: `\\(${taskD0}\\)` },
+                { val: `${taskS}`, math: `\\(${taskS}\\)` },
+                { val: `x`, math: `\\(x\\)` },
+                { val: `x`, math: `\\(x\\)` },
+                { val: `*`, math: `\\(\\cdot\\)` },
+                { val: `*`, math: `\\(\\cdot\\)` },
+                { val: `+`, math: `\\(+\\)` },
+                { val: `+`, math: `\\(+\\)` },
+                { val: `=`, math: `\\(=\\)` }
+            ];
+
+            // Перемешиваем кубики
+            for (let i = eqPiecesData.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [eqPiecesData[i], eqPiecesData[j]] = [eqPiecesData[j], eqPiecesData[i]];
+            }
+
+            eqPiecesData.forEach(pieceData => {
+                const piece = document.createElement('div');
+                piece.className = 'eq-piece';
+                piece.draggable = true;
+                piece.dataset.val = pieceData.val;
+                piece.innerHTML = pieceData.math;
+                piece.addEventListener('dragstart', e => {
+                    draggedEqPiece = piece;
+                });
+                eqPiecesContainer.appendChild(piece);
+            });
+
+            document.querySelectorAll('.eq-drop-zone').forEach(zone => {
+                zone.addEventListener('dragover', e => e.preventDefault());
+                zone.addEventListener('drop', e => {
+                    e.preventDefault();
+                    if (!draggedEqPiece) return;
+                    zone.innerHTML = '';
+                    zone.appendChild(draggedEqPiece);
+                    zone.classList.add('filled');
+                    currentEquation[zone.dataset.index] = draggedEqPiece.dataset.val;
+                });
+            });
+
+            MathJax.typesetPromise();
+        }
+
+        function handleTextDrop(e) {
+            const zone = e.target;
+            if(zone.classList.contains('correct')) return;
+
+            zone.classList.remove('drag-over');
+            const draggedId = e.dataTransfer.getData('text-id');
+            const draggedText = e.dataTransfer.getData('text-content');
+            const acceptedId = zone.dataset.accept;
+
+            if (draggedId === acceptedId) {
+                zone.textContent = draggedText;
+                zone.classList.add('correct');
+                correctMatches++;
+                if (correctMatches === 5) {
+                    setTimeout(() => {
+                        document.getElementById('stage2').classList.add('active');
+                        window.scrollTo({ top: document.getElementById('stage2').offsetTop, behavior: 'smooth' });
+                    }, 600);
+                }
+            } else {
+                zone.classList.add('error');
+                setTimeout(() => zone.classList.remove('error'), 500);
+            }
+        }
+
+        function checkEquation() {
+            const feedback = document.getElementById('eq-feedback');
+            let assembled = '';
+            
+            // Проверяем, что все 11 слотов заполнены
+            for(let i = 0; i < 11; i++) {
+                if(!currentEquation[i]) {
+                    showEqError(feedback);
+                    return;
+                }
+                assembled += currentEquation[i];
+            }
+            
+            // Умная логика проверки (разбиваем уравнение на левую и правую части по знаку =)
+            const parts = assembled.split('=');
+            if (parts.length !== 2) {
+                showEqError(feedback); return;
+            }
+            
+            let leftPart;
+            // Равенство может быть как справа (V*x + ... = S), так и слева (S = V*x + ...)
+            if (parts[1] === taskS.toString()) {
+                leftPart = parts[0];
+            } else if (parts[0] === taskS.toString()) { 
+                leftPart = parts[1];
+            } else {
+                showEqError(feedback); return;
+            }
+
+            // Разбиваем левую часть на слагаемые по знаку +
+            const terms = leftPart.split('+');
+            if (terms.length !== 3) {
+                showEqError(feedback); return;
+            }
+
+            // Допустимые варианты каждого из трех слагаемых (от перестановки множителей произведение не меняется)
+            const expectedTerm1A = taskVc + '*x';
+            const expectedTerm1B = 'x*' + taskVc;
+            const expectedTerm2A = taskVd + '*x';
+            const expectedTerm2B = 'x*' + taskVd;
+            const expectedTerm3 = taskD0.toString();
+
+            const hasTerm1 = terms.includes(expectedTerm1A) || terms.includes(expectedTerm1B);
+            const hasTerm2 = terms.includes(expectedTerm2A) || terms.includes(expectedTerm2B);
+            const hasTerm3 = terms.includes(expectedTerm3);
+
+            if (hasTerm1 && hasTerm2 && hasTerm3) {
+                feedback.textContent = 'Отлично! Уравнение составлено верно.';
+                feedback.className = 'feedback success-text';
+                
+                document.getElementById('stage3-eq-display').innerHTML = `\\(${taskVc}x + ${taskVd}x + ${taskD0} = ${taskS}\\)`;
+                
+                MathJax.typesetPromise().then(() => {
+                    setTimeout(() => {
+                        document.getElementById('stage3').classList.add('active');
+                        window.scrollTo({ top: document.getElementById('stage3').offsetTop, behavior: 'smooth' });
+                    }, 800);
+                });
+            } else {
+                showEqError(feedback);
+            }
+        }
+
+        function showEqError(feedback) {
+            feedback.innerHTML = 'Где-то ошибка. Вспомните, что путь — это <strong>Скорость &middot; Время</strong>. Сложите пути животных и их начальное расстояние.';
+            feedback.className = 'feedback error-text';
+        }
+
+        function checkSolution() {
+            const step1Coef = document.getElementById('step1-input-coef').value;
+            const step2Coef = document.getElementById('step2-input-coef').value;
+            const step2Val = document.getElementById('step2-input-val').value;
+            const step3X = document.getElementById('step3-input-x').value;
+            const feedback = document.getElementById('sol-feedback');
+
+            const expectedCoef = taskVc + taskVd; 
+            const expectedVal = taskS - taskD0;
+
+            const isStep1Correct = parseInt(step1Coef) === expectedCoef;
+            const isStep2CoefCorrect = parseInt(step2Coef) === expectedCoef;
+            const isStep2ValCorrect = parseInt(step2Val) === expectedVal;
+            const isStep3Correct = parseInt(step3X) === taskX;
+
+            if (isStep1Correct && isStep2CoefCorrect && isStep2ValCorrect && isStep3Correct) {
+                feedback.textContent = `Задача решена абсолютно верно! Ответ: ${taskX} сек.`;
+                feedback.className = 'feedback success-text';
+                
+                localStorage.setItem('task5_completed', 'true'); 
+                document.getElementById('success-actions').style.display = 'block';
+                
+            } else {
+                feedback.textContent = 'В вычислениях есть ошибка. Убедитесь, что вы правильно сложили скорости и вычли начальное расстояние.';
+                feedback.className = 'feedback error-text';
+                document.getElementById('success-actions').style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

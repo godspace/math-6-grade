@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Задача 2: Проценты</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        /* Дополнительный класс для текстовых инпутов, чтобы они выглядели как числовые */
+        input.num-input {
+            width: 70px;
+            padding: 6px;
+            font-size: 1em;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="nav-bar">
+        <a href="../equations_construct-2.html" class="back-link">← Вернуться в главное меню</a>
+    </div>
+
+    <h1>Задача 2: Проценты</h1>
+
+    <div id="stage1" class="stage active">
+        <h2>Этап 1: Соотнесите текст с математическим языком</h2>
+        <p>Перетащите выделенные фрагменты текста в пустые поля напротив подходящих выражений. Помните, что проценты в уравнениях записываются в виде десятичной дроби!</p>
+        
+        <div class="problem-text">
+            Известно, что <span class="draggable-text" id="drag-p" data-id="part-p" draggable="true"></span> от <span class="draggable-text" data-id="part-x" draggable="true">неизвестного числа</span> <span class="draggable-text" id="drag-s" data-id="part-s" draggable="true"></span>. Найдите это исходное число.
+        </div>
+
+        <div class="targets-container" id="targets-list"></div>
+    </div>
+
+    <div id="stage2" class="stage">
+        <h2>Этап 2: Составьте уравнение</h2>
+        <p>Расположите полученные блоки в правильном порядке, чтобы получилось верное уравнение.</p>
+        
+        <div class="equation-builder" id="eq-pieces-container"></div>
+
+        <div class="equation-builder" id="eq-drop-container">
+            <div class="eq-drop-zone" data-index="0"></div>
+            <div class="eq-drop-zone" data-index="1"></div>
+            <div class="eq-drop-zone" data-index="2"></div>
+        </div>
+        <button class="btn" onclick="checkEquation()">Проверить уравнение</button>
+        <span id="eq-feedback" class="feedback"></span>
+    </div>
+
+    <div id="stage3" class="stage">
+        <h2>Этап 3: Решите уравнение</h2>
+        <p>Уравнение составлено: <strong id="stage3-eq-display"></strong></p>
+        
+        <div class="solution-step">
+            1. Переведем проценты в десятичную дробь:<br>
+            <span id="stage3-p-text"></span> % = <input type="text" class="num-input" id="step1-input-dec" placeholder="0,0">
+        </div>
+        <div class="solution-step">
+            2. Чтобы найти число по его части, нужно значение этой части разделить на саму дробь:<br>
+            \(x =\) 
+            <input type="text" class="num-input" id="step2-input-s" placeholder="Значение"> \(:\) 
+            <input type="text" class="num-input" id="step2-input-dec" placeholder="Дробь">
+        </div>
+        <div class="solution-step">
+            3. Вычислим корень уравнения (исходное число): <br>
+            \(x =\) <input type="text" class="num-input" id="step3-input-x">
+        </div>
+        <button class="btn" onclick="checkSolution()">Проверить решение</button>
+        <span id="sol-feedback" class="feedback"></span>
+
+        <div id="success-actions" style="display: none; margin-top: 20px;">
+            <a href="../equations_construct-2.html" class="btn" style="background: #0984e3; text-decoration: none; display: inline-block;">★ Вернуться к списку задач</a>
+        </div>
+    </div>
+
+    <script>
+        // Глобальные переменные
+        let taskP, taskX, taskS, taskPDecimal, taskPDecimalStr;
+        let correctMatches = 0;
+        let draggedEqPiece = null;
+        const currentEquation = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initProblem();
+        });
+
+        function initProblem() {
+            // 1. Генерируем "красивые" числа
+            const validPercentages = [10, 20, 25, 30, 40, 50, 60, 75, 80];
+            taskP = validPercentages[Math.floor(Math.random() * validPercentages.length)]; // Процент
+            taskX = (Math.floor(Math.random() * 10) + 2) * 20; // Исходное число (x): 40, 60, 80 ... 220
+            
+            taskPDecimal = taskP / 100;
+            taskS = (taskP * taskX) / 100; // Значение части (S)
+
+            // Заменяем точку на запятую для русской локализации (например 0.4 -> 0,4)
+            taskPDecimalStr = taskPDecimal.toString().replace('.', ',');
+
+            // 2. Заполняем текст задачи
+            document.getElementById('drag-p').textContent = `${taskP}%`;
+            document.getElementById('drag-s').textContent = `равны ${taskS}`;
+            document.getElementById('stage3-p-text').textContent = taskP;
+
+            // 3. Генерируем варианты для Этапа 1
+            const mathExpressions = [
+                { id: 'part-p', math: `\\(${taskPDecimalStr}\\)`, isFalse: false }, // Правильная десятичная дробь
+                { id: 'part-x', math: '\\(x\\)', isFalse: false },
+                { id: 'part-s', math: `\\(= ${taskS}\\)`, isFalse: false },
+                { id: 'false-1', math: `\\(${taskP}\\)`, isFalse: true }, // Ошибка невнимательности (просто число)
+                { id: 'false-2', math: `\\(${taskS}x\\)`, isFalse: true } // Бессмысленное выражение
+            ];
+
+            mathExpressions.sort(() => Math.random() - 0.5);
+
+            const targetsList = document.getElementById('targets-list');
+            targetsList.innerHTML = ''; 
+            
+            mathExpressions.forEach(expr => {
+                const row = document.createElement('div');
+                row.className = 'target-row';
+                // Для MathJax конструкция {,} не дает пробелу появиться после запятой
+                const cleanMath = expr.math.replace(',', '{,}'); 
+                row.innerHTML = `
+                    <div class="math-part">${cleanMath}</div>
+                    <div class="drop-zone" data-accept="${expr.isFalse ? 'none' : expr.id}">Перетащите текст сюда</div>
+                `;
+                targetsList.appendChild(row);
+            });
+
+            // Навешиваем Drag&Drop (Этап 1)
+            document.querySelectorAll('.draggable-text').forEach(item => {
+                item.addEventListener('dragstart', e => {
+                    e.dataTransfer.setData('text-id', e.target.dataset.id);
+                    e.dataTransfer.setData('text-content', e.target.textContent);
+                });
+            });
+
+            document.querySelectorAll('.drop-zone').forEach(zone => {
+                zone.addEventListener('dragover', e => {
+                    e.preventDefault();
+                    zone.classList.add('drag-over');
+                });
+                zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+                zone.addEventListener('drop', handleTextDrop);
+            });
+
+            // 4. Генерируем блоки уравнения (Этап 2)
+            const eqPiecesContainer = document.getElementById('eq-pieces-container');
+            eqPiecesContainer.innerHTML = ''; 
+
+            const eqPiecesData = [
+                { val: `px`, math: `\\(${taskPDecimalStr.replace(',', '{,}')}x\\)` },
+                { val: `=`, math: `\\(=\\)` },
+                { val: `s`, math: `\\(${taskS}\\)` }
+            ];
+
+            // Перемешивание кубиков
+            for (let i = eqPiecesData.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [eqPiecesData[i], eqPiecesData[j]] = [eqPiecesData[j], eqPiecesData[i]];
+            }
+
+            eqPiecesData.forEach(pieceData => {
+                const piece = document.createElement('div');
+                piece.className = 'eq-piece';
+                piece.draggable = true;
+                piece.dataset.val = pieceData.val;
+                piece.innerHTML = pieceData.math;
+                piece.addEventListener('dragstart', e => {
+                    draggedEqPiece = piece;
+                });
+                eqPiecesContainer.appendChild(piece);
+            });
+
+            document.querySelectorAll('.eq-drop-zone').forEach(zone => {
+                zone.addEventListener('dragover', e => e.preventDefault());
+                zone.addEventListener('drop', e => {
+                    e.preventDefault();
+                    if (!draggedEqPiece) return;
+                    zone.innerHTML = '';
+                    zone.appendChild(draggedEqPiece);
+                    zone.classList.add('filled');
+                    currentEquation[zone.dataset.index] = draggedEqPiece.dataset.val;
+                });
+            });
+
+            MathJax.typesetPromise();
+        }
+
+        function handleTextDrop(e) {
+            const zone = e.target;
+            if(zone.classList.contains('correct')) return;
+
+            zone.classList.remove('drag-over');
+            const draggedId = e.dataTransfer.getData('text-id');
+            const draggedText = e.dataTransfer.getData('text-content');
+            const acceptedId = zone.dataset.accept;
+
+            if (draggedId === acceptedId) {
+                zone.textContent = draggedText;
+                zone.classList.add('correct');
+                correctMatches++;
+                if (correctMatches === 3) {
+                    setTimeout(() => {
+                        document.getElementById('stage2').classList.add('active');
+                        window.scrollTo({ top: document.getElementById('stage2').offsetTop, behavior: 'smooth' });
+                    }, 600);
+                }
+            } else {
+                zone.classList.add('error');
+                setTimeout(() => zone.classList.remove('error'), 500);
+            }
+        }
+
+        function checkEquation() {
+            const feedback = document.getElementById('eq-feedback');
+            const assembled = currentEquation.join('');
+            
+            // Варианты правильной сборки: 0,4x=80 или 80=0,4x
+            if (assembled === 'px=s' || assembled === 's=px') {
+                feedback.textContent = 'Отлично! Уравнение составлено верно.';
+                feedback.className = 'feedback success-text';
+                
+                document.getElementById('stage3-eq-display').innerHTML = `\\(${taskPDecimalStr.replace(',', '{,}')}x = ${taskS}\\)`;
+                
+                MathJax.typesetPromise().then(() => {
+                    setTimeout(() => {
+                        document.getElementById('stage3').classList.add('active');
+                        window.scrollTo({ top: document.getElementById('stage3').offsetTop, behavior: 'smooth' });
+                    }, 800);
+                });
+            } else {
+                feedback.textContent = 'Где-то ошибка. Проверьте порядок блоков.';
+                feedback.className = 'feedback error-text';
+            }
+        }
+
+        // Вспомогательная функция для парсинга чисел, введенных с запятой или точкой
+        function parseLocalFloat(value) {
+            return parseFloat(value.replace(',', '.'));
+        }
+
+        function checkSolution() {
+            const inputDec1 = document.getElementById('step1-input-dec').value;
+            const inputS = document.getElementById('step2-input-s').value;
+            const inputDec2 = document.getElementById('step2-input-dec').value;
+            const inputX = document.getElementById('step3-input-x').value;
+            const feedback = document.getElementById('sol-feedback');
+
+            // Проверяем ответы, конвертируя введенные данные через функцию парсинга
+            const isStep1Correct = parseLocalFloat(inputDec1) === taskPDecimal;
+            const isStep2Correct = parseLocalFloat(inputS) === taskS && parseLocalFloat(inputDec2) === taskPDecimal;
+            const isStep3Correct = parseLocalFloat(inputX) === taskX;
+
+            if (isStep1Correct && isStep2Correct && isStep3Correct) {
+                feedback.textContent = `Задача решена абсолютно верно! Исходное число: ${taskX}.`;
+                feedback.className = 'feedback success-text';
+                
+                // Сохраняем прогресс для меню
+                localStorage.setItem('task2_completed', 'true'); 
+                
+                // Показываем кнопку возврата
+                document.getElementById('success-actions').style.display = 'block';
+                
+            } else {
+                feedback.textContent = 'Где-то ошибка. Убедитесь, что вы правильно перевели проценты в десятичную дробь (через запятую или точку) и верно выполнили деление.';
+                feedback.className = 'feedback error-text';
+                document.getElementById('success-actions').style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

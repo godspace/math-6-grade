@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Задача 8: Лодка</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        input.num-input {
+            width: 60px; padding: 6px; font-size: 1em;
+            border: 1px solid #ccc; border-radius: 4px; text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="nav-bar">
+        <a href="../equations_construct-2.html" class="back-link">← Вернуться в главное меню</a>
+    </div>
+
+    <h1>Задача 8: Лодка (Разница путей)</h1>
+
+    <div id="stage1" class="stage active">
+        <h2>Этап 1: Анализ условия</h2>
+        <p>Соотнесите смысловые части задачи с выражениями. Помните: чтобы уравнять два пути, нужно к <strong>меньшему</strong> пути прибавить разницу!</p>
+        
+        <div class="problem-text">
+            Лодка плыла <span id="text-t1"></span> по течению реки и <span id="text-t2"></span> против течения. 
+            <span class="draggable-text" id="drag-sdown" data-id="part-sdown" draggable="true">Путь, который проплыла лодка по течению</span>, 
+            оказался <span class="draggable-text" id="drag-diff" data-id="part-diff" draggable="true"></span> 
+            <span class="draggable-text" id="drag-sup" data-id="part-sup" draggable="true">пути, который она проплыла против течения</span>. 
+            Найдите <span class="draggable-text" data-id="part-x" draggable="true">скорость течения реки</span>, если скорость лодки в стоячей воде составляет <span id="text-v0"></span>.
+        </div>
+
+        <div class="targets-container" id="targets-list"></div>
+    </div>
+
+    <div id="stage2" class="stage">
+        <h2>Этап 2: Составьте уравнение</h2>
+        <p>Соберите уравнение. Поскольку путь по течению был меньше, прибавьте разницу к нему, чтобы приравнять его к пути против течения!</p>
+        
+        <div class="equation-builder" id="eq-pieces-container"></div>
+
+        <div class="equation-builder" id="eq-drop-container">
+            <div class="eq-drop-zone" data-index="0"></div>
+            <div class="eq-drop-zone" data-index="1"></div>
+            <div class="eq-drop-zone" data-index="2"></div>
+            <div class="eq-drop-zone" data-index="3"></div>
+            <div class="eq-drop-zone" data-index="4"></div>
+        </div>
+        <button class="btn" onclick="checkEquation()">Проверить уравнение</button>
+        <span id="eq-feedback" class="feedback"></span>
+    </div>
+
+    <div id="stage3" class="stage">
+        <h2>Этап 3: Решите уравнение</h2>
+        <p>Уравнение составлено: <strong id="stage3-eq-display"></strong></p>
+        
+        <div class="solution-step">
+            1. Раскроем скобки: <br>
+            <input type="text" id="step1-v1" class="num-input" placeholder="0,0"> \(+\) <input type="text" id="step1-t1" class="num-input" placeholder="0,0"> \(x \ + \ \) <span id="stage3-diff"></span> \(=\) 
+            <input type="text" id="step1-v2" class="num-input" placeholder="0,0"> \(-\) <input type="text" id="step1-t2" class="num-input" placeholder="0,0"> \(x\)
+        </div>
+        <div class="solution-step">
+            2. Перенесем все \(x\) в одну сторону, а числа в другую (чтобы избежать минусов, перенесите \(-x\) из правой части в левую):<br>
+            <input type="text" id="step2-coef" class="num-input" placeholder="0,0"> \(x =\) 
+            <input type="text" id="step2-val" class="num-input" style="width: 80px;" placeholder="0,0">
+        </div>
+        <div class="solution-step">
+            3. Найдем скорость течения реки: <br>
+            \(x =\) <input type="number" id="step3-input-x" class="num-input"> км/ч
+        </div>
+        <button class="btn" onclick="checkSolution()">Проверить решение</button>
+        <span id="sol-feedback" class="feedback"></span>
+
+        <div id="success-actions" style="display: none; margin-top: 20px;">
+            <a href="../equations_construct-2.html" class="btn" style="background: #0984e3; text-decoration: none; display: inline-block;">★ Вернуться к списку задач</a>
+        </div>
+    </div>
+
+    <script>
+        let taskX, taskV0, taskT1, taskT2, taskDiff;
+        let strT1, strT2, strDiff;
+        let correctMatches = 0;
+        let draggedEqPiece = null;
+        const currentEquation = [];
+
+        function declOfNum(n, text_forms) {
+            n = Math.abs(n) % 100; var n1 = n % 10;
+            if (n > 10 && n < 20) return text_forms[2];
+            if (n1 > 1 && n1 < 5) return text_forms[1];
+            if (n1 == 1) return text_forms[0];
+            return text_forms[2];
+        }
+
+        document.addEventListener('DOMContentLoaded', initProblem);
+
+        function initProblem() {
+            // Наборы красивых чисел, чтобы корень всегда был целым
+            // x - скорость реки, V0 - скорость лодки, t1 - по течению, t2 - против
+            const configs = [
+                { x: 2, v0: 28, t1: 1.4, t2: 1.7 }, // Diff = 1.7(26) - 1.4(30) = 44.2 - 42.0 = 2.2
+                { x: 3, v0: 25, t1: 1.5, t2: 2.0 }, // Diff = 2.0(22) - 1.5(28) = 44.0 - 42.0 = 2.0
+                { x: 2, v0: 20, t1: 1.2, t2: 1.5 }, // Diff = 1.5(18) - 1.2(22) = 27.0 - 26.4 = 0.6
+                { x: 1, v0: 24, t1: 1.5, t2: 1.8 }, // Diff = 1.8(23) - 1.5(25) = 41.4 - 37.5 = 3.9
+                { x: 3, v0: 30, t1: 1.2, t2: 1.6 }  // Diff = 1.6(27) - 1.2(33) = 43.2 - 39.6 = 3.6
+            ];
+            
+            const cfg = configs[Math.floor(Math.random() * configs.length)];
+            taskX = cfg.x;
+            taskV0 = cfg.v0;
+            taskT1 = cfg.t1;
+            taskT2 = cfg.t2;
+            
+            taskDiff = taskT2 * (taskV0 - taskX) - taskT1 * (taskV0 + taskX);
+            // Округляем до 1 знака после запятой на случай ошибки JS с плавающей точкой
+            taskDiff = Math.round(taskDiff * 10) / 10; 
+
+            strT1 = taskT1.toString().replace('.', ',');
+            strT2 = taskT2.toString().replace('.', ',');
+            strDiff = taskDiff.toString().replace('.', ',');
+
+            document.getElementById('text-t1').textContent = `${strT1} часа`;
+            document.getElementById('text-t2').textContent = `${strT2} часа`;
+            document.getElementById('text-v0').textContent = `${taskV0} км/ч`;
+            
+            document.getElementById('drag-diff').textContent = `на ${strDiff} км меньше`;
+            document.getElementById('stage3-diff').textContent = strDiff;
+
+            const cT1 = strT1.replace(',', '{,}');
+            const cT2 = strT2.replace(',', '{,}');
+            const cDiff = strDiff.replace(',', '{,}');
+
+            const mathExpressions = [
+                { id: 'part-x', math: '\\(x\\)', isFalse: false },
+                { id: 'part-sdown', math: `\\(${cT1}(${taskV0} + x)\\)`, isFalse: false },
+                { id: 'part-sup', math: `\\(${cT2}(${taskV0} - x)\\)`, isFalse: false },
+                { id: 'part-diff', math: `\\(+ ${cDiff}\\)`, isFalse: false },
+                { id: 'false-1', math: `\\(${cT1}(${taskV0} - x)\\)`, isFalse: true },
+                { id: 'false-2', math: `\\(- ${cDiff}\\)`, isFalse: true }
+            ];
+
+            mathExpressions.sort(() => Math.random() - 0.5);
+            const list = document.getElementById('targets-list');
+            list.innerHTML = '';
+            mathExpressions.forEach(expr => {
+                const row = document.createElement('div');
+                row.className = 'target-row';
+                row.innerHTML = `<div class="math-part">${expr.math}</div><div class="drop-zone" data-accept="${expr.isFalse ? 'none' : expr.id}">Перетащите текст...</div>`;
+                list.appendChild(row);
+            });
+
+            setupDragAndDrop();
+            setupEquationPieces(cT1, cT2, cDiff);
+            MathJax.typesetPromise();
+        }
+
+        function setupDragAndDrop() {
+            document.querySelectorAll('.draggable-text').forEach(item => {
+                item.addEventListener('dragstart', e => {
+                    e.dataTransfer.setData('text-id', e.target.dataset.id);
+                    e.dataTransfer.setData('text-content', e.target.textContent);
+                });
+            });
+            document.querySelectorAll('.drop-zone').forEach(zone => {
+                zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+                zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+                zone.addEventListener('drop', handleDrop);
+            });
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const zone = e.target;
+            zone.classList.remove('drag-over');
+            if(zone.classList.contains('correct')) return;
+
+            const id = e.dataTransfer.getData('text-id');
+            if (id === zone.dataset.accept) {
+                zone.textContent = e.dataTransfer.getData('text-content');
+                zone.classList.add('correct');
+                if (++correctMatches === 4) {
+                    setTimeout(() => { document.getElementById('stage2').classList.add('active'); window.scrollTo({ top: document.getElementById('stage2').offsetTop, behavior: 'smooth' }); }, 600);
+                }
+            } else {
+                zone.classList.add('error');
+                setTimeout(() => zone.classList.remove('error'), 500);
+            }
+        }
+
+        function setupEquationPieces(cT1, cT2, cDiff) {
+            const container = document.getElementById('eq-pieces-container');
+            const data = [
+                { val: `sdown`, math: `\\(${cT1}(${taskV0} + x)\\)` },
+                { val: `+`, math: `\\(+\\)` },
+                { val: `diff`, math: `\\(${cDiff}\\)` },
+                { val: `=`, math: `\\(=\\)` },
+                { val: `sup`, math: `\\(${cT2}(${taskV0} - x)\\)` }
+            ];
+            data.sort(() => Math.random() - 0.5);
+            data.forEach(d => {
+                const piece = document.createElement('div');
+                piece.className = 'eq-piece';
+                piece.draggable = true;
+                piece.dataset.val = d.val;
+                piece.innerHTML = d.math;
+                piece.addEventListener('dragstart', e => { draggedEqPiece = piece; });
+                container.appendChild(piece);
+            });
+
+            document.querySelectorAll('.eq-drop-zone').forEach(zone => {
+                zone.addEventListener('dragover', e => e.preventDefault());
+                zone.addEventListener('drop', e => {
+                    e.preventDefault();
+                    if (!draggedEqPiece) return;
+                    zone.innerHTML = '';
+                    zone.appendChild(draggedEqPiece);
+                    zone.classList.add('filled');
+                    currentEquation[zone.dataset.index] = draggedEqPiece.dataset.val;
+                });
+            });
+        }
+
+        function checkEquation() {
+            const res = currentEquation.filter(x => x).join('');
+            
+            const valid = [
+                `sdown+diff=sup`,
+                `diff+sdown=sup`,
+                `sup=sdown+diff`,
+                `sup=diff+sdown`
+            ];
+
+            if (valid.includes(res)) {
+                const f = document.getElementById('eq-feedback');
+                f.textContent = 'Отлично! Уравнение собрано верно.'; f.className = 'feedback success-text';
+                
+                const cT1 = strT1.replace(',', '{,}');
+                const cT2 = strT2.replace(',', '{,}');
+                const cDiff = strDiff.replace(',', '{,}');
+                document.getElementById('stage3-eq-display').innerHTML = `\\(${cT1}(${taskV0} + x) + ${cDiff} = ${cT2}(${taskV0} - x)\\)`;
+                
+                setTimeout(() => { document.getElementById('stage3').classList.add('active'); window.scrollTo({ top: document.getElementById('stage3').offsetTop, behavior: 'smooth' }); MathJax.typesetPromise(); }, 600);
+            } else {
+                const f = document.getElementById('eq-feedback');
+                f.textContent = 'Ошибка. Путь по течению меньше, значит именно к нему нужно прибавить разницу, чтобы получилось равенство.';
+                f.className = 'feedback error-text';
+            }
+        }
+
+        function parseLocalFloat(value) {
+            return parseFloat(value.replace(',', '.'));
+        }
+
+        function checkSolution() {
+            const s1v1 = parseLocalFloat(document.getElementById('step1-v1').value);
+            const s1t1 = parseLocalFloat(document.getElementById('step1-t1').value);
+            const s1v2 = parseLocalFloat(document.getElementById('step1-v2').value);
+            const s1t2 = parseLocalFloat(document.getElementById('step1-t2').value);
+            
+            const s2coef = parseLocalFloat(document.getElementById('step2-coef').value);
+            const s2val = parseLocalFloat(document.getElementById('step2-val').value);
+            
+            const s3x = parseInt(document.getElementById('step3-input-x').value);
+
+            const f = document.getElementById('sol-feedback');
+
+            // Ожидаемые значения:
+            const expV1 = Math.round(taskT1 * taskV0 * 10) / 10;
+            const expV2 = Math.round(taskT2 * taskV0 * 10) / 10;
+            const expCoef = Math.round((taskT1 + taskT2) * 10) / 10;
+            const expVal = Math.round((expV2 - expV1 - taskDiff) * 10) / 10;
+
+            const isStep1Correct = s1v1 === expV1 && s1t1 === taskT1 && s1v2 === expV2 && s1t2 === taskT2;
+            const isStep2Correct = s2coef === expCoef && s2val === expVal;
+            const isStep3Correct = s3x === taskX;
+
+            if (isStep1Correct && isStep2Correct && isStep3Correct) {
+                f.textContent = 'Идеально! Модуль уравнений пройден!'; f.className = 'feedback success-text';
+                localStorage.setItem('task8_completed', 'true');
+                document.getElementById('success-actions').style.display = 'block';
+            } else {
+                f.textContent = 'Где-то ошибка. Проверьте раскрытие скобок (умножение дробей) и правильность переноса слагаемых.'; f.className = 'feedback error-text';
+                document.getElementById('success-actions').style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

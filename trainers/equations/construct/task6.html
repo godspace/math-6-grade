@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Задача 6: Сундук и мешок</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+
+    <div class="nav-bar">
+        <a href="../equations_construct-2.html" class="back-link">← Вернуться в главное меню</a>
+    </div>
+
+    <h1>Задача 6: Сундук и мешок (Перекладывание)</h1>
+
+    <div id="stage1" class="stage active">
+        <h2>Этап 1: Анализ условия</h2>
+        <p>Соотнесите смысловые части задачи с математическими выражениями. За \(x\) берем первоначальное количество монет в мешке.</p>
+        
+        <div class="problem-text">
+            В мешке было в <span id="text-k1" style="font-weight: bold;"></span> раза меньше монет, чем <span class="draggable-text" data-id="part-k1x" draggable="true">в сундуке</span>. 
+            После того как <span class="draggable-text" id="drag-minus" data-id="part-minus" draggable="true"></span> 
+            и <span class="draggable-text" id="drag-plus" data-id="part-plus" draggable="true">переложили их в сундук</span>, 
+            оказалось, что в сундуке их <span class="draggable-text" id="drag-k2" data-id="part-k2result" draggable="true"></span>. 
+            Сколько монет было <span class="draggable-text" data-id="part-x" draggable="true">в мешке первоначально</span>?
+        </div>
+
+        <div class="targets-container" id="targets-list"></div>
+    </div>
+
+    <div id="stage2" class="stage">
+        <h2>Этап 2: Составьте уравнение</h2>
+        <p>Соберите уравнение. Левая часть — сколько монет стало в сундуке. Правая часть — сколько стало в мешке, умноженное на разницу.</p>
+        
+        <div class="equation-builder" id="eq-pieces-container"></div>
+
+        <div class="equation-builder" id="eq-drop-container">
+            <div class="eq-drop-zone" data-index="0"></div>
+            <div class="eq-drop-zone" data-index="1"></div>
+            <div class="eq-drop-zone" data-index="2"></div>
+            <div class="eq-drop-zone" data-index="3"></div>
+            <div class="eq-drop-zone" data-index="4"></div>
+            <div class="eq-drop-zone" data-index="5"></div>
+            <div class="eq-drop-zone" data-index="6"></div>
+        </div>
+        <button class="btn" onclick="checkEquation()">Проверить уравнение</button>
+        <span id="eq-feedback" class="feedback"></span>
+    </div>
+
+    <div id="stage3" class="stage">
+        <h2>Этап 3: Решите уравнение</h2>
+        <p>Уравнение составлено: <strong id="stage3-eq-display"></strong></p>
+        
+        <div class="solution-step">
+            1. Раскроем скобки в правой части: <br>
+            <span id="stage3-left-part"></span> \(= \) 
+            <input type="number" id="step1-input-x" style="width: 60px;"> \(x \ - \ \) <input type="number" id="step1-input-val" style="width: 80px;">
+        </div>
+        <div class="solution-step">
+            2. Перенесем \(x\) вправо, а числа влево (чтобы избежать отрицательных чисел):<br>
+            <input type="number" id="step2-input-val" style="width: 80px;"> \(=\) 
+            <input type="number" id="step2-input-coef" style="width: 60px;"> \(x\)
+        </div>
+        <div class="solution-step">
+            3. Найдем корень уравнения: <br>
+            \(x =\) <input type="number" id="step3-input-x" style="width: 80px;">
+        </div>
+        <button class="btn" onclick="checkSolution()">Проверить решение</button>
+        <span id="sol-feedback" class="feedback"></span>
+
+        <div id="success-actions" style="display: none; margin-top: 20px;">
+            <a href="../equations_construct-2.html" class="btn" style="background: #0984e3; text-decoration: none; display: inline-block;">★ Вернуться к списку задач</a>
+        </div>
+    </div>
+
+    <script>
+        let taskX, taskK1, taskK2, taskA;
+        let correctMatches = 0;
+        let draggedEqPiece = null;
+        const currentEquation = [];
+
+        function declOfNum(n, text_forms) {
+            n = Math.abs(n) % 100; var n1 = n % 10;
+            if (n > 10 && n < 20) return text_forms[2];
+            if (n1 > 1 && n1 < 5) return text_forms[1];
+            if (n1 == 1) return text_forms[0];
+            return text_forms[2];
+        }
+
+        document.addEventListener('DOMContentLoaded', initProblem);
+
+        function initProblem() {
+            taskK1 = Math.floor(Math.random() * 2) + 2; 
+            taskK2 = taskK1 + Math.floor(Math.random() * 2) + 2; 
+            let diff = taskK2 - taskK1;
+            let base = Math.floor(Math.random() * 5) + 3;
+            taskA = base * diff; 
+            taskX = base * (taskK2 + 1);
+
+            document.getElementById('text-k1').textContent = taskK1;
+            document.getElementById('drag-minus').textContent = `из мешка забрали ${taskA} ${declOfNum(taskA, ['монету', 'монеты', 'монет'])}`;
+            document.getElementById('drag-plus').textContent = `переложили их в сундук`;
+            document.getElementById('drag-k2').textContent = `стало в ${taskK2} раз больше, чем в мешке`;
+            
+            document.getElementById('stage3-left-part').textContent = `\\(${taskK1}x + ${taskA}\\)`;
+
+            const mathExpressions = [
+                { id: 'part-x', math: '\\(x\\)', isFalse: false },
+                { id: 'part-k1x', math: `\\(${taskK1}x\\)`, isFalse: false },
+                { id: 'part-minus', math: `\\(x - ${taskA}\\)`, isFalse: false },
+                { id: 'part-plus', math: `\\(${taskK1}x + ${taskA}\\)`, isFalse: false },
+                { id: 'part-k2result', math: `\\(${taskK2}(x - ${taskA})\\)`, isFalse: false },
+                { id: 'false-1', math: `\\(x / ${taskK1}\\)`, isFalse: true },
+                { id: 'false-2', math: `\\(${taskK2}x - ${taskA}\\)`, isFalse: true }
+            ];
+
+            mathExpressions.sort(() => Math.random() - 0.5);
+            const list = document.getElementById('targets-list');
+            list.innerHTML = '';
+            mathExpressions.forEach(expr => {
+                const row = document.createElement('div');
+                row.className = 'target-row';
+                row.innerHTML = `<div class="math-part">${expr.math}</div><div class="drop-zone" data-accept="${expr.isFalse ? 'none' : expr.id}">Перетащите текст...</div>`;
+                list.appendChild(row);
+            });
+
+            setupDragAndDrop();
+            setupEquationPieces();
+            MathJax.typesetPromise();
+        }
+
+        function setupDragAndDrop() {
+            document.querySelectorAll('.draggable-text').forEach(item => {
+                item.addEventListener('dragstart', e => {
+                    e.dataTransfer.setData('text-id', e.target.dataset.id);
+                    e.dataTransfer.setData('text-content', e.target.textContent);
+                });
+            });
+            document.querySelectorAll('.drop-zone').forEach(zone => {
+                zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+                zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+                zone.addEventListener('drop', handleDrop);
+            });
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const zone = e.target;
+            zone.classList.remove('drag-over');
+            if(zone.classList.contains('correct')) return;
+
+            const id = e.dataTransfer.getData('text-id');
+            if (id === zone.dataset.accept) {
+                zone.textContent = e.dataTransfer.getData('text-content');
+                zone.classList.add('correct');
+                if (++correctMatches === 5) {
+                    setTimeout(() => { document.getElementById('stage2').classList.add('active'); window.scrollTo({ top: document.getElementById('stage2').offsetTop, behavior: 'smooth' }); }, 600);
+                }
+            } else {
+                zone.classList.add('error');
+                setTimeout(() => zone.classList.remove('error'), 500);
+            }
+        }
+
+        function setupEquationPieces() {
+            const container = document.getElementById('eq-pieces-container');
+            const data = [
+                { val: `${taskK1}x`, math: `\\(${taskK1}x\\)` },
+                { val: `+`, math: `\\(+\\)` },
+                { val: `${taskA}`, math: `\\(${taskA}\\)` },
+                { val: `=`, math: `\\(=\\)` },
+                { val: `${taskK2}`, math: `\\(${taskK2}\\)` },
+                { val: `*`, math: `\\(\\cdot\\)` },
+                { val: `parens`, math: `\\((x - ${taskA})\\)` }
+            ];
+            data.sort(() => Math.random() - 0.5);
+            data.forEach(d => {
+                const piece = document.createElement('div');
+                piece.className = 'eq-piece';
+                piece.draggable = true;
+                piece.dataset.val = d.val;
+                piece.innerHTML = d.math;
+                piece.addEventListener('dragstart', e => { draggedEqPiece = piece; });
+                container.appendChild(piece);
+            });
+
+            document.querySelectorAll('.eq-drop-zone').forEach(zone => {
+                zone.addEventListener('dragover', e => e.preventDefault());
+                zone.addEventListener('drop', e => {
+                    e.preventDefault();
+                    if (!draggedEqPiece) return;
+                    zone.innerHTML = '';
+                    zone.appendChild(draggedEqPiece);
+                    zone.classList.add('filled');
+                    currentEquation[zone.dataset.index] = draggedEqPiece.dataset.val;
+                });
+            });
+        }
+
+        function checkEquation() {
+            const res = currentEquation.filter(x => x).join('');
+            const valid = [
+                `${taskK1}x+${taskA}=${taskK2}*parens`,
+                `${taskA}+${taskK1}x=${taskK2}*parens`,
+                `${taskK2}*parens=${taskK1}x+${taskA}`,
+                `${taskK2}*parens=${taskA}+${taskK1}x`
+            ];
+            if (valid.includes(res)) {
+                const f = document.getElementById('eq-feedback');
+                f.textContent = 'Верно!'; f.className = 'feedback success-text';
+                document.getElementById('stage3-eq-display').innerHTML = `\\(${taskK1}x + ${taskA} = ${taskK2}(x - ${taskA})\\)`;
+                setTimeout(() => { document.getElementById('stage3').classList.add('active'); window.scrollTo({ top: document.getElementById('stage3').offsetTop, behavior: 'smooth' }); MathJax.typesetPromise(); }, 600);
+            } else {
+                const f = document.getElementById('eq-feedback');
+                f.textContent = 'Проверьте логику: [Стало в сундуке] = [Разница] · [Стало в мешке]';
+                f.className = 'feedback error-text';
+            }
+        }
+
+        function checkSolution() {
+            const s1x = parseInt(document.getElementById('step1-input-x').value);
+            const s1v = parseInt(document.getElementById('step1-input-val').value);
+            const s2v = parseInt(document.getElementById('step2-input-val').value);
+            const s2c = parseInt(document.getElementById('step2-input-coef').value);
+            const s3x = parseInt(document.getElementById('step3-input-x').value);
+
+            const isCorrect = s1x === taskK2 && s1v === (taskK2 * taskA) && 
+                              s2v === (taskA + (taskK2 * taskA)) && s2c === (taskK2 - taskK1) && 
+                              s3x === taskX;
+
+            const f = document.getElementById('sol-feedback');
+            if (isCorrect) {
+                f.textContent = 'Верно!'; f.className = 'feedback success-text';
+                localStorage.setItem('task6_completed', 'true');
+                document.getElementById('success-actions').style.display = 'block';
+            } else {
+                f.textContent = 'Ошибка в вычислениях.'; f.className = 'feedback error-text';
+            }
+        }
+    </script>
+</body>
+</html>
