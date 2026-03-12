@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мониторинг прогресса</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f8f9fa; padding: 20px; }
+        .dashboard { max-width: 1100px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h1 { color: #2d3436; border-bottom: 2px solid #0984e3; padding-bottom: 10px; margin-top: 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 1.1em; }
+        th, td { border: 1px solid #dfe6e9; padding: 12px; text-align: center; }
+        th { background: #f1f2f6; color: #2d3436; }
+        td:first-child { text-align: left; font-weight: bold; color: #2d3436; }
+        .done { background: #d4edda; color: #155724; font-weight: bold; }
+        .not-done { background: #f8d7da; color: #721c24; }
+        .total-score { font-weight: bold; font-size: 1.2em; }
+        .controls { margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .btn-clear { background: #e74c3c; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn-clear:hover { background: #c0392b; }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard">
+        <div class="controls">
+            <h1>📊 Мониторинг: Составление уравнений</h1>
+            <button class="btn-clear" onclick="clearDatabase()">Очистить таблицу (Новый урок)</button>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ФИО ученика</th>
+                    <th>З.1</th><th>З.2</th><th>З.3</th><th>З.4</th><th>З.5</th><th>З.6</th><th>З.7</th><th>З.8</th><th>З.9</th>
+                    <th>Итого</th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+                <tr><td colspan="11" style="color: #636e72;">Ожидание подключения к базе данных...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <script>
+        // ВАШИ КЛЮЧИ FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyBdWiycGwMs2iiC9IqIsGXNO4oLFVK8-do",
+            authDomain: "equations-construct.firebaseapp.com",
+            databaseURL: "https://equations-construct-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "equations-construct",
+            storageBucket: "equations-construct.firebasestorage.app",
+            messagingSenderId: "603114224808",
+            appId: "1:603114224808:web:1937c586d860e39820d69d"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const database = firebase.database();
+        const tbody = document.getElementById('table-body');
+
+        // Слушаем изменения в реальном времени
+        database.ref('students_progress').on('value', (snapshot) => {
+            const data = snapshot.val();
+            tbody.innerHTML = ''; // Очищаем таблицу
+
+            if (!data) {
+                tbody.innerHTML = '<tr><td colspan="11" style="color: #636e72;">Пока никто не сдал работу. Таблица пуста.</td></tr>';
+                return;
+            }
+
+            // Сортируем учеников по времени сдачи (новые снизу)
+            const students = Object.values(data).sort((a, b) => a.timestamp - b.timestamp);
+
+            students.forEach(student => {
+                const tr = document.createElement('tr');
+                
+                // Имя
+                const nameTd = document.createElement('td');
+                nameTd.textContent = student.name;
+                tr.appendChild(nameTd);
+
+                // 9 задач
+                for (let i = 1; i <= 9; i++) {
+                    const td = document.createElement('td');
+                    const isCompleted = student.tasks['task' + i];
+                    
+                    if (isCompleted) {
+                        td.textContent = '✓';
+                        td.className = 'done';
+                    } else {
+                        td.textContent = '✗';
+                        td.className = 'not-done';
+                    }
+                    tr.appendChild(td);
+                }
+
+                // Итого баллов
+                const totalTd = document.createElement('td');
+                totalTd.textContent = `${student.score} / 9`;
+                totalTd.className = 'total-score';
+                if (student.score === 9) totalTd.style.color = '#27ae60';
+                tr.appendChild(totalTd);
+
+                tbody.appendChild(tr);
+            });
+        });
+
+        function clearDatabase() {
+            if (confirm('Вы уверены, что хотите очистить все результаты? Это действие нельзя отменить.')) {
+                database.ref('students_progress').remove();
+            }
+        }
+    </script>
+</body>
+</html>

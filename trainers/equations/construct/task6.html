@@ -342,9 +342,49 @@
                 f.textContent = 'Верно!'; f.className = 'feedback success-text';
                 localStorage.setItem('task6_completed', 'true');
                 document.getElementById('success-actions').style.display = 'block';
+
+                // НОВАЯ СТРОКА: Фоновая отправка учителю
+                if(typeof autoSaveToFirebase === 'function') autoSaveToFirebase();
+
             } else {
                 f.textContent = 'Ошибка в вычислениях.'; f.className = 'feedback error-text';
             }
+        }
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script>
+        function autoSaveToFirebase() {
+            // Если база недоступна из-за блокировки — просто тихо прерываем отправку, 
+            // не выдавая никаких ошибок ученику.
+            if (!database) return; 
+
+            const name = localStorage.getItem('studentName');
+            if (!name) return;
+            
+            const firebaseConfig = {
+                apiKey: "AIzaSyBdWiycGwMs2iiC9IqIsGXNO4oLFVK8-do",
+                authDomain: "equations-construct.firebaseapp.com",
+                databaseURL: "https://equations-construct-default-rtdb.asia-southeast1.firebasedatabase.app",
+                projectId: "equations-construct",
+                storageBucket: "equations-construct.firebasestorage.app",
+                messagingSenderId: "603114224808",
+                appId: "1:603114224808:web:1937c586d860e39820d69d"
+            };
+
+            if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+            const database = firebase.database();
+
+            let tasks = {}; let score = 0;
+            for(let i=1; i<=9; i++) {
+                let isDone = localStorage.getItem('task' + i + '_completed') === 'true';
+                tasks['task' + i] = isDone;
+                if (isDone) score++;
+            }
+
+            database.ref('students_progress/' + studentName).set({
+                name: studentName, tasks: tasks, score: score, timestamp: Date.now()
+            });
         }
     </script>
 </body>
