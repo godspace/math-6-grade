@@ -69,24 +69,22 @@
     </div>
 
     <script>
-        // Глобальные переменные для текущей задачи
+        // Глобальные переменные
         let taskK, taskA, taskB, taskX;
-        let correctMatches = 0;
         let draggedEqPiece = null;
-        const currentEquation = [];
 
         document.addEventListener('DOMContentLoaded', () => {
             initProblem();
         });
 
         function initProblem() {
-            // 1. Генерируем значения (сначала корень, чтобы он был целым)
-            taskX = (Math.floor(Math.random() * 15) + 3) * 50; // Корень x: от 150 до 850 (шаг 50)
-            taskK = Math.floor(Math.random() * 4) + 2;         // Коэффициент k: от 2 до 5
-            taskA = (Math.floor(Math.random() * 15) + 4) * 50; // Добавка a: от 200 до 900 (шаг 50)
-            taskB = (taskK + 1) * taskX + taskA;               // Итоговая масса b
+            // 1. Генерируем значения
+            taskX = (Math.floor(Math.random() * 15) + 3) * 50; 
+            taskK = Math.floor(Math.random() * 4) + 2;         
+            taskA = (Math.floor(Math.random() * 15) + 4) * 50; 
+            taskB = (taskK + 1) * taskX + taskA;               
 
-            // 2. Заполняем текст задачи на Этапе 1
+            // 2. Заполняем текст задачи
             document.getElementById('drag-kx').textContent = `в ${taskK} раза больше`;
             document.getElementById('drag-a').textContent = `добавить к ней еще ${taskA} кг`;
             document.getElementById('drag-b').textContent = `составит ${taskB} кг`;
@@ -101,11 +99,10 @@
                 { id: 'false-2', math: `\\(- ${taskA}\\)`, isFalse: true }
             ];
 
-            // Перемешиваем варианты ответов
             mathExpressions.sort(() => Math.random() - 0.5);
 
             const targetsList = document.getElementById('targets-list');
-            targetsList.innerHTML = ''; // Очищаем перед генерацией
+            targetsList.innerHTML = ''; 
             
             mathExpressions.forEach(expr => {
                 const row = document.createElement('div');
@@ -117,7 +114,6 @@
                 targetsList.appendChild(row);
             });
 
-            // Навешиваем события Drag&Drop на текст Этапа 1
             document.querySelectorAll('.draggable-text').forEach(item => {
                 item.addEventListener('dragstart', e => {
                     e.dataTransfer.setData('text-id', e.target.dataset.id);
@@ -134,9 +130,9 @@
                 zone.addEventListener('drop', handleTextDrop);
             });
 
-            // 4. Генерируем "запчасти" уравнения для Этапа 2
+            // 4. Генерируем блоки уравнения (Этап 2)
             const eqPiecesContainer = document.getElementById('eq-pieces-container');
-            eqPiecesContainer.innerHTML = ''; // Очищаем
+            eqPiecesContainer.innerHTML = ''; 
 
             const eqPiecesData = [
                 { val: `${taskK}x`, math: `\\(${taskK}x\\)` },
@@ -146,7 +142,6 @@
                 { val: `=${taskB}`, math: `\\(= ${taskB}\\)` }
             ];
 
-            // Алгоритм Фишера-Йетса для перемешивания кубиков уравнения
             for (let i = eqPiecesData.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [eqPiecesData[i], eqPiecesData[j]] = [eqPiecesData[j], eqPiecesData[i]];
@@ -158,59 +153,150 @@
                 piece.draggable = true;
                 piece.dataset.val = pieceData.val;
                 piece.innerHTML = pieceData.math;
+                
                 piece.addEventListener('dragstart', e => {
                     draggedEqPiece = piece;
                 });
+
+                // Возврат карточки по клику
+                piece.addEventListener('click', function() {
+                    if (this.parentElement.classList.contains('eq-drop-zone')) {
+                        const zone = this.parentElement;
+                        document.getElementById('eq-pieces-container').appendChild(this);
+                        zone.classList.remove('filled');
+                    }
+                });
+
                 eqPiecesContainer.appendChild(piece);
             });
 
-            // Настройка дроп-зон Этапа 2
             document.querySelectorAll('.eq-drop-zone').forEach(zone => {
                 zone.addEventListener('dragover', e => e.preventDefault());
                 zone.addEventListener('drop', e => {
                     e.preventDefault();
                     if (!draggedEqPiece) return;
-                    zone.innerHTML = '';
+                    
+                    // Защита от наложения карточек
+                    if (zone.children.length > 0) {
+                        const existingPiece = zone.children[0];
+                        document.getElementById('eq-pieces-container').appendChild(existingPiece);
+                    }
+                    
                     zone.appendChild(draggedEqPiece);
                     zone.classList.add('filled');
-                    currentEquation[zone.dataset.index] = draggedEqPiece.dataset.val;
                 });
             });
 
-            // Запускаем рендеринг формул через MathJax
             MathJax.typesetPromise();
         }
 
-        function handleTextDrop(e) {
+        // Универсальная логика Этапа 1 (Текст в условии остается)
+        function handleTextDrop(e) { 
+            e.preventDefault();
             const zone = e.target;
+            
             if(zone.classList.contains('correct')) return;
-
             zone.classList.remove('drag-over');
+
             const draggedId = e.dataTransfer.getData('text-id');
             const draggedText = e.dataTransfer.getData('text-content');
-            const acceptedId = zone.dataset.accept;
 
-            if (draggedId === acceptedId) {
-                zone.textContent = draggedText;
-                zone.classList.add('correct');
-                correctMatches++;
-                if (correctMatches === 4) {
-                    setTimeout(() => {
-                        document.getElementById('stage2').classList.add('active');
-                        window.scrollTo({ top: document.getElementById('stage2').offsetTop, behavior: 'smooth' });
-                    }, 600);
-                }
-            } else {
-                zone.classList.add('error');
-                setTimeout(() => zone.classList.remove('error'), 500);
+            // Защита от дублирования слов
+            const existingZone = document.querySelector(`.drop-zone[data-dropped-id="${draggedId}"]`);
+            if (existingZone && existingZone !== zone) {
+                existingZone.textContent = existingZone.dataset.placeholder;
+                existingZone.style.background = '';
+                existingZone.style.color = '';
+                existingZone.style.border = '';
+                delete existingZone.dataset.droppedId;
+            }
+
+            if (!zone.dataset.placeholder) {
+                zone.dataset.placeholder = zone.textContent;
+            }
+
+            zone.textContent = draggedText;
+            zone.dataset.droppedId = draggedId;
+            zone.style.background = '#e9ecef';
+            zone.style.color = '#333';
+            zone.style.border = '2px solid #adb5bd';
+            zone.style.cursor = 'pointer'; 
+
+            const totalTexts = document.querySelectorAll('.draggable-text').length;
+            const filledZones = document.querySelectorAll('.drop-zone[data-dropped-id]');
+
+            if (filledZones.length === totalTexts) {
+                checkStage1(filledZones);
             }
         }
 
+        function checkStage1(filledZones) {
+            let isAllCorrect = true;
+
+            filledZones.forEach(zone => {
+                if (zone.dataset.droppedId !== zone.dataset.accept) {
+                    isAllCorrect = false;
+                }
+            });
+
+            if (isAllCorrect) {
+                filledZones.forEach(zone => {
+                    zone.style.background = ''; 
+                    zone.style.color = '';
+                    zone.style.border = '';
+                    zone.style.cursor = 'default';
+                    zone.classList.add('correct');
+                });
+                
+                setTimeout(() => {
+                    document.getElementById('stage2').classList.add('active');
+                    window.scrollTo({ top: document.getElementById('stage2').offsetTop, behavior: 'smooth' });
+                }, 600);
+            } else {
+                filledZones.forEach(zone => {
+                    zone.style.background = '';
+                    zone.style.color = '';
+                    zone.style.border = '';
+                    zone.classList.add('error');
+                });
+
+                setTimeout(() => {
+                    filledZones.forEach(zone => {
+                        zone.classList.remove('error');
+                        zone.textContent = zone.dataset.placeholder; 
+                        delete zone.dataset.droppedId;
+                    });
+                }, 1200); 
+            }
+        }
+
+        // Возврат фрагмента Этапа 1 по клику
+        document.addEventListener('click', function(e) {
+            const zone = e.target;
+            if (zone.classList.contains('drop-zone') && zone.dataset.droppedId && !zone.classList.contains('correct')) {
+                zone.textContent = zone.dataset.placeholder;
+                zone.style.background = '';
+                zone.style.color = '';
+                zone.style.border = '';
+                delete zone.dataset.droppedId;
+            }
+        });
+
         function checkEquation() {
             const feedback = document.getElementById('eq-feedback');
-            const assembled = currentEquation.join('');
+            let assembled = '';
+            const zones = document.querySelectorAll('.eq-drop-zone');
             
-            // Проверка с учетом переместительного свойства сложения
+            // Читаем ответ прямо из ячеек Этапа 2
+            for (let i = 0; i < zones.length; i++) {
+                if (zones[i].children.length === 0) {
+                    feedback.textContent = 'Сначала заполните все пустые ячейки!';
+                    feedback.className = 'feedback error-text';
+                    return; 
+                }
+                assembled += zones[i].children[0].dataset.val;
+            }
+            
             const valid1 = `${taskK}x+x+${taskA}=${taskB}`;
             const valid2 = `x+${taskK}x+${taskA}=${taskB}`;
 
@@ -218,7 +304,6 @@
                 feedback.textContent = 'Отлично! Уравнение составлено верно.';
                 feedback.className = 'feedback success-text';
                 
-                // Подготавливаем тексты для Этапа 3 перед его открытием
                 document.getElementById('stage3-eq-display').innerHTML = `\\(${taskK}x + x + ${taskA} = ${taskB}\\)`;
                 document.getElementById('stage3-step1-text').innerHTML = `\\(x + ${taskA} = ${taskB}\\)`;
                 document.getElementById('stage3-step2-text').innerHTML = `\\(${taskK + 1}x =\\)`;
@@ -241,7 +326,6 @@
             const step3 = document.getElementById('step3-input').value;
             const feedback = document.getElementById('sol-feedback');
 
-            // Проверка ответов с динамическими переменными
             const isStep1Correct = parseInt(step1) === (taskK + 1);
             const isStep2Correct = parseInt(step2) === (taskB - taskA);
             const isStep3Correct = parseInt(step3) === taskX;
@@ -250,17 +334,12 @@
                 feedback.textContent = `Задача решена абсолютно верно! Ответ: ${taskX} кг.`;
                 feedback.className = 'feedback success-text';
                 
-                // Записываем в память браузера, что Задача 3 выполнена
                 localStorage.setItem('task3_completed', 'true'); 
-                
-                // Показываем кнопку возврата в меню
                 document.getElementById('success-actions').style.display = 'block';
                 
             } else {
                 feedback.textContent = 'В вычислениях есть ошибка. Проверьте каждый шаг.';
                 feedback.className = 'feedback error-text';
-                
-                // Прячем кнопку, если допущена ошибка
                 document.getElementById('success-actions').style.display = 'none';
             }
         }

@@ -82,9 +82,7 @@
     <script>
         // Глобальные переменные
         let taskP, taskX, taskS, taskPDecimal, taskPDecimalStr;
-        let correctMatches = 0;
         let draggedEqPiece = null;
-        const currentEquation = [];
 
         document.addEventListener('DOMContentLoaded', () => {
             initProblem();
@@ -93,13 +91,12 @@
         function initProblem() {
             // 1. Генерируем "красивые" числа
             const validPercentages = [10, 20, 25, 30, 40, 50, 60, 75, 80];
-            taskP = validPercentages[Math.floor(Math.random() * validPercentages.length)]; // Процент
-            taskX = (Math.floor(Math.random() * 10) + 2) * 20; // Исходное число (x): 40, 60, 80 ... 220
+            taskP = validPercentages[Math.floor(Math.random() * validPercentages.length)]; 
+            taskX = (Math.floor(Math.random() * 10) + 2) * 20; 
             
             taskPDecimal = taskP / 100;
-            taskS = (taskP * taskX) / 100; // Значение части (S)
+            taskS = (taskP * taskX) / 100; 
 
-            // Заменяем точку на запятую для русской локализации (например 0.4 -> 0,4)
             taskPDecimalStr = taskPDecimal.toString().replace('.', ',');
 
             // 2. Заполняем текст задачи
@@ -109,11 +106,11 @@
 
             // 3. Генерируем варианты для Этапа 1
             const mathExpressions = [
-                { id: 'part-p', math: `\\(${taskPDecimalStr}\\)`, isFalse: false }, // Правильная десятичная дробь
+                { id: 'part-p', math: `\\(${taskPDecimalStr}\\)`, isFalse: false }, 
                 { id: 'part-x', math: '\\(x\\)', isFalse: false },
                 { id: 'part-s', math: `\\(= ${taskS}\\)`, isFalse: false },
-                { id: 'false-1', math: `\\(${taskP}\\)`, isFalse: true }, // Ошибка невнимательности (просто число)
-                { id: 'false-2', math: `\\(${taskS}x\\)`, isFalse: true } // Бессмысленное выражение
+                { id: 'false-1', math: `\\(${taskP}\\)`, isFalse: true }, 
+                { id: 'false-2', math: `\\(${taskS}x\\)`, isFalse: true } 
             ];
 
             mathExpressions.sort(() => Math.random() - 0.5);
@@ -124,7 +121,6 @@
             mathExpressions.forEach(expr => {
                 const row = document.createElement('div');
                 row.className = 'target-row';
-                // Для MathJax конструкция {,} не дает пробелу появиться после запятой
                 const cleanMath = expr.math.replace(',', '{,}'); 
                 row.innerHTML = `
                     <div class="math-part">${cleanMath}</div>
@@ -133,7 +129,6 @@
                 targetsList.appendChild(row);
             });
 
-            // Навешиваем Drag&Drop (Этап 1)
             document.querySelectorAll('.draggable-text').forEach(item => {
                 item.addEventListener('dragstart', e => {
                     e.dataTransfer.setData('text-id', e.target.dataset.id);
@@ -172,9 +167,20 @@
                 piece.draggable = true;
                 piece.dataset.val = pieceData.val;
                 piece.innerHTML = pieceData.math;
+                
                 piece.addEventListener('dragstart', e => {
                     draggedEqPiece = piece;
                 });
+
+                // Возврат карточки по клику
+                piece.addEventListener('click', function() {
+                    if (this.parentElement.classList.contains('eq-drop-zone')) {
+                        const zone = this.parentElement;
+                        document.getElementById('eq-pieces-container').appendChild(this);
+                        zone.classList.remove('filled');
+                    }
+                });
+
                 eqPiecesContainer.appendChild(piece);
             });
 
@@ -183,46 +189,129 @@
                 zone.addEventListener('drop', e => {
                     e.preventDefault();
                     if (!draggedEqPiece) return;
-                    zone.innerHTML = '';
+                    
+                    // Защита от наложения карточек
+                    if (zone.children.length > 0) {
+                        const existingPiece = zone.children[0];
+                        document.getElementById('eq-pieces-container').appendChild(existingPiece);
+                    }
+                    
                     zone.appendChild(draggedEqPiece);
                     zone.classList.add('filled');
-                    currentEquation[zone.dataset.index] = draggedEqPiece.dataset.val;
                 });
             });
 
             MathJax.typesetPromise();
         }
 
-        function handleTextDrop(e) {
+        // Универсальная логика Этапа 1
+        function handleTextDrop(e) { 
+            e.preventDefault();
             const zone = e.target;
+            
             if(zone.classList.contains('correct')) return;
-
             zone.classList.remove('drag-over');
+
             const draggedId = e.dataTransfer.getData('text-id');
             const draggedText = e.dataTransfer.getData('text-content');
-            const acceptedId = zone.dataset.accept;
 
-            if (draggedId === acceptedId) {
-                zone.textContent = draggedText;
-                zone.classList.add('correct');
-                correctMatches++;
-                if (correctMatches === 3) {
-                    setTimeout(() => {
-                        document.getElementById('stage2').classList.add('active');
-                        window.scrollTo({ top: document.getElementById('stage2').offsetTop, behavior: 'smooth' });
-                    }, 600);
-                }
-            } else {
-                zone.classList.add('error');
-                setTimeout(() => zone.classList.remove('error'), 500);
+            // Защита от дублирования слов
+            const existingZone = document.querySelector(`.drop-zone[data-dropped-id="${draggedId}"]`);
+            if (existingZone && existingZone !== zone) {
+                existingZone.textContent = existingZone.dataset.placeholder;
+                existingZone.style.background = '';
+                existingZone.style.color = '';
+                existingZone.style.border = '';
+                delete existingZone.dataset.droppedId;
+            }
+
+            if (!zone.dataset.placeholder) {
+                zone.dataset.placeholder = zone.textContent;
+            }
+
+            zone.textContent = draggedText;
+            zone.dataset.droppedId = draggedId;
+            zone.style.background = '#e9ecef';
+            zone.style.color = '#333';
+            zone.style.border = '2px solid #adb5bd';
+            zone.style.cursor = 'pointer'; 
+
+            const totalTexts = document.querySelectorAll('.draggable-text').length;
+            const filledZones = document.querySelectorAll('.drop-zone[data-dropped-id]');
+
+            // Запуск проверки только при полном заполнении
+            if (filledZones.length === totalTexts) {
+                checkStage1(filledZones);
             }
         }
 
+        function checkStage1(filledZones) {
+            let isAllCorrect = true;
+
+            filledZones.forEach(zone => {
+                if (zone.dataset.droppedId !== zone.dataset.accept) {
+                    isAllCorrect = false;
+                }
+            });
+
+            if (isAllCorrect) {
+                filledZones.forEach(zone => {
+                    zone.style.background = ''; 
+                    zone.style.color = '';
+                    zone.style.border = '';
+                    zone.style.cursor = 'default';
+                    zone.classList.add('correct');
+                });
+                
+                setTimeout(() => {
+                    document.getElementById('stage2').classList.add('active');
+                    window.scrollTo({ top: document.getElementById('stage2').offsetTop, behavior: 'smooth' });
+                }, 600);
+            } else {
+                filledZones.forEach(zone => {
+                    zone.style.background = '';
+                    zone.style.color = '';
+                    zone.style.border = '';
+                    zone.classList.add('error');
+                });
+
+                setTimeout(() => {
+                    filledZones.forEach(zone => {
+                        zone.classList.remove('error');
+                        zone.textContent = zone.dataset.placeholder; 
+                        delete zone.dataset.droppedId;
+                    });
+                }, 1200); 
+            }
+        }
+
+        // Возврат фрагмента Этапа 1 по клику
+        document.addEventListener('click', function(e) {
+            const zone = e.target;
+            if (zone.classList.contains('drop-zone') && zone.dataset.droppedId && !zone.classList.contains('correct')) {
+                zone.textContent = zone.dataset.placeholder;
+                zone.style.background = '';
+                zone.style.color = '';
+                zone.style.border = '';
+                delete zone.dataset.droppedId;
+            }
+        });
+
         function checkEquation() {
             const feedback = document.getElementById('eq-feedback');
-            const assembled = currentEquation.join('');
+            let assembled = '';
+            const zones = document.querySelectorAll('.eq-drop-zone');
             
-            // Варианты правильной сборки: 0,4x=80 или 80=0,4x
+            // Читаем ответ прямо из HTML (DOM) ячеек Этапа 2
+            for (let i = 0; i < zones.length; i++) {
+                if (zones[i].children.length === 0) {
+                    feedback.textContent = 'Сначала заполните все пустые ячейки!';
+                    feedback.className = 'feedback error-text';
+                    return; 
+                }
+                assembled += zones[i].children[0].dataset.val;
+            }
+            
             if (assembled === 'px=s' || assembled === 's=px') {
                 feedback.textContent = 'Отлично! Уравнение составлено верно.';
                 feedback.className = 'feedback success-text';
@@ -241,7 +330,6 @@
             }
         }
 
-        // Вспомогательная функция для парсинга чисел, введенных с запятой или точкой
         function parseLocalFloat(value) {
             return parseFloat(value.replace(',', '.'));
         }
@@ -253,7 +341,6 @@
             const inputX = document.getElementById('step3-input-x').value;
             const feedback = document.getElementById('sol-feedback');
 
-            // Проверяем ответы, конвертируя введенные данные через функцию парсинга
             const isStep1Correct = parseLocalFloat(inputDec1) === taskPDecimal;
             const isStep2Correct = parseLocalFloat(inputS) === taskS && parseLocalFloat(inputDec2) === taskPDecimal;
             const isStep3Correct = parseLocalFloat(inputX) === taskX;
@@ -262,10 +349,7 @@
                 feedback.textContent = `Задача решена абсолютно верно! Исходное число: ${taskX}.`;
                 feedback.className = 'feedback success-text';
                 
-                // Сохраняем прогресс для меню
                 localStorage.setItem('task2_completed', 'true'); 
-                
-                // Показываем кнопку возврата
                 document.getElementById('success-actions').style.display = 'block';
                 
             } else {

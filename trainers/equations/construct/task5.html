@@ -83,9 +83,7 @@
 
     <script>
         let taskX, taskVc, taskVd, taskD0, taskS;
-        let correctMatches = 0;
         let draggedEqPiece = null;
-        const currentEquation = [];
 
         // Склонение слов
         function declOfNum(n, text_forms) {
@@ -195,9 +193,20 @@
                 piece.draggable = true;
                 piece.dataset.val = pieceData.val;
                 piece.innerHTML = pieceData.math;
+                
                 piece.addEventListener('dragstart', e => {
                     draggedEqPiece = piece;
                 });
+
+                // Возврат карточки по клику
+                piece.addEventListener('click', function() {
+                    if (this.parentElement.classList.contains('eq-drop-zone')) {
+                        const zone = this.parentElement;
+                        document.getElementById('eq-pieces-container').appendChild(this);
+                        zone.classList.remove('filled');
+                    }
+                });
+
                 eqPiecesContainer.appendChild(piece);
             });
 
@@ -206,52 +215,126 @@
                 zone.addEventListener('drop', e => {
                     e.preventDefault();
                     if (!draggedEqPiece) return;
-                    zone.innerHTML = '';
+                    
+                    // Защита от наложения карточек
+                    if (zone.children.length > 0) {
+                        const existingPiece = zone.children[0];
+                        document.getElementById('eq-pieces-container').appendChild(existingPiece);
+                    }
+                    
                     zone.appendChild(draggedEqPiece);
                     zone.classList.add('filled');
-                    currentEquation[zone.dataset.index] = draggedEqPiece.dataset.val;
                 });
             });
 
             MathJax.typesetPromise();
         }
 
-        function handleTextDrop(e) {
+        // Универсальная логика Этапа 1
+        function handleTextDrop(e) { 
+            e.preventDefault();
             const zone = e.target;
+            
             if(zone.classList.contains('correct')) return;
-
             zone.classList.remove('drag-over');
+
             const draggedId = e.dataTransfer.getData('text-id');
             const draggedText = e.dataTransfer.getData('text-content');
-            const acceptedId = zone.dataset.accept;
 
-            if (draggedId === acceptedId) {
-                zone.textContent = draggedText;
-                zone.classList.add('correct');
-                correctMatches++;
-                if (correctMatches === 5) {
-                    setTimeout(() => {
-                        document.getElementById('stage2').classList.add('active');
-                        window.scrollTo({ top: document.getElementById('stage2').offsetTop, behavior: 'smooth' });
-                    }, 600);
-                }
-            } else {
-                zone.classList.add('error');
-                setTimeout(() => zone.classList.remove('error'), 500);
+            // Защита от дублирования
+            const existingZone = document.querySelector(`.drop-zone[data-dropped-id="${draggedId}"]`);
+            if (existingZone && existingZone !== zone) {
+                existingZone.textContent = existingZone.dataset.placeholder;
+                existingZone.style.background = '';
+                existingZone.style.color = '';
+                existingZone.style.border = '';
+                delete existingZone.dataset.droppedId;
+            }
+
+            if (!zone.dataset.placeholder) {
+                zone.dataset.placeholder = zone.textContent;
+            }
+
+            zone.textContent = draggedText;
+            zone.dataset.droppedId = draggedId;
+            zone.style.background = '#e9ecef';
+            zone.style.color = '#333';
+            zone.style.border = '2px solid #adb5bd';
+            zone.style.cursor = 'pointer'; 
+
+            const totalTexts = document.querySelectorAll('.draggable-text').length;
+            const filledZones = document.querySelectorAll('.drop-zone[data-dropped-id]');
+
+            if (filledZones.length === totalTexts) {
+                checkStage1(filledZones);
             }
         }
+
+        function checkStage1(filledZones) {
+            let isAllCorrect = true;
+
+            filledZones.forEach(zone => {
+                if (zone.dataset.droppedId !== zone.dataset.accept) {
+                    isAllCorrect = false;
+                }
+            });
+
+            if (isAllCorrect) {
+                filledZones.forEach(zone => {
+                    zone.style.background = ''; 
+                    zone.style.color = '';
+                    zone.style.border = '';
+                    zone.style.cursor = 'default';
+                    zone.classList.add('correct');
+                });
+                
+                setTimeout(() => {
+                    document.getElementById('stage2').classList.add('active');
+                    window.scrollTo({ top: document.getElementById('stage2').offsetTop, behavior: 'smooth' });
+                }, 600);
+            } else {
+                filledZones.forEach(zone => {
+                    zone.style.background = '';
+                    zone.style.color = '';
+                    zone.style.border = '';
+                    zone.classList.add('error');
+                });
+
+                setTimeout(() => {
+                    filledZones.forEach(zone => {
+                        zone.classList.remove('error');
+                        zone.textContent = zone.dataset.placeholder; 
+                        delete zone.dataset.droppedId;
+                    });
+                }, 1200); 
+            }
+        }
+
+        // Возврат фрагмента Этапа 1 по клику
+        document.addEventListener('click', function(e) {
+            const zone = e.target;
+            if (zone.classList.contains('drop-zone') && zone.dataset.droppedId && !zone.classList.contains('correct')) {
+                zone.textContent = zone.dataset.placeholder;
+                zone.style.background = '';
+                zone.style.color = '';
+                zone.style.border = '';
+                delete zone.dataset.droppedId;
+            }
+        });
 
         function checkEquation() {
             const feedback = document.getElementById('eq-feedback');
             let assembled = '';
+            const zones = document.querySelectorAll('.eq-drop-zone');
             
-            // Проверяем, что все 11 слотов заполнены
-            for(let i = 0; i < 11; i++) {
-                if(!currentEquation[i]) {
-                    showEqError(feedback);
+            // Читаем ответ прямо из ячеек
+            for(let i = 0; i < zones.length; i++) {
+                if(zones[i].children.length === 0) {
+                    feedback.textContent = 'Сначала заполните все пустые ячейки!';
+                    feedback.className = 'feedback error-text';
                     return;
                 }
-                assembled += currentEquation[i];
+                assembled += zones[i].children[0].dataset.val;
             }
             
             // Умная логика проверки (разбиваем уравнение на левую и правую части по знаку =)

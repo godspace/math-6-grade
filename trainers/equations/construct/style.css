@@ -145,3 +145,10 @@ input[type="number"] {
     font-weight: bold;
     font-size: 0.9em;
 }
+/* Делаем курсор-указатель для карточек, которые уже вставлены в уравнение */
+.eq-drop-zone .eq-piece {
+    cursor: pointer;
+}
+.eq-drop-zone .eq-piece:hover {
+    background-color: #ff7675; /* При наведении карточка будет краснеть, намекая на удаление */
+}

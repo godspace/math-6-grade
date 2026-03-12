@@ -83,9 +83,7 @@
     <script>
         let taskX, taskV0, taskT1, taskT2, taskDiff;
         let strT1, strT2, strDiff;
-        let correctMatches = 0;
         let draggedEqPiece = null;
-        const currentEquation = [];
 
         function declOfNum(n, text_forms) {
             n = Math.abs(n) % 100; var n1 = n % 10;
@@ -101,11 +99,11 @@
             // Наборы красивых чисел, чтобы корень всегда был целым
             // x - скорость реки, V0 - скорость лодки, t1 - по течению, t2 - против
             const configs = [
-                { x: 2, v0: 28, t1: 1.4, t2: 1.7 }, // Diff = 1.7(26) - 1.4(30) = 44.2 - 42.0 = 2.2
-                { x: 3, v0: 25, t1: 1.5, t2: 2.0 }, // Diff = 2.0(22) - 1.5(28) = 44.0 - 42.0 = 2.0
-                { x: 2, v0: 20, t1: 1.2, t2: 1.5 }, // Diff = 1.5(18) - 1.2(22) = 27.0 - 26.4 = 0.6
-                { x: 1, v0: 24, t1: 1.5, t2: 1.8 }, // Diff = 1.8(23) - 1.5(25) = 41.4 - 37.5 = 3.9
-                { x: 3, v0: 30, t1: 1.2, t2: 1.6 }  // Diff = 1.6(27) - 1.2(33) = 43.2 - 39.6 = 3.6
+                { x: 2, v0: 28, t1: 1.4, t2: 1.7 }, 
+                { x: 3, v0: 25, t1: 1.5, t2: 2.0 }, 
+                { x: 2, v0: 20, t1: 1.2, t2: 1.5 }, 
+                { x: 1, v0: 24, t1: 1.5, t2: 1.8 }, 
+                { x: 3, v0: 30, t1: 1.2, t2: 1.6 }  
             ];
             
             const cfg = configs[Math.floor(Math.random() * configs.length)];
@@ -115,7 +113,6 @@
             taskT2 = cfg.t2;
             
             taskDiff = taskT2 * (taskV0 - taskX) - taskT1 * (taskV0 + taskX);
-            // Округляем до 1 знака после запятой на случай ошибки JS с плавающей точкой
             taskDiff = Math.round(taskDiff * 10) / 10; 
 
             strT1 = taskT1.toString().replace('.', ',');
@@ -171,27 +168,103 @@
             });
         }
 
+        // Универсальная логика Этапа 1
         function handleDrop(e) {
             e.preventDefault();
             const zone = e.target;
-            zone.classList.remove('drag-over');
+            
             if(zone.classList.contains('correct')) return;
+            zone.classList.remove('drag-over');
 
-            const id = e.dataTransfer.getData('text-id');
-            if (id === zone.dataset.accept) {
-                zone.textContent = e.dataTransfer.getData('text-content');
-                zone.classList.add('correct');
-                if (++correctMatches === 4) {
-                    setTimeout(() => { document.getElementById('stage2').classList.add('active'); window.scrollTo({ top: document.getElementById('stage2').offsetTop, behavior: 'smooth' }); }, 600);
-                }
-            } else {
-                zone.classList.add('error');
-                setTimeout(() => zone.classList.remove('error'), 500);
+            const draggedId = e.dataTransfer.getData('text-id');
+            const draggedText = e.dataTransfer.getData('text-content');
+
+            // Защита от дублирования
+            const existingZone = document.querySelector(`.drop-zone[data-dropped-id="${draggedId}"]`);
+            if (existingZone && existingZone !== zone) {
+                existingZone.textContent = existingZone.dataset.placeholder;
+                existingZone.style.background = '';
+                existingZone.style.color = '';
+                existingZone.style.border = '';
+                delete existingZone.dataset.droppedId;
+            }
+
+            if (!zone.dataset.placeholder) {
+                zone.dataset.placeholder = zone.textContent;
+            }
+
+            zone.textContent = draggedText;
+            zone.dataset.droppedId = draggedId;
+            zone.style.background = '#e9ecef';
+            zone.style.color = '#333';
+            zone.style.border = '2px solid #adb5bd';
+            zone.style.cursor = 'pointer'; 
+
+            const totalTexts = document.querySelectorAll('.draggable-text').length;
+            const filledZones = document.querySelectorAll('.drop-zone[data-dropped-id]');
+
+            // Запускаем проверку только при полном заполнении
+            if (filledZones.length === totalTexts) {
+                checkStage1(filledZones);
             }
         }
 
+        function checkStage1(filledZones) {
+            let isAllCorrect = true;
+
+            filledZones.forEach(zone => {
+                if (zone.dataset.droppedId !== zone.dataset.accept) {
+                    isAllCorrect = false;
+                }
+            });
+
+            if (isAllCorrect) {
+                filledZones.forEach(zone => {
+                    zone.style.background = ''; 
+                    zone.style.color = '';
+                    zone.style.border = '';
+                    zone.style.cursor = 'default';
+                    zone.classList.add('correct');
+                });
+                
+                setTimeout(() => {
+                    document.getElementById('stage2').classList.add('active');
+                    window.scrollTo({ top: document.getElementById('stage2').offsetTop, behavior: 'smooth' });
+                }, 600);
+            } else {
+                filledZones.forEach(zone => {
+                    zone.style.background = '';
+                    zone.style.color = '';
+                    zone.style.border = '';
+                    zone.classList.add('error');
+                });
+
+                setTimeout(() => {
+                    filledZones.forEach(zone => {
+                        zone.classList.remove('error');
+                        zone.textContent = zone.dataset.placeholder; 
+                        delete zone.dataset.droppedId;
+                    });
+                }, 1200); 
+            }
+        }
+
+        // Возврат фрагмента по клику
+        document.addEventListener('click', function(e) {
+            const zone = e.target;
+            if (zone.classList.contains('drop-zone') && zone.dataset.droppedId && !zone.classList.contains('correct')) {
+                zone.textContent = zone.dataset.placeholder;
+                zone.style.background = '';
+                zone.style.color = '';
+                zone.style.border = '';
+                delete zone.dataset.droppedId;
+            }
+        });
+
         function setupEquationPieces(cT1, cT2, cDiff) {
             const container = document.getElementById('eq-pieces-container');
+            container.innerHTML = '';
+            
             const data = [
                 { val: `sdown`, math: `\\(${cT1}(${taskV0} + x)\\)` },
                 { val: `+`, math: `\\(+\\)` },
@@ -199,14 +272,29 @@
                 { val: `=`, math: `\\(=\\)` },
                 { val: `sup`, math: `\\(${cT2}(${taskV0} - x)\\)` }
             ];
+            
             data.sort(() => Math.random() - 0.5);
+            
             data.forEach(d => {
                 const piece = document.createElement('div');
                 piece.className = 'eq-piece';
                 piece.draggable = true;
                 piece.dataset.val = d.val;
                 piece.innerHTML = d.math;
-                piece.addEventListener('dragstart', e => { draggedEqPiece = piece; });
+                
+                piece.addEventListener('dragstart', e => { 
+                    draggedEqPiece = piece; 
+                });
+                
+                // Возврат карточки по клику
+                piece.addEventListener('click', function() {
+                    if (this.parentElement.classList.contains('eq-drop-zone')) {
+                        const zone = this.parentElement;
+                        document.getElementById('eq-pieces-container').appendChild(this);
+                        zone.classList.remove('filled');
+                    }
+                });
+                
                 container.appendChild(piece);
             });
 
@@ -215,16 +303,34 @@
                 zone.addEventListener('drop', e => {
                     e.preventDefault();
                     if (!draggedEqPiece) return;
+                    
+                    // Защита от наложения карточек
+                    if (zone.children.length > 0) {
+                        const existingPiece = zone.children[0];
+                        document.getElementById('eq-pieces-container').appendChild(existingPiece);
+                    }
+                    
                     zone.innerHTML = '';
                     zone.appendChild(draggedEqPiece);
                     zone.classList.add('filled');
-                    currentEquation[zone.dataset.index] = draggedEqPiece.dataset.val;
                 });
             });
         }
 
         function checkEquation() {
-            const res = currentEquation.filter(x => x).join('');
+            const feedback = document.getElementById('eq-feedback');
+            let assembled = '';
+            const zones = document.querySelectorAll('.eq-drop-zone');
+            
+            // Читаем уравнение напрямую из DOM
+            for (let i = 0; i < zones.length; i++) {
+                if (zones[i].children.length === 0) {
+                    feedback.textContent = 'Сначала заполните все пустые ячейки!';
+                    feedback.className = 'feedback error-text';
+                    return; 
+                }
+                assembled += zones[i].children[0].dataset.val;
+            }
             
             const valid = [
                 `sdown+diff=sup`,
@@ -233,9 +339,9 @@
                 `sup=diff+sdown`
             ];
 
-            if (valid.includes(res)) {
-                const f = document.getElementById('eq-feedback');
-                f.textContent = 'Отлично! Уравнение собрано верно.'; f.className = 'feedback success-text';
+            if (valid.includes(assembled)) {
+                feedback.textContent = 'Отлично! Уравнение собрано верно.'; 
+                feedback.className = 'feedback success-text';
                 
                 const cT1 = strT1.replace(',', '{,}');
                 const cT2 = strT2.replace(',', '{,}');
@@ -244,9 +350,8 @@
                 
                 setTimeout(() => { document.getElementById('stage3').classList.add('active'); window.scrollTo({ top: document.getElementById('stage3').offsetTop, behavior: 'smooth' }); MathJax.typesetPromise(); }, 600);
             } else {
-                const f = document.getElementById('eq-feedback');
-                f.textContent = 'Ошибка. Путь по течению меньше, значит именно к нему нужно прибавить разницу, чтобы получилось равенство.';
-                f.className = 'feedback error-text';
+                feedback.textContent = 'Ошибка. Путь по течению меньше, значит именно к нему нужно прибавить разницу, чтобы получилось равенство.';
+                feedback.className = 'feedback error-text';
             }
         }
 
