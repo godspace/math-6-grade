@@ -37,3 +37,4 @@
 - Решение задач (https://godspace.github.io/math-6-grade/trainers/equations/equations.html)
 - Решение задач - Тест (https://godspace.github.io/math-6-grade/trainers/equations/equations-test.html)
 - Составление уравнений (https://godspace.github.io/math-6-grade/trainers/equations/equations_construct.html)
+- Наглядное составление уравнений (https://godspace.github.io/math-6-grade/trainers/equations/equations_construct-2.html)
