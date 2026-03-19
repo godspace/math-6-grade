@@ -1,617 +1,494 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Тренажёр НОК - Найди общие кратные</title>
-    <style>
-        :root {
-            --primary: #4361ee;
-            --secondary: #3a0ca3;
-            --accent: #f72585;
-            --light: #f8f9fa;
-            --dark: #212529;
-            --success: #4cc9f0;
-            --warning: #ffd166;
-            --selected: #7209b7;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            color: var(--light);
-        }
-        
-        .container {
-            max-width: 1000px;
-            width: 100%;
-            background-color: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        }
-        
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-        }
-        
-        .instructions {
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 1.1rem;
-            opacity: 0.9;
-        }
-        
-        .task-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .numbers {
-            font-size: 2.5rem;
-            font-weight: bold;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 20px;
-        }
-        
-        .number-box {
-            background-color: var(--accent);
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        
-        .buttons {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-top: 20px;
-        }
-        
-        button {
-            padding: 12px 25px;
-            font-size: 1rem;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: bold;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-        
-        .show-btn {
-            background-color: var(--warning);
-            color: var(--dark);
-        }
-        
-        .check-btn {
-            background-color: var(--success);
-            color: white;
-        }
-        
-        .next-btn {
-            background-color: var(--primary);
-            color: white;
-        }
-        
-        button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-        }
-        
-        button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .visualization {
-            margin-top: 30px;
-            background-color: rgba(255, 255, 255, 0.15);
-            border-radius: 15px;
-            padding: 20px;
-        }
-        
-        .multiples-row {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .number-label {
-            font-weight: bold;
-            width: 80px;
-            text-align: center;
-            font-size: 1.2rem;
-        }
-        
-        .multiples {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            flex: 1;
-            justify-content: center;
-            min-height: 50px;
-        }
-        
-        .multiple {
-            padding: 8px 15px;
-            background-color: rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
-            transition: all 0.3s ease;
-            font-weight: bold;
-            cursor: pointer;
-            opacity: 0;
-            transform: scale(0);
-            animation: appear 0.5s forwards;
-        }
-        
-        @keyframes appear {
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-        
-        .multiple:hover {
-            transform: scale(1.1);
-        }
-        
-        .selected {
-            background-color: var(--selected);
-            transform: scale(1.1);
-            box-shadow: 0 0 10px var(--selected);
-        }
-        
-        .smallest {
-            background-color: var(--success);
-            color: white;
-            transform: scale(1.2);
-            animation: glow 1.5s infinite alternate;
-        }
-        
-        @keyframes glow {
-            from { box-shadow: 0 0 5px var(--success); }
-            to { box-shadow: 0 0 20px var(--success); }
-        }
-        
-        .feedback {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 10px;
-            font-weight: bold;
-            text-align: center;
-            min-height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            font-size: 1.2rem;
-        }
-        
-        .correct {
-            background-color: rgba(76, 201, 240, 0.3);
-            color: var(--success);
-        }
-        
-        .incorrect {
-            background-color: rgba(247, 37, 133, 0.3);
-            color: var(--accent);
-        }
-        
-        .stats {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 30px;
-            background-color: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 15px;
-        }
-        
-        .stat-item {
-            text-align: center;
-        }
-        
-        .stat-value {
-            font-size: 2rem;
-            font-weight: bold;
-            color: var(--warning);
-        }
-        
-        @media (max-width: 768px) {
-            .container {
-                padding: 20px;
-            }
-            
-            h1 {
-                font-size: 2rem;
-            }
-            
-            .numbers {
-                font-size: 2rem;
-            }
-            
-            .number-box {
-                width: 70px;
-                height: 70px;
-            }
-            
-            .multiples-row {
-                flex-direction: column;
-                gap: 10px;
-            }
-            
-            .number-label {
-                width: 100%;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Тренажер: Нахождение НОК</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    justify-content: center;
+    background-color: #f4f7f6;
+    margin: 0;
+    padding: 20px;
+    user-select: none; 
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+  .container {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    max-width: 680px;
+    width: 100%;
+    text-align: center;
+  }
+  h2 {
+    color: #333;
+    margin-top: 0;
+  }
+  #instructions {
+    color: #555;
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    min-height: 48px;
+    transition: color 0.3s;
+  }
+  .row {
+    margin: 15px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 22px;
+    min-height: 46px;
+  }
+  .label {
+    font-weight: bold;
+    color: #444;
+    margin-right: 10px;
+    width: 60px;
+    text-align: right;
+    padding: 5px;
+    border-radius: 6px;
+    transition: background 0.2s, color 0.2s;
+  }
+  .label.interactive:hover {
+    background: #e3f2fd;
+    color: #1976D2;
+    cursor: pointer;
+  }
+  .label.wrong {
+    color: white;
+    background: #F44336;
+    animation: shake 0.4s;
+  }
+  .factor {
+    padding: 10px 16px;
+    background: #e0e6ed;
+    border-radius: 8px;
+    font-weight: bold;
+    color: #333;
+    transition: all 0.2s ease;
+  }
+  /* Состояния множителей */
+  .factor.base {
+    background: #9C27B0;
+    color: white;
+    box-shadow: 0 4px 6px rgba(156, 39, 176, 0.3);
+  }
+  .factor.dimmed {
+    background: #f0f4f8;
+    color: #b0bec5;
+    opacity: 0.6;
+    cursor: default;
+  }
+  .factor.clickable {
+    background: #FFC107;
+    color: #333;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  .factor.clickable:hover {
+    background: #FFB300;
+    transform: translateY(-2px);
+  }
+  .factor.added {
+    background: #4CAF50;
+    color: white;
+    box-shadow: 0 4px 6px rgba(76, 175, 80, 0.3);
+  }
+  .sign {
+    color: #999;
+  }
+  .input-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  input[type="number"].factor-input {
+    font-size: 18px;
+    width: 60px;
+    text-align: center;
+    padding: 8px;
+    border: 2px solid #2196F3;
+    border-radius: 6px;
+    outline: none;
+  }
+  input[type="number"].factor-input:focus {
+    box-shadow: 0 0 8px rgba(33, 150, 243, 0.4);
+  }
+  input[type="number"].factor-input.wrong {
+    border-color: #F44336;
+    background-color: #ffebee;
+    animation: shake 0.4s;
+  }
+  .add-btn {
+    background: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .add-btn:hover {
+    background: #1976D2;
+  }
+  .check-icon {
+    color: #4CAF50;
+    font-weight: bold;
+    margin-left: 10px;
+  }
+  .lcm-area {
+    margin-top: 25px;
+    padding: 20px;
+    border: 2px dashed #9C27B0;
+    border-radius: 10px;
+    background: #fbf0ff;
+    min-height: 80px;
+  }
+  .lcm-title {
+    font-size: 18px;
+    color: #7B1FA2;
+    margin-bottom: 10px;
+  }
+  #lcm-factors {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 15px;
+  }
+  .btn {
+    padding: 12px 24px;
+    background: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 15px;
+    transition: background 0.2s;
+  }
+  .btn:hover {
+    background: #1976D2;
+  }
+  #lcm-input {
+    font-size: 20px;
+    width: 100px;
+    text-align: center;
+    padding: 8px;
+    margin: 0 10px;
+    border: 2px solid #ccc;
+    border-radius: 6px;
+  }
+  .hidden {
+    display: none !important;
+  }
+  #message {
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 20px;
+    min-height: 24px;
+  }
+  
+  @keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+    100% { transform: translateX(0); }
+  }
+</style>
 <script src="../../assets/analytics.js"></script>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Найди НОК</h1>
-            <p class="instructions">Найди общие кратные чисел и выбери наименьшее</p>
-        </header>
-        
-        <div class="task-container">
-            <div class="numbers">
-                <div class="number-box" id="num1">12</div>
-                <span>и</span>
-                <div class="number-box" id="num2">18</div>
-            </div>
-            
-            <div class="buttons">
-                <button class="show-btn" id="show">Показать кратные</button>
-                <button class="check-btn" id="check" disabled>Проверить НОК</button>
-                <button class="next-btn" id="next">Дальше</button>
-            </div>
-            
-            <div class="feedback" id="feedback"></div>
-        </div>
-        
-        <div class="visualization">
-            <div class="multiples-row">
-                <div class="number-label" id="label1">12:</div>
-                <div class="multiples" id="multiples1">
-                    <!-- Кратные первого числа -->
-                </div>
-            </div>
-            
-            <div class="multiples-row">
-                <div class="number-label" id="label2">18:</div>
-                <div class="multiples" id="multiples2">
-                    <!-- Кратные второго числа -->
-                </div>
-            </div>
-        </div>
-        
-        <div class="stats">
-            <div class="stat-item">
-                <div class="stat-value" id="correct-count">0</div>
-                <div>Правильно</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" id="total-count">0</div>
-                <div>Всего</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" id="success-rate">0%</div>
-                <div>Успех</div>
-            </div>
-        </div>
-    </div>
 
-    <script>
-        // Элементы DOM
-        const num1Element = document.getElementById('num1');
-        const num2Element = document.getElementById('num2');
-        const label1Element = document.getElementById('label1');
-        const label2Element = document.getElementById('label2');
-        const showButton = document.getElementById('show');
-        const checkButton = document.getElementById('check');
-        const nextButton = document.getElementById('next');
-        const feedbackElement = document.getElementById('feedback');
-        const multiples1Container = document.getElementById('multiples1');
-        const multiples2Container = document.getElementById('multiples2');
-        const correctCountElement = document.getElementById('correct-count');
-        const totalCountElement = document.getElementById('total-count');
-        const successRateElement = document.getElementById('success-rate');
+<div class="container">
+  <h2>Поиск НОК</h2>
+  <div id="instructions">Шаг 1. Разложи каждое число на простые множители.</div>
+  
+  <div id="game-board"></div>
+  
+  <div id="lcm-area" class="lcm-area hidden">
+    <div class="lcm-title">Сборка НОК:</div>
+    <div id="lcm-factors"></div>
+    
+    <div id="final-answer-area" class="hidden" style="margin-top: 15px; display: flex; justify-content: center; align-items: center;">
+      <span style="font-size: 20px; font-weight: bold;">НОК = </span>
+      <input type="number" id="lcm-input" placeholder="?">
+      <button class="btn" style="margin-top: 0;" onclick="checkLCM()">Проверить</button>
+    </div>
+  </div>
+  
+  <p id="message"></p>
+  <button class="btn" onclick="initGame()" style="background: #607D8B;">Новое задание</button>
+</div>
+
+<script>
+  // Наборы подобраны так, чтобы требовалось добавление множителей
+  const sets = [
+    [36, 54, 72], [12, 18, 24], [15, 20, 30], 
+    [10, 15, 25], [14, 21, 28], [24, 36, 48]
+  ];
+  
+  let currentSet = [];
+  let remainders = [];
+  let factorsArr = []; 
+  let baseIndex = -1;
+  let addedFactors = [];
+  let expectedLCM = 1;
+  let currentStage = 1; 
+
+  function isPrime(num) {
+    if (num < 2) return false;
+    for (let i = 2; i <= Math.sqrt(num); i++) {
+      if (num % i === 0) return false;
+    }
+    return true;
+  }
+
+  function gcd(a, b) { return !b ? a : gcd(b, a % b); }
+  function lcm(a, b) { return (a * b) / gcd(a, b); }
+
+  function initGame() {
+    currentStage = 1;
+    baseIndex = -1;
+    addedFactors = [];
+    document.getElementById('message').innerText = '';
+    document.getElementById('lcm-factors').innerHTML = '';
+    document.getElementById('lcm-area').classList.add('hidden');
+    document.getElementById('final-answer-area').classList.add('hidden');
+    document.getElementById('lcm-input').value = '';
+    
+    let instr = document.getElementById('instructions');
+    instr.innerHTML = 'Шаг 1. Разложи каждое число на простые множители.';
+    instr.style.color = '#555';
+
+    currentSet = sets[Math.floor(Math.random() * sets.length)];
+    // Перемешиваем порядок чисел для разнообразия
+    currentSet.sort(() => Math.random() - 0.5);
+    
+    remainders = [...currentSet];
+    factorsArr = [[], [], []];
+    expectedLCM = currentSet.reduce((acc, val) => lcm(acc, val), 1);
+
+    render();
+  }
+
+  function render() {
+    const board = document.getElementById('game-board');
+    board.innerHTML = '';
+    
+    factorsArr.forEach((row, rowIndex) => {
+      let rowDiv = document.createElement('div');
+      rowDiv.className = 'row';
+      
+      let label = document.createElement('div');
+      label.className = 'label';
+      label.id = 'label-' + rowIndex;
+      label.innerText = currentSet[rowIndex] + ' =';
+      
+      // На этапе 2 подсвечиваем ярлыки
+      if (currentStage === 2) {
+        label.classList.add('interactive');
+        label.onclick = () => selectBase(rowIndex);
+      }
+      rowDiv.appendChild(label);
+      
+      row.forEach((factorObj, colIndex) => {
+        let span = document.createElement('span');
+        span.className = 'factor ' + factorObj.state;
+        span.innerText = factorObj.value;
         
-        // Статистика
-        let correctCount = 0;
-        let totalCount = 0;
-        
-        // Текущие числа
-        let currentNum1, currentNum2, currentLCM;
-        
-        // Для пошагового показа кратных
-        let currentStep = 0;
-        let multiples1 = [];
-        let multiples2 = [];
-        let selectedMultiples = [];
-        let answered = false;
-        
-        // Инициализация
-        function init() {
-            generateNewNumbers();
-            updateStats();
-            
-            // Обработчики событий
-            showButton.addEventListener('click', showNextMultiple);
-            checkButton.addEventListener('click', checkAnswer);
-            nextButton.addEventListener('click', generateNewNumbers);
+        if (currentStage === 3 && factorObj.state === 'clickable') {
+          span.onclick = () => addMissingFactor(rowIndex, colIndex);
         }
         
-        // Генерация новых чисел с общими кратными
-        function generateNewNumbers() {
-            // Очистка предыдущего состояния
-            feedbackElement.textContent = '';
-            feedbackElement.className = 'feedback';
-            multiples1Container.innerHTML = '';
-            multiples2Container.innerHTML = '';
-            currentStep = 0;
-            selectedMultiples = [];
-            answered = false;
-            
-            // Включение кнопок
-            showButton.disabled = false;
-            checkButton.disabled = true;
-            
-            // Генерация чисел с общими кратными
-            generateNumbersWithCommonMultiples();
-            
-            // Обновление отображения чисел
-            num1Element.textContent = currentNum1;
-            num2Element.textContent = currentNum2;
-            label1Element.textContent = `${currentNum1}:`;
-            label2Element.textContent = `${currentNum2}:`;
-            
-            // Вычисление НОК
-            currentLCM = calculateLCM(currentNum1, currentNum2);
-            
-            // Подготовка кратных чисел
-            prepareMultiples();
-        }
+        rowDiv.appendChild(span);
         
-        // Генерация чисел, у которых точно есть общие кратные
-        function generateNumbersWithCommonMultiples() {
-            // Создаем базовое число
-            const base = Math.floor(Math.random() * 6) + 2; // от 2 до 7
-            const multiplier1 = Math.floor(Math.random() * 4) + 2; // от 2 до 5
-            const multiplier2 = Math.floor(Math.random() * 4) + 2; // от 2 до 5
-            
-            // Убедимся, что множители разные
-            while (multiplier1 === multiplier2) {
-                multiplier2 = Math.floor(Math.random() * 4) + 2;
-            }
-            
-            currentNum1 = base * multiplier1;
-            currentNum2 = base * multiplier2;
-            
-            // Проверяем, чтобы числа были в разумных пределах
-            if (currentNum1 > 30 || currentNum2 > 30) {
-                generateNumbersWithCommonMultiples();
-            }
+        if (colIndex < row.length - 1 || (currentStage === 1 && remainders[rowIndex] > 1)) {
+          let mul = document.createElement('span');
+          mul.className = 'sign';
+          mul.innerHTML = ' &times; ';
+          rowDiv.appendChild(mul);
         }
-        
-        // Вычисление НОК
-        function calculateLCM(a, b) {
-            // Используем формулу: НОК(a, b) = |a * b| / НОД(a, b)
-            return Math.abs(a * b) / calculateGCD(a, b);
+      });
+
+      if (currentStage === 1) {
+        if (remainders[rowIndex] > 1) {
+          let group = document.createElement('div');
+          group.className = 'input-group';
+
+          let input = document.createElement('input');
+          input.type = 'number';
+          input.className = 'factor-input';
+          input.id = 'input-' + rowIndex;
+          input.onkeypress = (e) => { if (e.key === 'Enter') addFactor(rowIndex); };
+          
+          let btn = document.createElement('button');
+          btn.className = 'add-btn';
+          btn.innerHTML = '&#10003;';
+          btn.onclick = () => addFactor(rowIndex);
+
+          group.appendChild(input);
+          group.appendChild(btn);
+          rowDiv.appendChild(group);
+        } else {
+          let check = document.createElement('span');
+          check.className = 'check-icon';
+          check.innerHTML = '&#10004; Готово';
+          rowDiv.appendChild(check);
         }
-        
-        // Вычисление НОД (алгоритм Евклида)
-        function calculateGCD(a, b) {
-            if (b === 0) {
-                return a;
-            }
-            return calculateGCD(b, a % b);
+      }
+      
+      board.appendChild(rowDiv);
+    });
+
+    if (currentStage === 1) {
+      for (let i = 0; i < remainders.length; i++) {
+        if (remainders[i] > 1) {
+          let inp = document.getElementById('input-' + i);
+          if (inp) inp.focus();
+          break;
         }
-        
-        // Подготовка кратных чисел
-        function prepareMultiples() {
-            multiples1 = [];
-            multiples2 = [];
-            
-            // Генерируем кратные до НОК + несколько следующих
-            const maxMultiples = 12;
-            for (let i = 1; i <= maxMultiples; i++) {
-                multiples1.push(currentNum1 * i);
-                multiples2.push(currentNum2 * i);
-            }
+      }
+    }
+  }
+
+  function addFactor(rowIndex) {
+    let input = document.getElementById('input-' + rowIndex);
+    let val = parseInt(input.value);
+
+    if (val && isPrime(val) && remainders[rowIndex] % val === 0) {
+      factorsArr[rowIndex].push({value: val, state: 'normal'});
+      remainders[rowIndex] /= val;
+      checkStage1Progress();
+    } else {
+      input.classList.add('wrong');
+      setTimeout(() => input.classList.remove('wrong'), 400);
+    }
+  }
+
+  function checkStage1Progress() {
+    if (remainders.every(r => r === 1)) {
+      currentStage = 2;
+      let instr = document.getElementById('instructions');
+      instr.innerHTML = 'Шаг 2. Кликни по самому числу (слева), которое является <b>наибольшим</b>.';
+      instr.style.color = '#9C27B0';
+    }
+    render();
+  }
+
+  function selectBase(rowIndex) {
+    let maxVal = Math.max(...currentSet);
+    if (currentSet[rowIndex] !== maxVal) {
+      let label = document.getElementById('label-' + rowIndex);
+      label.classList.add('wrong');
+      setTimeout(() => label.classList.remove('wrong'), 400);
+      return;
+    }
+
+    baseIndex = rowIndex;
+    currentStage = 3;
+    
+    // Формируем пул множителей базы
+    let lcmPool = factorsArr[baseIndex].map(f => f.value);
+    
+    // Красим базу
+    factorsArr[baseIndex].forEach(f => f.state = 'base');
+
+    // Проверяем остальные числа: затеняем совпадения
+    for (let i = 0; i < factorsArr.length; i++) {
+      if (i === baseIndex) continue;
+      
+      let poolCounts = {};
+      lcmPool.forEach(val => poolCounts[val] = (poolCounts[val] || 0) + 1);
+
+      factorsArr[i].forEach(f => {
+        if (poolCounts[f.value] > 0) {
+          f.state = 'dimmed';
+          poolCounts[f.value]--;
+        } else {
+          f.state = 'clickable'; // Это недостающий множитель!
         }
-        
-        // Показать следующее кратное
-        function showNextMultiple() {
-            if (currentStep < 12) {
-                // Добавляем кратное для первого числа
-                if (currentStep < multiples1.length) {
-                    const multiple1 = multiples1[currentStep];
-                    const element1 = createMultipleElement(multiple1, 1);
-                    multiples1Container.appendChild(element1);
-                }
-                
-                // Добавляем кратное для второго числа
-                if (currentStep < multiples2.length) {
-                    const multiple2 = multiples2[currentStep];
-                    const element2 = createMultipleElement(multiple2, 2);
-                    multiples2Container.appendChild(element2);
-                }
-                
-                currentStep++;
-                
-                // Активируем кнопку проверки, если есть общие кратные
-                if (hasCommonMultiples()) {
-                    checkButton.disabled = false;
-                }
-                
-                // Если показали все кратные, отключаем кнопку
-                if (currentStep >= 12) {
-                    showButton.disabled = true;
-                }
-            }
-        }
-        
-        // Создание элемента кратного числа
-        function createMultipleElement(value, listNum) {
-            const element = document.createElement('div');
-            element.className = 'multiple';
-            element.textContent = value;
-            element.dataset.value = value;
-            element.dataset.list = listNum;
-            
-            // Добавляем обработчик клика
-            element.addEventListener('click', () => {
-                if (answered) return;
-                
-                const multipleValue = parseInt(element.dataset.value);
-                
-                // Проверяем, является ли кратное общим
-                if (isCommonMultiple(multipleValue)) {
-                    // Переключаем выделение
-                    if (element.classList.contains('selected')) {
-                        element.classList.remove('selected');
-                        selectedMultiples = selectedMultiples.filter(v => v !== multipleValue);
-                    } else {
-                        element.classList.add('selected');
-                        selectedMultiples.push(multipleValue);
-                    }
-                    
-                    // Обновляем выделение в обоих списках
-                    updateSelection(multipleValue);
-                } else {
-                    // Если выбрано не общее кратное, показываем сообщение
-                    feedbackElement.textContent = 'Это не общее кратное!';
-                    feedbackElement.className = 'feedback incorrect';
-                    setTimeout(() => {
-                        if (!answered) feedbackElement.textContent = '';
-                    }, 1500);
-                }
-            });
-            
-            return element;
-        }
-        
-        // Проверяет, является ли число общим кратным
-        function isCommonMultiple(value) {
-            return multiples1.includes(value) && multiples2.includes(value);
-        }
-        
-        // Обновляет выделение числа в обоих списках
-        function updateSelection(value) {
-            const allMultiples = document.querySelectorAll('.multiple');
-            allMultiples.forEach(el => {
-                if (parseInt(el.dataset.value) === value) {
-                    if (selectedMultiples.includes(value)) {
-                        el.classList.add('selected');
-                    } else {
-                        el.classList.remove('selected');
-                    }
-                }
-            });
-        }
-        
-        // Проверяет, есть ли общие кратные среди показанных
-        function hasCommonMultiples() {
-            const currentMultiples1 = Array.from(multiples1Container.querySelectorAll('.multiple'))
-                .map(el => parseInt(el.dataset.value));
-            const currentMultiples2 = Array.from(multiples2Container.querySelectorAll('.multiple'))
-                .map(el => parseInt(el.dataset.value));
-            
-            return currentMultiples1.some(value => currentMultiples2.includes(value));
-        }
-        
-        // Проверка ответа
-        function checkAnswer() {
-            if (selectedMultiples.length === 0) {
-                feedbackElement.textContent = 'Выбери общие кратные числа!';
-                feedbackElement.className = 'feedback incorrect';
-                return;
-            }
-            
-            totalCount++;
-            answered = true;
-            
-            // Находим наименьшее выбранное кратное
-            const userAnswer = Math.min(...selectedMultiples);
-            
-            if (userAnswer === currentLCM) {
-                feedbackElement.textContent = '✓ Правильно! Это наименьшее общее кратное!';
-                feedbackElement.className = 'feedback correct';
-                correctCount++;
-                
-                // Подсвечиваем правильный ответ
-                document.querySelectorAll(`.multiple[data-value="${currentLCM}"]`).forEach(el => {
-                    el.classList.add('smallest');
-                });
-            } else {
-                feedbackElement.textContent = `✗ Это не НОК. Наименьшее общее кратное: ${currentLCM}`;
-                feedbackElement.className = 'feedback incorrect';
-                
-                // Подсвечиваем правильный ответ
-                document.querySelectorAll(`.multiple[data-value="${currentLCM}"]`).forEach(el => {
-                    el.classList.add('smallest');
-                });
-            }
-            
-            // Отключаем кнопки
-            showButton.disabled = true;
-            checkButton.disabled = true;
-            
-            updateStats();
-        }
-        
-        // Обновление статистики
-        function updateStats() {
-            correctCountElement.textContent = correctCount;
-            totalCountElement.textContent = totalCount;
-            
-            const successRate = totalCount > 0 ? Math.round((correctCount / totalCount) * 100) : 0;
-            successRateElement.textContent = `${successRate}%`;
-        }
-        
-        // Запуск приложения
-        init();
-    </script>
+      });
+    }
+
+    let instr = document.getElementById('instructions');
+    instr.innerHTML = 'Шаг 3. Кликай по оставшимся (желтым) множителям, чтобы добавить их в НОК.';
+    instr.style.color = '#FF9800';
+    
+    document.getElementById('lcm-area').classList.remove('hidden');
+    updateLCMArea();
+    render();
+    checkIfStage3Done();
+  }
+
+  function addMissingFactor(rowIndex, colIndex) {
+    let f = factorsArr[rowIndex][colIndex];
+    f.state = 'added';
+    addedFactors.push(f.value);
+    
+    // Сортируем добавленные для красоты
+    addedFactors.sort((a, b) => a - b);
+    
+    updateLCMArea();
+    render();
+    checkIfStage3Done();
+  }
+
+  function updateLCMArea() {
+    let area = document.getElementById('lcm-factors');
+    let baseVal = currentSet[baseIndex];
+    let baseFactorsStr = factorsArr[baseIndex].map(f => f.value).join(' &times; ');
+
+    let html = `<span style="color: #9C27B0; font-size: 32px;">${baseVal}</span> <span style="font-size: 16px; color: #888; vertical-align: middle;">(${baseFactorsStr})</span>`;
+
+    if (addedFactors.length > 0) {
+      html += ` <span class="sign" style="font-size: 32px;">&times;</span> ` + 
+              addedFactors.map(v => `<span style="color: #4CAF50; font-size: 32px;">${v}</span>`).join(' <span class="sign" style="font-size: 32px;">&times;</span> ');
+    }
+    area.innerHTML = html;
+  }
+
+  function checkIfStage3Done() {
+    let hasClickable = factorsArr.some(row => row.some(f => f.state === 'clickable'));
+    if (!hasClickable) {
+       currentStage = 4;
+       let instr = document.getElementById('instructions');
+       instr.innerHTML = 'Шаг 4. Умножь базу на добавленные множители и введи НОК.';
+       instr.style.color = '#2196F3';
+       document.getElementById('final-answer-area').classList.remove('hidden');
+       setTimeout(() => document.getElementById('lcm-input').focus(), 100);
+    }
+  }
+
+  function checkLCM() {
+    let inputVal = parseInt(document.getElementById('lcm-input').value);
+    let msg = document.getElementById('message');
+    
+    if (inputVal === expectedLCM) {
+      msg.innerText = 'Правильно! НОК = ' + expectedLCM + ' 🎉';
+      msg.style.color = '#4CAF50';
+    } else {
+      msg.innerText = 'Ошибка. Проверь вычисления и попробуй снова!';
+      msg.style.color = '#F44336';
+    }
+  }
+
+  initGame();
+</script>
+
 </body>
 </html>
