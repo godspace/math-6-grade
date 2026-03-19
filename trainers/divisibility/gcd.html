@@ -1,756 +1,462 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>НОД-Игра</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Comic Sans MS', cursive, sans-serif;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-            color: white;
-            min-height: 100vh;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .container {
-            max-width: 800px;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            text-align: center;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .title {
-            font-size: 1.8rem;
-            margin-bottom: 30px;
-            color: #FFD700;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-        }
-        
-        .factors-container {
-            display: flex;
-            justify-content: center;
-            gap: 50px;
-            margin: 40px 0;
-            flex-wrap: wrap;
-        }
-        
-        .factors-column {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        
-        .factors-title {
-            font-size: 1.4rem;
-            margin-bottom: 20px;
-            color: #FFD700;
-        }
-        
-        .factors {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            justify-content: center;
-            max-width: 300px;
-            min-height: 120px;
-        }
-        
-        .factor {
-            width: 60px;
-            height: 60px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1.6rem;
-            font-weight: bold;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            opacity: 0;
-            transform: scale(0.5);
-            transition: all 0.5s;
-        }
-        
-        .factor.visible {
-            opacity: 1;
-            transform: scale(1);
-        }
-        
-        .factor.common {
-            background: #FFD700;
-            color: #333;
-            animation: pulse 1.5s infinite;
-        }
-        
-        .factor-input {
-            width: 60px;
-            height: 60px;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1.6rem;
-            font-weight: bold;
-            border: none;
-            text-align: center;
-            color: #333;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        }
-        
-        .factor-input:focus {
-            outline: none;
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
-        }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-        
-        .gcd-input-container {
-            margin: 30px 0;
-            position: relative;
-        }
-        
-        .gcd-input {
-            padding: 15px 25px;
-            font-size: 2rem;
-            width: 200px;
-            border: none;
-            border-radius: 50px;
-            text-align: center;
-            background: rgba(255, 255, 255, 0.9);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s;
-            color: #333;
-            font-weight: bold;
-        }
-        
-        .gcd-input:focus {
-            outline: none;
-            transform: scale(1.05);
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
-        }
-        
-        .gcd-input::placeholder {
-            color: #aaa;
-        }
-        
-        .input-label {
-            position: absolute;
-            top: -25px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: #FFD700;
-            font-size: 1.2rem;
-            white-space: nowrap;
-        }
-        
-        .buttons {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin: 25px 0;
-            flex-wrap: wrap;
-        }
-        
-        button {
-            padding: 12px 25px;
-            font-size: 1.2rem;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        }
-        
-        .check-btn {
-            background: #00b09b;
-            color: white;
-        }
-        
-        .check-btn:hover {
-            background: #009c80;
-            transform: translateY(-2px);
-        }
-        
-        .next-btn {
-            background: #ff9a9e;
-            color: #333;
-        }
-        
-        .next-btn:hover {
-            background: #ff7b80;
-            transform: translateY(-2px);
-        }
-        
-        .hint-btn {
-            background: #a8edea;
-            color: #333;
-            display: none;
-        }
-        
-        .hint-btn:hover {
-            background: #8ae0dc;
-            transform: translateY(-2px);
-        }
-        
-        .hint-btn.visible {
-            display: inline-block;
-        }
-        
-        .show-factor-btn {
-            background: #FFD700;
-            color: #333;
-            display: none;
-        }
-        
-        .show-factor-btn.visible {
-            display: inline-block;
-        }
-        
-        .show-factor-btn:hover {
-            background: #e6c200;
-            transform: translateY(-2px);
-        }
-        
-        .result {
-            font-size: 1.6rem;
-            margin: 20px 0;
-            min-height: 40px;
-            font-weight: bold;
-        }
-        
-        .correct {
-            color: #7FFF00;
-        }
-        
-        .incorrect {
-            color: #FF6B6B;
-        }
-        
-        .stats {
-            display: flex;
-            justify-content: space-around;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 15px;
-            margin: 20px 0;
-        }
-        
-        .stat {
-            text-align: center;
-        }
-        
-        .stat-value {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: #FFD700;
-        }
-        
-        @media (max-width: 600px) {
-            .factors-container {
-                gap: 30px;
-            }
-            
-            .factors {
-                gap: 10px;
-            }
-            
-            .factor, .factor-input {
-                width: 50px;
-                height: 50px;
-                font-size: 1.4rem;
-            }
-            
-            .title {
-                font-size: 1.5rem;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Тренажер: Нахождение НОД</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    justify-content: center;
+    background-color: #f4f7f6;
+    margin: 0;
+    padding: 20px;
+    /* Запрет выделения текста */
+    user-select: none; 
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+  .container {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    max-width: 650px;
+    width: 100%;
+    text-align: center;
+  }
+  h2 {
+    color: #333;
+    margin-top: 0;
+  }
+  #instructions {
+    color: #555;
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    min-height: 48px;
+    transition: color 0.3s;
+  }
+  .row {
+    margin: 15px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 22px;
+    min-height: 46px;
+  }
+  .label {
+    font-weight: bold;
+    color: #444;
+    margin-right: 10px;
+    width: 60px;
+    text-align: right;
+  }
+  .factor {
+    padding: 10px 16px;
+    background: #e0e6ed;
+    border-radius: 8px;
+    font-weight: bold;
+    color: #333;
+    transition: all 0.2s ease;
+  }
+  .factor.clickable {
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  .factor.clickable:hover:not(.matched) {
+    background: #cdd5df;
+    transform: translateY(-2px);
+  }
+  .factor.matched {
+    background: #4CAF50;
+    color: white;
+    cursor: default;
+    box-shadow: 0 4px 6px rgba(76, 175, 80, 0.3);
+  }
+  .factor.wrong {
+    background: #F44336;
+    color: white;
+    animation: shake 0.4s;
+  }
+  .sign {
+    color: #999;
+  }
+  .input-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  input[type="number"].factor-input {
+    font-size: 18px;
+    width: 60px;
+    text-align: center;
+    padding: 8px;
+    border: 2px solid #2196F3;
+    border-radius: 6px;
+    outline: none;
+  }
+  input[type="number"].factor-input:focus {
+    box-shadow: 0 0 8px rgba(33, 150, 243, 0.4);
+  }
+  input[type="number"].factor-input.wrong {
+    border-color: #F44336;
+    background-color: #ffebee;
+    animation: shake 0.4s;
+  }
+  .add-btn {
+    background: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .add-btn:hover {
+    background: #1976D2;
+  }
+  .check-icon {
+    color: #4CAF50;
+    font-weight: bold;
+    margin-left: 10px;
+  }
+  .common-area {
+    margin-top: 25px;
+    padding: 20px;
+    border: 2px dashed #2196F3;
+    border-radius: 10px;
+    background: #f0f8ff;
+    min-height: 80px;
+  }
+  .common-title {
+    font-size: 18px;
+    color: #1976D2;
+    margin-bottom: 10px;
+  }
+  #common-factors {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    letter-spacing: 2px;
+  }
+  .btn {
+    padding: 12px 24px;
+    background: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 15px;
+    transition: background 0.2s;
+  }
+  .btn:hover {
+    background: #1976D2;
+  }
+  #gcd-input {
+    font-size: 20px;
+    width: 90px;
+    text-align: center;
+    padding: 8px;
+    margin: 0 10px;
+    border: 2px solid #ccc;
+    border-radius: 6px;
+  }
+  .hidden {
+    display: none !important;
+  }
+  #message {
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 20px;
+    min-height: 24px;
+  }
+  
+  @keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+    100% { transform: translateX(0); }
+  }
+</style>
 <script src="../../assets/analytics.js"></script>
 </head>
 <body>
-    <div class="container">
-        <div class="title">Найди все делители и определи наибольший общий делитель!</div>
-        
-        <div class="factors-container">
-            <div class="factors-column">
-                <div class="factors-title">Делители числа <span id="factorNumA">24</span></div>
-                <div class="factors" id="factorsA"></div>
-            </div>
-            
-            <div class="factors-column">
-                <div class="factors-title">Делители числа <span id="factorNumB">36</span></div>
-                <div class="factors" id="factorsB"></div>
-            </div>
-        </div>
-        
-        <div class="gcd-input-container">
-            <div class="input-label">Наибольший общий делитель</div>
-            <input type="number" id="answerInput" placeholder="?" min="1" class="gcd-input">
-        </div>
-        
-        <div class="buttons">
-            <button class="check-btn" id="checkBtn">✅ Проверить</button>
-            <button class="next-btn" id="nextBtn">🔄 Следующие числа</button>
-            <button class="hint-btn" id="hintBtn">💡 Показать делители</button>
-            <button class="show-factor-btn" id="showFactorBtn">🔍 Показать делитель</button>
-        </div>
-        
-        <div class="result" id="result"></div>
-        
-        <div class="stats">
-            <div class="stat">
-                <div>Решено</div>
-                <div class="stat-value" id="solved">0</div>
-            </div>
-            <div class="stat">
-                <div>Уровень</div>
-                <div class="stat-value" id="level">1</div>
-            </div>
-            <div class="stat">
-                <div>Очки</div>
-                <div class="stat-value" id="score">0</div>
-            </div>
-        </div>
-    </div>
 
-    <script>
-        // Игровые переменные
-        let currentNumbers = { a: 24, b: 36 };
-        let solvedCount = 0;
-        let score = 0;
-        let level = 1;
-        let currentGCD = 0;
-        let hintUsed = false;
-        let factorsA = [];
-        let factorsB = [];
-        let currentFactorIndexA = 0;
-        let currentFactorIndexB = 0;
+<div class="container">
+  <h2>Поиск НОД</h2>
+  <div id="instructions">Шаг 1. Разложи каждое число на простые множители (2, 3, 5, 7...).</div>
+  
+  <div id="game-board"></div>
+  
+  <div id="common-area" class="common-area hidden">
+    <div class="common-title">Общие множители:</div>
+    <div id="common-factors"></div>
+    
+    <div id="final-answer-area" class="hidden" style="margin-top: 15px; display: flex; justify-content: center; align-items: center;">
+      <span style="font-size: 20px; font-weight: bold;">НОД = </span>
+      <input type="number" id="gcd-input" placeholder="?">
+      <button class="btn" style="margin-top: 0;" onclick="checkGCD()">Проверить</button>
+    </div>
+  </div>
+  
+  <p id="message"></p>
+  <button class="btn" onclick="initGame()" style="background: #607D8B;">Новое задание</button>
+</div>
+
+<script>
+  const sets = [
+    [36, 54, 72], [24, 36, 48], [18, 27, 45], [30, 45, 60],
+    [12, 18, 30], [40, 60, 80], [28, 42, 70], [48, 72, 96]
+  ];
+  
+  let currentSet = [];
+  let remainders = [];
+  let factorsArr = [];
+  let matchedFactors = [];
+  let expectedGCD = 1;
+  let currentStage = 1; // 1 - ввод множителей, 2 - поиск общих
+
+  // Проверка на простое число
+  function isPrime(num) {
+    if (num < 2) return false;
+    for (let i = 2; i <= Math.sqrt(num); i++) {
+      if (num % i === 0) return false;
+    }
+    return true;
+  }
+
+  // Внутреннее разложение для вычисления правильного НОД
+  function getPrimeFactors(num) {
+    let factors = [];
+    let d = 2;
+    while (num >= 2) {
+      if (num % d === 0) {
+        factors.push(d);
+        num /= d;
+      } else {
+        d++;
+      }
+    }
+    return factors;
+  }
+
+  function initGame() {
+    currentStage = 1;
+    document.getElementById('message').innerText = '';
+    document.getElementById('common-factors').innerHTML = '';
+    document.getElementById('common-area').classList.add('hidden');
+    document.getElementById('final-answer-area').classList.add('hidden');
+    document.getElementById('gcd-input').value = '';
+    
+    let instr = document.getElementById('instructions');
+    instr.innerHTML = 'Шаг 1. Разложи каждое число на простые множители (2, 3, 5, 7...).';
+    instr.style.color = '#555';
+
+    matchedFactors = [];
+    currentSet = sets[Math.floor(Math.random() * sets.length)];
+    remainders = [...currentSet];
+    factorsArr = [[], [], []];
+    
+    // Вычисляем реальный НОД
+    expectedGCD = 1;
+    let targetFactors = currentSet.map(n => getPrimeFactors(n));
+    let tempArr = targetFactors.map(row => [...row]);
+    while(true) {
+        let common = findCommonValue(tempArr);
+        if(common) {
+            expectedGCD *= common;
+            tempArr.forEach(row => { row.splice(row.indexOf(common), 1); });
+        } else break;
+    }
+
+    render();
+  }
+
+  function findCommonValue(arrays) {
+    if (!arrays || arrays.length === 0) return null;
+    let firstRow = arrays[0];
+    for (let val of firstRow) {
+        if (arrays.every(row => row.includes(val))) return val;
+    }
+    return null;
+  }
+
+  function render() {
+    const board = document.getElementById('game-board');
+    board.innerHTML = '';
+    
+    factorsArr.forEach((row, rowIndex) => {
+      let rowDiv = document.createElement('div');
+      rowDiv.className = 'row';
+      
+      let label = document.createElement('div');
+      label.className = 'label';
+      label.innerText = currentSet[rowIndex] + ' =';
+      rowDiv.appendChild(label);
+      
+      // Отрисовка уже введенных множителей
+      row.forEach((factorObj, colIndex) => {
+        let span = document.createElement('span');
+        let classes = 'factor';
+        if (currentStage === 2) classes += ' clickable';
+        if (factorObj.matched) classes += ' matched';
+        span.className = classes;
+        span.innerText = factorObj.value;
         
-        // Элементы DOM
-        const factorNumAElement = document.getElementById('factorNumA');
-        const factorNumBElement = document.getElementById('factorNumB');
-        const answerInput = document.getElementById('answerInput');
-        const checkBtn = document.getElementById('checkBtn');
-        const nextBtn = document.getElementById('nextBtn');
-        const hintBtn = document.getElementById('hintBtn');
-        const showFactorBtn = document.getElementById('showFactorBtn');
-        const resultElement = document.getElementById('result');
-        const factorsAElement = document.getElementById('factorsA');
-        const factorsBElement = document.getElementById('factorsB');
-        const solvedElement = document.getElementById('solved');
-        const levelElement = document.getElementById('level');
-        const scoreElement = document.getElementById('score');
-        
-        // Инициализация игры
-        function initGame() {
-            generateNumbers();
-            updateDisplay();
-            setupEventListeners();
+        if (currentStage === 2 && !factorObj.matched) {
+          span.onclick = () => tryMatch(factorObj.value, span);
         }
         
-        // Генерация случайных чисел с минимум 3 общими делителями
-        function generateNumbers() {
-            let a, b, gcd, commonFactors;
-            let attempts = 0;
-            const maxAttempts = 100;
-            
-            do {
-                // Определяем диапазон в зависимости от уровня
-                let min, max;
-                if (level === 1) {
-                    min = 12;
-                    max = 40;
-                } else if (level === 2) {
-                    min = 20;
-                    max = 60;
-                } else {
-                    min = 30;
-                    max = 100;
-                }
-                
-                // Генерируем числа
-                a = Math.floor(Math.random() * (max - min + 1)) + min;
-                b = Math.floor(Math.random() * (max - min + 1)) + min;
-                
-                // Вычисляем НОД и общие делители
-                gcd = calculateGCD(a, b);
-                factorsA = getFactors(a);
-                factorsB = getFactors(b);
-                commonFactors = getCommonFactors(factorsA, factorsB);
-                
-                attempts++;
-                
-                // На уровнях выше 1 избегаем НОД=1
-                if (level > 1 && gcd === 1) continue;
-                
-            } while (commonFactors.length < 3 && attempts < maxAttempts);
-            
-            // Если не удалось найти числа с 3+ общими делителями, используем числа по умолчанию
-            if (attempts >= maxAttempts) {
-                a = 24;
-                b = 36;
-                gcd = calculateGCD(a, b);
-                factorsA = getFactors(a);
-                factorsB = getFactors(b);
-            }
-            
-            currentNumbers.a = a;
-            currentNumbers.b = b;
-            currentGCD = gcd;
-            
-            // Сбрасываем индексы делителей
-            currentFactorIndexA = 0;
-            currentFactorIndexB = 0;
-        }
+        rowDiv.appendChild(span);
         
-        // Обновление отображения
-        function updateDisplay() {
-            factorNumAElement.textContent = currentNumbers.a;
-            factorNumBElement.textContent = currentNumbers.b;
-            
-            // Очищаем предыдущие результаты
-            resultElement.textContent = '';
-            resultElement.className = 'result';
-            
-            // Скрываем кнопки подсказок
-            hintBtn.classList.remove('visible');
-            showFactorBtn.classList.remove('visible');
-            hintUsed = false;
-            
-            // Обновляем визуализацию делителей
-            updateFactorsDisplay();
-            
-            // Обновляем статистику
-            solvedElement.textContent = solvedCount;
-            levelElement.textContent = level;
-            scoreElement.textContent = score;
-            
-            // Фокусируемся на поле ввода
-            answerInput.value = '';
-            answerInput.focus();
+        // Знак умножения
+        if (colIndex < row.length - 1 || (currentStage === 1 && remainders[rowIndex] > 1)) {
+          let mul = document.createElement('span');
+          mul.className = 'sign';
+          mul.innerHTML = ' &times; ';
+          rowDiv.appendChild(mul);
         }
-        
-        // Обновление визуализации делителей
-        function updateFactorsDisplay() {
-            factorsAElement.innerHTML = '';
-            factorsBElement.innerHTML = '';
-            
-            const commonFactors = getCommonFactors(factorsA, factorsB);
-            
-            // На уровне 1 создаем пустые контейнеры для делителей
-            if (level === 1) {
-                // Показываем кнопку "Показать делитель"
-                showFactorBtn.classList.add('visible');
-            } 
-            // На уровне 2 показываем пустые поля для ввода делителей
-            else if (level === 2) {
-                factorsA.forEach(() => {
-                    const inputElement = document.createElement('input');
-                    inputElement.type = 'number';
-                    inputElement.min = '1';
-                    inputElement.className = 'factor-input';
-                    inputElement.placeholder = '?';
-                    factorsAElement.appendChild(inputElement);
-                });
-                
-                factorsB.forEach(() => {
-                    const inputElement = document.createElement('input');
-                    inputElement.type = 'number';
-                    inputElement.min = '1';
-                    inputElement.className = 'factor-input';
-                    inputElement.placeholder = '?';
-                    factorsBElement.appendChild(inputElement);
-                });
-            }
-            // На уровнях 3+ не показываем подсказки о количестве делителей
-            else {
-                factorsAElement.innerHTML = '<div style="color: #FFD700; font-size: 1.2rem;">Найди все делители сам!</div>';
-                factorsBElement.innerHTML = '<div style="color: #FFD700; font-size: 1.2rem;">Найди все делители сам!</div>';
-            }
+      });
+
+      // Отрисовка поля ввода или галочки (только для Этапа 1)
+      if (currentStage === 1) {
+        if (remainders[rowIndex] > 1) {
+          let group = document.createElement('div');
+          group.className = 'input-group';
+
+          let input = document.createElement('input');
+          input.type = 'number';
+          input.className = 'factor-input';
+          input.id = 'input-' + rowIndex;
+          input.onkeypress = (e) => { if (e.key === 'Enter') addFactor(rowIndex); };
+          
+          let btn = document.createElement('button');
+          btn.className = 'add-btn';
+          btn.innerHTML = '&#10003;';
+          btn.onclick = () => addFactor(rowIndex);
+
+          group.appendChild(input);
+          group.appendChild(btn);
+          rowDiv.appendChild(group);
+        } else {
+          let check = document.createElement('span');
+          check.className = 'check-icon';
+          check.innerHTML = '&#10004; Готово';
+          rowDiv.appendChild(check);
         }
-        
-        // Показать следующий делитель (для уровня 1)
-        function showNextFactor() {
-            if (currentFactorIndexA < factorsA.length) {
-                const factorElement = document.createElement('div');
-                factorElement.className = 'factor';
-                factorElement.textContent = factorsA[currentFactorIndexA];
-                factorsAElement.appendChild(factorElement);
-                
-                // Анимируем появление
-                setTimeout(() => {
-                    factorElement.classList.add('visible');
-                }, 10);
-                
-                currentFactorIndexA++;
-            }
-            
-            if (currentFactorIndexB < factorsB.length) {
-                const factorElement = document.createElement('div');
-                factorElement.className = 'factor';
-                factorElement.textContent = factorsB[currentFactorIndexB];
-                factorsBElement.appendChild(factorElement);
-                
-                // Анимируем появление
-                setTimeout(() => {
-                    factorElement.classList.add('visible');
-                }, 10);
-                
-                currentFactorIndexB++;
-            }
-            
-            // Если показали все делители, скрываем кнопку и подсвечиваем общие
-            if (currentFactorIndexA >= factorsA.length && currentFactorIndexB >= factorsB.length) {
-                showFactorBtn.classList.remove('visible');
-                highlightCommonFactors();
-            }
+      }
+      
+      board.appendChild(rowDiv);
+    });
+
+    // После отрисовки фокусируемся на первом пустом инпуте, если это Этап 1
+    if (currentStage === 1) {
+      for (let i = 0; i < remainders.length; i++) {
+        if (remainders[i] > 1) {
+          let inp = document.getElementById('input-' + i);
+          if (inp) inp.focus();
+          break;
         }
-        
-        // Подсветка общих делителей
-        function highlightCommonFactors() {
-            const commonFactors = getCommonFactors(factorsA, factorsB);
-            const factorElementsA = factorsAElement.querySelectorAll('.factor');
-            const factorElementsB = factorsBElement.querySelectorAll('.factor');
-            
-            factorElementsA.forEach(element => {
-                const value = parseInt(element.textContent);
-                if (commonFactors.includes(value)) {
-                    setTimeout(() => {
-                        element.classList.add('common');
-                    }, 500);
-                }
-            });
-            
-            factorElementsB.forEach(element => {
-                const value = parseInt(element.textContent);
-                if (commonFactors.includes(value)) {
-                    setTimeout(() => {
-                        element.classList.add('common');
-                    }, 500);
-                }
-            });
-        }
-        
-        // Настройка обработчиков событий
-        function setupEventListeners() {
-            checkBtn.addEventListener('click', checkAnswer);
-            nextBtn.addEventListener('click', nextQuestion);
-            hintBtn.addEventListener('click', showAllFactors);
-            showFactorBtn.addEventListener('click', showNextFactor);
-            
-            answerInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    checkAnswer();
-                }
-            });
-        }
-        
-        // Проверка ответа
-        function checkAnswer() {
-            // На уровнях 2+ сначала проверяем введенные делители
-            if (level >= 2) {
-                if (!checkFactorsInput()) {
-                    return;
-                }
-            }
-            
-            const userAnswer = parseInt(answerInput.value);
-            
-            if (isNaN(userAnswer)) {
-                resultElement.textContent = 'Введите число!';
-                resultElement.className = 'result incorrect';
-                return;
-            }
-            
-            if (userAnswer === currentGCD) {
-                resultElement.textContent = '✅ Правильно! Молодец!';
-                resultElement.className = 'result correct';
-                
-                // Обновляем статистику
-                solvedCount++;
-                score += level * 10;
-                
-                // Повышаем уровень каждые 5 правильных ответов
-                if (solvedCount % 5 === 0) {
-                    level++;
-                    resultElement.textContent = `🎉 Уровень ${level}!`;
-                }
-                
-                setTimeout(() => {
-                    nextQuestion();
-                }, 1500);
-            } else {
-                resultElement.textContent = '❌ Неправильно. Попробуй ещё!';
-                resultElement.className = 'result incorrect';
-                
-                // Показываем кнопку подсказки после неправильного ответа
-                if (!hintUsed && level > 1) {
-                    hintBtn.classList.add('visible');
-                }
-            }
-        }
-        
-        // Проверка введенных делителей (для уровней 2+)
-        function checkFactorsInput() {
-            if (level < 2) return true;
-            
-            const inputsA = factorsAElement.querySelectorAll('input');
-            const userFactorsA = Array.from(inputsA)
-                .map(input => parseInt(input.value))
-                .filter(value => !isNaN(value));
-            
-            const inputsB = factorsBElement.querySelectorAll('input');
-            const userFactorsB = Array.from(inputsB)
-                .map(input => parseInt(input.value))
-                .filter(value => !isNaN(value));
-            
-            const correctA = arraysEqual(userFactorsA.sort((a, b) => a - b), factorsA.sort((a, b) => a - b));
-            const correctB = arraysEqual(userFactorsB.sort((a, b) => a - b), factorsB.sort((a, b) => a - b));
-            
-            if (!correctA || !correctB) {
-                resultElement.textContent = '❌ Сначала правильно введи все делители!';
-                resultElement.className = 'result incorrect';
-                
-                highlightIncorrectFactors(inputsA, factorsA);
-                highlightIncorrectFactors(inputsB, factorsB);
-                
-                // Показываем кнопку подсказки после неправильного ответа
-                if (!hintUsed) {
-                    hintBtn.classList.add('visible');
-                }
-                
-                return false;
-            }
-            
-            resultElement.textContent = '✅ Делители верны! Теперь найди НОД.';
-            resultElement.className = 'result correct';
-            return true;
-        }
-        
-        // Подсветка неправильно введенных делителей
-        function highlightIncorrectFactors(inputs, correctFactors) {
-            const userFactors = Array.from(inputs)
-                .map(input => parseInt(input.value))
-                .filter(value => !isNaN(value));
-            
-            inputs.forEach(input => {
-                const value = parseInt(input.value);
-                if (isNaN(value)) {
-                    input.style.background = '#FF6B6B';
-                } else if (!correctFactors.includes(value)) {
-                    input.style.background = '#FF6B6B';
-                } else if (userFactors.filter(f => f === value).length > 1) {
-                    input.style.background = '#FF6B6B';
-                } else {
-                    input.style.background = '#7FFF00';
-                }
-            });
-        }
-        
-        // Показать все делители (подсказка)
-        function showAllFactors() {
-            // Для уровня 1 просто показываем все делители сразу
-            if (level === 1) {
-                factorsAElement.innerHTML = '';
-                factorsBElement.innerHTML = '';
-                
-                factorsA.forEach(factor => {
-                    const factorElement = document.createElement('div');
-                    factorElement.className = 'factor visible';
-                    factorElement.textContent = factor;
-                    factorsAElement.appendChild(factorElement);
-                });
-                
-                factorsB.forEach(factor => {
-                    const factorElement = document.createElement('div');
-                    factorElement.className = 'factor visible';
-                    factorElement.textContent = factor;
-                    factorsBElement.appendChild(factorElement);
-                });
-                
-                highlightCommonFactors();
-            } else {
-                // Для уровней 2+ показываем правильные делители
-                const inputsA = factorsAElement.querySelectorAll('input');
-                const inputsB = factorsBElement.querySelectorAll('input');
-                
-                inputsA.forEach((input, index) => {
-                    input.value = factorsA[index];
-                    input.style.background = '#7FFF00';
-                });
-                
-                inputsB.forEach((input, index) => {
-                    input.value = factorsB[index];
-                    input.style.background = '#7FFF00';
-                });
-            }
-            
-            // Скрываем кнопку подсказки
-            hintBtn.classList.remove('visible');
-            hintUsed = true;
-            
-            resultElement.textContent = '💡 Вот все делители чисел. Найди наибольший общий!';
-            resultElement.className = 'result';
-        }
-        
-        // Следующий вопрос
-        function nextQuestion() {
-            generateNumbers();
-            updateDisplay();
-        }
-        
-        // Вспомогательные функции
-        function calculateGCD(a, b) {
-            while (b !== 0) {
-                const temp = b;
-                b = a % b;
-                a = temp;
-            }
-            return a;
-        }
-        
-        function getFactors(n) {
-            const factors = [];
-            for (let i = 1; i <= n; i++) {
-                if (n % i === 0) factors.push(i);
-            }
-            return factors;
-        }
-        
-        function getCommonFactors(factorsA, factorsB) {
-            return factorsA.filter(factor => factorsB.includes(factor));
-        }
-        
-        function arraysEqual(a, b) {
-            if (a.length !== b.length) return false;
-            for (let i = 0; i < a.length; i++) {
-                if (a[i] !== b[i]) return false;
-            }
-            return true;
-        }
-        
-        // Запуск игры при загрузке страницы
-        window.onload = initGame;
-    </script>
+      }
+    }
+  }
+
+  function addFactor(rowIndex) {
+    let input = document.getElementById('input-' + rowIndex);
+    let val = parseInt(input.value);
+
+    // Проверяем: введено число, оно простое и является делителем остатка
+    if (val && isPrime(val) && remainders[rowIndex] % val === 0) {
+      factorsArr[rowIndex].push({value: val, matched: false});
+      remainders[rowIndex] /= val;
+      checkStage1Progress();
+    } else {
+      input.classList.add('wrong');
+      setTimeout(() => input.classList.remove('wrong'), 400);
+    }
+  }
+
+  function checkStage1Progress() {
+    if (remainders.every(r => r === 1)) {
+      currentStage = 2;
+      let instr = document.getElementById('instructions');
+      instr.innerHTML = 'Шаг 2. Отлично! Теперь кликай по множителям, которые есть <b>во всех трех</b> рядах.';
+      instr.style.color = '#2196F3';
+      document.getElementById('common-area').classList.remove('hidden');
+    }
+    render();
+  }
+
+  function tryMatch(val, btnElement) {
+    let availableInAll = true;
+    let indicesToMatch = [];
+    
+    for (let i = 0; i < factorsArr.length; i++) {
+      let foundIdx = factorsArr[i].findIndex(f => f.value === val && !f.matched);
+      if (foundIdx === -1) {
+        availableInAll = false;
+        break;
+      }
+      indicesToMatch.push(foundIdx);
+    }
+
+    if (availableInAll) {
+      for (let i = 0; i < factorsArr.length; i++) {
+        factorsArr[i][indicesToMatch[i]].matched = true;
+      }
+      matchedFactors.push(val);
+      updateCommonArea();
+      render();
+      checkIfDone();
+    } else {
+      btnElement.classList.add('wrong');
+      setTimeout(() => btnElement.classList.remove('wrong'), 400);
+    }
+  }
+
+  function updateCommonArea() {
+    let area = document.getElementById('common-factors');
+    area.innerHTML = matchedFactors.join(' <span class="sign">&times;</span> ');
+  }
+
+  function checkIfDone() {
+    let remainingUnmatched = factorsArr.map(row => row.filter(f => !f.matched).map(f => f.value));
+    if (!findCommonValue(remainingUnmatched)) {
+       document.getElementById('final-answer-area').classList.remove('hidden');
+       let msg = document.getElementById('message');
+       msg.innerText = 'Все общие множители найдены! Теперь перемножь их и введи НОД.';
+       msg.style.color = '#2196F3';
+       setTimeout(() => document.getElementById('gcd-input').focus(), 100);
+    }
+  }
+
+  function checkGCD() {
+    let inputVal = parseInt(document.getElementById('gcd-input').value);
+    let msg = document.getElementById('message');
+    
+    if (inputVal === expectedGCD) {
+      msg.innerText = 'Правильно! НОД = ' + expectedGCD + ' 🎉';
+      msg.style.color = '#4CAF50';
+    } else {
+      msg.innerText = 'Ошибка. Проверь вычисления и попробуй снова!';
+      msg.style.color = '#F44336';
+    }
+  }
+
+  initGame();
+</script>
+
 </body>
 </html>
