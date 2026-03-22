@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Тренажер: Нахождение НОК</title>
+<script src="../../assets/analytics.js"></script>
+
 <style>
   body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -76,32 +78,30 @@
     color: #333;
     transition: all 0.2s ease;
   }
+  
   /* Состояния множителей */
   .factor.base {
     background: #9C27B0;
     color: white;
     box-shadow: 0 4px 6px rgba(156, 39, 176, 0.3);
   }
-  .factor.dimmed {
-    background: #f0f4f8;
-    color: #b0bec5;
-    opacity: 0.6;
-    cursor: default;
-  }
-  .factor.clickable {
-    background: #FFC107;
-    color: #333;
+  .factor.interactive {
     cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
-  .factor.clickable:hover {
-    background: #FFB300;
+  .factor.interactive:hover:not(.added) {
+    background: #cdd5df;
     transform: translateY(-2px);
   }
   .factor.added {
     background: #4CAF50;
     color: white;
     box-shadow: 0 4px 6px rgba(76, 175, 80, 0.3);
+    cursor: default;
+  }
+  .factor.wrong {
+    background: #F44336 !important;
+    color: white !important;
+    animation: shake 0.4s;
   }
   .sign {
     color: #999;
@@ -210,7 +210,6 @@
     100% { transform: translateX(0); }
   }
 </style>
-<script src="../../assets/analytics.js"></script>
 </head>
 <body>
 
@@ -236,7 +235,6 @@
 </div>
 
 <script>
-  // Наборы подобраны так, чтобы требовалось добавление множителей
   const sets = [
     [36, 54, 72], [12, 18, 24], [15, 20, 30], 
     [10, 15, 25], [14, 21, 28], [24, 36, 48]
@@ -249,6 +247,7 @@
   let addedFactors = [];
   let expectedLCM = 1;
   let currentStage = 1; 
+  let targetMissingFactors = []; // Массив множителей, которые предстоит найти ученику
 
   function isPrime(num) {
     if (num < 2) return false;
@@ -261,10 +260,25 @@
   function gcd(a, b) { return !b ? a : gcd(b, a % b); }
   function lcm(a, b) { return (a * b) / gcd(a, b); }
 
+  function getPrimeFactors(num) {
+    let factors = [];
+    let d = 2;
+    while (num >= 2) {
+      if (num % d === 0) {
+        factors.push(d);
+        num /= d;
+      } else {
+        d++;
+      }
+    }
+    return factors;
+  }
+
   function initGame() {
     currentStage = 1;
     baseIndex = -1;
     addedFactors = [];
+    targetMissingFactors = [];
     document.getElementById('message').innerText = '';
     document.getElementById('lcm-factors').innerHTML = '';
     document.getElementById('lcm-area').classList.add('hidden');
@@ -276,7 +290,6 @@
     instr.style.color = '#555';
 
     currentSet = sets[Math.floor(Math.random() * sets.length)];
-    // Перемешиваем порядок чисел для разнообразия
     currentSet.sort(() => Math.random() - 0.5);
     
     remainders = [...currentSet];
@@ -299,7 +312,6 @@
       label.id = 'label-' + rowIndex;
       label.innerText = currentSet[rowIndex] + ' =';
       
-      // На этапе 2 подсвечиваем ярлыки
       if (currentStage === 2) {
         label.classList.add('interactive');
         label.onclick = () => selectBase(rowIndex);
@@ -311,8 +323,8 @@
         span.className = 'factor ' + factorObj.state;
         span.innerText = factorObj.value;
         
-        if (currentStage === 3 && factorObj.state === 'clickable') {
-          span.onclick = () => addMissingFactor(rowIndex, colIndex);
+        if (currentStage === 3 && factorObj.state === 'interactive') {
+          span.onclick = function() { tryAddFactor(rowIndex, colIndex, this); };
         }
         
         rowDiv.appendChild(span);
@@ -402,50 +414,62 @@
     baseIndex = rowIndex;
     currentStage = 3;
     
-    // Формируем пул множителей базы
-    let lcmPool = factorsArr[baseIndex].map(f => f.value);
+    // Формируем список множителей полного НОК
+    let fullLCMFactors = getPrimeFactors(expectedLCM);
+    let baseFactors = factorsArr[baseIndex].map(f => f.value);
+    
+    // Вычисляем, какие множители предстоит найти ученику
+    targetMissingFactors = [...fullLCMFactors];
+    baseFactors.forEach(val => {
+      let idx = targetMissingFactors.indexOf(val);
+      if (idx > -1) targetMissingFactors.splice(idx, 1);
+    });
     
     // Красим базу
     factorsArr[baseIndex].forEach(f => f.state = 'base');
 
-    // Проверяем остальные числа: затеняем совпадения
+    // Делаем все остальные множители интерактивными, но без подсказок
     for (let i = 0; i < factorsArr.length; i++) {
       if (i === baseIndex) continue;
-      
-      let poolCounts = {};
-      lcmPool.forEach(val => poolCounts[val] = (poolCounts[val] || 0) + 1);
-
       factorsArr[i].forEach(f => {
-        if (poolCounts[f.value] > 0) {
-          f.state = 'dimmed';
-          poolCounts[f.value]--;
-        } else {
-          f.state = 'clickable'; // Это недостающий множитель!
-        }
+        f.state = 'interactive';
       });
     }
 
     let instr = document.getElementById('instructions');
-    instr.innerHTML = 'Шаг 3. Кликай по оставшимся (желтым) множителям, чтобы добавить их в НОК.';
+    instr.innerHTML = 'Шаг 3. Самостоятельно определи и кликни по недостающим множителям в остальных числах.';
     instr.style.color = '#FF9800';
     
     document.getElementById('lcm-area').classList.remove('hidden');
     updateLCMArea();
     render();
-    checkIfStage3Done();
+    
+    // Если недостающих множителей нет (редкий случай, но возможный)
+    if (targetMissingFactors.length === 0) checkIfStage3Done();
   }
 
-  function addMissingFactor(rowIndex, colIndex) {
+  function tryAddFactor(rowIndex, colIndex, btnElement) {
     let f = factorsArr[rowIndex][colIndex];
-    f.state = 'added';
-    addedFactors.push(f.value);
+    let val = f.value;
     
-    // Сортируем добавленные для красоты
-    addedFactors.sort((a, b) => a - b);
+    // Проверяем, нужен ли этот множитель для формирования НОК
+    let neededIdx = targetMissingFactors.indexOf(val);
     
-    updateLCMArea();
-    render();
-    checkIfStage3Done();
+    if (neededIdx > -1) {
+      // Правильный выбор
+      targetMissingFactors.splice(neededIdx, 1);
+      f.state = 'added';
+      addedFactors.push(val);
+      addedFactors.sort((a, b) => a - b);
+      
+      updateLCMArea();
+      render();
+      checkIfStage3Done();
+    } else {
+      // Неправильный выбор (множитель уже учтен в базе или выбран ранее)
+      btnElement.classList.add('wrong');
+      setTimeout(() => btnElement.classList.remove('wrong'), 400);
+    }
   }
 
   function updateLCMArea() {
@@ -463,12 +487,20 @@
   }
 
   function checkIfStage3Done() {
-    let hasClickable = factorsArr.some(row => row.some(f => f.state === 'clickable'));
-    if (!hasClickable) {
+    if (targetMissingFactors.length === 0) {
        currentStage = 4;
        let instr = document.getElementById('instructions');
        instr.innerHTML = 'Шаг 4. Умножь базу на добавленные множители и введи НОК.';
        instr.style.color = '#2196F3';
+       
+       // Снимаем интерактивность с оставшихся элементов
+       factorsArr.forEach(row => {
+         row.forEach(f => {
+           if (f.state === 'interactive') f.state = 'normal';
+         });
+       });
+       render();
+       
        document.getElementById('final-answer-area').classList.remove('hidden');
        setTimeout(() => document.getElementById('lcm-input').focus(), 100);
     }
