@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Окружность и Круг: Конструктор Формул</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Семантическая палитра геометрии */
+            --color-c: #e11d48; /* Красный для длины окружности */
+            --color-d: #2563eb; /* Синий для диаметра */
+            --color-r: #7c3aed; /* Фиолетовый для радиуса */
+            
+            --color-s-fill: rgba(16, 185, 129, 0.2); /* Светло-зеленый для площади (заливка) */
+            --color-s-stroke: #10b981;               /* Зеленый для контура площади */
+            --color-s-text: #047857;                 /* Темно-зеленый для текста площади */
+            
+            --color-neutral: #94a3b8; /* Нейтральный серый для неизвестных элементов */
+
+            /* UI цвета */
+            --primary: #2563eb;
+            --dark: #1e293b;
+            --bg: #f8fafc;
+            --success: #16a34a;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            overflow: hidden;
+        }
+
+        .main-container {
+            width: 1050px;
+            height: 720px;
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            display: flex;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            position: relative;
+        }
+
+        /* КАНВАС */
+        .canvas-section {
+            flex-grow: 1;
+            position: relative;
+            background: #f1f5f9;
+            background-image: 
+                linear-gradient(#e2e8f0 1px, transparent 1px),
+                linear-gradient(90deg, #e2e8f0 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        /* САЙДБАР */
+        .sidebar {
+            width: 320px;
+            background: #ffffff;
+            border-left: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            padding: 25px;
+            z-index: 2;
+        }
+
+        .app-title {
+            margin: 0 0 15px 0;
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--dark);
+            letter-spacing: -0.03em;
+        }
+
+        .tabs { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+
+        .tab-btn {
+            background: #f1f5f9; border: 1px solid transparent; padding: 12px 15px;
+            border-radius: 12px; font-family: 'Inter', sans-serif; font-weight: 600;
+            font-size: 0.9rem; color: #475569; cursor: pointer; text-align: left;
+            transition: all 0.2s; display: flex; align-items: center; justify-content: space-between;
+        }
+        .tab-btn:hover { background: #e2e8f0; }
+        .tab-btn.active { background: #eff6ff; border-color: #bfdbfe; color: var(--primary); }
+
+        .instructions {
+            background: #f8fafc; padding: 15px; border-radius: 12px;
+            margin-bottom: 20px; border: 1px solid #e2e8f0; font-size: 0.85rem;
+            color: #475569; line-height: 1.5;
+        }
+        .instructions strong { color: var(--dark); }
+
+        .sidebar h2 {
+            margin: 0 0 15px 0; font-size: 1.1rem; color: var(--dark);
+            border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;
+        }
+
+        .log-list { flex-grow: 1; overflow-y: auto; padding-right: 5px; }
+        .log-list::-webkit-scrollbar { width: 4px; }
+        .log-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .log-item {
+            background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px;
+            padding: 10px 12px; margin-bottom: 8px; font-family: 'Roboto Mono', monospace;
+            font-size: 0.85rem; color: #475569; animation: slideIn 0.3s ease; border-left: 4px solid var(--success);
+        }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+
+        /* ПАНЕЛЬ УПРАВЛЕНИЯ */
+        .controls {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px);
+            padding: 20px 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0; z-index: 10; min-width: 450px;
+            display: flex; flex-direction: column; align-items: center; gap: 15px;
+        }
+
+        .feedback {
+            position: absolute; top: -50px; left: 50%; transform: translateX(-50%);
+            padding: 8px 16px; border-radius: 20px; font-weight: 600; font-size: 0.9rem;
+            opacity: 0; transition: 0.3s; pointer-events: none; white-space: nowrap; z-index: 20;
+        }
+        .feedback.correct { background: #dcfce7; color: #16a34a; opacity: 1; top: -40px;}
+        .feedback.wrong { background: #fee2e2; color: #dc2626; opacity: 1; top: -40px;}
+
+        /* СОХРАНЕННЫЕ ФОРМУЛЫ ТЕКУЩЕГО ЗАДАНИЯ */
+        .completed-formulas-container {
+            display: none; flex-direction: column; align-items: center; gap: 6px;
+            width: 100%; border-bottom: 2px dashed #e2e8f0; padding-bottom: 12px; margin-bottom: 5px;
+        }
+        .completed-formulas-title { font-size: 0.8rem; color: #64748b; text-transform: uppercase; font-weight: bold; letter-spacing: 0.05em; }
+        .completed-formula-item {
+            background: #f1f5f9; border: 1px solid #cbd5e1; padding: 4px 16px;
+            border-radius: 8px; font-family: 'Roboto Mono', monospace; font-size: 1.1rem;
+            color: var(--dark); font-weight: 700;
+        }
+
+        /* КОНСТРУКТОР ФОРМУЛ */
+        #builderWrapper { display: flex; flex-direction: column; align-items: center; width: 100%; gap: 15px; }
+        .builder-title { font-weight: 700; color: var(--dark); font-size: 1.1rem; text-align: center; }
+        
+        .formula-display { display: flex; align-items: center; gap: 10px; }
+        .input-label { font-family: 'Roboto Mono', monospace; font-size: 1.8rem; font-weight: 700; color: var(--dark); }
+        
+        .dropzone {
+            display: flex; gap: 5px; min-width: 150px; min-height: 50px; padding: 5px;
+            border: 2px dashed #cbd5e1; border-radius: 12px; align-items: center; justify-content: flex-start;
+            background: #f8fafc; transition: 0.2s;
+        }
+        .dropzone.active { border-color: var(--primary); background: #eff6ff; }
+        
+        .parts-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 5px; }
+        
+        .chip {
+            background: #e2e8f0; color: var(--dark); border: none; padding: 10px 16px;
+            border-radius: 8px; font-family: 'Roboto Mono', monospace; font-size: 1.2rem;
+            font-weight: 700; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .chip:hover { background: #cbd5e1; transform: translateY(-2px); }
+        .chip.in-dropzone { background: var(--primary); color: white; }
+        .chip.in-dropzone:hover { background: #1d4ed8; }
+
+        /* КАЛЬКУЛЯТОР */
+        #calcWrapper { display: none; align-items: center; justify-content: center; gap: 20px; width: 100%; flex-direction: column;}
+        .calc-row { display: flex; align-items: center; gap: 15px; }
+        input[type="number"] {
+            width: 120px; padding: 10px 15px; font-family: 'Roboto Mono', monospace;
+            font-size: 1.5rem; font-weight: 700; color: var(--dark); border: 2px solid #cbd5e1;
+            border-radius: 12px; outline: none; text-align: center; transition: 0.2s;
+        }
+        input[type="number"]:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2); }
+        input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+        button.action-btn {
+            background: var(--primary); color: white; border: none; padding: 12px 24px;
+            border-radius: 12px; font-weight: 600; font-size: 1rem; cursor: pointer;
+            transition: 0.2s; white-space: nowrap; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        button.action-btn:hover { background: #1d4ed8; transform: translateY(-1px); }
+        button.next-btn { background: var(--dark); display: none; margin-top: 10px;}
+        button.next-btn:hover { background: #334155; }
+
+    </style>
+    <script src="../../assets/analytics.js"></script>
+</head>
+<body>
+
+<div class="main-container">
+    <div class="canvas-section">
+        <canvas id="simCanvas"></canvas>
+        
+        <div class="controls" id="mainControls">
+            <div class="feedback" id="feedbackMsg">Правильно!</div>
+            
+            <div id="savedFormulasContainer" class="completed-formulas-container">
+                <div class="completed-formulas-title">Собранные формулы</div>
+                <div id="savedFormulasList" style="display:flex; flex-direction:column; gap:6px; align-items:center;"></div>
+            </div>
+            
+            <div id="builderWrapper">
+                <div class="builder-title" id="builderTitle">Шаг 1: Составь формулу</div>
+                <div class="formula-display">
+                    <div class="input-label" id="formulaLeft">d =</div>
+                    <div class="dropzone" id="formulaDropzone"></div>
+                </div>
+                <div class="parts-container" id="partsContainer"></div>
+                <button class="action-btn" onclick="checkFormula()">Проверить формулу</button>
+            </div>
+
+            <div id="calcWrapper">
+                <div class="builder-title" id="calcTitle">Итоговый расчет</div>
+                <div class="calc-row">
+                    <div class="input-label" id="targetLabelCalc">r =</div>
+                    <input type="number" id="answerInput" placeholder="?" step="0.01" autocomplete="off">
+                    <button class="action-btn" id="checkBtnCalc" onclick="checkAnswer()">Считать</button>
+                </div>
+                <button class="action-btn next-btn" id="nextBtn" onclick="generateTask()">Следующее задание</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <h1 class="app-title">Сборка & Практика</h1>
+        
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchMode(0)" id="tab0">
+                <span>1. Найти радиус <strong style="color:var(--color-r)">(r)</strong></span>
+                <span style="color:#94a3b8; font-size:0.8rem">дано: C</span>
+            </button>
+            <button class="tab-btn" onclick="switchMode(1)" id="tab1">
+                <span>2. Найти площадь <strong style="color:var(--color-s-text)">(S)</strong></span>
+                <span style="color:#94a3b8; font-size:0.8rem">дано: d</span>
+            </button>
+            <button class="tab-btn" onclick="switchMode(2)" id="tab2">
+                <span>3. Найти диаметр <strong style="color:var(--color-d)">(d)</strong></span>
+                <span style="color:#94a3b8; font-size:0.8rem">дано: S</span>
+            </button>
+        </div>
+
+        <div class="instructions" id="instructionText"></div>
+
+        <h2>📒 Журнал решений</h2>
+        <div class="log-list" id="logList">
+            <div id="emptyLog" style="padding:10px; color:#94a3b8; font-size:0.9rem;">
+                Здесь появятся ваши правильные ответы.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('simCanvas');
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const width = 730;
+    const height = 720;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    ctx.scale(dpr, dpr);
+    canvas.style.width = width + "px";
+    canvas.style.height = height + "px";
+
+    const PI = 3.14;
+    
+    // Переменные цветов для JS (соответствуют CSS)
+    const COLOR_C = '#e11d48'; // Красный
+    const COLOR_D = '#2563eb'; // Синий
+    const COLOR_R = '#7c3aed'; // Фиолетовый
+    const COLOR_S_FILL = 'rgba(16, 185, 129, 0.2)'; 
+    const COLOR_S_STROKE = '#10b981';
+    const COLOR_S_TEXT = '#047857';
+    const COLOR_NEUTRAL = '#94a3b8';
+    
+    let currentMode = 0; 
+    let currentTask = {};
+    let isAnswered = false;
+    let currentSubStep = 0;
+    let currentFormula = [];
+    let savedFormulas = []; 
+
+    const STAGES = [
+        [
+            { type: 'build', title: 'Шаг 1: Формула диаметра (из π = C:d)', left: 'd', target: ['C', ':', 'π'], parts: ['C', 'S', 'π', '2', ':', '*'] },
+            { type: 'build', title: 'Шаг 2: Формула радиуса', left: 'r', target: ['d', ':', '2'], parts: ['d', 'π', '2', 'C', ':', '*'] },
+            { type: 'calc', targetVar: 'r', label: 'r =', title: 'Шаг 3: Вычисли радиус', color: COLOR_R }
+        ],
+        [
+            { type: 'build', title: 'Шаг 1: Найдем радиус', left: 'r', target: ['d', ':', '2'], parts: ['d', 'π', '2', 'C', ':', '*'] },
+            { type: 'build', title: 'Шаг 2: Формула площади', left: 'S', target: ['π', '*', 'r²'], parts: ['π', 'r²', 'd', '2', '*', ':'] },
+            { type: 'calc', targetVar: 'S', label: 'S =', title: 'Шаг 3: Вычисли площадь', color: COLOR_S_TEXT }
+        ],
+        [
+            { type: 'build', title: 'Шаг 1: Найдем квадрат радиуса', left: 'r²', target: ['S', ':', 'π'], parts: ['S', 'C', 'π', '2', ':', '*'] },
+            { type: 'build', title: 'Шаг 2: Формула радиуса (корень)', left: 'r', target: ['√', '(', 'S', ':', 'π', ')'], parts: ['S', 'π', '(', ')', '√', ':', '*'] },
+            { type: 'build', title: 'Шаг 3: Формула диаметра', left: 'd', target: ['r', '*', '2'], parts: ['r', 'π', '2', 'S', '*', ':'] },
+            { type: 'calc', targetVar: 'd', label: 'd =', title: 'Шаг 4: Вычисли диаметр', color: COLOR_D }
+        ]
+    ];
+
+    const INSTRUCTIONS = [
+        "Известна <strong style='color:var(--color-c)'>длина окружности (C)</strong>.<br><br>Базовая зависимость:<br>π = C : d<br><br>Собери формулы шаг за шагом, чтобы найти <strong style='color:var(--color-r)'>радиус (r)</strong>.",
+        "Известен <strong style='color:var(--color-d)'>диаметр (d)</strong>.<br><br>Вспомни базовые формулы площади и связи диаметра с радиусом.<br><br>Собери формулы шаг за шагом, чтобы найти <strong style='color:var(--color-s-text)'>площадь (S)</strong>.",
+        "Известна <strong style='color:var(--color-s-text)'>площадь круга (S)</strong>.<br><br>Формулы:<br>S = π * (r²)<br><br>Собери обратные формулы шаг за шагом, чтобы найти <strong style='color:var(--color-d)'>диаметр (d)</strong>."
+    ];
+
+    function switchMode(mode) {
+        currentMode = mode;
+        document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
+            btn.classList.toggle('active', idx === mode);
+        });
+        document.getElementById('instructionText').innerHTML = INSTRUCTIONS[mode] + "<br><br><span style='background:#fef3c7; padding:2px 6px; border-radius:4px; color:#b45309; font-weight:bold;'>π ≈ 3.14</span>";
+        generateTask();
+    }
+
+    function generateTask() {
+        isAnswered = false;
+        currentSubStep = 0;
+        currentFormula = [];
+        savedFormulas = [];
+        updateSavedFormulasUI();
+        hideFeedback();
+        
+        const r = Math.floor(Math.random() * 8) + 3; 
+        const d = r * 2;
+        const C = parseFloat((2 * PI * r).toFixed(2));
+        const S = parseFloat((PI * r * r).toFixed(2));
+
+        currentTask = { r, d, C, S };
+        currentTask.visualR = 90 + (r * 10);
+        currentTask.cx = width / 2;
+        currentTask.cy = height / 2 - 60;
+
+        renderCurrentStep();
+        draw();
+    }
+
+    function updateSavedFormulasUI() {
+        const container = document.getElementById('savedFormulasContainer');
+        const list = document.getElementById('savedFormulasList');
+        list.innerHTML = '';
+        
+        if (savedFormulas.length > 0) {
+            container.style.display = 'flex';
+            savedFormulas.forEach(formulaText => {
+                const div = document.createElement('div');
+                div.className = 'completed-formula-item';
+                div.innerText = formulaText;
+                list.appendChild(div);
+            });
+        } else {
+            container.style.display = 'none';
+        }
+    }
+
+    function renderCurrentStep() {
+        const step = STAGES[currentMode][currentSubStep];
+        const builderWrap = document.getElementById('builderWrapper');
+        const calcWrap = document.getElementById('calcWrapper');
+
+        if (step.type === 'build') {
+            builderWrap.style.display = 'flex';
+            calcWrap.style.display = 'none';
+            
+            document.getElementById('builderTitle').innerText = step.title;
+            document.getElementById('formulaLeft').innerText = step.left + ' =';
+            
+            currentFormula = [];
+            renderDropzone();
+            renderParts(step.parts);
+        } else {
+            builderWrap.style.display = 'none';
+            calcWrap.style.display = 'flex';
+            
+            document.getElementById('calcTitle').innerText = step.title;
+            const targetLabel = document.getElementById('targetLabelCalc');
+            targetLabel.innerText = step.label;
+            targetLabel.style.color = step.color; // Красим лейбл в семантический цвет!
+            
+            const input = document.getElementById('answerInput');
+            input.value = '';
+            input.style.color = step.color; // Красим вводимый текст!
+            input.disabled = false;
+            
+            document.getElementById('checkBtnCalc').style.display = 'block';
+            document.getElementById('nextBtn').style.display = 'none';
+            input.focus();
+        }
+    }
+
+    function renderParts(partsArray) {
+        const container = document.getElementById('partsContainer');
+        container.innerHTML = '';
+        partsArray.forEach(part => {
+            const btn = document.createElement('button');
+            btn.className = 'chip';
+            btn.innerHTML = part;
+            btn.onclick = () => addToFormula(part);
+            container.appendChild(btn);
+        });
+    }
+
+    function renderDropzone() {
+        const dz = document.getElementById('formulaDropzone');
+        dz.innerHTML = '';
+        currentFormula.forEach((part, index) => {
+            const chip = document.createElement('div');
+            chip.className = 'chip in-dropzone';
+            chip.innerHTML = part;
+            chip.onclick = () => removeFromFormula(index);
+            dz.appendChild(chip);
+        });
+        if(currentFormula.length > 0) dz.classList.add('active');
+        else dz.classList.remove('active');
+    }
+
+    function addToFormula(part) {
+        const step = STAGES[currentMode][currentSubStep];
+        if (currentFormula.length < step.target.length + 2) {
+            currentFormula.push(part);
+            renderDropzone();
+        }
+    }
+
+    function removeFromFormula(index) {
+        currentFormula.splice(index, 1);
+        renderDropzone();
+    }
+
+    function checkFormula() {
+        const step = STAGES[currentMode][currentSubStep];
+        const userStr = currentFormula.join('');
+        const targetStr = step.target.join('');
+
+        if (userStr === targetStr) {
+            showFeedback(true, 'Верная формула!');
+            savedFormulas.push(`${step.left} = ${userStr}`);
+            updateSavedFormulasUI();
+
+            setTimeout(() => {
+                hideFeedback();
+                currentSubStep++;
+                renderCurrentStep();
+            }, 1000);
+        } else {
+            showFeedback(false, 'Формула собрана неверно');
+            setTimeout(hideFeedback, 1500);
+        }
+    }
+
+    function checkAnswer() {
+        if (isAnswered) return;
+        const inputVal = parseFloat(document.getElementById('answerInput').value.replace(',', '.'));
+        if (isNaN(inputVal)) return;
+
+        const step = STAGES[currentMode][currentSubStep];
+        const targetVal = currentTask[step.targetVar];
+
+        if (Math.abs(inputVal - targetVal) < 0.05) {
+            showFeedback(true, 'Точно!');
+            isAnswered = true;
+            document.getElementById('answerInput').disabled = true;
+            document.getElementById('checkBtnCalc').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'block';
+            addLog(inputVal);
+            draw();
+        } else {
+            showFeedback(false, 'Ошибка в вычислениях');
+            setTimeout(hideFeedback, 2000);
+        }
+    }
+
+    function showFeedback(isCorrect, text) {
+        const fb = document.getElementById('feedbackMsg');
+        fb.className = `feedback ${isCorrect ? 'correct' : 'wrong'}`;
+        fb.innerText = text;
+    }
+
+    function hideFeedback() {
+        document.getElementById('feedbackMsg').className = 'feedback';
+    }
+
+    function addLog(answer) {
+        const list = document.getElementById('logList');
+        const empty = document.getElementById('emptyLog');
+        if (empty) empty.remove();
+
+        const div = document.createElement('div');
+        div.className = 'log-item';
+        
+        let text = "";
+        if (currentMode === 0) text = `<span style="color:${COLOR_C}">C = ${currentTask.C}</span> ➔ <strong style="color:${COLOR_R}">r = ${answer}</strong>`;
+        else if (currentMode === 1) text = `<span style="color:${COLOR_D}">d = ${currentTask.d}</span> ➔ <strong style="color:${COLOR_S_TEXT}">S = ${answer}</strong>`;
+        else if (currentMode === 2) text = `<span style="color:${COLOR_S_TEXT}">S = ${currentTask.S}</span> ➔ <strong style="color:${COLOR_D}">d = ${answer}</strong>`;
+
+        div.innerHTML = text;
+        list.prepend(div);
+    }
+
+    document.getElementById('answerInput').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            if (isAnswered) generateTask();
+            else if (STAGES[currentMode][currentSubStep].type === 'calc') checkAnswer();
+        }
+    });
+
+    // Функция отрисовки текста с толстой белой обводкой
+    function drawTextWithOutline(text, x, y, fillColor, font) {
+        ctx.font = font;
+        ctx.miterLimit = 2;
+        ctx.lineJoin = 'round';
+        ctx.strokeStyle = '#ffffff'; 
+        ctx.lineWidth = 5;
+        ctx.strokeText(text, x, y);
+        ctx.fillStyle = fillColor;
+        ctx.fillText(text, x, y);
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, width, height);
+        const { cx, cy, visualR, C, d, S, r } = currentTask;
+
+        ctx.textAlign = 'center'; 
+        ctx.textBaseline = 'middle'; 
+
+        if (currentMode === 0) {
+            // Режим 0: Дано C (Красный), найти r (Фиолетовый)
+            ctx.beginPath(); ctx.arc(cx, cy, visualR, 0, Math.PI * 2);
+            ctx.strokeStyle = COLOR_C; ctx.lineWidth = 6; ctx.stroke();
+            
+            drawTextWithOutline(`C = ${C}`, cx, cy - visualR - 25, COLOR_C, '800 22px Inter');
+
+            ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + visualR, cy);
+            ctx.strokeStyle = COLOR_R; ctx.lineWidth = 4;
+            if (!isAnswered) ctx.setLineDash([8, 6]);
+            ctx.stroke(); ctx.setLineDash([]);
+
+            ctx.beginPath(); ctx.arc(cx, cy, 6, 0, Math.PI*2); ctx.fillStyle = COLOR_R; ctx.fill();
+            
+            drawTextWithOutline(isAnswered ? `r = ${r}` : `r = ?`, cx + visualR/2, cy - 15, COLOR_R, '800 22px Inter');
+        } 
+        else if (currentMode === 1) {
+            // Режим 1: Дано d (Синий), найти S (Зеленый)
+            ctx.beginPath(); ctx.arc(cx, cy, visualR, 0, Math.PI * 2);
+            ctx.fillStyle = isAnswered ? COLOR_S_FILL : 'rgba(226, 232, 240, 0.4)'; ctx.fill();
+            ctx.strokeStyle = isAnswered ? COLOR_S_STROKE : COLOR_NEUTRAL; ctx.lineWidth = 2; ctx.stroke();
+
+            const areaColor = isAnswered ? COLOR_S_TEXT : COLOR_NEUTRAL;
+            drawTextWithOutline(isAnswered ? `S = ${S}` : `S = ?`, cx, cy - visualR/2 + 20, areaColor, '800 26px Inter');
+
+            ctx.beginPath(); ctx.moveTo(cx - visualR, cy); ctx.lineTo(cx + visualR, cy);
+            ctx.strokeStyle = COLOR_D; ctx.lineWidth = 4; ctx.stroke();
+
+            ctx.beginPath(); ctx.arc(cx, cy, 6, 0, Math.PI*2); ctx.fillStyle = COLOR_D; ctx.fill();
+            drawTextWithOutline(`d = ${d}`, cx, cy + 20, COLOR_D, '800 22px Inter');
+        }
+        else if (currentMode === 2) {
+            // Режим 2: Дано S (Зеленый), найти d (Синий)
+            ctx.beginPath(); ctx.arc(cx, cy, visualR, 0, Math.PI * 2);
+            ctx.fillStyle = COLOR_S_FILL; ctx.fill();
+            ctx.strokeStyle = COLOR_S_STROKE; ctx.lineWidth = 3; ctx.stroke();
+
+            drawTextWithOutline(`S = ${S}`, cx, cy - visualR/2 + 20, COLOR_S_TEXT, '800 26px Inter');
+
+            ctx.beginPath(); ctx.moveTo(cx - visualR, cy); ctx.lineTo(cx + visualR, cy);
+            ctx.strokeStyle = COLOR_D; ctx.lineWidth = 4;
+            if (!isAnswered) ctx.setLineDash([8, 6]);
+            ctx.stroke(); ctx.setLineDash([]);
+
+            ctx.beginPath(); ctx.arc(cx, cy, 6, 0, Math.PI*2); ctx.fillStyle = COLOR_D; ctx.fill();
+            drawTextWithOutline(isAnswered ? `d = ${d}` : `d = ?`, cx, cy + 20, COLOR_D, '800 22px Inter');
+        }
+    }
+
+    switchMode(0);
+
+</script>
+</body>
+</html>
