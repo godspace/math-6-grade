@@ -58,7 +58,8 @@
         .top-formula-banner {
             position: absolute;
             top: 15px;
-            left: 15px;
+            left: 50%; /* Сдвигаем на середину экрана */
+            transform: translateX(-50%); /* Выравниваем точно по центру своего размера */
             background: linear-gradient(135deg, #10b981, #059669);
             color: white;
             padding: 8px 16px;
@@ -70,6 +71,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            white-space: nowrap; /* Чтобы формула не переносилась на новую строку */
         }
         .top-formula-banner span {
             font-family: 'Roboto Mono', monospace;
@@ -247,7 +249,7 @@
                 box-sizing: border-box;
             }
             .canvas-wrapper { flex: 1; min-height: 300px; padding: 5px; }
-            .top-formula-banner { font-size: 0.8rem; padding: 5px 10px; top: 10px; left: 10px;}
+            .top-formula-banner { font-size: 0.8rem; padding: 5px 10px; top: 10px; }
             .top-formula-banner span { font-size: 1rem; }
         }
     </style>
