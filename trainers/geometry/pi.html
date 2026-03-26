@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Число Пи: Интерактивный Эксперимент</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <script src="../../assets/analytics.js"></script>
+
     <style>
         :root {
             --primary: #2563eb;
@@ -80,7 +83,7 @@
             margin: 0; padding: 0; list-style: decimal;
             color: #475569; font-size: 0.9rem; line-height: 1.5;
         }
-        .instructions li { margin-bottom: 6px; }
+        .instructions li { margin-bottom: 8px; }
         .instructions li:last-child { margin-bottom: 0; }
         .instructions strong { color: var(--dark); }
 
@@ -188,7 +191,6 @@
         .big-number { font-size: 4.5rem; font-weight: 800; color: var(--success); margin: 15px 0; }
 
     </style>
-    <script src="../../assets/analytics.js"></script>
 </head>
 <body>
 
@@ -218,8 +220,8 @@
         
         <div class="instructions">
             <ol>
-                <li>Дотяни красную линию до конца и <strong>впиши значение C</strong>.</li>
-                <li>Дотяни синюю линию до конца и <strong>впиши значение d</strong>.</li>
+                <li>Дотяни красную ленту (<strong>длину окружности</strong>) до конца линейки и впиши значение <strong>C</strong>.</li>
+                <li>Дотяни синюю ленту (<strong>диаметр</strong>) до конца и впиши значение <strong>d</strong>.</li>
                 <li>Вычисли результат деления и <strong>впиши его</strong>.</li>
             </ol>
         </div>
@@ -301,7 +303,7 @@
         val: 0,
         targetVal: 0,
         isDragging: false,
-        isMeasureDone: false, // Флаг: лента дотянута до конца
+        isMeasureDone: false,
         measuredC: 0,
         measuredD: 0,
         introActive: true,
@@ -365,7 +367,6 @@
         document.getElementById('feedbackMsg').className = 'feedback';
     }
 
-    // Обработка клика по кнопке (Проверка введенных данных)
     window.handleClick = function() {
         if (state.phase === 'C') {
             const inputVal = parseInt(document.getElementById('uiNum').value);
@@ -412,7 +413,6 @@
             const inputVal = parseFloat(document.getElementById('uiRes').value.replace(',', '.'));
             const targetVal = state.measuredC / state.measuredD;
             
-            // Проверка с погрешностью (разрешаем легкое округление учеником)
             if (!isNaN(inputVal) && Math.abs(inputVal - targetVal) < 0.02) {
                 showFeedback(true, "Правильно!");
                 document.getElementById('uiRes').disabled = true;
@@ -437,7 +437,6 @@
         }
     }
 
-    // Поддержка Enter для инпутов
     document.querySelectorAll('.math-input').forEach(input => {
         input.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && !document.getElementById('mainBtn').disabled) {
@@ -467,7 +466,6 @@
     function showFinal() {
         const sum = resultsHistory.reduce((a,b)=>a+b, 0);
         const avg = sum / resultsHistory.length;
-        // Округление до сотых (двух знаков)
         document.getElementById('avgResult').innerText = avg.toFixed(2);
         document.getElementById('finalOverlay').style.display = 'flex';
     }
@@ -512,7 +510,6 @@
 
             const isDone = Math.abs(newVal - limit) < 0.5;
 
-            // Блокировка/Разблокировка интерфейса при достижении конца
             if (isDone && !state.isMeasureDone) {
                 state.isMeasureDone = true;
                 const btn = document.getElementById('mainBtn');
@@ -630,6 +627,12 @@
         ctx.beginPath(); ctx.arc(cx, cy, r, start, end);
         ctx.strokeStyle = col; ctx.lineWidth = 4; ctx.stroke();
         drawSlider(col, state.val);
+
+        // Динамическая подпись
+        if (state.val > 20) {
+            ctx.fillStyle = col; ctx.font = '600 16px Inter'; ctx.textAlign = 'center';
+            ctx.fillText('Длина окружности (C)', RULER.x + state.val / 2, RULER.y - 25);
+        }
     }
 
     function drawPhaseD() {
@@ -643,6 +646,12 @@
         ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2);
         ctx.strokeStyle = 'rgba(220, 38, 38, 0.2)'; ctx.lineWidth = 2; ctx.stroke();
         drawSlider(col, state.val);
+
+        // Динамическая подпись
+        if (state.val > 20) {
+            ctx.fillStyle = col; ctx.font = '600 16px Inter'; ctx.textAlign = 'center';
+            ctx.fillText('Диаметр (d)', RULER.x + state.val / 2, RULER.y - 25);
+        }
     }
 
     initRound();
