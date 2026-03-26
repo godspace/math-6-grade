@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Число Пи: Интерактивный Эксперимент</title>
+    <title>Число Пи и Площадь: Интерактивный Эксперимент</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     
     <script src="../../assets/analytics.js"></script>
@@ -15,6 +15,9 @@
             --dark: #1e293b;
             --bg: #f8fafc;
             --success: #16a34a;
+            
+            --color-r: #7c3aed; 
+            --color-s-text: #047857; 
         }
 
         body {
@@ -31,7 +34,7 @@
         }
 
         .main-container {
-            width: 1000px;
+            width: 1050px;
             height: 700px;
             background: #ffffff;
             border-radius: 24px;
@@ -55,7 +58,7 @@
 
         /* САЙДБАР */
         .sidebar {
-            width: 330px; 
+            width: 350px; 
             background: #ffffff;
             border-left: 1px solid #e2e8f0;
             display: flex;
@@ -121,10 +124,10 @@
         /* ПАНЕЛЬ УПРАВЛЕНИЯ */
         .controls {
             position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
-            min-width: 440px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px);
-            padding: 15px 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            min-width: 460px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px);
+            padding: 15px 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             display: flex; justify-content: space-between; align-items: center;
-            border: 1px solid #e2e8f0; gap: 30px; z-index: 10; transition: opacity 0.5s;
+            border: 1px solid #e2e8f0; gap: 20px; z-index: 10; transition: opacity 0.5s;
         }
         .controls.disabled { opacity: 0.5; pointer-events: none; }
 
@@ -136,8 +139,8 @@
         .feedback.correct { background: #dcfce7; color: #16a34a; opacity: 1; top: -35px;}
         .feedback.wrong { background: #fee2e2; color: #dc2626; opacity: 1; top: -35px;}
 
-        /* ФОРМУЛА С ИНПУТАМИ */
-        .formula-container { display: flex; align-items: center; gap: 15px; }
+        /* ФОРМУЛЫ С ИНПУТАМИ */
+        .formula-container { display: flex; align-items: center; justify-content: center; gap: 15px; width: 100%; }
         .fraction { display: flex; flex-direction: column; align-items: center; gap: 6px; }
         .fraction-line { width: 110px; height: 3px; background: var(--dark); border-radius: 2px;}
         
@@ -150,7 +153,7 @@
         input.math-input:disabled { background: transparent; border-color: transparent; }
         input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 
-        /* Цветовое кодирование полей */
+        /* Цветовое кодирование полей (Пи) */
         #uiNum { color: var(--accent); }
         #uiDen { color: var(--primary); }
         #uiRes { color: var(--success); opacity: 0; pointer-events: none; }
@@ -159,11 +162,20 @@
         #uiRes::placeholder { color: rgba(22, 163, 74, 0.4); }
         #uiRes.visible { opacity: 1; pointer-events: auto; }
 
-        .equals-sign { font-family: 'Roboto Mono', monospace; font-size: 2.2rem; font-weight: bold; color: var(--dark); opacity: 0; transition: 0.3s; }
-        .equals-sign.visible { opacity: 1; }
+        /* Цветовое кодирование полей (Площадь) */
+        #uiPiArea { color: var(--dark); }
+        #uiRArea { color: var(--color-r); }
+        #uiSArea { color: var(--color-s-text); opacity: 0; pointer-events: none; }
+        #uiPiArea::placeholder { color: rgba(30, 41, 59, 0.4); }
+        #uiRArea::placeholder { color: rgba(124, 58, 237, 0.4); }
+        #uiSArea::placeholder { color: rgba(4, 120, 87, 0.4); }
+        #uiSArea.visible { opacity: 1; pointer-events: auto; }
+
+        .equals-sign, .math-sign { font-family: 'Roboto Mono', monospace; font-size: 2.2rem; font-weight: bold; color: var(--dark); opacity: 0; transition: 0.3s; }
+        .equals-sign.visible, .math-sign.visible { opacity: 1; }
 
         button.action-btn {
-            background: var(--dark); color: white; border: none; padding: 14px 28px;
+            background: var(--dark); color: white; border: none; padding: 14px 24px;
             border-radius: 14px; font-weight: 600; font-size: 1.1rem; cursor: pointer;
             transition: 0.2s; white-space: nowrap; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
@@ -201,7 +213,7 @@
         <div class="controls" id="uiPanel">
             <div class="feedback" id="feedbackMsg">Правильно!</div>
             
-            <div class="formula-container">
+            <div class="formula-container" id="fracFormula">
                 <div class="fraction">
                     <input type="number" id="uiNum" class="math-input" placeholder="C" disabled autocomplete="off">
                     <div class="fraction-line"></div>
@@ -211,14 +223,25 @@
                 <input type="number" id="uiRes" class="math-input" placeholder="π ?" disabled step="0.01" autocomplete="off">
             </div>
 
+            <div class="formula-container" id="areaFormula" style="display: none;">
+                <input type="number" id="uiPiArea" class="math-input" placeholder="π" disabled autocomplete="off" style="width: 90px;">
+                <div class="math-sign visible">×</div>
+                <div style="position: relative; display: flex; align-items: center;">
+                    <input type="number" id="uiRArea" class="math-input" placeholder="r" disabled autocomplete="off" style="width: 90px; padding-right: 20px;">
+                    <span style="position: absolute; right: -15px; top: -10px; font-weight: bold; font-size: 1.5rem; color: var(--dark);">²</span>
+                </div>
+                <div id="uiEqArea" class="equals-sign visible">=</div>
+                <input type="number" id="uiSArea" class="math-input" placeholder="S ?" disabled step="0.01" autocomplete="off" style="width: 120px;">
+            </div>
+
             <button id="mainBtn" class="action-btn" onclick="handleClick()">Измеряй...</button>
         </div>
     </div>
 
     <div class="sidebar">
-        <h1 class="app-title">Число Пи</h1>
+        <h1 class="app-title" id="appTitleText">Число Пи</h1>
         
-        <div class="instructions">
+        <div class="instructions" id="instructionsBox">
             <ol>
                 <li>Дотяни красную ленту (<strong>длину окружности</strong>) до конца линейки и впиши значение <strong>C</strong>.</li>
                 <li>Дотяни синюю ленту (<strong>диаметр</strong>) до конца и впиши значение <strong>d</strong>.</li>
@@ -228,7 +251,7 @@
 
         <h2>📒 Журнал измерений</h2>
         <div class="log-list" id="logList">
-            <div style="padding:10px; color:#94a3b8; font-size:0.9rem;">
+            <div id="emptyLog" style="padding:10px; color:#94a3b8; font-size:0.9rem;">
                 Здесь будут записи.
             </div>
         </div>
@@ -239,15 +262,15 @@
     </div>
 
     <div class="overlay" id="finalOverlay">
-        <div class="card">
-            <h2 style="margin-top:0">🎉 Результаты</h2>
-            <p>Эксперимент завершен.</p>
-            <p style="margin-top:30px; color:#64748b; font-size:0.85rem; text-transform:uppercase; font-weight:bold;">Среднее значение π</p>
+        <div class="card" id="overlayCard">
+            <h2 style="margin-top:0">🎉 Отличная работа!</h2>
+            <p>Первый этап эксперимента завершен.</p>
+            <p style="margin-top:20px; color:#64748b; font-size:0.85rem; text-transform:uppercase; font-weight:bold;">Среднее значение π</p>
             <div class="big-number" id="avgResult">3.14</div>
             <p style="color:#64748b; font-size:0.9rem;">
-                Вывод: отношение C к d всегда постоянно у любых окружностей!
+                Вывод: отношение длины к диаметру всегда постоянно у любых окружностей!
             </p>
-            <button class="action-btn" onclick="location.reload()" style="margin-top:25px; width:100%">Начать заново</button>
+            <button class="action-btn" onclick="startAreaPhase()" style="margin-top:25px; width:100%; background: var(--primary);">Далее: Площадь круга</button>
         </div>
     </div>
 </div>
@@ -368,6 +391,7 @@
     }
 
     window.handleClick = function() {
+        // Логика фазы ПИ
         if (state.phase === 'C') {
             const inputVal = parseInt(document.getElementById('uiNum').value);
             const targetVal = Math.round(currentGeo.c);
@@ -435,6 +459,62 @@
                 showFeedback(false, "Пересчитай, проверь деление");
             }
         }
+        // Логика фазы ПЛОЩАДЬ
+        else if (state.phase === 'AREA_R') {
+            const inputVal = parseInt(document.getElementById('uiRArea').value);
+            if (inputVal === currentGeo.r) {
+                showFeedback(true, "Отлично!");
+                state.phase = 'AREA_PI';
+                document.getElementById('uiRArea').disabled = true;
+                
+                document.getElementById('uiPiArea').disabled = false;
+                document.getElementById('uiPiArea').focus();
+                document.getElementById('mainBtn').innerText = "Введи π";
+            } else {
+                showFeedback(false, "Посмотри на линейку");
+            }
+        }
+        else if (state.phase === 'AREA_PI') {
+            const inputVal = parseFloat(document.getElementById('uiPiArea').value.replace(',', '.'));
+            if (inputVal === 3.14) {
+                showFeedback(true, "Верно!");
+                state.phase = 'AREA_S';
+                document.getElementById('uiPiArea').disabled = true;
+                
+                document.getElementById('uiSArea').classList.add('visible');
+                document.getElementById('uiSArea').disabled = false;
+                document.getElementById('uiSArea').focus();
+                document.getElementById('mainBtn').innerText = "Записать S";
+            } else {
+                showFeedback(false, "Вспомни округленное значение π");
+            }
+        }
+        else if (state.phase === 'AREA_S') {
+            const inputVal = parseFloat(document.getElementById('uiSArea').value.replace(',', '.'));
+            const targetVal = 3.14 * currentGeo.r * currentGeo.r;
+            if (Math.abs(inputVal - targetVal) < 1) { 
+                showFeedback(true, "Превосходно!");
+                document.getElementById('uiSArea').disabled = true;
+                document.getElementById('mainBtn').disabled = true;
+                document.getElementById('mainBtn').innerText = "Конец";
+                
+                addAreaLog(currentGeo.r, targetVal);
+                
+                setTimeout(() => {
+                    document.getElementById('overlayCard').innerHTML = `
+                        <h2 style="margin-top:0">🏆 Поздравляем!</h2>
+                        <p>Ты успешно завершил оба эксперимента.</p>
+                        <p style="margin-top:15px; color:#475569; font-size:0.95rem;">
+                            Теперь ты умеешь находить и <strong>число Пи</strong>, и <strong>площадь круга</strong>!
+                        </p>
+                        <button class="action-btn" onclick="location.reload()" style="margin-top:25px; width:100%; background: var(--success);">Начать заново</button>
+                    `;
+                    document.getElementById('finalOverlay').style.display = 'flex';
+                }, 2000);
+            } else {
+                showFeedback(false, "Проверь вычисления (3.14 × r × r)");
+            }
+        }
     }
 
     document.querySelectorAll('.math-input').forEach(input => {
@@ -447,7 +527,9 @@
 
     function addLog(c, d, pi) {
         const list = document.getElementById('logList');
-        if (resultsHistory.length === 1) list.innerHTML = '';
+        const empty = document.getElementById('emptyLog');
+        if (empty) empty.remove();
+        
         const exp = EXPERIMENTS[roundIdx];
         const div = document.createElement('div');
         div.className = 'log-item';
@@ -463,11 +545,64 @@
         list.scrollTop = list.scrollHeight;
     }
 
+    function addAreaLog(r, s) {
+        const list = document.getElementById('logList');
+        const div = document.createElement('div');
+        div.className = 'log-item';
+        div.style.setProperty('--cyl-color', '#10b981');
+        div.innerHTML = `
+            <strong>Площадь круга</strong>
+            <div class="log-row"><span>r:</span> <span style="color:var(--color-r)">${r}</span></div>
+            <div class="log-row"><span>r²:</span> <span style="color:var(--dark)">${r*r}</span></div>
+            <div class="log-pi" style="color:var(--color-s-text)">S = ${s}</div>
+        `;
+        list.appendChild(div);
+        list.scrollTop = list.scrollHeight;
+    }
+
     function showFinal() {
         const sum = resultsHistory.reduce((a,b)=>a+b, 0);
         const avg = sum / resultsHistory.length;
         document.getElementById('avgResult').innerText = avg.toFixed(2);
         document.getElementById('finalOverlay').style.display = 'flex';
+    }
+
+    // --- ЗАПУСК ФАЗЫ ПЛОЩАДИ ---
+    function startAreaPhase() {
+        document.getElementById('finalOverlay').style.display = 'none';
+        document.getElementById('sidebarFooter').style.display = 'none';
+        
+        // Меняем UI на панель площади
+        document.getElementById('fracFormula').style.display = 'none';
+        document.getElementById('areaFormula').style.display = 'flex';
+        
+        document.getElementById('uiPanel').classList.remove('disabled');
+        document.getElementById('mainBtn').disabled = true;
+        document.getElementById('mainBtn').innerText = "Измеряй...";
+
+        // Обновляем инструкции
+        document.getElementById('appTitleText').innerText = "Площадь круга";
+        document.getElementById('instructionsBox').innerHTML = `
+            <ol>
+                <li>Дотяни фиолетовую ленту (<strong>радиус</strong>) до конца и впиши значение <strong>r</strong>.</li>
+                <li>Впиши значение <strong>π</strong> (округли до 3.14).</li>
+                <li>Вычисли площадь <strong>S = π × r²</strong> и впиши результат.</li>
+            </ol>
+        `;
+
+        state.phase = 'AREA_R';
+        state.val = 0;
+        state.targetVal = 0;
+        state.isMeasureDone = false;
+
+        // Фиксированный красивый круг для вычисления площади
+        currentGeo = {
+            r: 50,
+            c: 2 * Math.PI * 50,
+            cx: width / 2,
+            cy: 180,
+            color: { main: '#10b981', light: '#34d399', name: 'Площадь' }
+        };
     }
 
     // --- ВЗАИМОДЕЙСТВИЕ ---
@@ -476,7 +611,7 @@
 
     canvas.addEventListener('mousedown', (e) => {
         if (state.introActive) { state.introActive = false; state.val = 0; state.targetVal = 0; }
-        if (state.phase === 'RESULT' || resultsHistory.length === EXPERIMENTS.length) return;
+        if (state.phase === 'RESULT' || state.phase === 'AREA_PI' || state.phase === 'AREA_S' || resultsHistory.length > EXPERIMENTS.length) return;
         
         const mx = getX(e);
         const handleX = RULER.x + state.val;
@@ -487,17 +622,17 @@
 
     window.addEventListener('mouseup', () => {
         state.isDragging = false;
-        const limit = state.phase === 'C' ? currentGeo.c : currentGeo.d;
+        const limit = (state.phase === 'C') ? currentGeo.c : ((state.phase === 'D') ? currentGeo.d : currentGeo.r);
         if (Math.abs(state.targetVal - limit) < 2) state.targetVal = limit;
     });
 
     canvas.addEventListener('mousemove', (e) => {
-        if (state.phase === 'RESULT' || resultsHistory.length === EXPERIMENTS.length) { 
+        if (state.phase === 'RESULT' || state.phase === 'AREA_PI' || state.phase === 'AREA_S' || resultsHistory.length > EXPERIMENTS.length) { 
             canvas.style.cursor = 'default'; return; 
         }
         
         const mx = getX(e);
-        const limit = state.phase === 'C' ? currentGeo.c : currentGeo.d;
+        const limit = (state.phase === 'C') ? currentGeo.c : ((state.phase === 'D') ? currentGeo.d : currentGeo.r);
 
         if (state.isDragging) {
             state.introActive = false;
@@ -522,6 +657,9 @@
                 } else if (state.phase === 'D') {
                     document.getElementById('uiDen').disabled = false;
                     document.getElementById('uiDen').focus();
+                } else if (state.phase === 'AREA_R') {
+                    document.getElementById('uiRArea').disabled = false;
+                    document.getElementById('uiRArea').focus();
                 }
             } else if (!isDone && state.isMeasureDone) {
                 state.isMeasureDone = false;
@@ -529,6 +667,7 @@
                 document.getElementById('mainBtn').innerText = "Измеряй...";
                 if (state.phase === 'C') document.getElementById('uiNum').disabled = true;
                 if (state.phase === 'D') document.getElementById('uiDen').disabled = true;
+                if (state.phase === 'AREA_R') document.getElementById('uiRArea').disabled = true;
             }
         }
 
@@ -564,6 +703,7 @@
 
         if (state.phase === 'C') drawPhaseC();
         else if (state.phase === 'D' || state.phase === 'RESULT') drawPhaseD();
+        else drawPhaseArea();
 
         requestAnimationFrame(draw);
     }
@@ -628,7 +768,6 @@
         ctx.strokeStyle = col; ctx.lineWidth = 4; ctx.stroke();
         drawSlider(col, state.val);
 
-        // Динамическая подпись
         if (state.val > 20) {
             ctx.fillStyle = col; ctx.font = '600 16px Inter'; ctx.textAlign = 'center';
             ctx.fillText('Длина окружности (C)', RULER.x + state.val / 2, RULER.y - 25);
@@ -647,10 +786,32 @@
         ctx.strokeStyle = 'rgba(220, 38, 38, 0.2)'; ctx.lineWidth = 2; ctx.stroke();
         drawSlider(col, state.val);
 
-        // Динамическая подпись
         if (state.val > 20) {
             ctx.fillStyle = col; ctx.font = '600 16px Inter'; ctx.textAlign = 'center';
             ctx.fillText('Диаметр (d)', RULER.x + state.val / 2, RULER.y - 25);
+        }
+    }
+
+    function drawPhaseArea() {
+        const {cx, cy, r} = currentGeo;
+        const colR = '#7c3aed';
+        
+        if (state.phase === 'AREA_S' || document.getElementById('uiSArea').disabled) {
+            ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2);
+            ctx.fillStyle = 'rgba(16, 185, 129, 0.4)'; ctx.fill();
+        }
+        
+        ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + state.val, cy);
+        ctx.lineWidth = 4; ctx.strokeStyle = colR; ctx.stroke();
+        
+        ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2);
+        ctx.strokeStyle = '#10b981'; ctx.lineWidth = 2; ctx.stroke();
+        
+        drawSlider(colR, state.val);
+
+        if (state.val > 10) {
+            ctx.fillStyle = colR; ctx.font = '600 16px Inter'; ctx.textAlign = 'center';
+            ctx.fillText('Радиус (r)', RULER.x + state.val / 2, RULER.y - 25);
         }
     }
 
