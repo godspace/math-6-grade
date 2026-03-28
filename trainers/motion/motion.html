@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Тренажёр: Движение 6.0 (Интерактив + Часы)</title>
+    <title>Тренажёр: Движение 6.0 (Идеальные педали)</title>
     <style>
         :root {
             --sky: #e3f2fd;
             --road: #455a64;
             --grass: #81c784;
             --line-color: #2c3e50;
-            --accent: #d35400;
         }
 
         body {
@@ -21,7 +20,6 @@
             align-items: center;
             margin: 0;
             padding: 10px;
-            /* Запрет выделения текста для удобного перетаскивания */
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
@@ -39,7 +37,7 @@
             flex-direction: column;
         }
 
-        /* --- ВКЛАДКИ --- */
+        /* --- ВКЛАДКИ СЦЕНАРИЕВ --- */
         .tabs {
             display: flex;
             background: #eceff1;
@@ -65,7 +63,7 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
 
-        /* --- ТЕКСТ ЗАДАЧИ --- */
+        /* --- ЗАДАЧА --- */
         .task-area {
             padding: 20px 40px;
             text-align: center;
@@ -75,276 +73,166 @@
         .condition-text {
             font-size: 1.15rem;
             color: #37474f;
-            line-height: 1.4;
-            margin-bottom: 15px;
+            line-height: 1.5;
+            margin-bottom: 10px;
         }
-        .question-text {
-            font-size: 1.25rem;
-            color: #d32f2f;
-            font-weight: 700;
-            background: #ffebee;
-            display: inline-block;
-            padding: 8px 20px;
-            border-radius: 20px;
-        }
-        .highlight {
-            color: #1976d2;
-            font-weight: bold;
-        }
+        .highlight { color: #1976d2; font-weight: bold; }
 
-        /* --- ПАНЕЛЬ ПРИБОРОВ --- */
+        /* --- ПЕДАЛИ И ПРИБОРЫ --- */
         .dashboard {
             display: flex;
-            justify-content: space-around;
+            justify-content: space-between;
+            align-items: center;
             background: #2c3e50;
             color: #ecf0f1;
-            padding: 15px;
-            font-size: 1.2rem;
+            padding: 15px 30px;
             border-bottom: 2px solid #34495e;
         }
-        .dash-item {
+        
+        .pedal-group {
             display: flex;
-            align-items: center;
             gap: 15px;
         }
-        .dash-text {
+        
+        .pedal {
             display: flex;
             flex-direction: column;
-            align-items: flex-start;
-        }
-        .dash-text-right {
-            align-items: flex-end;
-        }
-        .dash-label {
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #bdc3c7;
-        }
-        .dash-value {
-            font-size: 1.8rem;
+            align-items: center;
+            justify-content: center;
+            width: 80px;
+            height: 70px;
+            border-radius: 12px;
+            border: none;
             font-weight: bold;
-            color: #f1c40f;
-            font-variant-numeric: tabular-nums;
+            font-size: 1.1rem;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 6px 0 rgba(0,0,0,0.3);
+            transition: transform 0.1s, box-shadow 0.1s, filter 0.2s;
+            /* КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: полный запрет браузеру перехватывать жесты на педалях */
+            touch-action: none;
         }
+        .pedal:active {
+            transform: translateY(6px);
+            box-shadow: 0 0 0 rgba(0,0,0,0.3);
+            filter: brightness(1.2);
+        }
+        .pedal-gas { background: linear-gradient(to bottom, #43a047, #2e7d32); }
+        .pedal-rev { background: linear-gradient(to bottom, #e53935, #c62828); }
+        .pedal-icon { font-size: 1.5rem; }
 
-        /* --- АНАЛОГОВЫЕ ЧАСЫ --- */
-        .clock {
-            width: 50px;
-            height: 50px;
-            border: 4px solid #bdc3c7;
-            border-radius: 50%;
-            background: #fff;
-            position: relative;
-            box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+        .dash-item { display: flex; align-items: center; gap: 15px; }
+        .dash-text { display: flex; flex-direction: column; align-items: center; }
+        .dash-value { 
+            font-size: 1.8rem; 
+            font-weight: bold; 
+            color: #f1c40f; 
+            font-variant-numeric: tabular-nums; 
+            white-space: nowrap; 
         }
-        .clock-center {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 6px;
-            height: 6px;
-            background: #2c3e50;
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 5;
+        
+        .clock {
+            width: 44px; height: 44px;
+            border: 3px solid #bdc3c7; border-radius: 50%;
+            background: #fff; position: relative;
         }
         .hand {
-            position: absolute;
-            bottom: 50%;
-            left: 50%;
-            transform-origin: bottom;
-            border-radius: 4px;
-            transition: transform 0.05s linear;
+            position: absolute; bottom: 50%; left: 50%;
+            transform-origin: bottom; border-radius: 4px;
         }
-        .hour-hand {
-            width: 4px;
-            height: 14px;
-            margin-left: -2px;
-            background: #c0392b;
-            z-index: 3;
-        }
-        .minute-hand {
-            width: 2px;
-            height: 20px;
-            margin-left: -1px;
-            background: #2c3e50;
-            z-index: 4;
-        }
-        /* Деления на часах (12, 3, 6, 9) */
-        .clock-mark {
-            position: absolute;
-            background: #95a5a6;
-        }
-        .mark-12 { top: 2px; left: 50%; width: 2px; height: 4px; transform: translateX(-50%); }
-        .mark-3 { top: 50%; right: 2px; width: 4px; height: 2px; transform: translateY(-50%); }
-        .mark-6 { bottom: 2px; left: 50%; width: 2px; height: 4px; transform: translateX(-50%); }
-        .mark-9 { top: 50%; left: 2px; width: 4px; height: 2px; transform: translateY(-50%); }
+        .hour-hand { width: 4px; height: 12px; margin-left: -2px; background: #c0392b; z-index: 3; }
+        .minute-hand { width: 2px; height: 18px; margin-left: -1px; background: #2c3e50; z-index: 4; }
 
         .instruction {
-            text-align: center;
-            font-size: 0.95rem;
-            color: #34495e;
-            padding: 10px;
-            background: #e8f8f5;
-            font-weight: bold;
-            border-bottom: 1px solid #d1f2eb;
+            text-align: center; font-size: 0.95rem; color: #34495e;
+            padding: 10px; background: #e8f8f5; font-weight: bold; border-bottom: 1px solid #d1f2eb;
         }
 
         /* --- СЦЕНА --- */
         .scene {
-            position: relative;
-            width: 100%;
-            height: 280px;
+            position: relative; width: 100%; height: 260px;
             background: linear-gradient(to bottom, var(--sky) 65%, var(--grass) 65%);
             overflow: hidden;
-            cursor: grab;
         }
-        .scene:active { cursor: grabbing; }
 
         .road {
-            position: absolute;
-            top: 65%;
-            width: 100%;
-            height: 105px;
+            position: absolute; top: 65%; width: 100%; height: 105px;
             background: var(--road);
-            border-top: 4px solid #cfd8dc;
-            border-bottom: 4px solid #cfd8dc;
+            border-top: 4px solid #cfd8dc; border-bottom: 4px solid #cfd8dc;
         }
         .road-dashed {
-            position: absolute;
-            top: 50%;
-            width: 100%;
-            border-top: 4px dashed #cfd8dc;
-            opacity: 0.5;
+            position: absolute; top: 50%; width: 100%;
+            border-top: 4px dashed #cfd8dc; opacity: 0.5;
         }
 
         .city-marker {
-            position: absolute;
-            top: -50px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            opacity: 0.7;
-            font-weight: bold;
-            color: #2c3e50;
-            z-index: 1;
+            position: absolute; top: -50px;
+            display: flex; flex-direction: column; align-items: center;
+            font-weight: bold; color: #2c3e50; z-index: 1;
         }
         .city-pole { width: 2px; height: 50px; background: #333; }
-        .city-flag { font-size: 24px; line-height: 1; }
-
+        
         .dimension-line-container {
-            position: absolute;
-            top: -65px;
-            height: 40px;
-            z-index: 20;
-            pointer-events: none;
+            position: absolute; top: -65px; height: 40px; z-index: 20; pointer-events: none;
         }
         .dim-line {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            border-bottom: 2px solid var(--line-color);
+            position: absolute; bottom: 0; width: 100%; border-bottom: 2px solid var(--line-color);
         }
         .dim-line::before, .dim-line::after {
             content: ''; position: absolute; bottom: 0; width: 2px; height: 15px; background: var(--line-color);
         }
-        .dim-line::before { left: 0; }
-        .dim-line::after { right: 0; }
-        
+        .dim-line::before { left: 0; } .dim-line::after { right: 0; }
         .projection-line {
-            position: absolute;
-            top: 100%;
-            width: 1px;
-            height: 100px;
-            border-left: 1px dashed rgba(0,0,0,0.3);
+            position: absolute; top: 100%; width: 1px; height: 100px; border-left: 1px dashed rgba(0,0,0,0.3);
         }
-        .proj-left { left: 0; }
-        .proj-right { right: 0; }
+        .proj-left { left: 0; } .proj-right { right: 0; }
 
         .vehicle-wrapper {
-            position: absolute;
-            top: 15px;
-            width: 0;
-            height: 0;
-            z-index: 10;
-            will-change: transform;
-            padding: 20px;
-            margin: -20px;
+            position: absolute; top: 15px; width: 0; height: 0; z-index: 10;
         }
         .vehicle-body {
-            position: absolute;
-            top: 0;
-            left: -40px;
-            width: 80px;
-            height: 60px;
-            text-align: center;
-            font-size: 50px;
-            line-height: 1;
-            pointer-events: none;
+            position: absolute; top: 0; left: -40px; width: 80px; height: 60px;
+            text-align: center; font-size: 50px; line-height: 1; pointer-events: none;
+            transition: transform 0.3s;
         }
         .vehicle-tag {
-            position: absolute;
-            top: -25px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 11px;
-            background: rgba(255,255,255,0.9);
-            padding: 2px 6px;
-            border-radius: 4px;
-            white-space: nowrap;
-            font-weight: bold;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            position: absolute; top: -25px; left: 50%; transform: translateX(-50%);
+            font-size: 11px; background: rgba(255,255,255,0.9); padding: 2px 6px;
+            border-radius: 4px; white-space: nowrap; font-weight: bold;
         }
-
         .face-right { transform: scaleX(-1); }
         .face-left { transform: scaleX(1); }
         .face-right .vehicle-tag { transform: translateX(-50%) scaleX(-1); } 
 
-        /* --- БЛОК ОТВЕТА И ПРОВЕРКИ --- */
+        /* --- ОТВЕТЫ --- */
         .controls {
-            padding: 20px;
-            background: #f5f5f5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 15px;
+            padding: 20px; background: #f5f5f5;
+            display: flex; flex-direction: column; align-items: center; gap: 15px;
         }
-        
+        .answers-grid {
+            display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;
+        }
+        .answer-box {
+            display: flex; flex-direction: column; align-items: center; gap: 5px;
+            background: white; padding: 10px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .ans-label { font-weight: bold; color: #555; }
         input[type="number"] {
-            padding: 12px;
-            font-size: 18px;
-            width: 120px;
-            border: 2px solid #b0bec5;
-            border-radius: 8px;
-            text-align: center;
-            transition: border 0.3s;
+            padding: 10px; font-size: 18px; width: 90px;
+            border: 2px solid #b0bec5; border-radius: 8px; text-align: center;
         }
         input:focus { border-color: #1e88e5; outline: none; }
 
         .btn {
-            padding: 12px 30px;
-            font-size: 1.1rem;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            color: white;
-            font-weight: bold;
-            transition: transform 0.1s, background 0.2s;
+            padding: 12px 30px; font-size: 1.1rem; border: none; border-radius: 8px;
+            cursor: pointer; color: white; font-weight: bold;
         }
-        .btn:hover { filter: brightness(1.1); }
-        .btn:active { transform: scale(0.98); }
-
         .btn-check { background-color: #43a047; }
-        .btn-next { background-color: #1e88e5; display: none; }
+        .btn-next { background-color: #1e88e5; display: none; margin-top: 10px; }
 
         .feedback-area {
-            min-height: 30px;
-            text-align: center;
-            padding-bottom: 10px;
-            background: #f5f5f5;
-            font-weight: bold;
-            font-size: 1.1rem;
+            text-align: center; padding-bottom: 10px; background: #f5f5f5;
+            font-weight: bold; font-size: 1.1rem; min-height: 25px;
         }
         .msg-success { color: #2e7d32; }
         .msg-error { color: #c62828; }
@@ -355,38 +243,47 @@
 
 <div class="main-container">
     <div class="tabs">
-        <button class="tab-btn active" onclick="Game.setMode('meet', this)">Навстречу</button>
-        <button class="tab-btn" onclick="Game.setMode('apart', this)">В разные стороны</button>
-        <button class="tab-btn" onclick="Game.setMode('chase', this)">Вдогонку</button>
+        <button class="tab-btn active" onclick="Game.setMode(0, this)">1. Навстречу</button>
+        <button class="tab-btn" onclick="Game.setMode(1, this)">2. Врозь</button>
+        <button class="tab-btn" onclick="Game.setMode(2, this)">3. Вдогонку (вправо)</button>
+        <button class="tab-btn" onclick="Game.setMode(3, this)">4. Вдогонку (влево)</button>
     </div>
 
     <div class="task-area">
         <div class="condition-text" id="conditionText">...</div>
-        <div class="question-text" id="questionText">...</div>
     </div>
 
-    <div class="instruction">💡 Потяните машинку мышкой, чтобы настроить часы и найти ответ!</div>
+    <div class="instruction">💡 Жмите на педаль, чтобы ехать во времени. На каждом ровном часе тренажёр остановится сам!</div>
 
     <div class="dashboard">
-        <div class="dash-item">
+        <div class="pedal-group">
+            <button class="pedal pedal-rev" id="btnRev">
+                <span class="pedal-icon">⏪</span>
+                РЕВЕРС
+            </button>
+            <button class="pedal pedal-gas" id="btnGas">
+                <span class="pedal-icon">⏩</span>
+                ГАЗ
+            </button>
+        </div>
+
+        <div class="dash-item" style="min-width: 170px;">
             <div class="clock">
-                <div class="clock-mark mark-12"></div>
-                <div class="clock-mark mark-3"></div>
-                <div class="clock-mark mark-6"></div>
-                <div class="clock-mark mark-9"></div>
                 <div class="hand hour-hand" id="hourHand"></div>
                 <div class="hand minute-hand" id="minuteHand"></div>
-                <div class="clock-center"></div>
             </div>
             <div class="dash-text">
-                <span class="dash-label">Время в пути</span>
-                <span class="dash-value" id="liveTime">0 ч 00 мин</span>
+                <span style="font-size: 0.8rem; color: #bdc3c7; text-transform: uppercase;">Время</span>
+                <span class="dash-value" id="liveTime" style="display:inline-block; width: 115px; text-align: left;">0 ч 00 мин</span>
             </div>
         </div>
-        <div class="dash-item">
-            <div class="dash-text dash-text-right">
-                <span class="dash-label">Текущая дистанция</span>
-                <span class="dash-value"><span id="liveDist">0</span> км</span>
+        
+        <div class="dash-item" style="background: rgba(0,0,0,0.2); padding: 10px 20px; border-radius: 12px; min-width: 140px; justify-content: center;">
+            <div class="dash-text">
+                <span style="font-size: 0.8rem; color: #bdc3c7; text-transform: uppercase;">Дистанция</span>
+                <span class="dash-value">
+                    <span id="liveDist" style="display:inline-block; width: 75px; text-align: right;">0</span> км
+                </span>
             </div>
         </div>
     </div>
@@ -395,13 +292,11 @@
         <div class="road">
             <div class="road-dashed"></div>
             
-            <div class="city-marker" id="cityA" style="left: 5%">
-                <div class="city-flag">🚩</div>
-                <div class="city-pole"></div><span>A</span>
+            <div class="city-marker" id="cityA">
+                <div class="city-flag">📍</div><div class="city-pole"></div><span>A</span>
             </div>
-            <div class="city-marker" id="cityB" style="left: 95%">
-                <div class="city-flag">🏁</div>
-                <div class="city-pole"></div><span>B</span>
+            <div class="city-marker" id="cityB">
+                <div class="city-flag">📍</div><div class="city-pole"></div><span>Б</span>
             </div>
 
             <div id="dimContainer" class="dimension-line-container">
@@ -411,15 +306,10 @@
             </div>
 
             <div id="car1" class="vehicle-wrapper">
-                <div class="vehicle-body">
-                    <div class="vehicle-tag">Авто</div>🚗
-                </div>
+                <div class="vehicle-body"><div class="vehicle-tag">Авто</div>🚗</div>
             </div>
-
             <div id="car2" class="vehicle-wrapper">
-                <div class="vehicle-body">
-                    <div class="vehicle-tag">Грузовик</div>🚛
-                </div>
+                <div class="vehicle-body"><div class="vehicle-tag">Грузовик</div>🚛</div>
             </div>
         </div>
     </div>
@@ -427,259 +317,299 @@
     <div class="feedback-area" id="feedback"></div>
 
     <div class="controls">
-        <label style="font-size: 1.1rem; color: #555; font-weight: bold;">Ответ:</label>
-        <input type="number" id="inpAnswer" placeholder="...">
-        <span style="font-weight: bold; color: #555;">км</span>
-        <button class="btn btn-check" id="btnCheck" onclick="Game.check()">ПРОВЕРИТЬ</button>
-        <button class="btn btn-next" id="btnNext" onclick="Game.generate()">СЛЕДУЮЩАЯ >></button>
+        <div class="answers-grid">
+            <div class="answer-box"><span class="ans-label">Случай 1</span><input type="number" class="ans-input" data-idx="0"></div>
+            <div class="answer-box"><span class="ans-label">Случай 2</span><input type="number" class="ans-input" data-idx="1"></div>
+            <div class="answer-box"><span class="ans-label">Случай 3</span><input type="number" class="ans-input" data-idx="2"></div>
+            <div class="answer-box"><span class="ans-label">Случай 4</span><input type="number" class="ans-input" data-idx="3"></div>
+        </div>
+        <div>
+            <button class="btn btn-check" id="btnCheck" onclick="Game.checkAnswers()">ПРОВЕРИТЬ ВСЕ</button>
+            <button class="btn btn-next" id="btnNext" onclick="Game.generateRandom()">СГЕНЕРИРОВАТЬ ДРУГУЮ</button>
+        </div>
     </div>
 </div>
 
 <script>
     const Game = {
         state: {
-            mode: 'meet',
-            currentTime: 0,
-            maxTime: 5,
-            targetTime: 0,
-            targetAnswer: 0,
-            v1: 0,
-            v2: 0,
-            sStart: 0,
-            dir1: 1, 
-            dir2: -1,
-            startX1: 0, 
-            startX2: 0,
-            isResolved: false
+            v1: 60, v2: 50, distAB: 110,
+            targetTime: 1, maxTime: 3.5,
+            currentTime: 0, 
+            dir1: 1, dir2: -1,
+            currentMode: 0, 
+            camMinX: 0, camWidth: 100,
+            isResolved: false,
+            gasActive: 0, 
+            animFrame: null,
+            lastTimestamp: 0
         },
         ui: {
-            scene: document.getElementById('sceneBox'),
-            car1: document.getElementById('car1'),
-            car1Body: document.querySelector('#car1 .vehicle-body'),
-            car2: document.getElementById('car2'),
-            car2Body: document.querySelector('#car2 .vehicle-body'),
+            car1: document.getElementById('car1'), car1Body: document.querySelector('#car1 .vehicle-body'),
+            car2: document.getElementById('car2'), car2Body: document.querySelector('#car2 .vehicle-body'),
+            cityA: document.getElementById('cityA'), cityB: document.getElementById('cityB'),
             dimContainer: document.getElementById('dimContainer'),
             condition: document.getElementById('conditionText'),
-            question: document.getElementById('questionText'),
-            liveTime: document.getElementById('liveTime'),
-            liveDist: document.getElementById('liveDist'),
-            hourHand: document.getElementById('hourHand'),
-            minuteHand: document.getElementById('minuteHand'),
-            cityA: document.getElementById('cityA'),
-            cityB: document.getElementById('cityB'),
-            inp: document.getElementById('inpAnswer'),
-            btnCheck: document.getElementById('btnCheck'),
-            btnNext: document.getElementById('btnNext'),
-            feedback: document.getElementById('feedback')
+            liveTime: document.getElementById('liveTime'), liveDist: document.getElementById('liveDist'),
+            hourHand: document.getElementById('hourHand'), minuteHand: document.getElementById('minuteHand'),
+            inputs: document.querySelectorAll('.ans-input'),
+            btnCheck: document.getElementById('btnCheck'), btnNext: document.getElementById('btnNext'),
+            feedback: document.getElementById('feedback'),
+            btnGas: document.getElementById('btnGas'), btnRev: document.getElementById('btnRev')
         },
+
+        modesConfig: [
+            { d1: 1,  d2: -1 }, 
+            { d1: -1, d2: 1  }, 
+            { d1: 1,  d2: 1  }, 
+            { d1: -1, d2: -1 }  
+        ],
 
         init() {
-            this.bindDragEvents();
-            this.generate();
+            this.bindPedals();
+            this.generateRandom();
         },
 
-        setMode(mode, btn) {
-            this.state.mode = mode;
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            this.generate();
+        bindPedals() {
+            // Используем Pointer Events для идеальной работы на всех устройствах
+            const startGas = (dir) => (e) => {
+                e.preventDefault();
+                // Блокируем захват мыши, чтобы события не улетали мимо
+                e.target.setPointerCapture(e.pointerId);
+
+                if (this.state.gasActive === dir) return; 
+                this.state.gasActive = dir;
+                
+                // Очищаем старый кадр, если он завис
+                if (this.state.animFrame) {
+                    cancelAnimationFrame(this.state.animFrame);
+                }
+
+                this.state.lastTimestamp = performance.now(); 
+                this.state.animFrame = requestAnimationFrame((ts) => this.animLoop(ts));
+            };
+
+            const stopGas = (e) => {
+                // Освобождаем захват
+                if (e && e.target && e.target.releasePointerCapture) {
+                    try { e.target.releasePointerCapture(e.pointerId); } catch(err){}
+                }
+                
+                this.state.gasActive = 0;
+                if (this.state.animFrame) {
+                    cancelAnimationFrame(this.state.animFrame);
+                    this.state.animFrame = null;
+                }
+            };
+
+            this.ui.btnGas.addEventListener('pointerdown', startGas(1));
+            this.ui.btnRev.addEventListener('pointerdown', startGas(-1));
+
+            // Ловим события отпускания везде
+            window.addEventListener('pointerup', stopGas);
+            window.addEventListener('pointercancel', stopGas);
         },
 
-        generate() {
+        animLoop(timestamp) {
+            if (this.state.gasActive === 0) {
+                this.state.animFrame = null;
+                return;
+            }
+
+            if (!timestamp) timestamp = performance.now();
+            let dt = timestamp - this.state.lastTimestamp;
+            this.state.lastTimestamp = timestamp;
+
+            // Защита от лагов
+            if (dt > 100) dt = 16;
+            if (dt < 0) dt = 0;
+
+            let oldTime = this.state.currentTime;
+            let timeDelta = this.state.gasActive * (dt / 2500); 
+            let newTimeRaw = oldTime + timeDelta;
+            let forceStop = false;
+
+            if (this.state.gasActive === 1) {
+                let nextHour = Math.floor(oldTime) + 1;
+                if (newTimeRaw >= nextHour && oldTime < nextHour) {
+                    newTimeRaw = nextHour; 
+                    forceStop = true; 
+                }
+            } else if (this.state.gasActive === -1) {
+                let prevHour = Math.ceil(oldTime) - 1;
+                if (newTimeRaw <= prevHour && oldTime > prevHour) {
+                    newTimeRaw = prevHour;
+                    forceStop = true; 
+                }
+            }
+
+            newTimeRaw = Math.max(0, Math.min(this.state.maxTime, newTimeRaw));
+            
+            this.updateSimulation(newTimeRaw);
+
+            if (forceStop || newTimeRaw === 0 || newTimeRaw === this.state.maxTime) {
+                this.state.gasActive = 0; 
+                this.state.animFrame = null;
+                return;
+            }
+
+            this.state.animFrame = requestAnimationFrame((ts) => this.animLoop(ts));
+        },
+
+        generateRandom() {
+            this.state.distAB = (Math.floor(Math.random() * 8) + 5) * 10; 
+            this.state.v1 = (Math.floor(Math.random() * 5) + 6) * 10; 
+            do {
+                this.state.v2 = (Math.floor(Math.random() * 5) + 4) * 10; 
+            } while (this.state.v1 === this.state.v2);
+            
+            this.state.targetTime = Math.floor(Math.random() * 3) + 1; 
+            this.state.maxTime = this.state.targetTime + 0.5; 
+            
+            this.calculateCameraBounds();
+            this.resetGlobalUI();
+            this.updateText();
+            
+            document.querySelector('.tab-btn').click(); 
+        },
+
+        calculateCameraBounds() {
+            let minX = Math.min(0, -this.state.v1 * this.state.maxTime, this.state.distAB - this.state.v2 * this.state.maxTime);
+            let maxX = Math.max(this.state.distAB, this.state.v1 * this.state.maxTime, this.state.distAB + this.state.v2 * this.state.maxTime);
+
+            let totalWidthKm = maxX - minX;
+            let padding = totalWidthKm * 0.1; 
+            
+            this.state.camMinX = minX - padding;
+            this.state.camWidth = totalWidthKm + padding * 2;
+            
+            let posA_pct = ((0 - this.state.camMinX) / this.state.camWidth) * 100;
+            let posB_pct = ((this.state.distAB - this.state.camMinX) / this.state.camWidth) * 100;
+            
+            this.ui.cityA.style.left = posA_pct + '%';
+            this.ui.cityB.style.left = posB_pct + '%';
+        },
+
+        resetGlobalUI() {
             this.state.isResolved = false;
-            this.ui.inp.value = '';
-            this.ui.inp.disabled = false;
+            this.ui.inputs.forEach(inp => { inp.value = ''; inp.disabled = false; inp.style.borderColor = '#b0bec5'; });
             this.ui.btnCheck.style.display = 'block';
             this.ui.btnNext.style.display = 'none';
             this.ui.feedback.textContent = '';
+        },
 
-            this.state.v1 = (Math.floor(Math.random() * 4) + 6) * 10; 
-            this.state.v2 = (Math.floor(Math.random() * 4) + 4) * 10; 
+        updateText() {
+            const timeStr = this.state.targetTime === 1 ? 'через 1 час' : `через ${this.state.targetTime} ч.`;
+            this.ui.condition.innerHTML = 
+                `Через пункты А и Б, расстояние между которыми <span class="highlight">${this.state.distAB} км</span>, проходит прямолинейное шоссе.<br> 
+                Из пунктов А и Б одновременно выехали автомобиль (<span class="highlight">${this.state.v1} км/ч</span>) 
+                и грузовик (<span class="highlight">${this.state.v2} км/ч</span>). <br><br>
+                Какое расстояние будет между ними <b>${timeStr}</b> после начала движения в 4-х разных ситуациях?`;
+        },
+
+        setMode(modeIdx, btnEl) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btnEl.classList.add('active');
             
-            this.state.maxTime = Math.floor(Math.random() * 3) + 3; 
-            this.state.targetTime = Math.floor(Math.random() * (this.state.maxTime - 1)) + 1;
-            this.state.currentTime = 0;
-
-            let condTxt = '';
-            let questTxt = `Какое расстояние будет между ними через ${this.state.targetTime} ч?`;
-
-            this.ui.cityA.style.opacity = 0;
-            this.ui.cityB.style.opacity = 0;
-
-            if (this.state.mode === 'meet') {
-                this.state.sStart = (this.state.v1 + this.state.v2) * this.state.maxTime;
-                this.state.targetAnswer = this.state.sStart - (this.state.v1 + this.state.v2) * this.state.targetTime;
-                
-                this.ui.cityA.style.opacity = 1;
-                this.ui.cityB.style.opacity = 1;
-                this.ui.cityA.style.left = '5%';
-                this.ui.cityB.style.left = '95%';
-
-                condTxt = `Расстояние между пунктами А и Б равно <span class="highlight">${this.state.sStart} км</span>.<br>
-                           Навстречу друг другу едут автомобиль (${this.state.v1} км/ч) и грузовик (${this.state.v2} км/ч).`;
-
-                this.state.startX1 = 5; 
-                this.state.startX2 = 95;
-                this.state.dir1 = 1; this.state.dir2 = -1;
-
-            } else if (this.state.mode === 'apart') {
-                this.state.sStart = 0;
-                this.state.targetAnswer = (this.state.v1 + this.state.v2) * this.state.targetTime;
-
-                this.ui.cityA.style.opacity = 1;
-                this.ui.cityA.querySelector('span').textContent = 'Старт';
-                this.ui.cityA.style.left = '50%';
-                
-                condTxt = `Из одного пункта в противоположных направлениях выехали <br>
-                           автомобиль (${this.state.v1} км/ч) и грузовик (${this.state.v2} км/ч).`;
-
-                this.state.startX1 = 50; 
-                this.state.startX2 = 50;
-                this.state.dir1 = -1; this.state.dir2 = 1;
-
-            } else if (this.state.mode === 'chase') {
-                let vFast = Math.max(this.state.v1, this.state.v2);
-                let vSlow = Math.min(this.state.v1, this.state.v2);
-                this.state.v1 = vFast;
-                this.state.v2 = vSlow;
-
-                this.state.sStart = (this.state.v1 - this.state.v2) * this.state.maxTime;
-                this.state.targetAnswer = this.state.sStart - (this.state.v1 - this.state.v2) * this.state.targetTime;
-
-                condTxt = `Грузовик едет со скоростью ${this.state.v2} км/ч.<br>
-                           Позади него на расстоянии <span class="highlight">${this.state.sStart} км</span> едет автомобиль (${this.state.v1} км/ч).`;
-
-                this.state.startX1 = 5; 
-                this.state.startX2 = 5 + (this.state.sStart / (this.state.v1 * this.state.maxTime + this.state.sStart) * 85);
-                this.state.dir1 = 1; this.state.dir2 = 1;
-            }
-
-            this.ui.condition.innerHTML = condTxt;
-            this.ui.question.innerHTML = questTxt;
+            this.state.currentMode = modeIdx;
+            let cfg = this.modesConfig[modeIdx];
             
-            this.setOrientation(this.ui.car1Body, this.state.dir1);
-            this.setOrientation(this.ui.car2Body, this.state.dir2);
+            this.state.dir1 = cfg.d1;
+            this.state.dir2 = cfg.d2;
+            
+            this.ui.car1Body.className = 'vehicle-body ' + (cfg.d1 === 1 ? 'face-right' : 'face-left');
+            this.ui.car2Body.className = 'vehicle-body ' + (cfg.d2 === 1 ? 'face-right' : 'face-left');
             
             this.updateSimulation(0);
         },
 
-        check() {
-            if (this.state.isResolved) return;
-
-            const val = parseFloat(this.ui.inp.value);
-            if (isNaN(val)) return;
-
-            if (Math.abs(val - this.state.targetAnswer) <= 1) {
-                this.ui.feedback.innerHTML = `<span class="msg-success">Верно! Дистанция составит ${this.state.targetAnswer} км.</span>`;
-                this.ui.inp.disabled = true;
-                this.ui.btnCheck.style.display = 'none';
-                this.ui.btnNext.style.display = 'block';
-                this.state.isResolved = true;
-            } else {
-                this.ui.feedback.innerHTML = `<span class="msg-error">Пока неверно. Выставь на часах ровно ${this.state.targetTime} ч. 00 мин.</span>`;
-            }
-        },
-
-        bindDragEvents() {
-            let isDragging = false;
-            let startMouseX = 0;
-            let startTimeAtDrag = 0;
-
-            const onStart = (e) => {
-                isDragging = true;
-                startMouseX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
-                startTimeAtDrag = this.state.currentTime;
-            };
-
-            const onMove = (e) => {
-                if (!isDragging) return;
-                let currentMouseX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
-                let dx = currentMouseX - startMouseX;
-
-                let timeDelta = (dx / window.innerWidth) * this.state.maxTime * 1.5; 
-                let newTimeRaw = startTimeAtDrag + timeDelta;
-                newTimeRaw = Math.max(0, Math.min(this.state.maxTime, newTimeRaw));
-                
-                this.updateSimulation(newTimeRaw);
-            };
-
-            const onEnd = () => { isDragging = false; };
-
-            this.ui.scene.addEventListener('mousedown', onStart);
-            this.ui.scene.addEventListener('touchstart', onStart, {passive: true});
-            window.addEventListener('mousemove', onMove);
-            window.addEventListener('touchmove', onMove, {passive: true});
-            window.addEventListener('mouseup', onEnd);
-            window.addEventListener('touchend', onEnd);
-        },
-
         updateSimulation(t_raw) {
-            // Переводим "сырое" время в целые минуты для точности
+            this.state.currentTime = t_raw; 
+
+            let smooth_pos1_km = 0 + (this.state.v1 * t_raw * this.state.dir1);
+            let smooth_pos2_km = this.state.distAB + (this.state.v2 * t_raw * this.state.dir2);
+
             let totalMinutes = Math.round(t_raw * 60);
-            
-            // Прилипание (snapping) к целым часам, чтобы было легко поймать 00 минут
-            if (totalMinutes % 60 <= 4) totalMinutes -= (totalMinutes % 60);
-            else if (totalMinutes % 60 >= 56) totalMinutes += (60 - (totalMinutes % 60));
-
             let t = totalMinutes / 60;
-            this.state.currentTime = t;
-            const d = this.state;
             
-            // Расчеты дистанции
-            let dist1 = d.v1 * t;
-            let dist2 = d.v2 * t;
-            let currentDistance = 0;
+            let pos1_km = 0 + (this.state.v1 * t * this.state.dir1);
+            let pos2_km = this.state.distAB + (this.state.v2 * t * this.state.dir2);
+            let currentDistance = Math.abs(pos2_km - pos1_km);
 
-            if (d.mode === 'meet') {
-                currentDistance = Math.max(0, d.sStart - dist1 - dist2);
-            } else if (d.mode === 'apart') {
-                currentDistance = dist1 + dist2;
-            } else if (d.mode === 'chase') {
-                currentDistance = Math.max(0, d.sStart - (dist1 - dist2));
-            }
-
-            // Обновление текста на табло
             let hours = Math.floor(t);
             let minutes = Math.round((t - hours) * 60);
             if(minutes === 60) { hours++; minutes = 0; }
+            this.ui.liveTime.textContent = `${hours} ч ${minutes < 10 ? '0'+minutes : minutes} мин`;
             
-            let minStr = minutes < 10 ? '0' + minutes : minutes;
-            this.ui.liveTime.textContent = `${hours} ч ${minStr} мин`;
-            
-            // Округляем до 1 знака после запятой, чтобы не пугать огромными дробями,
-            // но на ровных часах будет идеально целое число, как и договаривались.
             this.ui.liveDist.textContent = currentDistance.toFixed(1).replace('.0', '');
 
-            // Обновление стрелок аналоговых часов
-            let minAngle = minutes * 6; // 360 градусов / 60 минут
-            let hourAngle = (hours * 30) + (minutes * 0.5); // 360/12 + смещение от минут
+            let exactMinutes = t_raw * 60;
+            this.ui.minuteHand.style.transform = `rotate(${exactMinutes * 6}deg)`;
+            this.ui.hourHand.style.transform = `rotate(${(t_raw * 30)}deg)`;
 
-            this.ui.minuteHand.style.transform = `rotate(${minAngle}deg)`;
-            this.ui.hourHand.style.transform = `rotate(${hourAngle}deg)`;
+            let renderPos1 = ((smooth_pos1_km - this.state.camMinX) / this.state.camWidth) * 100;
+            let renderPos2 = ((smooth_pos2_km - this.state.camMinX) / this.state.camWidth) * 100;
 
-            // Отрисовка машин
-            let maxTotalDist = 0;
-            if (d.mode === 'meet') maxTotalDist = d.sStart;
-            if (d.mode === 'apart') maxTotalDist = (d.v1 + d.v2) * d.maxTime;
-            if (d.mode === 'chase') maxTotalDist = d.v1 * d.maxTime + d.sStart;
+            this.ui.car1.style.left = renderPos1 + '%';
+            this.ui.car2.style.left = renderPos2 + '%';
 
-            let pxPerKm = 85 / maxTotalDist; 
-
-            let pos1 = d.startX1 + (dist1 * pxPerKm * d.dir1);
-            let pos2 = d.startX2 + (dist2 * pxPerKm * d.dir2);
-
-            this.ui.car1.style.left = pos1 + '%';
-            this.ui.car2.style.left = pos2 + '%';
-
-            let minP = Math.min(pos1, pos2);
-            let maxP = Math.max(pos1, pos2);
+            let minP = Math.min(renderPos1, renderPos2);
+            let maxP = Math.max(renderPos1, renderPos2);
             this.ui.dimContainer.style.left = minP + '%';
             this.ui.dimContainer.style.width = (maxP - minP) + '%';
             this.ui.dimContainer.style.opacity = (maxP - minP) < 2 ? 0 : 1;
         },
 
-        setOrientation(el, dir) {
-            el.className = 'vehicle-body ' + (dir === 1 ? 'face-right' : 'face-left');
+        getCorrectAnswers() {
+            let t = this.state.targetTime;
+            let v1 = this.state.v1;
+            let v2 = this.state.v2;
+            let S0 = this.state.distAB;
+            
+            let ans0 = Math.abs(S0 - (v1 + v2)*t); 
+            let ans1 = S0 + (v1 + v2)*t;           
+            let ans2 = Math.abs(S0 - Math.abs(v1 - v2)*t); 
+            let ans3 = S0 + Math.abs(v1 - v2)*t;           
+            
+            return [ans0, ans1, ans2, ans3];
+        },
+
+        checkAnswers() {
+            if (this.state.isResolved) return;
+
+            let correctValues = this.getCorrectAnswers();
+            let allFilled = true;
+            let allCorrect = true;
+
+            this.ui.inputs.forEach((inp) => {
+                let idx = parseInt(inp.getAttribute('data-idx'));
+                let val = parseInt(inp.value);
+                
+                if (isNaN(val)) {
+                    allFilled = false;
+                    inp.style.borderColor = '#c62828';
+                } else if (val !== correctValues[idx]) {
+                    allCorrect = false;
+                    inp.style.borderColor = '#c62828';
+                } else {
+                    inp.style.borderColor = '#43a047';
+                }
+            });
+
+            if (!allFilled) {
+                this.ui.feedback.innerHTML = `<span class="msg-error">Сначала заполни все 4 поля!</span>`;
+                return;
+            }
+
+            if (allCorrect) {
+                this.ui.feedback.innerHTML = `<span class="msg-success">Блестяще! Все 4 ситуации рассчитаны верно!</span>`;
+                this.ui.inputs.forEach(inp => inp.disabled = true);
+                this.ui.btnCheck.style.display = 'none';
+                this.ui.btnNext.style.display = 'block';
+                this.state.isResolved = true;
+            } else {
+                this.ui.feedback.innerHTML = `<span class="msg-error">Где-то ошибка. Перепроверь выделенные красным ответы, прокатившись по вкладкам.</span>`;
+            }
         }
     };
 
