@@ -13,9 +13,9 @@
             --bg: #f8fafc;
             --success: #16a34a;
             --color-r: #7c3aed; 
-            --color-s-fill: rgba(16, 185, 129, 0.3); 
-            --color-s-stroke: #10b981;               
-            --color-s-text: #047857;                 
+            --color-s-fill: rgba(124, 58, 237, 0.2); 
+            --color-s-stroke: #8b5cf6;               
+            --color-s-text: #5b21b6;                 
             --color-neutral: #94a3b8; 
             --color-partial: #f59e0b;
         }
@@ -58,8 +58,8 @@
         .top-formula-banner {
             position: absolute;
             top: 15px;
-            left: 50%; /* Сдвигаем на середину экрана */
-            transform: translateX(-50%); /* Выравниваем точно по центру своего размера */
+            left: 50%;
+            transform: translateX(-50%);
             background: linear-gradient(135deg, #10b981, #059669);
             color: white;
             padding: 8px 16px;
@@ -71,7 +71,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            white-space: nowrap; /* Чтобы формула не переносилась на новую строку */
+            white-space: nowrap;
         }
         .top-formula-banner span {
             font-family: 'Roboto Mono', monospace;
@@ -112,10 +112,11 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 15px;
+            padding: 15px 30px;
             box-shadow: 0 -10px 30px rgba(0,0,0,0.02);
             z-index: 10;
             position: relative;
+            min-height: 140px;
         }
 
         .pulse-text {
@@ -124,6 +125,7 @@
             color: var(--color-r);
             animation: pulse-op 2s infinite;
             text-align: center;
+            line-height: 1.5;
         }
         @keyframes pulse-op { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
 
@@ -143,16 +145,16 @@
         .subtitle { font-size: 0.85rem; color: #64748b; margin-bottom: 15px; line-height: 1.4; }
 
         .stats-box {
-            background: #eff6ff; border: 2px solid #bfdbfe; border-radius: 12px;
+            background: #f3e8ff; border: 2px solid #d8b4fe; border-radius: 12px;
             padding: 10px; margin-bottom: 15px; display: flex; flex-direction: column; align-items: center;
             transition: 0.3s;
         }
         .stats-box.done { background: #dcfce7; border-color: #86efac; }
-        .stats-label { font-size: 0.75rem; color: var(--primary); font-weight: bold; text-transform: uppercase; }
+        .stats-label { font-size: 0.75rem; color: var(--color-r); font-weight: bold; text-transform: uppercase; }
         .stats-box.done .stats-label { color: #166534; }
-        .stats-value { font-family: 'Roboto Mono', monospace; font-size: 2rem; font-weight: 800; color: var(--primary); margin: 2px 0; }
+        .stats-value { font-family: 'Roboto Mono', monospace; font-size: 2rem; font-weight: 800; color: var(--color-r); margin: 2px 0; }
         .stats-box.done .stats-value { color: #166534; }
-        .stats-desc { font-size: 0.8rem; color: #3b82f6; text-align: center; }
+        .stats-desc { font-size: 0.8rem; color: #7c3aed; text-align: center; }
         .stats-box.done .stats-desc { color: #166534; }
 
         .log-list { flex-grow: 1; overflow-y: auto; }
@@ -161,6 +163,8 @@
             padding: 10px; margin-bottom: 6px; font-family: 'Roboto Mono', monospace;
             font-size: 0.8rem; color: #475569; border-left: 4px solid var(--color-s-stroke);
         }
+
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
 
         /* КНОПКИ И ПОЛЯ */
         button.action-btn {
@@ -171,13 +175,13 @@
         button.btn-blue { background: var(--primary); }
         
         .feedback {
-            position: absolute; top: -20px; left: 50%; transform: translateX(-50%);
-            padding: 6px 16px; border-radius: 20px; font-weight: 600; font-size: 0.9rem;
+            position: absolute; top: -15px; left: 50%; transform: translateX(-50%);
+            padding: 4px 12px; border-radius: 20px; font-weight: 600; font-size: 0.85rem;
             opacity: 0; pointer-events: none; z-index: 20; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             transition: opacity 0.3s; width: max-content;
         }
-        .feedback.correct { background: #dcfce7; color: #16a34a; opacity: 1; }
-        .feedback.wrong { background: #fee2e2; color: #dc2626; opacity: 1; }
+        .feedback.correct { background: #dcfce7; color: #16a34a; opacity: 1; top: -20px;}
+        .feedback.wrong { background: #fee2e2; color: #dc2626; opacity: 1; top: -20px;}
 
         /* ФИНАЛЬНАЯ СБОРКА */
         .final-assembly-wrapper { display: none; flex-direction: column; align-items: center; width: 100%; }
@@ -233,20 +237,10 @@
         /* АДАПТИВ ДЛЯ МОБИЛОК */
         @media (max-width: 850px) {
             body { display: block; height: auto; }
-            .main-container {
-                flex-direction: column;
-                height: 100vh;
-                max-height: none;
-                border-radius: 0;
-            }
+            .main-container { flex-direction: column; height: 100vh; max-height: none; border-radius: 0; }
             .sidebar {
-                width: 100%;
-                height: auto;
-                max-height: 30vh;
-                border-left: none;
-                border-top: 1px solid #e2e8f0;
-                padding: 15px;
-                box-sizing: border-box;
+                width: 100%; height: auto; max-height: 30vh; border-left: none; border-top: 1px solid #e2e8f0;
+                padding: 15px; box-sizing: border-box;
             }
             .canvas-wrapper { flex: 1; min-height: 300px; padding: 5px; }
             .top-formula-banner { font-size: 0.8rem; padding: 5px 10px; top: 10px; }
@@ -259,9 +253,7 @@
 <div class="main-container">
     <div class="left-column">
         
-        <div class="top-formula-banner">
-            Площадь: <span>S = πr²</span>
-        </div>
+        <div class="top-formula-banner">Площадь: <span>S = πr²</span></div>
 
         <div class="canvas-wrapper">
             <canvas id="simCanvas"></canvas>
@@ -270,7 +262,7 @@
         <div class="controls-wrapper">
             <div class="feedback" id="feedbackMsg">Правильно!</div>
             
-            <div class="pulse-text" id="hintText">👆 Тяни фиолетовый радиус по кругу!</div>
+            <div class="pulse-text" id="hintText">👆 Тяни фиолетовый радиус по кругу!<br><span style="font-size:0.9rem; font-weight:400; color:#64748b;">Сектора отрываются и превращаются в полоски. 1 сектор = 1 полоска!</span></div>
             
             <div class="final-assembly-wrapper" id="finalAssemblyWrapper">
                 <div class="math-derivation" id="mathDerivation">
@@ -300,14 +292,12 @@
 
     <div class="sidebar">
         <h1 class="app-title">Наполни квадраты</h1>
-        <div class="subtitle">Тяни радиус по кругу. Закрашенная площадь перельётся в квадраты (r²).</div>
-
+        <div class="subtitle">Тяни радиус по кругу. Площадь круга распадается на сектора и складывается в идеальные квадраты (r²).</div>
         <div class="stats-box" id="statsBox">
             <div class="stats-label">Заполнено (r²):</div>
             <div class="stats-value" id="statsCount">0.00</div>
             <div class="stats-desc" id="statsDesc">Круг пока пуст</div>
         </div>
-
         <div class="log-list" id="logList">
             <div id="emptyLog" style="padding:10px; color:#94a3b8; font-size:0.85rem; text-align: center;">Тяни радиус, чтобы начать</div>
         </div>
@@ -317,12 +307,10 @@
         <div class="card">
             <h2 id="pauseTitle">Квадрат заполнен!</h2>
             <p id="pauseDesc" style="color:#475569; font-size:0.95rem; margin-bottom: 15px;"></p>
-            
             <div style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px;">
                 <span style="font-size: 1.2rem; font-weight: bold;">S = </span>
                 <input type="number" id="pauseInput" autocomplete="off">
             </div>
-            
             <div class="feedback" id="pauseFeedback" style="position: relative; top: auto; left: auto; transform: none; display: none; margin: 0 auto 15px auto;"></div>
             <button class="action-btn btn-blue" style="width: 100%;" onclick="checkSquareArea()">Ответить</button>
         </div>
@@ -332,13 +320,9 @@
         <div class="card">
             <h2>🎉 Блестяще!</h2>
             <p style="color:#475569; font-size:0.95rem; margin-bottom: 10px;">
-                Мы «выдавили» площадь круга и увидели, что в него помещается <strong>3.14 квадратов радиуса</strong>.
+                В круг помещается ровно <strong>3.14 квадратов радиуса</strong>.
             </p>
-            
-            <div class="formula-highlight" id="finalMathText">
-                S = 3.14 × r²
-            </div>
-
+            <div class="formula-highlight" id="finalMathText">S = 3.14 × r²</div>
             <button class="action-btn btn-blue" style="margin-top:15px; width:100%;" onclick="initTask()">Новое число</button>
         </div>
     </div>
@@ -349,7 +333,6 @@
     const ctx = canvas.getContext('2d');
     const dpr = window.devicePixelRatio || 1;
     
-    // Логическое разрешение холста (масштабируется CSS)
     const logicalWidth = 800; 
     const logicalHeight = 500; 
     
@@ -357,13 +340,12 @@
     canvas.height = logicalHeight * dpr;
     ctx.scale(dpr, dpr);
 
-    // Геометрия 
     const R = 120;
     const cx = 200; 
     const cy = 250;
     
-    const sqSize = 100;
-    const sqStartX = 450;
+    const sqSize = 120; // Идеально совпадает с R!
+    const sqStartX = 420;
     const sqStartY = 130; 
     const sqGap = 20;
 
@@ -375,23 +357,23 @@
     ];
 
     const COLOR_R = '#7c3aed'; 
-    const COLOR_S_FILL = 'rgba(124, 58, 237, 0.2)'; 
+    const COLOR_S_FILL = 'rgba(124, 58, 237, 0.4)'; 
     const COLOR_S_STROKE = '#8b5cf6';
-    const COLOR_S_FILL_SOLID = 'rgba(124, 58, 237, 0.15)'; 
+    const COLOR_S_FILL_SOLID = 'rgba(124, 58, 237, 0.8)'; 
 
-    const NICE_RADIUSES = [10, 20, 30, 40, 50];
+    const NICE_RADIUSES = [10, 20];
 
     let state = {
         currentAngle: 0, isDragging: false, isCompleted: false,
         pausedForInput: false, currentPauseSq: 0, expectedPauseValue: 0,
         completedSquares: 0, logs: [false, false, false, false],
-        derivationStep: 0, visualArea: 0
+        derivationStep: 0, spawnedSticksCount: 0, finalSliceSpawned: false
     };
     
     let currentGeo = { mathR: 10 };
     let selectedChip = null;
     let flyingLines = [];
-    let lastSpawnAngle = 0;
+    let visualSticksInSquares = [0, 0, 0, 0]; 
 
     function initTask() {
         document.getElementById('finalOverlay').style.display = 'none';
@@ -405,23 +387,22 @@
         document.getElementById('btnNextStep').innerText = "Как это работает?";
         
         document.getElementById('hintText').style.display = 'block';
-        document.getElementById('hintText').innerHTML = "👆 Тяни фиолетовый радиус по кругу!";
-        document.getElementById('hintText').style.animation = "pulse-op 2s infinite";
+        document.getElementById('hintText').innerHTML = "👆 Тяни фиолетовый радиус по кругу!<br><span style='font-size:0.85rem; font-weight:400; color:#64748b;'>Сектора отрываются и превращаются в полоски. 1 сектор = 1 полоска!</span>";
         
         document.getElementById('statsBox').classList.remove('done');
         document.getElementById('statsCount').innerText = "0.00";
         document.getElementById('statsDesc').innerText = "Круг пока пуст";
-        
         document.getElementById('logList').innerHTML = '<div id="emptyLog" style="padding:10px; color:#94a3b8; font-size:0.85rem; text-align: center;">Тяни радиус, чтобы начать</div>';
 
         state = {
             currentAngle: 0, isDragging: false, isCompleted: false,
             pausedForInput: false, currentPauseSq: 0, expectedPauseValue: 0,
-            completedSquares: 0, logs: [false, false, false, false], derivationStep: 0, visualArea: 0
+            completedSquares: 0, logs: [false, false, false, false], 
+            derivationStep: 0, spawnedSticksCount: 0, finalSliceSpawned: false
         };
 
         flyingLines = [];
-        lastSpawnAngle = 0;
+        visualSticksInSquares = [0, 0, 0, 0];
         currentGeo.mathR = NICE_RADIUSES[Math.floor(Math.random() * NICE_RADIUSES.length)];
         selectedChip = null;
     }
@@ -435,7 +416,6 @@
         return newArr;
     }
 
-    // --- ЛОГИКА ПАУЗ ---
     function triggerPause(sqIndex) {
         state.isDragging = false;
         state.pausedForInput = true;
@@ -444,21 +424,19 @@
         const rSq = currentGeo.mathR * currentGeo.mathR;
         let expected = rSq;
         let title = `${sqIndex}-й квадрат!`;
-        let desc = `Сторона квадрата равна <strong>r = ${currentGeo.mathR}</strong>.<br>Площадь этого квадрата?`;
+        let desc = `В квадрат легло ровно <strong>${currentGeo.mathR} радиусов</strong>.<br>Умножь их количество на длину: r × r = ?`;
         
         if (sqIndex === 4) {
             expected = Math.round(0.14 * rSq);
             title = `Остаток (4-й квадрат)`;
-            desc = `Сюда поместилось <strong>0.14</strong> от объёма.<br>Вычисли площадь (0.14 × ${rSq}):`;
+            desc = `Сюда перелилось ровно <strong>0.14</strong> от объёма.<br>Вычисли площадь (0.14 × ${rSq}):`;
         }
 
         state.expectedPauseValue = expected;
-        
         document.getElementById('pauseTitle').innerText = title;
         document.getElementById('pauseDesc').innerHTML = desc;
         document.getElementById('pauseInput').value = '';
         document.getElementById('pauseFeedback').style.display = 'none';
-        
         document.getElementById('pauseOverlay').style.display = 'flex';
         setTimeout(() => document.getElementById('pauseInput').focus(), 100);
     }
@@ -479,13 +457,12 @@
                 document.getElementById('pauseOverlay').style.display = 'none';
                 state.completedSquares++;
                 state.pausedForInput = false;
-                
                 if (state.completedSquares === 4) startFinalPhase();
-                else document.getElementById('hintText').innerText = "Супер! Тяни дальше.";
+                else document.getElementById('hintText').innerHTML = "Супер! Тяни дальше.<br><span style='font-size:0.85rem; font-weight:400; color:#64748b;'>Наблюдай за магией превращения форм.</span>";
             }, 800);
         } else {
             fb.className = 'feedback wrong';
-            fb.innerText = state.currentPauseSq === 4 ? `Ошибка! Умножь 0.14 на ${currentGeo.mathR*currentGeo.mathR}` : `Ошибка! Площадь = r × r`;
+            fb.innerText = state.currentPauseSq === 4 ? `Ошибка! Умножь 0.14 на ${currentGeo.mathR*currentGeo.mathR}` : `Ошибка! Умножь длину полосок на их количество (r × r)`;
             fb.style.display = 'block';
         }
     }
@@ -510,9 +487,8 @@
 
     function showNextDerivationStep() {
         state.derivationStep++;
-        if (state.derivationStep === 1) {
-            document.getElementById('der2').classList.add('visible');
-        } else if (state.derivationStep === 2) {
+        if (state.derivationStep === 1) document.getElementById('der2').classList.add('visible');
+        else if (state.derivationStep === 2) {
             document.getElementById('der3').classList.add('visible');
             document.getElementById('btnNextStep').innerText = "Подставить числа";
         } else if (state.derivationStep === 3) {
@@ -546,7 +522,6 @@
             if (dz.id === 'dz4') dz.style.borderColor = 'var(--color-partial)';
             dz.onclick = () => dropToZone(dz);
         });
-
         document.getElementById('finalSumInput').value = '';
         document.getElementById('finalSumInput').disabled = true;
         document.getElementById('checkFinalSumBtn').style.display = 'none';
@@ -565,18 +540,15 @@
             dz.innerText = selectedChip.dataset.val; dz.classList.add('filled');
             if (dz.id === 'dz4') dz.style.borderColor = 'var(--color-s-stroke)';
             selectedChip.classList.add('used'); selectedChip.classList.remove('selected'); selectedChip = null;
-            checkAllDropped();
+            
+            if (document.querySelectorAll('.drop-zone.filled').length === 4) {
+                document.getElementById('finalSumInput').disabled = false;
+                document.getElementById('checkFinalSumBtn').style.display = 'inline-flex';
+                document.getElementById('finalSumInput').focus();
+                addLogEntry(`🧮 <strong>Сложи числа!</strong> Найди общую сумму.`);
+            }
         } else {
             dz.style.animation = 'shake 0.3s'; setTimeout(() => dz.style.animation = '', 300);
-        }
-    }
-
-    function checkAllDropped() {
-        if (document.querySelectorAll('.drop-zone.filled').length === 4) {
-            document.getElementById('finalSumInput').disabled = false;
-            document.getElementById('checkFinalSumBtn').style.display = 'inline-flex';
-            document.getElementById('finalSumInput').focus();
-            addLogEntry(`🧮 <strong>Сложи числа!</strong> Найди общую сумму.`);
         }
     }
 
@@ -599,7 +571,6 @@
         }
     }
 
-    // --- СЕНСОРНОЕ И МЫШИНОЕ ВЗАИМОДЕЙСТВИЕ ---
     function getPos(e) {
         const evt = e.touches ? e.touches[0] : e;
         const rect = canvas.getBoundingClientRect();
@@ -617,8 +588,6 @@
         
         if (Math.hypot(pos.x - handleX, pos.y - handleY) < 60) {
             state.isDragging = true;
-            document.getElementById('hintText').innerText = "Крути по часовой стрелке 🔄";
-            document.getElementById('hintText').style.animation = "none";
         }
     }
 
@@ -628,7 +597,6 @@
 
         if (state.isDragging) {
             if (e.cancelable) e.preventDefault(); 
-
             const dx = pos.x - cx; const dy = pos.y - cy;
             let a = Math.atan2(dy, dx) - (-Math.PI / 2);
             while (a < 0) a += Math.PI * 2; while (a >= Math.PI * 2) a -= Math.PI * 2;
@@ -646,24 +614,46 @@
 
             state.currentAngle = potentialAngle;
 
-            // Спавн летящих линий
-            while (state.currentAngle - lastSpawnAngle > 0.05) {
-                lastSpawnAngle += 0.05;
-                let spawnArea = lastSpawnAngle / 2;
-                let sqIndex = Math.floor(spawnArea);
+            // ФИЗИКА ТОЧНОГО СПАВНА
+            const anglePerStick = 2 / currentGeo.mathR;
+            let targetStickIndex = Math.floor((state.currentAngle + 0.0001) / anglePerStick);
+
+            while (state.spawnedSticksCount < targetStickIndex) {
+                let sqIndex = Math.floor(state.spawnedSticksCount / currentGeo.mathR);
+                let stickInSq = state.spawnedSticksCount % currentGeo.mathR;
                 if (sqIndex > 3) sqIndex = 3;
-                let localFill = spawnArea - sqIndex;
-                let targetY = squares[sqIndex].y + sqSize - (localFill * sqSize);
+
+                let a1 = state.spawnedSticksCount * anglePerStick;
+                let a2 = (state.spawnedSticksCount + 1) * anglePerStick;
 
                 flyingLines.push({
-                    startA: lastSpawnAngle,
-                    targetSq: sqIndex,
-                    targetY: targetY,
-                    progress: 0,
-                    speed: 0.015 + Math.random() * 0.015 
+                    id: state.spawnedSticksCount,
+                    a1: a1, a2: a2,
+                    sqIndex: sqIndex, stickInSq: stickInSq,
+                    isPartial: false, fraction: 1,
+                    progress: 0, speed: 0.02 + Math.random() * 0.015 
                 });
+                
+                state.spawnedSticksCount++;
             }
-            if (state.currentAngle < lastSpawnAngle) lastSpawnAngle = state.currentAngle;
+
+            if (state.currentAngle >= Math.PI * 2 - 0.01 && !state.finalSliceSpawned) {
+                let remainderArea = (Math.PI * 2) / 2 - (state.spawnedSticksCount * anglePerStick / 2);
+                if (remainderArea > 0.001) {
+                    let a1 = state.spawnedSticksCount * anglePerStick;
+                    let a2 = Math.PI * 2;
+                    let fraction = remainderArea / (anglePerStick / 2);
+                    
+                    flyingLines.push({
+                        id: state.spawnedSticksCount,
+                        a1: a1, a2: a2,
+                        sqIndex: 3, stickInSq: state.spawnedSticksCount % currentGeo.mathR,
+                        isPartial: true, fraction: fraction,
+                        progress: 0, speed: 0.02
+                    });
+                    state.finalSliceSpawned = true;
+                }
+            }
 
             document.getElementById('statsCount').innerText = (potentialAngle / 2).toFixed(2);
         }
@@ -677,14 +667,12 @@
     function handleEnd() {
         if (state.isDragging) {
             state.isDragging = false;
-            if (!state.isCompleted && !state.pausedForInput) document.getElementById('hintText').innerText = "Продолжай тянуть радиус по кругу!";
         }
     }
 
     canvas.addEventListener('mousedown', handleStart);
     canvas.addEventListener('mousemove', handleMove);
     window.addEventListener('mouseup', handleEnd);
-    
     canvas.addEventListener('touchstart', handleStart, {passive: false});
     canvas.addEventListener('touchmove', handleMove, {passive: false});
     window.addEventListener('touchend', handleEnd);
@@ -704,15 +692,24 @@
 
     function draw() {
         ctx.clearRect(0, 0, logicalWidth, logicalHeight);
-        state.visualArea += ((state.currentAngle / 2) - state.visualArea) * 0.15;
 
-        // КРУГ
+        // 1. КРУГ И СЕКТОРА
         ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2);
         ctx.fillStyle = '#e2e8f0'; ctx.fill(); ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 3; ctx.stroke();
 
         if (state.currentAngle > 0) {
             ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, R, -Math.PI/2, -Math.PI/2 + state.currentAngle);
-            ctx.closePath(); ctx.fillStyle = COLOR_S_FILL; ctx.fill(); ctx.strokeStyle = COLOR_S_STROKE; ctx.lineWidth = 2; ctx.stroke();
+            ctx.closePath(); ctx.fillStyle = COLOR_S_FILL; ctx.fill();
+            
+            const anglePerStick = 2 / currentGeo.mathR;
+            ctx.beginPath();
+            for (let a = anglePerStick; a < state.currentAngle; a += anglePerStick) {
+                ctx.moveTo(cx, cy); ctx.lineTo(cx + R * Math.cos(-Math.PI/2 + a), cy + R * Math.sin(-Math.PI/2 + a));
+            }
+            ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 1.5; ctx.stroke();
+            
+            ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, R, -Math.PI/2, -Math.PI/2 + state.currentAngle);
+            ctx.strokeStyle = COLOR_S_STROKE; ctx.lineWidth = 2; ctx.stroke();
         }
 
         ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx, cy - R);
@@ -728,85 +725,91 @@
         const midX = cx + (hX - cx)/2; const midY = cy + (hY - cy)/2;
         drawTextWithOutline(`r = ${currentGeo.mathR}`, midX + 20, midY - 10, COLOR_R, '800 20px Inter');
 
-        // КВАДРАТЫ
-        ctx.beginPath(); ctx.moveTo(cx + R + 20, cy); ctx.lineTo(sqStartX - 30, cy);
-        ctx.strokeStyle = COLOR_S_STROKE; ctx.lineWidth = 3; ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(sqStartX - 30, cy); ctx.lineTo(sqStartX - 40, cy - 8); ctx.lineTo(sqStartX - 40, cy + 8);
-        ctx.fillStyle = COLOR_S_STROKE; ctx.fill();
-
+        // 2. РЕЗЕРВУАРЫ (Квадраты)
         const rSqVal = currentGeo.mathR * currentGeo.mathR;
+        const stickH = sqSize / currentGeo.mathR; 
 
         for (let i = 0; i < 4; i++) {
             const sq = squares[i];
             ctx.beginPath(); ctx.rect(sq.x, sq.y, sqSize, sqSize);
             ctx.fillStyle = 'white'; ctx.fill(); ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 3; ctx.stroke();
 
-            let fillAmount = Math.max(0, Math.min(1, state.visualArea - i));
-            if (fillAmount > 0) {
-                const fH = sqSize * fillAmount;
-                ctx.beginPath(); ctx.rect(sq.x, sq.y + sqSize - fH, sqSize, fH); ctx.fillStyle = COLOR_S_FILL_SOLID; ctx.fill();
+            // Заполняем на основе прилетевших линий
+            let sticksToDraw = visualSticksInSquares[i];
+            if (sticksToDraw > 0) {
+                const fillHeight = sticksToDraw * stickH;
                 
-                // Линии "стопки"
+                ctx.beginPath(); ctx.rect(sq.x, sq.y + sqSize - fillHeight, sqSize, fillHeight);
+                ctx.fillStyle = COLOR_S_FILL_SOLID; ctx.fill();
+                
+                // Прорисовка линий стыка палочек
                 ctx.beginPath();
-                for(let yLine = sq.y + sqSize; yLine >= sq.y + sqSize - fH; yLine -= 8) {
-                    ctx.moveTo(sq.x, yLine); ctx.lineTo(sq.x + sqSize, yLine);
+                for(let j = 1; j <= Math.ceil(sticksToDraw); j++) {
+                    let yLine = sq.y + sqSize - (j * stickH);
+                    if (yLine >= sq.y) {
+                        ctx.moveTo(sq.x, yLine); ctx.lineTo(sq.x + sqSize, yLine);
+                    }
                 }
-                ctx.strokeStyle = 'rgba(124, 58, 237, 0.3)'; ctx.lineWidth = 2; ctx.stroke();
+                ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 1; ctx.stroke();
 
-                ctx.beginPath(); ctx.moveTo(sq.x, sq.y + sqSize - fH); ctx.lineTo(sq.x + sqSize, sq.y + sqSize - fH);
-                ctx.strokeStyle = COLOR_R; ctx.lineWidth = 3; ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(sq.x, sq.y + sqSize - fillHeight); ctx.lineTo(sq.x + sqSize, sq.y + sqSize - fillHeight);
+                ctx.strokeStyle = COLOR_R; ctx.lineWidth = 2; ctx.stroke();
             }
 
             let label = i === 3 ? "4-й (остаток)" : `${i+1}-й`;
             drawTextWithOutline(label, sq.x + sqSize/2, sq.y + sqSize + 15, '#64748b', '600 12px Inter');
 
             if (i < 3) {
-                if (state.completedSquares > i) drawTextWithOutline(`(${rSqVal})`, sq.x + sqSize/2, sq.y + sqSize/2, '#065f46', '800 16px Inter');
-                else if (fillAmount > 0) drawTextWithOutline(`?`, sq.x + sqSize/2, sq.y + sqSize/2, '#065f46', '800 24px Inter');
+                if (state.completedSquares > i) drawTextWithOutline(`(${rSqVal})`, sq.x + sqSize/2, sq.y + sqSize/2, '#065f46', '800 20px Inter');
             } else { 
-                if (state.completedSquares > 3) drawTextWithOutline(`(${Math.round(0.14 * rSqVal)})`, sq.x + sqSize/2, sq.y + sqSize/2, '#065f46', '800 16px Inter');
-                else if (fillAmount > 0) drawTextWithOutline(`?`, sq.x + sqSize/2, sq.y + sqSize/2, '#065f46', '800 24px Inter');
-                
+                if (state.completedSquares > 3) drawTextWithOutline(`(${Math.round(0.14 * rSqVal)})`, sq.x + sqSize/2, sq.y + sqSize/2, '#065f46', '800 20px Inter');
                 const limitY = sq.y + sqSize - (sqSize * 0.1415);
                 ctx.beginPath(); ctx.moveTo(sq.x, limitY); ctx.lineTo(sq.x + sqSize, limitY);
                 ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 2; ctx.setLineDash([4, 4]); ctx.stroke(); ctx.setLineDash([]);
             }
         }
 
-        // ЛЕТЯЩИЕ ЛИНИИ
+        // 3. АНИМАЦИЯ ПОЛЁТА
         for (let i = flyingLines.length - 1; i >= 0; i--) {
             let fl = flyingLines[i];
             fl.progress += fl.speed;
-            
-            let p = 1 - Math.pow(1 - fl.progress, 3);
+            let p = 1 - Math.pow(1 - fl.progress, 3); 
 
-            let a = -Math.PI/2 + fl.startA;
-            while(a > Math.PI) a -= Math.PI * 2;
-            while(a < -Math.PI) a += Math.PI * 2;
+            let w_tl = [cx, cy]; 
+            let w_bl = [cx, cy]; 
+            let w_tr = [cx + R * Math.cos(-Math.PI/2 + fl.a1), cy + R * Math.sin(-Math.PI/2 + fl.a1)];
+            let w_br = [cx + R * Math.cos(-Math.PI/2 + fl.a2), cy + R * Math.sin(-Math.PI/2 + fl.a2)];
 
-            let startCx = cx + (R/2) * Math.cos(a);
-            let startCy = cy + (R/2) * Math.sin(a);
+            let sq = squares[fl.sqIndex];
+            let yBottom = sq.y + sqSize - (fl.stickInSq * stickH);
+            let h = stickH * fl.fraction;
+            let yTop = yBottom - h;
 
-            let endCx = squares[fl.targetSq].x + sqSize/2;
-            let endCy = fl.targetY;
+            let r_tl = [sq.x, yTop];
+            let r_bl = [sq.x, yBottom];
+            let r_tr = [sq.x + sqSize, yTop];
+            let r_br = [sq.x + sqSize, yBottom];
 
-            let currentCx = startCx + (endCx - startCx) * p;
-            let currentCy = startCy + (endCy - startCy) * p;
-            let currentA = a + (0 - a) * p;
-
-            let x1 = currentCx - (R/2) * Math.cos(currentA);
-            let y1 = currentCy - (R/2) * Math.sin(currentA);
-            let x2 = currentCx + (R/2) * Math.cos(currentA);
-            let y2 = currentCy + (R/2) * Math.sin(currentA);
+            let c_tl = [w_tl[0] + (r_tl[0] - w_tl[0]) * p, w_tl[1] + (r_tl[1] - w_tl[1]) * p];
+            let c_bl = [w_bl[0] + (r_bl[0] - w_bl[0]) * p, w_bl[1] + (r_bl[1] - w_bl[1]) * p];
+            let c_tr = [w_tr[0] + (r_tr[0] - w_tr[0]) * p, w_tr[1] + (r_tr[1] - w_tr[1]) * p];
+            let c_br = [w_br[0] + (r_br[0] - w_br[0]) * p, w_br[1] + (r_br[1] - w_br[1]) * p];
 
             ctx.beginPath();
-            ctx.moveTo(x1, y1);
-            ctx.lineTo(x2, y2);
-            ctx.strokeStyle = `rgba(124, 58, 237, ${1 - p*0.2})`;
-            ctx.lineWidth = 4;
-            ctx.stroke();
+            ctx.moveTo(c_tl[0], c_tl[1]); ctx.lineTo(c_tr[0], c_tr[1]);
+            ctx.lineTo(c_br[0], c_br[1]); ctx.lineTo(c_bl[0], c_bl[1]);
+            ctx.closePath();
 
-            if (fl.progress >= 1) flyingLines.splice(i, 1);
+            ctx.fillStyle = `rgba(124, 58, 237, ${1 - p*0.2})`; ctx.fill();
+            ctx.strokeStyle = `rgba(91, 33, 182, ${1 - p*0.5})`; ctx.lineWidth = 1; ctx.stroke();
+
+            if (fl.progress >= 1) {
+                visualSticksInSquares[fl.sqIndex] += fl.fraction;
+                if (visualSticksInSquares[fl.sqIndex] > currentGeo.mathR) {
+                    visualSticksInSquares[fl.sqIndex] = currentGeo.mathR;
+                }
+                flyingLines.splice(i, 1);
+            }
         }
 
         requestAnimationFrame(draw);
