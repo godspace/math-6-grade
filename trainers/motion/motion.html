@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Тренажёр: Движение 6.0 (Pro)</title>
+    <title>Тренажёр: Движение 6.0 (Интерактив + Часы)</title>
     <style>
         :root {
             --sky: #e3f2fd;
@@ -21,6 +21,11 @@
             align-items: center;
             margin: 0;
             padding: 10px;
+            /* Запрет выделения текста для удобного перетаскивания */
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none; 
         }
 
         .main-container {
@@ -34,7 +39,7 @@
             flex-direction: column;
         }
 
-        /* --- ПАНЕЛЬ ВЫБОРА РЕЖИМА --- */
+        /* --- ВКЛАДКИ --- */
         .tabs {
             display: flex;
             background: #eceff1;
@@ -60,17 +65,18 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
 
-        /* --- БЛОК ЗАДАЧИ --- */
+        /* --- ТЕКСТ ЗАДАЧИ --- */
         .task-area {
-            padding: 25px 40px;
+            padding: 20px 40px;
             text-align: center;
+            background: #fff;
             border-bottom: 1px solid #eee;
         }
         .condition-text {
             font-size: 1.15rem;
             color: #37474f;
-            margin-bottom: 10px;
             line-height: 1.4;
+            margin-bottom: 15px;
         }
         .question-text {
             font-size: 1.25rem;
@@ -78,31 +84,129 @@
             font-weight: 700;
             background: #ffebee;
             display: inline-block;
-            padding: 5px 15px;
+            padding: 8px 20px;
             border-radius: 20px;
         }
         .highlight {
             color: #1976d2;
             font-weight: bold;
-            white-space: nowrap;
+        }
+
+        /* --- ПАНЕЛЬ ПРИБОРОВ --- */
+        .dashboard {
+            display: flex;
+            justify-content: space-around;
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            font-size: 1.2rem;
+            border-bottom: 2px solid #34495e;
+        }
+        .dash-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .dash-text {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .dash-text-right {
+            align-items: flex-end;
+        }
+        .dash-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #bdc3c7;
+        }
+        .dash-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #f1c40f;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* --- АНАЛОГОВЫЕ ЧАСЫ --- */
+        .clock {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #bdc3c7;
+            border-radius: 50%;
+            background: #fff;
+            position: relative;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+        }
+        .clock-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 6px;
+            height: 6px;
+            background: #2c3e50;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+        }
+        .hand {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom;
+            border-radius: 4px;
+            transition: transform 0.05s linear;
+        }
+        .hour-hand {
+            width: 4px;
+            height: 14px;
+            margin-left: -2px;
+            background: #c0392b;
+            z-index: 3;
+        }
+        .minute-hand {
+            width: 2px;
+            height: 20px;
+            margin-left: -1px;
+            background: #2c3e50;
+            z-index: 4;
+        }
+        /* Деления на часах (12, 3, 6, 9) */
+        .clock-mark {
+            position: absolute;
+            background: #95a5a6;
+        }
+        .mark-12 { top: 2px; left: 50%; width: 2px; height: 4px; transform: translateX(-50%); }
+        .mark-3 { top: 50%; right: 2px; width: 4px; height: 2px; transform: translateY(-50%); }
+        .mark-6 { bottom: 2px; left: 50%; width: 2px; height: 4px; transform: translateX(-50%); }
+        .mark-9 { top: 50%; left: 2px; width: 4px; height: 2px; transform: translateY(-50%); }
+
+        .instruction {
+            text-align: center;
+            font-size: 0.95rem;
+            color: #34495e;
+            padding: 10px;
+            background: #e8f8f5;
+            font-weight: bold;
+            border-bottom: 1px solid #d1f2eb;
         }
 
         /* --- СЦЕНА --- */
         .scene {
             position: relative;
             width: 100%;
-            height: 300px; /* Увеличили высоту для "воздуха" */
+            height: 280px;
             background: linear-gradient(to bottom, var(--sky) 65%, var(--grass) 65%);
             overflow: hidden;
-            user-select: none;
+            cursor: grab;
         }
+        .scene:active { cursor: grabbing; }
 
-        /* Дорога */
         .road {
             position: absolute;
             top: 65%;
             width: 100%;
-            height: 105px; /* Высота дороги */
+            height: 105px;
             background: var(--road);
             border-top: 4px solid #cfd8dc;
             border-bottom: 4px solid #cfd8dc;
@@ -115,10 +219,9 @@
             opacity: 0.5;
         }
 
-        /* Флажки пунктов */
         .city-marker {
             position: absolute;
-            top: -50px; /* Над дорогой */
+            top: -50px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -130,79 +233,56 @@
         .city-pole { width: 2px; height: 50px; background: #333; }
         .city-flag { font-size: 24px; line-height: 1; }
 
-        /* --- РАЗМЕРНАЯ ЛИНИЯ (ВЫНОСКА) --- */
-        /* Она теперь живет НАД дорогой, в небе, чтобы не перекрывать машины */
         .dimension-line-container {
             position: absolute;
-            top: -70px; /* Высоко над дорогой */
+            top: -65px;
             height: 40px;
             z-index: 20;
             pointer-events: none;
-            /* Позиционирование через JS (left/width) */
         }
-        
         .dim-line {
             position: absolute;
             bottom: 0;
             width: 100%;
             border-bottom: 2px solid var(--line-color);
         }
-        /* Засечки */
         .dim-line::before, .dim-line::after {
             content: ''; position: absolute; bottom: 0; width: 2px; height: 15px; background: var(--line-color);
         }
         .dim-line::before { left: 0; }
         .dim-line::after { right: 0; }
-
-        /* Пунктирные линии от машин к размерной линии (проекция) */
+        
         .projection-line {
             position: absolute;
-            top: 100%; /* От линии вниз */
+            top: 100%;
             width: 1px;
-            height: 100px; /* До середины дороги */
+            height: 100px;
             border-left: 1px dashed rgba(0,0,0,0.3);
         }
         .proj-left { left: 0; }
         .proj-right { right: 0; }
 
-        /* Текст с километрами */
-        .dim-label {
-            position: absolute;
-            bottom: 5px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #fff;
-            padding: 2px 10px;
-            border-radius: 12px;
-            border: 1px solid #ccc;
-            font-weight: bold;
-            color: var(--line-color);
-            font-size: 14px;
-            white-space: nowrap;
-        }
-
-        /* --- МАШИНЫ --- */
         .vehicle-wrapper {
             position: absolute;
-            top: 15px; /* Отступ от верха дороги */
-            width: 0; /* Точка отсчета */
+            top: 15px;
+            width: 0;
             height: 0;
             z-index: 10;
-            will-change: transform; /* Оптимизация для плавности */
+            will-change: transform;
+            padding: 20px;
+            margin: -20px;
         }
-
         .vehicle-body {
             position: absolute;
             top: 0;
-            left: -40px; /* Центрируем относительно точки координат */
+            left: -40px;
             width: 80px;
             height: 60px;
             text-align: center;
             font-size: 50px;
             line-height: 1;
+            pointer-events: none;
         }
-
-        /* Подписи авто */
         .vehicle-tag {
             position: absolute;
             top: -25px;
@@ -217,23 +297,20 @@
             box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
 
-        /* Отражение для поворота */
         .face-right { transform: scaleX(-1); }
         .face-left { transform: scaleX(1); }
-        /* Текст не должен зеркалиться */
         .face-right .vehicle-tag { transform: translateX(-50%) scaleX(-1); } 
 
-        /* --- УПРАВЛЕНИЕ --- */
+        /* --- БЛОК ОТВЕТА И ПРОВЕРКИ --- */
         .controls {
             padding: 20px;
             background: #f5f5f5;
-            border-top: 1px solid #e0e0e0;
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 15px;
         }
-
+        
         input[type="number"] {
             padding: 12px;
             font-size: 18px;
@@ -255,13 +332,11 @@
             font-weight: bold;
             transition: transform 0.1s, background 0.2s;
         }
+        .btn:hover { filter: brightness(1.1); }
         .btn:active { transform: scale(0.98); }
-        
+
         .btn-check { background-color: #43a047; }
-        .btn-check:hover { background-color: #2e7d32; }
-        
         .btn-next { background-color: #1e88e5; display: none; }
-        .btn-next:hover { background-color: #1565c0; }
 
         .feedback-area {
             min-height: 30px;
@@ -269,19 +344,18 @@
             padding-bottom: 10px;
             background: #f5f5f5;
             font-weight: bold;
+            font-size: 1.1rem;
         }
         .msg-success { color: #2e7d32; }
         .msg-error { color: #c62828; }
 
     </style>
-<script src="../../assets/analytics.js"></script>
 </head>
 <body>
 
 <div class="main-container">
-    
     <div class="tabs">
-        <button class="tab-btn active" onclick="Game.setMode('meet', this)">Навстречу друг другу</button>
+        <button class="tab-btn active" onclick="Game.setMode('meet', this)">Навстречу</button>
         <button class="tab-btn" onclick="Game.setMode('apart', this)">В разные стороны</button>
         <button class="tab-btn" onclick="Game.setMode('chase', this)">Вдогонку</button>
     </div>
@@ -291,54 +365,73 @@
         <div class="question-text" id="questionText">...</div>
     </div>
 
-    <div class="scene">
+    <div class="instruction">💡 Потяните машинку мышкой, чтобы настроить часы и найти ответ!</div>
+
+    <div class="dashboard">
+        <div class="dash-item">
+            <div class="clock">
+                <div class="clock-mark mark-12"></div>
+                <div class="clock-mark mark-3"></div>
+                <div class="clock-mark mark-6"></div>
+                <div class="clock-mark mark-9"></div>
+                <div class="hand hour-hand" id="hourHand"></div>
+                <div class="hand minute-hand" id="minuteHand"></div>
+                <div class="clock-center"></div>
+            </div>
+            <div class="dash-text">
+                <span class="dash-label">Время в пути</span>
+                <span class="dash-value" id="liveTime">0 ч 00 мин</span>
+            </div>
+        </div>
+        <div class="dash-item">
+            <div class="dash-text dash-text-right">
+                <span class="dash-label">Текущая дистанция</span>
+                <span class="dash-value"><span id="liveDist">0</span> км</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="scene" id="sceneBox">
         <div class="road">
             <div class="road-dashed"></div>
             
             <div class="city-marker" id="cityA" style="left: 5%">
                 <div class="city-flag">🚩</div>
-                <div class="city-pole"></div>
-                <span>A</span>
+                <div class="city-pole"></div><span>A</span>
             </div>
-            
             <div class="city-marker" id="cityB" style="left: 95%">
                 <div class="city-flag">🏁</div>
-                <div class="city-pole"></div>
-                <span>B</span>
+                <div class="city-pole"></div><span>B</span>
             </div>
 
             <div id="dimContainer" class="dimension-line-container">
                 <div class="dim-line"></div>
-                <div class="dim-label" id="dimLabel">? км</div>
                 <div class="projection-line proj-left"></div>
                 <div class="projection-line proj-right"></div>
             </div>
 
             <div id="car1" class="vehicle-wrapper">
                 <div class="vehicle-body">
-                    <div class="vehicle-tag">Авто</div>
-                    🚗
+                    <div class="vehicle-tag">Авто</div>🚗
                 </div>
             </div>
 
             <div id="car2" class="vehicle-wrapper">
                 <div class="vehicle-body">
-                    <div class="vehicle-tag">Грузовик</div>
-                    🚛
+                    <div class="vehicle-tag">Грузовик</div>🚛
                 </div>
             </div>
-
         </div>
     </div>
     
     <div class="feedback-area" id="feedback"></div>
 
     <div class="controls">
-        <label style="font-size: 1.1rem; color: #555;">Ответ:</label>
+        <label style="font-size: 1.1rem; color: #555; font-weight: bold;">Ответ:</label>
         <input type="number" id="inpAnswer" placeholder="...">
         <span style="font-weight: bold; color: #555;">км</span>
-        <button class="btn btn-check" id="btnCheck">ПРОВЕРИТЬ</button>
-        <button class="btn btn-next" id="btnNext">СЛЕДУЮЩАЯ >></button>
+        <button class="btn btn-check" id="btnCheck" onclick="Game.check()">ПРОВЕРИТЬ</button>
+        <button class="btn btn-next" id="btnNext" onclick="Game.generate()">СЛЕДУЮЩАЯ >></button>
     </div>
 </div>
 
@@ -346,34 +439,46 @@
     const Game = {
         state: {
             mode: 'meet',
-            data: null,
-            animating: false
+            currentTime: 0,
+            maxTime: 5,
+            targetTime: 0,
+            targetAnswer: 0,
+            v1: 0,
+            v2: 0,
+            sStart: 0,
+            dir1: 1, 
+            dir2: -1,
+            startX1: 0, 
+            startX2: 0,
+            isResolved: false
         },
         ui: {
-            car1: document.getElementById('car1'), // Обертка
-            car1Body: document.querySelector('#car1 .vehicle-body'), // Тело для поворота
+            scene: document.getElementById('sceneBox'),
+            car1: document.getElementById('car1'),
+            car1Body: document.querySelector('#car1 .vehicle-body'),
             car2: document.getElementById('car2'),
             car2Body: document.querySelector('#car2 .vehicle-body'),
             dimContainer: document.getElementById('dimContainer'),
-            dimLabel: document.getElementById('dimLabel'),
             condition: document.getElementById('conditionText'),
             question: document.getElementById('questionText'),
+            liveTime: document.getElementById('liveTime'),
+            liveDist: document.getElementById('liveDist'),
+            hourHand: document.getElementById('hourHand'),
+            minuteHand: document.getElementById('minuteHand'),
+            cityA: document.getElementById('cityA'),
+            cityB: document.getElementById('cityB'),
             inp: document.getElementById('inpAnswer'),
             btnCheck: document.getElementById('btnCheck'),
             btnNext: document.getElementById('btnNext'),
-            feedback: document.getElementById('feedback'),
-            cityA: document.getElementById('cityA'),
-            cityB: document.getElementById('cityB')
+            feedback: document.getElementById('feedback')
         },
 
         init() {
-            this.ui.btnCheck.addEventListener('click', () => this.check());
-            this.ui.btnNext.addEventListener('click', () => this.generate());
+            this.bindDragEvents();
             this.generate();
         },
 
         setMode(mode, btn) {
-            if (this.state.animating) return;
             this.state.mode = mode;
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
@@ -381,178 +486,204 @@
         },
 
         generate() {
-            // Сброс UI
-            this.state.animating = false;
+            this.state.isResolved = false;
             this.ui.inp.value = '';
             this.ui.inp.disabled = false;
             this.ui.btnCheck.style.display = 'block';
             this.ui.btnNext.style.display = 'none';
             this.ui.feedback.textContent = '';
+
+            this.state.v1 = (Math.floor(Math.random() * 4) + 6) * 10; 
+            this.state.v2 = (Math.floor(Math.random() * 4) + 4) * 10; 
             
-            // Генерация чисел
-            const t = Math.floor(Math.random() * 3) + 2; // 2..4 часа
-            const v1 = (Math.floor(Math.random() * 4) + 6) * 10; // 60..90
-            const v2 = (Math.floor(Math.random() * 4) + 4) * 10; // 40..70
+            this.state.maxTime = Math.floor(Math.random() * 3) + 3; 
+            this.state.targetTime = Math.floor(Math.random() * (this.state.maxTime - 1)) + 1;
+            this.state.currentTime = 0;
 
-            let sStart, sEnd, condTxt, questTxt;
-            let p1_start, p2_start, p1_end, p2_end; // Позиции в %
-            let dir1, dir2; // 1 (вправо) или -1 (влево)
+            let condTxt = '';
+            let questTxt = `Какое расстояние будет между ними через ${this.state.targetTime} ч?`;
 
-            // Настройка отображения флагов (нужны не везде)
             this.ui.cityA.style.opacity = 0;
             this.ui.cityB.style.opacity = 0;
 
             if (this.state.mode === 'meet') {
+                this.state.sStart = (this.state.v1 + this.state.v2) * this.state.maxTime;
+                this.state.targetAnswer = this.state.sStart - (this.state.v1 + this.state.v2) * this.state.targetTime;
+                
                 this.ui.cityA.style.opacity = 1;
                 this.ui.cityB.style.opacity = 1;
                 this.ui.cityA.style.left = '5%';
                 this.ui.cityB.style.left = '95%';
 
-                const distTravelled = (v1 + v2) * t;
-                const gap = Math.floor(Math.random() * 40 + 20);
-                sStart = distTravelled + gap;
-                sEnd = gap;
+                condTxt = `Расстояние между пунктами А и Б равно <span class="highlight">${this.state.sStart} км</span>.<br>
+                           Навстречу друг другу едут автомобиль (${this.state.v1} км/ч) и грузовик (${this.state.v2} км/ч).`;
 
-                condTxt = `Расстояние между пунктами А и Б равно <span class="highlight">${sStart} км</span>. <br>
-                           Из них одновременно навстречу друг другу выехали автомобиль (${v1} км/ч) и грузовик (${v2} км/ч).`;
-                questTxt = `Какое расстояние будет между ними через ${t} ч?`;
-
-                p1_start = 5;  p1_end = 5 + (v1*t / sStart * 90);
-                p2_start = 95; p2_end = 95 - (v2*t / sStart * 90);
-                dir1 = 1; dir2 = -1;
+                this.state.startX1 = 5; 
+                this.state.startX2 = 95;
+                this.state.dir1 = 1; this.state.dir2 = -1;
 
             } else if (this.state.mode === 'apart') {
-                // Старт из центра
+                this.state.sStart = 0;
+                this.state.targetAnswer = (this.state.v1 + this.state.v2) * this.state.targetTime;
+
                 this.ui.cityA.style.opacity = 1;
                 this.ui.cityA.querySelector('span').textContent = 'Старт';
                 this.ui.cityA.style.left = '50%';
-
-                sStart = 0;
-                sEnd = (v1 + v2) * t;
                 
-                condTxt = `Из одного пункта одновременно в противоположных направлениях выехали 
-                           автомобиль (${v1} км/ч) и грузовик (${v2} км/ч).`;
-                questTxt = `На каком расстоянии друг от друга они окажутся через ${t} ч?`;
+                condTxt = `Из одного пункта в противоположных направлениях выехали <br>
+                           автомобиль (${this.state.v1} км/ч) и грузовик (${this.state.v2} км/ч).`;
 
-                // 80% экрана - это sEnd
-                const scale = 80 / sEnd;
-                p1_start = 50; p1_end = 50 - (v1*t * scale);
-                p2_start = 50; p2_end = 50 + (v2*t * scale);
-                dir1 = -1; dir2 = 1;
+                this.state.startX1 = 50; 
+                this.state.startX2 = 50;
+                this.state.dir1 = -1; this.state.dir2 = 1;
 
             } else if (this.state.mode === 'chase') {
-                const vFast = Math.max(v1, v2);
-                const vSlow = Math.min(v1, v2);
-                
-                sStart = (vFast - vSlow) * t + 50;
-                sEnd = sStart - (vFast - vSlow) * t;
+                let vFast = Math.max(this.state.v1, this.state.v2);
+                let vSlow = Math.min(this.state.v1, this.state.v2);
+                this.state.v1 = vFast;
+                this.state.v2 = vSlow;
 
-                condTxt = `Грузовик едет со скоростью ${vSlow} км/ч. <br>
-                           Позади него на расстоянии <span class="highlight">${sStart} км</span> едет автомобиль (${vFast} км/ч).`;
-                questTxt = `Каким станет расстояние между ними через ${t} ч?`;
+                this.state.sStart = (this.state.v1 - this.state.v2) * this.state.maxTime;
+                this.state.targetAnswer = this.state.sStart - (this.state.v1 - this.state.v2) * this.state.targetTime;
 
-                const totalDist = vFast * t + sStart; 
-                const scale = 85 / totalDist;
+                condTxt = `Грузовик едет со скоростью ${this.state.v2} км/ч.<br>
+                           Позади него на расстоянии <span class="highlight">${this.state.sStart} км</span> едет автомобиль (${this.state.v1} км/ч).`;
 
-                p1_start = 5; p1_end = 5 + (vFast*t * scale);
-                p2_start = 5 + (sStart*scale); p2_end = p2_start + (vSlow*t * scale);
-                dir1 = 1; dir2 = 1;
+                this.state.startX1 = 5; 
+                this.state.startX2 = 5 + (this.state.sStart / (this.state.v1 * this.state.maxTime + this.state.sStart) * 85);
+                this.state.dir1 = 1; this.state.dir2 = 1;
             }
 
-            this.state.data = { sStart, sEnd, p1_start, p2_start, p1_end, p2_end, dir1, dir2 };
-            
             this.ui.condition.innerHTML = condTxt;
             this.ui.question.innerHTML = questTxt;
-            this.ui.dimLabel.textContent = sStart + " км";
-
-            this.renderScene(0); // 0% прогресса
+            
+            this.setOrientation(this.ui.car1Body, this.state.dir1);
+            this.setOrientation(this.ui.car2Body, this.state.dir2);
+            
+            this.updateSimulation(0);
         },
 
         check() {
+            if (this.state.isResolved) return;
+
             const val = parseFloat(this.ui.inp.value);
             if (isNaN(val)) return;
 
-            const correct = this.state.data.sEnd;
-            const isCorrect = Math.abs(val - correct) <= 2;
-
-            this.ui.inp.disabled = true;
-            this.ui.btnCheck.style.display = 'none';
-            this.state.animating = true;
-
-            this.animate(isCorrect, correct);
+            if (Math.abs(val - this.state.targetAnswer) <= 1) {
+                this.ui.feedback.innerHTML = `<span class="msg-success">Верно! Дистанция составит ${this.state.targetAnswer} км.</span>`;
+                this.ui.inp.disabled = true;
+                this.ui.btnCheck.style.display = 'none';
+                this.ui.btnNext.style.display = 'block';
+                this.state.isResolved = true;
+            } else {
+                this.ui.feedback.innerHTML = `<span class="msg-error">Пока неверно. Выставь на часах ровно ${this.state.targetTime} ч. 00 мин.</span>`;
+            }
         },
 
-        animate(isCorrect, correctVal) {
-            const startT = performance.now();
-            const duration = 2500; // 2.5 сек
+        bindDragEvents() {
+            let isDragging = false;
+            let startMouseX = 0;
+            let startTimeAtDrag = 0;
 
-            const step = (now) => {
-                let progress = (now - startT) / duration;
-                if (progress > 1) progress = 1;
-
-                this.renderScene(progress);
-                
-                // Интерполяция числа на линии
-                const curDist = this.state.data.sStart + (this.state.data.sEnd - this.state.data.sStart) * progress;
-                this.ui.dimLabel.textContent = Math.round(curDist) + " км";
-
-                if (progress < 1) {
-                    requestAnimationFrame(step);
-                } else {
-                    this.finish(isCorrect, correctVal);
-                }
+            const onStart = (e) => {
+                isDragging = true;
+                startMouseX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+                startTimeAtDrag = this.state.currentTime;
             };
-            requestAnimationFrame(step);
+
+            const onMove = (e) => {
+                if (!isDragging) return;
+                let currentMouseX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+                let dx = currentMouseX - startMouseX;
+
+                let timeDelta = (dx / window.innerWidth) * this.state.maxTime * 1.5; 
+                let newTimeRaw = startTimeAtDrag + timeDelta;
+                newTimeRaw = Math.max(0, Math.min(this.state.maxTime, newTimeRaw));
+                
+                this.updateSimulation(newTimeRaw);
+            };
+
+            const onEnd = () => { isDragging = false; };
+
+            this.ui.scene.addEventListener('mousedown', onStart);
+            this.ui.scene.addEventListener('touchstart', onStart, {passive: true});
+            window.addEventListener('mousemove', onMove);
+            window.addEventListener('touchmove', onMove, {passive: true});
+            window.addEventListener('mouseup', onEnd);
+            window.addEventListener('touchend', onEnd);
         },
 
-        renderScene(progress) {
-            const d = this.state.data;
+        updateSimulation(t_raw) {
+            // Переводим "сырое" время в целые минуты для точности
+            let totalMinutes = Math.round(t_raw * 60);
             
-            // Интерполяция позиций
-            // Используем CSS Translate для супер-плавности (в %)
-            const cur1 = d.p1_start + (d.p1_end - d.p1_start) * progress;
-            const cur2 = d.p2_start + (d.p2_end - d.p2_start) * progress;
+            // Прилипание (snapping) к целым часам, чтобы было легко поймать 00 минут
+            if (totalMinutes % 60 <= 4) totalMinutes -= (totalMinutes % 60);
+            else if (totalMinutes % 60 >= 56) totalMinutes += (60 - (totalMinutes % 60));
 
-            // Двигаем обертки через left (или transform, но left в % удобнее для layout)
-            // Но чтобы было плавно, лучше left менять в requestAnimationFrame - это норм.
-            this.ui.car1.style.left = cur1 + '%';
-            this.ui.car2.style.left = cur2 + '%';
-
-            // Поворот (transform scaleX)
-            this.setOrientation(this.ui.car1Body, d.dir1);
-            this.setOrientation(this.ui.car2Body, d.dir2);
-
-            // Размерная линия
-            const minX = Math.min(cur1, cur2);
-            const maxX = Math.max(cur1, cur2);
-            const w = maxX - minX;
-
-            this.ui.dimContainer.style.left = minX + '%';
-            this.ui.dimContainer.style.width = w + '%';
+            let t = totalMinutes / 60;
+            this.state.currentTime = t;
+            const d = this.state;
             
-            // Если слишком узко, прячем линию
-            this.ui.dimContainer.style.opacity = w < 2 ? 0 : 1;
+            // Расчеты дистанции
+            let dist1 = d.v1 * t;
+            let dist2 = d.v2 * t;
+            let currentDistance = 0;
+
+            if (d.mode === 'meet') {
+                currentDistance = Math.max(0, d.sStart - dist1 - dist2);
+            } else if (d.mode === 'apart') {
+                currentDistance = dist1 + dist2;
+            } else if (d.mode === 'chase') {
+                currentDistance = Math.max(0, d.sStart - (dist1 - dist2));
+            }
+
+            // Обновление текста на табло
+            let hours = Math.floor(t);
+            let minutes = Math.round((t - hours) * 60);
+            if(minutes === 60) { hours++; minutes = 0; }
+            
+            let minStr = minutes < 10 ? '0' + minutes : minutes;
+            this.ui.liveTime.textContent = `${hours} ч ${minStr} мин`;
+            
+            // Округляем до 1 знака после запятой, чтобы не пугать огромными дробями,
+            // но на ровных часах будет идеально целое число, как и договаривались.
+            this.ui.liveDist.textContent = currentDistance.toFixed(1).replace('.0', '');
+
+            // Обновление стрелок аналоговых часов
+            let minAngle = minutes * 6; // 360 градусов / 60 минут
+            let hourAngle = (hours * 30) + (minutes * 0.5); // 360/12 + смещение от минут
+
+            this.ui.minuteHand.style.transform = `rotate(${minAngle}deg)`;
+            this.ui.hourHand.style.transform = `rotate(${hourAngle}deg)`;
+
+            // Отрисовка машин
+            let maxTotalDist = 0;
+            if (d.mode === 'meet') maxTotalDist = d.sStart;
+            if (d.mode === 'apart') maxTotalDist = (d.v1 + d.v2) * d.maxTime;
+            if (d.mode === 'chase') maxTotalDist = d.v1 * d.maxTime + d.sStart;
+
+            let pxPerKm = 85 / maxTotalDist; 
+
+            let pos1 = d.startX1 + (dist1 * pxPerKm * d.dir1);
+            let pos2 = d.startX2 + (dist2 * pxPerKm * d.dir2);
+
+            this.ui.car1.style.left = pos1 + '%';
+            this.ui.car2.style.left = pos2 + '%';
+
+            let minP = Math.min(pos1, pos2);
+            let maxP = Math.max(pos1, pos2);
+            this.ui.dimContainer.style.left = minP + '%';
+            this.ui.dimContainer.style.width = (maxP - minP) + '%';
+            this.ui.dimContainer.style.opacity = (maxP - minP) < 2 ? 0 : 1;
         },
 
         setOrientation(el, dir) {
             el.className = 'vehicle-body ' + (dir === 1 ? 'face-right' : 'face-left');
-        },
-
-        finish(success, val) {
-            this.ui.btnNext.style.display = 'block';
-            this.ui.dimLabel.textContent = Math.round(val) + " км";
-            
-            if(success) {
-                this.ui.feedback.innerHTML = `<span class="msg-success">Верно! Молодец!</span>`;
-            } else {
-                this.ui.feedback.innerHTML = `<span class="msg-error">Ошибка. Правильный ответ: ${Math.round(val)} км</span>`;
-            }
         }
     };
 
     Game.init();
 </script>
-
 </body>
-
 </html>
