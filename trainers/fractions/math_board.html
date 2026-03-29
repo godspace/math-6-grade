@@ -9,7 +9,7 @@
             --sidebar-bg: #ffffff;
             --grid-color: #e0e0ea;
             --grid-accent: #d0d0da;
-            --primary-color: #4f46e5; /* Индиго */
+            --primary-color: #4f46e5;
             --primary-light: #eef2ff;
             --text-color: #1e293b;
             --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -25,9 +25,11 @@
             background-color: var(--bg-color);
             overflow: hidden;
             color: var(--text-color);
+            user-select: none; /* Запрет выделения текста на всей доске */
+            -webkit-user-select: none;
         }
 
-        /* --- САЙДБАР (Обновленный дизайн) --- */
+        /* --- САЙДБАР --- */
         #sidebar {
             width: 260px;
             background: var(--sidebar-bg);
@@ -63,27 +65,27 @@
         /* Сетка инструментов */
         .tools-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr); /* 2 колонки */
-            gap: 10px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
         }
 
-        .tools-grid.full { grid-template-columns: 1fr; } /* На всю ширину */
+        .tools-grid.full { grid-template-columns: 1fr; }
 
         .palette-item {
             background: #fff;
-            border: 1px solid #e2e8f0;
-            padding: 12px;
+            border: 2px solid #cbd5e1; /* Более заметная граница */
+            padding: 14px;
             border-radius: var(--radius);
-            cursor: grab;
+            cursor: pointer; /* Изменено на обычный клик */
             text-align: center;
-            font-size: 1.1rem;
+            font-size: 1.5rem; /* Сделано крупнее */
             font-family: 'Cambria Math', serif;
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 500;
+            font-weight: 700; /* Сделано жирнее */
         }
 
         .palette-item:hover {
@@ -94,9 +96,8 @@
             color: var(--primary-color);
         }
 
-        .palette-item:active { cursor: grabbing; transform: scale(0.98); }
+        .palette-item:active { transform: scale(0.95); }
 
-        /* Специальные стили для дробей в меню */
         .preview-fraction {
             display: inline-flex;
             flex-direction: column;
@@ -104,9 +105,8 @@
             font-size: 0.8em;
             line-height: 1;
         }
-        .preview-fraction span:first-child { border-bottom: 1px solid currentColor; padding: 0 4px; }
+        .preview-fraction span:first-child { border-bottom: 2px solid currentColor; padding: 0 4px; }
 
-        /* Кнопки управления */
         .action-btn {
             padding: 10px;
             border: none;
@@ -122,31 +122,26 @@
         .btn-reset { background: #f1f5f9; color: #475569; margin-top: auto; }
         .btn-reset:hover { background: #e2e8f0; }
 
-
         /* --- РАБОЧАЯ ОБЛАСТЬ --- */
         #viewport {
             flex-grow: 1;
             position: relative;
             overflow: hidden;
-            cursor: default; /* Будет меняться JS-ом */
+            cursor: default;
         }
 
-        /* Поверхность, которую мы двигаем и зумим */
         #surface {
             position: absolute;
             top: 0;
             left: 0;
-            /* Точка трансформации важна для зума */
             transform-origin: 0 0; 
-            /* Бесконечный фон */
             width: 0; 
             height: 0;
             overflow: visible; 
         }
 
-        /* Сетка фона */
         #grid-bg {
-            position: fixed; /* Фон стоит, двигаем его паттерн через JS или CSS */
+            position: fixed;
             top: -5000px; left: -5000px;
             width: 10000px; height: 10000px;
             background-color: var(--bg-color);
@@ -154,7 +149,7 @@
                 linear-gradient(var(--grid-color) 1px, transparent 1px),
                 linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
             background-size: 20px 20px;
-            pointer-events: none; /* Чтобы клики проходили сквозь фон к surface */
+            pointer-events: none;
             z-index: -1;
         }
 
@@ -187,7 +182,6 @@
             z-index: 999;
         }
 
-        /* Удаление */
         .delete-btn {
             position: absolute;
             top: -8px;
@@ -205,7 +199,6 @@
         }
         .board-item:hover .delete-btn { opacity: 1; }
 
-        /* Инпуты и дроби */
         .smart-input {
             border: none;
             background: transparent;
@@ -216,6 +209,8 @@
             min-width: 20px;
             width: 30px;
             color: #0f172a;
+            user-select: text; /* Разрешаем выделение внутри инпутов */
+            -webkit-user-select: text;
         }
         
         .fraction-box { display: flex; flex-direction: column; align-items: center; margin: 0 4px; }
@@ -224,7 +219,6 @@
         .mixed-container { display: flex; align-items: center; gap: 6px; }
         .operator-text { font-size: 28px; font-weight: bold; color: #334155; padding: 0 4px;}
 
-        /* HUD (Интерфейс на экране) */
         #hud {
             position: absolute;
             bottom: 20px;
@@ -290,8 +284,7 @@
 </div>
 
 <div id="viewport">
-    <div id="grid-bg"></div> <div id="surface">
-        </div>
+    <div id="grid-bg"></div> <div id="surface"></div>
     
     <div id="hud">
         <span id="zoom-val">100%</span>
@@ -301,7 +294,6 @@
 </div>
 
 <script>
-    // --- State ---
     const state = {
         scale: 1,
         panX: 0,
@@ -317,15 +309,13 @@
     const gridBg = document.getElementById('grid-bg');
     const zoomVal = document.getElementById('zoom-val');
 
-    // Центрируем камеру при старте (примерно)
     state.panX = viewport.clientWidth / 2;
     state.panY = viewport.clientHeight / 2;
     updateView();
 
-    // --- 1. PANNING (Перемещение камеры) ---
+    // --- 1. PANNING ---
 
     viewport.addEventListener('mousedown', (e) => {
-        // Если клик по самому вьюпорту или по сетке (но не по элементам доски)
         if (e.target === viewport || e.target === surface || e.target === gridBg) {
             state.isPanning = true;
             state.startX = e.clientX - state.panX;
@@ -335,7 +325,6 @@
     });
 
     window.addEventListener('mousemove', (e) => {
-        // Логика перемещения камеры
         if (state.isPanning) {
             e.preventDefault();
             state.panX = e.clientX - state.startX;
@@ -344,12 +333,9 @@
             return;
         }
 
-        // Логика перетаскивания элемента (если активна)
         if (dragState.activeItem) {
             e.preventDefault();
-            // Текущая мышь в координатах мира
             const worldPos = screenToWorld(e.clientX, e.clientY);
-            
             dragState.activeItem.style.left = (worldPos.x - dragState.offsetX) + 'px';
             dragState.activeItem.style.top = (worldPos.y - dragState.offsetY) + 'px';
         }
@@ -361,88 +347,60 @@
             viewport.style.cursor = 'default';
         }
         if (dragState.activeItem) {
-            // Snap to grid
             snapItem(dragState.activeItem);
             dragState.activeItem.classList.remove('dragging');
             dragState.activeItem = null;
         }
     });
 
-    // --- 2. ZOOM (Масштабирование) ---
+    // --- 2. ZOOM ---
 
     viewport.addEventListener('wheel', (e) => {
         e.preventDefault();
         const zoomIntensity = 0.001;
         const delta = -e.deltaY * zoomIntensity;
         const newScale = Math.min(Math.max(0.2, state.scale + delta), 4);
-
-        // Zoom towards mouse cursor logic
-        // 1. Координаты мыши до зума (в мире)
-        const mouseWorldBefore = screenToWorld(e.clientX, e.clientY);
-
-        // 2. Применяем зум
-        state.scale = newScale;
-
-        // 3. Корректируем pan, чтобы мышь осталась над той же точкой мира
-        // Формула: NewPan = MouseScreen - (MouseWorld * NewScale)
-        // Но так как у нас translate применяется ДО scale в transform origin (0,0),
-        // нам нужно просто сдвинуть pan так, чтобы точка под курсором осталась на месте.
-        // Более простой способ для transform-origin 0 0:
         
-        // Пересчитываем pan смещение
         const rect = viewport.getBoundingClientRect();
         const mouseX = e.clientX - rect.left;
         const mouseY = e.clientY - rect.top;
         
-        // Смещение мира относительно мыши должно измениться пропорционально
         state.panX = mouseX - (mouseX - state.panX) * (newScale / (state.scale - delta));
         state.panY = mouseY - (mouseY - state.panY) * (newScale / (state.scale - delta));
         
-        // *Упрощенная логика (без точного зума в курсор для надежности, если формула выше глючит)*:
-        // Просто обновляем масштаб. Для точного зума в курсор нужна более сложная матрица.
-        // Оставим простой зум от 0,0 (верх-лев) + ручной pan, или зум к центру.
-        // В данном коде: зум идет от transform-origin, который мы двигаем через pan.
-        
+        state.scale = newScale;
         updateView();
     }, { passive: false });
 
 
     function updateView() {
-        // Двигаем поверхность
         surface.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.scale})`;
-        
-        // Двигаем сетку фона (параллакс или просто синхрон)
-        // Чтобы сетка казалась бесконечной, используем background-position
         gridBg.style.backgroundPosition = `${state.panX}px ${state.panY}px`;
         gridBg.style.backgroundSize = `${20 * state.scale}px ${20 * state.scale}px`;
-
         zoomVal.textContent = Math.round(state.scale * 100) + '%';
     }
 
     function resetView() {
         state.scale = 1;
-        state.panX = viewport.clientWidth / 2 - 100; // Немного смещаем
+        state.panX = viewport.clientWidth / 2 - 100;
         state.panY = viewport.clientHeight / 2 - 100;
         updateView();
     }
 
     // --- 3. MATH HELPERS ---
 
-    // Преобразует координаты экрана (мыши) в координаты внутри surface
     function screenToWorld(screenX, screenY) {
         const rect = viewport.getBoundingClientRect();
-        // Учитываем смещение вьюпорта
         const viewportX = screenX - rect.left;
         const viewportY = screenY - rect.top;
         
-        // Обратная трансформация: (x - pan) / scale
         return {
             x: (viewportX - state.panX) / state.scale,
             y: (viewportY - state.panY) / state.scale
         };
     }
 
-    // --- 4. ITEM LOGIC (Drag & Drop) ---
+    // --- 4. ITEM LOGIC ---
     
     let dragState = {
         activeItem: null,
@@ -450,7 +408,6 @@
         offsetY: 0
     };
 
-    // Создание элемента
     function createItem(type, val, worldX, worldY) {
         const item = document.createElement('div');
         item.className = 'board-item';
@@ -458,17 +415,14 @@
         item.style.left = worldX + 'px';
         item.style.top = worldY + 'px';
 
-        // Удаление
         const del = document.createElement('div');
         del.className = 'delete-btn';
         del.innerHTML = '×';
         del.onmousedown = (e) => { e.stopPropagation(); item.remove(); };
         item.appendChild(del);
 
-        // Контент
         if(type === 'number') {
             item.appendChild(autoInput(''));
-            setTimeout(() => item.querySelector('input').focus(), 10);
         } else if (type === 'fraction') {
             item.appendChild(fractionDom());
         } else if (type === 'mixed') {
@@ -487,10 +441,9 @@
             item.appendChild(span);
         }
 
-        // События элемента
         item.addEventListener('mousedown', (e) => {
             if(e.target.tagName === 'INPUT') return;
-            e.stopPropagation(); // Не запускаем pan
+            e.stopPropagation();
             startItemDrag(e, item, false);
         });
         
@@ -500,6 +453,13 @@
         });
 
         surface.appendChild(item);
+        
+        // Автоматический фокус на первом инпуте после создания
+        const firstInput = item.querySelector('input');
+        if (firstInput) {
+            setTimeout(() => firstInput.focus(), 10);
+        }
+
         return item;
     }
 
@@ -523,13 +483,21 @@
         return b;
     }
 
-    // Drag Logic
+    // Клик по палитре - добавление в центр экрана
     document.querySelectorAll('.palette-item').forEach(p => {
-        p.addEventListener('mousedown', (e) => {
-            e.preventDefault();
-            const worldPos = screenToWorld(e.clientX, e.clientY);
-            const item = createItem(p.dataset.type, p.dataset.val, worldPos.x, worldPos.y);
-            startItemDrag(e, item, true);
+        p.addEventListener('click', (e) => {
+            const rect = viewport.getBoundingClientRect();
+            // Вычисляем центр вьюпорта
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            // Переводим центр экрана в мировые координаты доски
+            const worldPos = screenToWorld(centerX, centerY);
+            
+            // Создаем элемент (со смещением, чтобы он визуально был ровно по центру)
+            const offsetX = 30; // Приблизительная половина ширины блока
+            const offsetY = 20; // Приблизительная половина высоты блока
+            createItem(p.dataset.type, p.dataset.val, worldPos.x - offsetX, worldPos.y - offsetY);
         });
     });
 
@@ -543,8 +511,7 @@
         const itemTop = parseFloat(item.style.top);
 
         if (isNew) {
-            // Центрируем
-            dragState.offsetX = item.offsetWidth / 2; // Приблизительно, т.к. размеры еще могут скакать
+            dragState.offsetX = item.offsetWidth / 2;
             dragState.offsetY = item.offsetHeight / 2; 
         } else {
             dragState.offsetX = worldPos.x - itemLeft;
@@ -560,10 +527,8 @@
         item.style.top = (Math.round(y/grid)*grid) + 'px';
     }
 
-    // Очистка
     function clearAll() { if(confirm('Все удалить?')) surface.innerHTML = ''; }
     
-    // Клавиатура
     window.addEventListener('keydown', (e) => {
         if((e.key === 'Delete' || e.key === 'Backspace') && document.activeElement.tagName !== 'INPUT') {
             const s = document.querySelector('.selected');
