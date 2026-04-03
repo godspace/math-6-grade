@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Math Board Pro v3.0</title>
+    <title>Math Board Pro v9.3</title>
     <style>
         :root {
             --bg-color: #f4f6f8;
@@ -25,32 +25,24 @@
             background-color: var(--bg-color);
             overflow: hidden;
             color: var(--text-color);
-            user-select: none; /* Запрет выделения текста на всей доске */
+            user-select: none;
             -webkit-user-select: none;
         }
 
         /* --- САЙДБАР --- */
         #sidebar {
-            width: 260px;
+            width: 250px;
             background: var(--sidebar-bg);
             border-right: 1px solid #e2e8f0;
-            padding: 24px 16px;
+            /* Увеличенный отступ 74px сверху для внешней кнопки "Меню" */
+            padding: 74px 12px 16px 12px; 
             display: flex;
             flex-direction: column;
-            gap: 24px;
+            gap: 16px;
             box-shadow: 10px 0 30px rgba(0,0,0,0.03);
             z-index: 500;
             position: relative;
-        }
-
-        .brand {
-            font-size: 1.25rem;
-            font-weight: 800;
-            color: var(--primary-color);
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            overflow-y: auto;
         }
 
         .section-title {
@@ -59,33 +51,32 @@
             letter-spacing: 0.05em;
             color: #64748b;
             font-weight: 700;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
         }
 
-        /* Сетка инструментов */
         .tools-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
+            gap: 8px;
         }
 
         .tools-grid.full { grid-template-columns: 1fr; }
 
         .palette-item {
             background: #fff;
-            border: 2px solid #cbd5e1; /* Более заметная граница */
-            padding: 14px;
+            border: 2px solid #cbd5e1;
+            padding: 8px;
             border-radius: var(--radius);
-            cursor: pointer; /* Изменено на обычный клик */
+            cursor: pointer;
             text-align: center;
-            font-size: 1.5rem; /* Сделано крупнее */
+            font-size: 1.3rem;
             font-family: 'Cambria Math', serif;
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 700; /* Сделано жирнее */
+            font-weight: 700;
         }
 
         .palette-item:hover {
@@ -114,8 +105,12 @@
             font-weight: 600;
             cursor: pointer;
             transition: 0.2s;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
+            font-family: inherit;
         }
+        .btn-primary { background: var(--primary-light); color: var(--primary-color); border: 1px solid var(--primary-color); }
+        .btn-primary:hover { background: var(--primary-color); color: #fff; }
+
         .btn-danger { background: #fee2e2; color: #ef4444; }
         .btn-danger:hover { background: #fecaca; }
         
@@ -153,23 +148,34 @@
             z-index: -1;
         }
 
-        /* --- ЭЛЕМЕНТЫ --- */
+        /* --- ЭЛЕМЕНТЫ ДОСКИ --- */
         .board-item {
             position: absolute;
-            background: #fff;
-            padding: 8px 14px;
+            background: transparent; 
+            padding: 0 10px;
             border-radius: var(--radius);
-            box-shadow: var(--shadow-soft);
+            box-shadow: none; 
             cursor: grab;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            border: 2px solid transparent;
+            border: 1px solid transparent; 
             font-family: 'Cambria Math', 'Times New Roman', serif;
-            transition: box-shadow 0.2s;
+            transition: background 0.2s, box-shadow 0.2s, border-color 0.2s, opacity 0.2s;
+            box-sizing: border-box; 
+        }
+
+        .board-item.item-single { height: 40px; }
+        .board-item.item-fraction { height: 80px; }
+        .board-item.item-auto { height: auto; padding: 10px; }
+
+        .board-item:hover {
+            border-color: rgba(203, 213, 225, 0.8); 
         }
 
         .board-item.dragging {
+            background: rgba(255, 255, 255, 0.8);
+            opacity: 0.25;
             box-shadow: var(--shadow-floating);
             cursor: grabbing;
             z-index: 1000 !important;
@@ -177,9 +183,22 @@
         }
 
         .board-item.selected {
+            background: transparent;
             border-color: var(--primary-color);
-            background-color: rgba(79, 70, 229, 0.04);
+            border-width: 2px;
             z-index: 999;
+        }
+
+        /* Умное скрытие ползунка для дробной черты */
+        .item-fraction-bar .segment-resize-handle {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+        .item-fraction-bar:hover .segment-resize-handle,
+        .item-fraction-bar.selected .segment-resize-handle {
+            opacity: 1;
+            pointer-events: auto;
         }
 
         .delete-btn {
@@ -196,28 +215,203 @@
             opacity: 0;
             transition: 0.2s;
             pointer-events: auto;
+            z-index: 10;
         }
-        .board-item:hover .delete-btn { opacity: 1; }
+        .board-item:hover > .delete-btn { opacity: 1; }
 
         .smart-input {
             border: none;
             background: transparent;
             font-family: inherit;
             font-size: 24px;
+            height: 28px;
+            line-height: 28px;
+            margin: 0;
+            padding: 0;
             text-align: center;
             outline: none;
             min-width: 20px;
             width: 30px;
             color: #0f172a;
-            user-select: text; /* Разрешаем выделение внутри инпутов */
+            user-select: text;
             -webkit-user-select: text;
         }
         
-        .fraction-box { display: flex; flex-direction: column; align-items: center; margin: 0 4px; }
-        .numerator { border-bottom: 2px solid #0f172a; padding: 0 4px 2px; display: flex; justify-content: center; }
-        .denominator { padding: 2px 4px 0; display: flex; justify-content: center; }
-        .mixed-container { display: flex; align-items: center; gap: 6px; }
+        .fraction-box { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            height: 100%; 
+            margin: 0 4px; 
+        }
+        .numerator { 
+            border-bottom: 2px solid #0f172a; 
+            padding: 0 4px 2px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: flex-end;
+            height: 50%;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .denominator { 
+            padding: 2px 4px 0; 
+            display: flex; 
+            justify-content: center; 
+            align-items: flex-start;
+            height: 50%;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .mixed-container { display: flex; align-items: center; height: 100%; gap: 6px; }
         .operator-text { font-size: 28px; font-weight: bold; color: #334155; padding: 0 4px;}
+
+        /* --- КОНТЕЙНЕР ОТРЕЗКОВ --- */
+        .seg-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding: 4px;
+            min-width: 350px;
+        }
+
+        .seg-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 2px dashed #e2e8f0;
+            padding-bottom: 12px;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            color: #475569;
+            gap: 12px;
+        }
+
+        .scale-wrap { display: flex; align-items: center; gap: 4px; font-weight: 600;}
+        .scale-input {
+            border: none;
+            border-bottom: 2px solid #cbd5e1;
+            font-family: 'Cambria Math', serif;
+            font-size: 16px;
+            width: 45px;
+            text-align: center;
+            color: var(--primary-color);
+            font-weight: bold;
+            outline: none;
+            transition: 0.2s;
+            background: transparent;
+        }
+        .scale-input:focus { border-bottom-color: var(--primary-color); }
+        
+        .auto-scale-label {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #64748b;
+            user-select: none;
+        }
+        .auto-scale-label input { cursor: pointer; }
+
+        .seg-rows {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .seg-row {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .seg-top {
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .segment-graphics {
+            position: relative;
+            height: 50px;
+        }
+        .segment-main-line {
+            position: absolute;
+            top: 10px; 
+            left: 0;
+            height: 2px;
+            background: var(--text-color);
+            z-index: 1;
+        }
+        .segment-tick {
+            position: absolute;
+            top: 0;
+            width: 2px;
+            height: 22px;
+            background: var(--text-color);
+            transform: translateX(-50%); 
+            z-index: 2;
+        }
+        .segment-label {
+            position: absolute;
+            top: 28px;
+            transform: translateX(-50%);
+            font-size: 16px;
+            font-family: 'Cambria Math', serif;
+            font-weight: 600;
+            color: #334155;
+            white-space: nowrap;
+        }
+        
+        .segment-resize-handle {
+            width: 24px;
+            height: 32px;
+            background: var(--primary-light);
+            border: 2px solid var(--primary-color);
+            border-radius: 6px;
+            cursor: ew-resize;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 14px;
+            margin-top: -5px;
+            color: var(--primary-color);
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: 0.2s;
+        }
+        .segment-resize-handle:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .seg-bottom {
+            display: flex;
+            align-items: center;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            color: #64748b;
+            background: #f8fafc;
+            padding: 4px 12px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            width: max-content;
+            gap: 6px;
+        }
+
+        .seg-row-del {
+            background: none;
+            border: none;
+            color: #ef4444;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-left: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: 0.2s;
+        }
+        .seg-row-del:hover { background: #fee2e2; }
 
         #hud {
             position: absolute;
@@ -233,25 +427,26 @@
             color: #475569;
             box-shadow: var(--shadow-soft);
             display: flex;
-            gap: 10px;
+            gap: 15px;
             align-items: center;
         }
     </style>
-<script src="../../assets/analytics.js"></script>
+    <script src="../../assets/analytics.js"></script>
 </head>
 <body>
 
 <div id="sidebar">
-    <div class="brand">
-        <span>📐 MathBoard</span>
-    </div>
-    
     <div>
-        <div class="section-title">Числа</div>
+        <div class="section-title">Числа и Переменные</div>
         <div class="tools-grid full">
             <div class="palette-item" data-type="number">123</div>
-            <div class="palette-item" data-type="fraction">
-                <div class="preview-fraction"><span>x</span><span>y</span></div>
+            <div class="tools-grid">
+                <div class="palette-item" data-type="var" data-val="x">
+                    <span style="font-family: 'Cambria Math', serif; font-style: italic;">x</span>
+                </div>
+                <div class="palette-item" data-type="fraction">
+                    <div class="preview-fraction"><span>a</span><span>b</span></div>
+                </div>
             </div>
             <div class="palette-item" data-type="mixed">
                 <span style="font-size: 0.8em; margin-right: 4px;">1</span>
@@ -265,7 +460,7 @@
         <div class="tools-grid">
             <div class="palette-item" data-type="op" data-val="+">+</div>
             <div class="palette-item" data-type="op" data-val="-">−</div>
-            <div class="palette-item" data-type="op" data-val="×">×</div>
+            <div class="palette-item" data-type="op-mul" data-val="×"><span style="font-size: 0.8em;">×</span></div>
             <div class="palette-item" data-type="op" data-val=":">:</div>
             <div class="palette-item" data-type="op" data-val="=">=</div>
         </div>
@@ -276,6 +471,18 @@
         <div class="tools-grid">
             <div class="palette-item" data-type="text" data-val="(">(</div>
             <div class="palette-item" data-type="text" data-val=")">)</div>
+        </div>
+    </div>
+
+    <div>
+        <div class="section-title">Визуал</div>
+        <div class="tools-grid full">
+            <div class="palette-item" data-type="fraction-bar" style="font-family: 'Inter', sans-serif; font-size: 0.95rem;">
+                ➖ Общая черта
+            </div>
+            <div class="palette-item" data-type="segment" style="font-family: 'Inter', sans-serif; font-size: 0.95rem;">
+                📏 Блок отрезков
+            </div>
         </div>
     </div>
     
@@ -289,7 +496,7 @@
     <div id="hud">
         <span id="zoom-val">100%</span>
         <span style="color:#ccc">|</span>
-        <span style="font-size: 12px; color: #888">Зажми фон чтобы двигать</span>
+        <span style="font-size: 12px; color: #888">Фон - двигать, колёсико - зум</span>
     </div>
 </div>
 
@@ -314,9 +521,10 @@
     updateView();
 
     // --- 1. PANNING ---
-
     viewport.addEventListener('mousedown', (e) => {
         if (e.target === viewport || e.target === surface || e.target === gridBg) {
+            document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
+
             state.isPanning = true;
             state.startX = e.clientX - state.panX;
             state.startY = e.clientY - state.panY;
@@ -354,24 +562,27 @@
     });
 
     // --- 2. ZOOM ---
-
     viewport.addEventListener('wheel', (e) => {
         e.preventDefault();
-        const zoomIntensity = 0.001;
-        const delta = -e.deltaY * zoomIntensity;
-        const newScale = Math.min(Math.max(0.2, state.scale + delta), 4);
         
         const rect = viewport.getBoundingClientRect();
         const mouseX = e.clientX - rect.left;
         const mouseY = e.clientY - rect.top;
-        
-        state.panX = mouseX - (mouseX - state.panX) * (newScale / (state.scale - delta));
-        state.panY = mouseY - (mouseY - state.panY) * (newScale / (state.scale - delta));
+
+        const worldXBeforeZoom = (mouseX - state.panX) / state.scale;
+        const worldYBeforeZoom = (mouseY - state.panY) / state.scale;
+
+        const zoomIntensity = 0.001;
+        const delta = -e.deltaY * zoomIntensity;
+        const newScale = Math.min(Math.max(0.2, state.scale + delta), 4);
         
         state.scale = newScale;
+
+        state.panX = mouseX - worldXBeforeZoom * state.scale;
+        state.panY = mouseY - worldYBeforeZoom * state.scale;
+        
         updateView();
     }, { passive: false });
-
 
     function updateView() {
         surface.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.scale})`;
@@ -388,25 +599,36 @@
     }
 
     // --- 3. MATH HELPERS ---
-
     function screenToWorld(screenX, screenY) {
         const rect = viewport.getBoundingClientRect();
         const viewportX = screenX - rect.left;
         const viewportY = screenY - rect.top;
-        
         return {
             x: (viewportX - state.panX) / state.scale,
             y: (viewportY - state.panY) / state.scale
         };
     }
 
+    function parseInputVal(valStr) {
+        if (!valStr) return 1;
+        let v = valStr.replace(',', '.');
+        if (v.includes('/')) {
+            const [n, d] = v.split('/');
+            const num = parseFloat(n);
+            const den = parseFloat(d);
+            if (!isNaN(num) && !isNaN(den) && den !== 0) return num / den;
+        }
+        const res = parseFloat(v);
+        return (isNaN(res) || res <= 0) ? 1 : res;
+    }
+
+    function updateInputUI(inp, val) {
+        inp.value = parseFloat(val.toFixed(4));
+        inp.style.width = Math.max(30, (inp.value.length+1)*14) + 'px';
+    }
+
     // --- 4. ITEM LOGIC ---
-    
-    let dragState = {
-        activeItem: null,
-        offsetX: 0,
-        offsetY: 0
-    };
+    let dragState = { activeItem: null, offsetX: 0, offsetY: 0 };
 
     function createItem(type, val, worldX, worldY) {
         const item = document.createElement('div');
@@ -422,19 +644,298 @@
         item.appendChild(del);
 
         if(type === 'number') {
+            item.classList.add('item-single');
             item.appendChild(autoInput(''));
+        } else if (type === 'var') {
+            item.classList.add('item-single');
+            const span = document.createElement('span');
+            span.className = 'operator-text';
+            span.style.fontFamily = "'Cambria Math', serif";
+            span.style.fontStyle = 'italic';
+            span.textContent = val;
+            item.appendChild(span);
+        } else if (type === 'op-mul') {
+            item.classList.add('item-single');
+            const span = document.createElement('span');
+            span.className = 'operator-text';
+            span.style.fontSize = '20px';
+            span.style.padding = '0 8px';
+            span.textContent = '×';
+            item.appendChild(span);
         } else if (type === 'fraction') {
+            item.classList.add('item-fraction');
             item.appendChild(fractionDom());
         } else if (type === 'mixed') {
+            item.classList.add('item-fraction');
             const wrap = document.createElement('div');
             wrap.className = 'mixed-container';
             const intPart = document.createElement('div');
+            intPart.style.display = 'flex';
+            intPart.style.alignItems = 'center';
+            intPart.style.height = '100%';
             intPart.appendChild(autoInput(''));
             intPart.style.fontSize = '1.2em';
             wrap.appendChild(intPart);
             wrap.appendChild(fractionDom());
             item.appendChild(wrap);
+        } else if (type === 'fraction-bar') {
+            item.classList.add('item-single');
+            item.classList.add('item-fraction-bar');
+            let width = 120;
+            const wrapper = document.createElement('div');
+            wrapper.style.display = 'flex';
+            wrapper.style.alignItems = 'center';
+            wrapper.style.height = '100%'; 
+            
+            const line = document.createElement('div');
+            line.style.height = '3px';
+            line.style.backgroundColor = 'var(--text-color)';
+            line.style.width = width + 'px';
+            line.style.borderRadius = '2px';
+
+            const handle = document.createElement('div');
+            handle.className = 'segment-resize-handle';
+            handle.innerHTML = '⇹';
+            handle.style.marginLeft = '12px';
+            handle.style.marginTop = '0';
+
+            handle.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+                const startX = e.clientX;
+                const startW = width;
+                const onMouseMove = (ev) => {
+                    const dx = (ev.clientX - startX) / state.scale;
+                    width = Math.max(30, startW + dx);
+                    line.style.width = width + 'px';
+                };
+                const onMouseUp = () => {
+                    window.removeEventListener('mousemove', onMouseMove);
+                    window.removeEventListener('mouseup', onMouseUp);
+                };
+                window.addEventListener('mousemove', onMouseMove);
+                window.addEventListener('mouseup', onMouseUp);
+            });
+
+            wrapper.appendChild(line);
+            wrapper.appendChild(handle);
+            item.appendChild(wrapper);
+
+        } else if (type === 'segment') {
+            item.classList.add('item-auto');
+            let isAuto = true;
+            let localUnitPx = 20; 
+            let rowsData = []; 
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'seg-container';
+
+            const header = document.createElement('div');
+            header.className = 'seg-header';
+
+            const scaleWrap = document.createElement('div');
+            scaleWrap.className = 'scale-wrap';
+            scaleWrap.appendChild(document.createTextNode('1 ед = '));
+            
+            const scaleInput = document.createElement('input');
+            scaleInput.className = 'scale-input';
+            scaleInput.value = '20';
+            scaleWrap.appendChild(scaleInput);
+            scaleWrap.appendChild(document.createTextNode(' px'));
+
+            const autoLabel = document.createElement('label');
+            autoLabel.className = 'auto-scale-label';
+            const autoCb = document.createElement('input');
+            autoCb.type = 'checkbox';
+            autoCb.checked = true;
+            autoLabel.appendChild(autoCb);
+            autoLabel.appendChild(document.createTextNode('Автомасштаб'));
+
+            const leftHeaderGroup = document.createElement('div');
+            leftHeaderGroup.style.display = 'flex';
+            leftHeaderGroup.style.alignItems = 'center';
+            leftHeaderGroup.style.gap = '16px';
+            leftHeaderGroup.appendChild(scaleWrap);
+            leftHeaderGroup.appendChild(autoLabel);
+
+            const addBtn = document.createElement('button');
+            addBtn.className = 'action-btn btn-primary';
+            addBtn.innerHTML = '➕ Отрезок';
+
+            header.appendChild(leftHeaderGroup);
+            header.appendChild(addBtn);
+            wrapper.appendChild(header);
+
+            const rowsContainer = document.createElement('div');
+            rowsContainer.className = 'seg-rows';
+            wrapper.appendChild(rowsContainer);
+
+            const updateContainer = () => {
+                if (isAuto && rowsData.length > 0) {
+                    let maxLen = Math.max(...rowsData.map(r => r.step * r.parts));
+                    if (maxLen > 0) {
+                        localUnitPx = Math.min(100, Math.max(0.1, 400 / maxLen));
+                        scaleInput.value = parseFloat(localUnitPx.toFixed(2));
+                    }
+                }
+                rowsData.forEach(r => r.renderGraphics());
+            };
+
+            scaleInput.addEventListener('input', (e) => {
+                let val = parseFloat(e.target.value.replace(',', '.'));
+                if (!isNaN(val) && val > 0) {
+                    localUnitPx = val;
+                    isAuto = false;
+                    autoCb.checked = false;
+                    updateContainer(); 
+                }
+            });
+            scaleInput.addEventListener('mousedown', e => e.stopPropagation());
+
+            autoCb.addEventListener('change', (e) => {
+                isAuto = e.target.checked;
+                updateContainer();
+            });
+
+            const addSegment = (defaultStep) => {
+                const rowModel = { step: defaultStep, parts: 3, renderGraphics: null };
+                rowsData.push(rowModel);
+
+                const row = document.createElement('div');
+                row.className = 'seg-row';
+
+                const topArea = document.createElement('div');
+                topArea.className = 'seg-top';
+                
+                const graphics = document.createElement('div');
+                graphics.className = 'segment-graphics';
+
+                const handle = document.createElement('div');
+                handle.className = 'segment-resize-handle';
+                handle.innerHTML = '⇹';
+
+                topArea.appendChild(graphics);
+                topArea.appendChild(handle);
+
+                const bottomArea = document.createElement('div');
+                bottomArea.className = 'seg-bottom';
+                
+                bottomArea.appendChild(document.createTextNode('Шаг:'));
+                const stepInput = autoInput(rowModel.step.toString());
+                stepInput.style.fontSize = '16px';
+                bottomArea.appendChild(stepInput);
+
+                const divider = document.createElement('span');
+                divider.textContent = '|';
+                divider.style.color = '#cbd5e1';
+                divider.style.margin = '0 6px';
+                bottomArea.appendChild(divider);
+
+                bottomArea.appendChild(document.createTextNode('Длина:'));
+                const lenInput = autoInput((rowModel.step * rowModel.parts).toString());
+                lenInput.style.fontSize = '16px';
+                bottomArea.appendChild(lenInput);
+
+                const delRowBtn = document.createElement('button');
+                delRowBtn.className = 'seg-row-del';
+                delRowBtn.innerHTML = '🗑 Удалить';
+                delRowBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    row.remove();
+                    rowsData = rowsData.filter(r => r !== rowModel);
+                    updateContainer();
+                };
+                bottomArea.appendChild(delRowBtn);
+
+                row.appendChild(topArea);
+                row.appendChild(bottomArea);
+                rowsContainer.appendChild(row);
+
+                stepInput.addEventListener('input', () => {
+                    rowModel.step = parseInputVal(stepInput.value);
+                    updateInputUI(lenInput, rowModel.step * rowModel.parts);
+                    updateContainer();
+                });
+
+                lenInput.addEventListener('input', () => {
+                    let totalLen = parseInputVal(lenInput.value);
+                    rowModel.step = totalLen / rowModel.parts;
+                    updateInputUI(stepInput, rowModel.step);
+                    updateContainer();
+                });
+
+                rowModel.renderGraphics = () => {
+                    graphics.innerHTML = '';
+                    
+                    const partWidth = Math.max(5, rowModel.step * localUnitPx);
+                    const totalWidth = rowModel.parts * partWidth;
+
+                    graphics.style.width = totalWidth + 'px';
+
+                    const mainLine = document.createElement('div');
+                    mainLine.className = 'segment-main-line';
+                    mainLine.style.width = totalWidth + 'px';
+                    graphics.appendChild(mainLine);
+
+                    for (let i = 0; i <= rowModel.parts; i++) {
+                        const tick = document.createElement('div');
+                        tick.className = 'segment-tick';
+                        tick.style.left = (i * partWidth) + 'px';
+                        graphics.appendChild(tick);
+
+                        const label = document.createElement('div');
+                        label.className = 'segment-label';
+                        label.style.left = (i * partWidth) + 'px';
+                        label.textContent = parseFloat((i * rowModel.step).toFixed(3));
+                        graphics.appendChild(label);
+                    }
+                };
+
+                handle.addEventListener('mousedown', (e) => {
+                    e.stopPropagation();
+                    const startX = e.clientX;
+                    const startParts = rowModel.parts;
+                    
+                    isAuto = false;
+                    autoCb.checked = false;
+                    
+                    const currentPartWidth = Math.max(5, rowModel.step * localUnitPx);
+
+                    const onMouseMove = (ev) => {
+                        const dx = (ev.clientX - startX) / state.scale;
+                        let newParts = startParts + Math.round(dx / currentPartWidth);
+                        newParts = Math.max(1, Math.min(newParts, 150)); 
+                        
+                        if (newParts !== rowModel.parts) {
+                            rowModel.parts = newParts;
+                            updateInputUI(lenInput, rowModel.step * rowModel.parts);
+                            updateContainer();
+                        }
+                    };
+
+                    const onMouseUp = () => {
+                        window.removeEventListener('mousemove', onMouseMove);
+                        window.removeEventListener('mouseup', onMouseUp);
+                    };
+
+                    window.addEventListener('mousemove', onMouseMove);
+                    window.addEventListener('mouseup', onMouseUp);
+                });
+
+                updateContainer();
+                setTimeout(() => stepInput.focus(), 10);
+            };
+
+            addBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                addSegment(1);
+            });
+            addBtn.addEventListener('mousedown', e => e.stopPropagation());
+
+            addSegment(1);
+            item.appendChild(wrapper);
+
         } else {
+            item.classList.add('item-single');
             const span = document.createElement('span');
             span.className = 'operator-text';
             span.textContent = val;
@@ -442,21 +943,18 @@
         }
 
         item.addEventListener('mousedown', (e) => {
-            if(e.target.tagName === 'INPUT') return;
+            if(e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.type === 'checkbox') return;
+            document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
+            item.classList.add('selected');
+            
             e.stopPropagation();
             startItemDrag(e, item, false);
-        });
-        
-        item.addEventListener('click', () => {
-             document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
-             item.classList.add('selected');
         });
 
         surface.appendChild(item);
         
-        // Автоматический фокус на первом инпуте после создания
         const firstInput = item.querySelector('input');
-        if (firstInput) {
+        if (firstInput && type !== 'segment' && type !== 'fraction-bar') {
             setTimeout(() => firstInput.focus(), 10);
         }
 
@@ -468,7 +966,7 @@
         inp.className = 'smart-input';
         inp.value = val;
         inp.placeholder = '?';
-        const resize = () => inp.style.width = Math.max(30, (inp.value.length+1)*16) + 'px';
+        const resize = () => inp.style.width = Math.max(30, (inp.value.length + 1) * 14) + 'px';
         inp.addEventListener('input', resize);
         setTimeout(resize,0);
         return inp;
@@ -483,21 +981,23 @@
         return b;
     }
 
-    // Клик по палитре - добавление в центр экрана
     document.querySelectorAll('.palette-item').forEach(p => {
         p.addEventListener('click', (e) => {
             const rect = viewport.getBoundingClientRect();
-            // Вычисляем центр вьюпорта
             const centerX = rect.left + rect.width / 2;
             const centerY = rect.top + rect.height / 2;
             
-            // Переводим центр экрана в мировые координаты доски
             const worldPos = screenToWorld(centerX, centerY);
             
-            // Создаем элемент (со смещением, чтобы он визуально был ровно по центру)
-            const offsetX = 30; // Приблизительная половина ширины блока
-            const offsetY = 20; // Приблизительная половина высоты блока
-            createItem(p.dataset.type, p.dataset.val, worldPos.x - offsetX, worldPos.y - offsetY);
+            const offsetX = 30;
+            const offsetY = 20;
+            
+            const item = createItem(p.dataset.type, p.dataset.val, worldPos.x - offsetX, worldPos.y - offsetY);
+            
+            document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
+            item.classList.add('selected');
+
+            snapItem(item);
         });
     });
 
@@ -520,19 +1020,35 @@
     }
 
     function snapItem(item) {
-        const grid = 20;
+        const grid = 10;
         const x = parseFloat(item.style.left);
         const y = parseFloat(item.style.top);
         item.style.left = (Math.round(x/grid)*grid) + 'px';
         item.style.top = (Math.round(y/grid)*grid) + 'px';
     }
 
-    function clearAll() { if(confirm('Все удалить?')) surface.innerHTML = ''; }
+    function clearAll() { 
+        if(confirm('Все удалить?')) {
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                const event = new MouseEvent('mousedown');
+                btn.dispatchEvent(event);
+            });
+            surface.innerHTML = ''; 
+        }
+    }
     
     window.addEventListener('keydown', (e) => {
         if((e.key === 'Delete' || e.key === 'Backspace') && document.activeElement.tagName !== 'INPUT') {
             const s = document.querySelector('.selected');
-            if(s) s.remove();
+            if(s) {
+                const delBtn = s.querySelector('.delete-btn');
+                if(delBtn) {
+                    const event = new MouseEvent('mousedown');
+                    delBtn.dispatchEvent(event);
+                } else {
+                    s.remove();
+                }
+            }
         }
     });
 
