@@ -2,639 +2,826 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Генератор Уравнений: Защита от 0x</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Раскрытие скобок и решение уравнений 6 класс | Онлайн-тренажёр</title>
+    <meta name="description" content="Интерактивный тренажёр: раскрытие скобок перетаскиванием, перенос слагаемых со сменой знака, приведение подобных и решение полученного уравнения. 7 уровней сложности: от положительных чисел до отрицательного множителя. Бесплатно, 6 класс.">
+    <meta name="keywords" content="раскрытие скобок тренажер, решение уравнений 6 класс, генератор уравнений, перенос слагаемых, приведение подобных слагаемых, уравнения с отрицательными числами тренажер">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://godspace.github.io/math-6-grade/trainers/equations/opening.html">
+
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Раскрытие скобок и решение уравнений 6 класс — тренажёр">
+    <meta property="og:description" content="4 шага: скобки → перенос → приведение → ответ. 7 уровней: от положительных чисел до отрицательного множителя.">
+    <meta property="og:url" content="https://godspace.github.io/math-6-grade/trainers/equations/opening.html">
+    <meta property="og:site_name" content="Математика 6 класс">
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "LearningResource",
+        "name": "Раскрытие скобок и решение уравнений — тренажёр",
+        "description": "Пошаговый тренажёр решения уравнений: раскрытие скобок, перенос слагаемых, приведение подобных, нахождение x. 7 уровней сложности, включая отрицательный множитель перед скобкой. Для 6 класса.",
+        "educationalLevel": "6 класс",
+        "learningResourceType": "Интерактивный тренажёр",
+        "inLanguage": "ru",
+        "isAccessibleForFree": true,
+        "teaches": ["Раскрытие скобок", "Перенос слагаемых", "Приведение подобных слагаемых", "Решение линейных уравнений", "Действия с отрицательными числами"],
+        "url": "https://godspace.github.io/math-6-grade/trainers/equations/opening.html"
+    }
+    </script>
+
     <style>
-        :root {
-            --bg-paper: #f8fafc;
-            --line-color: #cbd5e1;
-            --primary: #3b82f6;   
-            --accent: #f97316;    
-            --success: #22c55e;
-            --danger: #ef4444;
-            --text: #1e293b;
-        }
-
+        * { box-sizing: border-box; }
         body {
-            font-family: 'Comic Sans MS', 'Segoe UI', sans-serif;
-            background-color: var(--bg-paper);
-            background-image: 
-                linear-gradient(var(--line-color) 1px, transparent 1px),
-                linear-gradient(90deg, var(--line-color) 1px, transparent 1px);
-            background-size: 25px 25px;
-            margin: 0; padding: 20px;
-            display: flex; flex-direction: column; align-items: center;
-            min-height: 100vh; color: var(--text); user-select: none;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            margin: 0; padding: 16px;
+            color: #2d3436; line-height: 1.5;
+            background-color: #f3f6fb;
+            background-image: linear-gradient(#dfe7f3 1px, transparent 1px),
+                              linear-gradient(90deg, #dfe7f3 1px, transparent 1px);
+            background-size: 28px 28px;
+            min-height: 100vh;
+        }
+        header { text-align: center; margin-bottom: 10px; }
+        h1 { font-size: 1.5rem; color: #2c3e50; margin: 0 0 4px; }
+        .subtitle { color: #7f8c8d; font-size: .95rem; margin: 0; }
+
+        /* ── Степпер ── */
+        .stepper { display: flex; gap: 8px; justify-content: center; margin: 14px 0; flex-wrap: wrap; }
+        .step-item { padding: 6px 14px; border-radius: 20px; background: #eef2f7; color: #8a94a6;
+                     font-size: 14px; font-weight: 600; transition: all .3s; }
+        .step-item b { display: inline-block; width: 18px; height: 18px; line-height: 18px; border-radius: 50%;
+                       background: #cfd8e3; color: #fff; text-align: center; margin-right: 6px; font-size: 12px; }
+        .step-item.active { background: #4a7dff; color: #fff; box-shadow: 0 3px 10px rgba(74,125,255,.4); }
+        .step-item.active b { background: #fff; color: #4a7dff; }
+        .step-item.done { background: #d9f5e5; color: #27ae60; }
+        .step-item.done b { background: #27ae60; }
+
+        /* ── Панель-инструктаж ── */
+        .guide { max-width: 780px; margin: 0 auto 14px; background: #fffbea; border: 2px solid #ffd766;
+                 border-radius: 12px; padding: 12px 18px; font-size: 15px; }
+        .guide-title { font-weight: 700; color: #2c3e50; margin-bottom: 6px; }
+        .guide-row { margin: 3px 0; color: #444; }
+        .guide-row.rule { color: #7a6100; font-size: 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .hint-btn { border: none; background: #ffd766; border-radius: 50%; width: 30px; height: 30px;
+                    cursor: pointer; font-size: 15px; flex: 0 0 auto; }
+
+        /* ── Игровое поле ── */
+        .board { max-width: 900px; margin: 0 auto; background: rgba(255,255,255,.75);
+                 border-radius: 18px; padding: 20px; box-shadow: 0 8px 24px rgba(0,0,0,.08); }
+        .level-line { display: flex; justify-content: space-between; align-items: center; margin-bottom: 26px; }
+        .level-badge { background: #4a7dff; color: #fff; padding: 6px 16px; border-radius: 18px; font-weight: 700; font-size: 14px; }
+        .score { color: #7f8c8d; font-size: 14px; font-weight: 600; }
+
+        .equation-area { display: flex; align-items: stretch; justify-content: center; gap: 14px; flex-wrap: wrap; }
+        .zone { position: relative; min-width: 240px; min-height: 120px; flex: 1 1 240px; max-width: 380px;
+                border: 2px dashed #b9c6d8; border-radius: 14px; background: #f7fafd;
+                display: flex; align-items: center; justify-content: center; gap: 10px; padding: 24px 12px 12px;
+                transition: all .25s; }
+        .zone::before { position: absolute; top: 5px; left: 12px; font-size: 12px; color: #90a2b8; font-weight: 600; }
+        #board[data-step="1"] .zone.left::before  { content: 'Левая часть со скобкой'; }
+        #board.opened[data-step="1"] .zone.left::before { content: 'Левая часть (скобка раскрыта)'; }
+        #board[data-step="1"] .zone.right::before { content: 'Правая часть (карточки спят до шага 2)'; }
+        #board[data-step="2"] .zone.left::before  { content: 'Сюда собираем слагаемые с x'; }
+        #board[data-step="2"] .zone.right::before { content: 'Сюда собираем числа'; }
+        #board[data-step="3"] .zone.left::before  { content: 'Тяни синюю на синюю и считай сам'; }
+        #board[data-step="3"] .zone.right::before { content: 'Тяни оранжевую на оранжевую и считай сам'; }
+        #board[data-step="4"] .zone::before       { content: 'Уравнение готово к решению'; }
+        .zone.zone-active { border-color: #4a7dff; background: #eef5ff; }
+        .eq-sign { font-size: 2rem; font-weight: 700; color: #8a94a6; align-self: center; }
+
+        /* ── Карточки ── */
+        .card { background: #fff; border: 2px solid #dfe6ee; border-radius: 12px;
+                padding: 12px 18px; font-size: 1.4rem; font-weight: 700; user-select: none;
+                box-shadow: 0 5px 0 -1px rgba(0,0,0,.08); transition: transform .15s, box-shadow .15s; }
+        .card .sign-part { display: inline-block; transition: all .3s; }
+        .card.num { color: #e67e22; box-shadow: 0 5px 0 -1px #f5c98a; }
+        .card.x   { color: #2f6fdb; box-shadow: 0 5px 0 -1px #a9c6f2; }
+        .card.locked { opacity: .55; cursor: default; }
+        .card.pop-in { animation: popIn .4s ease both; }
+        .card.drop-target { outline: 3px dashed #27ae60; outline-offset: 3px; }
+        [draggable="true"] { cursor: grab; }
+        [draggable="true"]:active { cursor: grabbing; }
+
+        .card.flip-prep { animation: flipPrep 1.2s ease; }
+        @keyframes flipPrep {
+            0%   { box-shadow: 0 5px 0 -1px rgba(0,0,0,.08); background: #fff; }
+            20%  { box-shadow: 0 0 0 10px rgba(231,76,60,.5);  background: #fff5f5; }
+            40%  { box-shadow: 0 5px 0 -1px rgba(0,0,0,.08);   background: #fff; }
+            60%  { box-shadow: 0 0 0 10px rgba(231,76,60,.5);  background: #fff5f5; }
+            80%  { box-shadow: 0 5px 0 -1px rgba(0,0,0,.08);   background: #fff; }
+            100% { box-shadow: 0 5px 0 -1px rgba(0,0,0,.08);   background: #fff; }
+        }
+        .card.flip { animation: flipCard 1.4s ease; }
+        @keyframes flipCard {
+            0%   { transform: rotateY(0); }
+            50%  { transform: rotateY(90deg) scale(1.15); }
+            100% { transform: rotateY(0); }
+        }
+        .card .sign-part.sign-swap { animation: signSwap .6s ease both; }
+        @keyframes signSwap {
+            0%   { opacity: 0; transform: scale(0.3) rotate(-180deg); color: #e74c3c; }
+            60%  { opacity: 1; transform: scale(1.6) rotate(0deg);    color: #e74c3c; text-shadow: 0 0 14px #e74c3c; }
+            100% { opacity: 1; transform: scale(1)   rotate(0deg);    color: inherit; text-shadow: none; }
         }
 
-        /* ХЕДЕР */
-        .level-bar {
-            display: flex; gap: 8px; margin-bottom: 20px;
-            background: white; padding: 10px 15px; border-radius: 20px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); flex-wrap: wrap; justify-content: center;
-        }
-        .level-dot {
-            width: 30px; height: 30px; background: #e2e8f0; border-radius: 50%;
-            display: flex; justify-content: center; align-items: center;
-            font-size: 0.9rem; font-weight: bold; color: #64748b;
-        }
-        .level-dot.active { background: var(--primary); color: white; transform: scale(1.2); box-shadow: 0 0 10px var(--primary); }
-        .level-dot.done { background: var(--success); color: white; }
+        /* ── Круг-множитель (красный, если отрицательный) ── */
+        .circle { width: 58px; height: 58px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #f0954f, #d96a1f);
+                  color: #fff; font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; justify-content: center;
+                  box-shadow: 0 5px 0 #b3541a; user-select: none; transition: all .4s; cursor: grab; }
+        .circle.neg { background: radial-gradient(circle at 35% 30%, #ec7063, #c0392b); box-shadow: 0 5px 0 #922b21; }
+        .circle:active { cursor: grabbing; }
+        .circle.spent { opacity: .25; transform: scale(.8); }
 
-        /* ИНСТРУКЦИЯ */
-        .instruction-box {
-            background: white; padding: 15px 30px; border-radius: 50px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 30px;
-            font-size: 1.2rem; font-weight: bold; color: var(--primary);
-            border: 2px solid transparent; text-align: center; max-width: 800px;
-            transition: all 0.3s;
-        }
-        .instruction-box.error { border-color: var(--danger); color: var(--danger); animation: shake 0.4s; }
+        .bracket { background: #fff; border: 2px solid #9aa7b8; border-radius: 12px; padding: 12px 18px;
+                   font-size: 1.4rem; font-weight: 700; letter-spacing: 2px;
+                   display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: center; }
+        .bracket .par { color: #9aa7b8; transition: all .45s; }
+        .bracket .par.gone { opacity: 0; transform: scale(.4); }
+        .bracket .bterm { display: inline-flex; flex-direction: column; align-items: center; gap: 3px; }
+        .bracket .bop { margin: 0 4px; align-self: center; }
+        .bracket .inrow { display: inline-flex; align-items: center; gap: 2px; }
+        .bracket .mult { color: #d96a1f; font-weight: 800; display: inline-block; animation: popIn .35s ease both; }
+        .bracket .mult.neg { color: #c0392b; }
+        .bracket .prompt { font-size: .8rem; color: #d96a1f; font-weight: 800; line-height: 1; letter-spacing: 1px; }
+        .bracket .prompt.neg { color: #c0392b; }
+        .bracket .bterm.calc { animation: flipCard .45s ease; }
+        .xsuf { margin-left: 2px; }
 
-        /* ИГРОВОЕ ПОЛЕ */
-        #board { width: 100%; max-width: 900px; display: flex; flex-direction: column; gap: 20px; padding-bottom: 80px; }
+        /* ── Числовые поля (без спиннеров, минус с клавиатуры) ── */
+        .bracket .prod-in, .merge-in, .answer-x {
+            padding: 4px 6px; font: inherit; font-weight: 800; text-align: center;
+            border: 2px solid #b9c6d8; border-radius: 8px; color: #2c3e50;
+            outline: none; background: #fff; transition: all .2s;
+            -moz-appearance: textfield; appearance: textfield; }
+        .bracket .prod-in::-webkit-outer-spin-button, .bracket .prod-in::-webkit-inner-spin-button,
+        .merge-in::-webkit-outer-spin-button, .merge-in::-webkit-inner-spin-button,
+        .answer-x::-webkit-outer-spin-button, .answer-x::-webkit-inner-spin-button {
+            -webkit-appearance: none; margin: 0; }
+        .bracket .prod-in { width: 60px; }
+        .merge-in { width: 70px; font-size: 1.2rem; }
+        .bracket .prod-in:focus, .merge-in:focus { border-color: #4a7dff; }
+        .bracket .prod-in.good, .merge-in.good { border-color: #27ae60; background: #eafaf0; }
+        .bracket .prod-in.bad,  .merge-in.bad  { border-color: #e74c3c; background: #fdeeee; }
+        .bracket .prod-in:disabled { opacity: .9; }
 
-        .row {
-            display: flex; align-items: center; justify-content: center; gap: 15px;
-            padding: 20px; background: white; border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05); position: relative; flex-wrap: wrap;
-            transition: all 0.5s ease;
-        }
-        .row.history {
-            opacity: 0.6; transform: scale(0.95); filter: grayscale(100%);
-            pointer-events: none; background: #f1f5f9; border: 2px dashed #cbd5e1;
-        }
+        .merge-widget { display: flex; align-items: center; gap: 8px; background: #f0fff4;
+                        border: 2px solid #27ae60; border-radius: 12px; padding: 10px 16px;
+                        font-size: 1.3rem; font-weight: 700; color: #2c3e50;
+                        animation: popIn .35s ease both; flex-wrap: wrap; justify-content: center; }
+        .merge-widget .mw-op, .merge-widget .mw-eq { color: #90a2b8; }
 
-        .side {
-            display: flex; align-items: center; gap: 12px; padding: 15px;
-            min-width: 220px; min-height: 90px; border: 2px dashed #cbd5e1;
-            border-radius: 12px; transition: background 0.3s; background: #f8fafc; justify-content: center;
-        }
-        .side.highlight { background: #eff6ff; border-color: var(--primary); }
-        .equals { font-size: 2rem; color: #94a3b8; font-weight: 900; }
+        .pulse-hint { animation: pulseHint 1s ease infinite; }
+        @keyframes pulseHint { 0%,100% { box-shadow: 0 0 0 0 rgba(255,180,0,.75); } 50% { box-shadow: 0 0 0 14px rgba(255,180,0,0); } }
+        @keyframes popIn { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-        /* КАРТОЧКИ */
-        .card {
-            display: inline-flex; align-items: center; padding: 8px 14px;
-            border-radius: 10px; background: white; box-shadow: 0 4px 0 #e2e8f0;
-            border: 2px solid #cbd5e1; font-size: 1.4rem; font-weight: bold;
-            cursor: grab; transition: transform 0.1s; position: relative;
-            transform-style: preserve-3d; margin: 5px;
-        }
-        .card:active { cursor: grabbing; transform: translateY(2px); box-shadow: 0 2px 0 #e2e8f0; }
-        .card[data-type="var"] { color: var(--primary); border-bottom: 4px solid #bfdbfe; }
-        .card[data-type="num"] { color: var(--accent); border-bottom: 4px solid #fed7aa; }
+        /* ── Ответ: крупный X ── */
+        .answer-area { display: flex; align-items: center; justify-content: center; gap: 18px; margin-top: 22px; flex-wrap: wrap; }
+        .big-x { font-size: 4rem; font-weight: 900; color: #2f6fdb; letter-spacing: -2px; line-height: 1;
+                 font-family: Georgia, 'Times New Roman', serif; font-style: italic; }
+        .big-eq { font-size: 3rem; font-weight: 800; color: #8a94a6; line-height: 1; }
+        .answer-x { width: 120px; padding: 12px; font-size: 2.2rem !important; font-weight: 900;
+                    border: 4px solid #b9c6d8; border-radius: 12px; color: #2f6fdb; background: #fff; }
+        .answer-x:focus { border-color: #4a7dff; box-shadow: 0 0 0 4px rgba(74,125,255,.15); }
 
-        .sign { margin-right: 5px; font-weight: 900; color: #64748b; }
-        .card.alert-sign .sign { color: var(--danger); transform: scale(1.3); }
+        .btn { padding: 12px 26px; border: none; border-radius: 10px; font-size: 1rem; font-weight: 700;
+               cursor: pointer; transition: transform .15s; }
+        .btn:active { transform: scale(.96); }
+        .btn.primary { background: #4a7dff; color: #fff; box-shadow: 0 4px 12px rgba(74,125,255,.4); }
+        .btn.secondary { background: #eef2f7; color: #5b6b7f; }
+        .controls { display: flex; justify-content: center; gap: 14px; margin-top: 20px; flex-wrap: wrap; }
+        .msg { min-height: 26px; text-align: center; margin-top: 14px; font-weight: 600; font-size: 1rem; }
+        .msg.ok { color: #27ae60; } .msg.err { color: #e74c3c; }
+        .hidden { display: none !important; }
 
-        /* ЭЛЕМЕНТЫ СКОБОК */
-        .bracket-group {
-            display: flex; align-items: center; border: 2px solid #94a3b8;
-            padding: 10px; border-radius: 12px; background: white;
-        }
-        .multiplier {
-            width: 40px; height: 40px; border-radius: 50%; background: var(--accent);
-            color: white; display: flex; justify-content: center; align-items: center;
-            font-size: 1.2rem; margin-right: 10px; cursor: grab; z-index: 10;
-            box-shadow: 0 3px 0 #c2410c;
-        }
-        .target-slot {
-            padding: 5px 8px; border-radius: 6px; border: 2px dashed transparent; transition: all 0.3s;
-        }
-        .target-slot.active { background: #ffedd5; border-color: var(--accent); }
-        .target-slot.done { background: #dcfce7; color: #166534; font-weight: bold; border: none; }
+        .overlay { position: fixed; inset: 0; background: rgba(255,255,255,.92); display: flex;
+                   align-items: center; justify-content: center; z-index: 50; }
+        .finish-card { background: linear-gradient(135deg, #4a7dff, #6c5ce7); color: #fff; text-align: center;
+                       padding: 40px 50px; border-radius: 22px; box-shadow: 0 15px 40px rgba(0,0,0,.25); }
+        .finish-card h2 { margin: 0 0 10px; font-size: 2rem; }
+        .finish-card .btn { margin-top: 18px; background: #fff; color: #4a7dff; }
+        .toast { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%);
+                 background: #2c3e50; color: #fff; padding: 12px 22px; border-radius: 30px;
+                 font-size: 15px; font-weight: 600; box-shadow: 0 8px 20px rgba(0,0,0,.3); z-index: 60; }
+        .confetti { position: fixed; top: -12px; width: 10px; height: 14px; z-index: 70; pointer-events: none;
+                    animation: fall 1.3s ease-in forwards; }
+        @keyframes fall { to { transform: translateY(105vh) rotate(720deg); opacity: .8; } }
 
-        /* АНИМАЦИИ */
-        .flipping { animation: coinFlip 0.8s cubic-bezier(0.45, 0, 0.55, 1) forwards; }
-        @keyframes coinFlip { 0% { transform: rotateY(0); } 50% { transform: rotateY(90deg) scale(1.1); } 100% { transform: rotateY(0); } }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
-        .pop { animation: popAnim 0.4s ease-out; }
-        @keyframes popAnim { 50% { transform: scale(1.2); } }
-
-        /* ФИНАЛ */
-        #final-area {
-            display: none; flex-direction: column; align-items: center;
-            background: white; padding: 20px; border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1); margin-top: 20px;
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            z-index: 100; width: 90%; max-width: 400px;
-        }
-        input { font-size: 1.8rem; width: 100px; text-align: center; padding: 10px; border: 3px solid var(--primary); border-radius: 10px; }
-        .btn-check, .btn-next { margin-top: 15px; padding: 10px 25px; font-size: 1.2rem; color: white; border: none; border-radius: 10px; cursor: pointer; width: 100%; }
-        .btn-check { background: var(--success); box-shadow: 0 4px 0 #15803d; }
-        .btn-next { background: var(--primary); box-shadow: 0 4px 0 #1e40af; display: none; }
-        
-        #victory-screen {
-            display: none; position: fixed; top:0; left:0; width:100%; height:100%;
-            background: rgba(0,0,0,0.9); z-index: 200; justify-content: center;
-            align-items: center; flex-direction: column; color: white; text-align: center;
+        @media (max-width: 640px) {
+            .card, .bracket, .merge-widget { font-size: 1.1rem; padding: 10px 14px; }
+            .circle { width: 48px; height: 48px; font-size: 1.2rem; }
+            .zone { min-width: 100%; }
+            .eq-sign { display: none; }
+            .big-x { font-size: 3rem; }
+            .big-eq { font-size: 2.2rem; }
+            .answer-x { font-size: 1.8rem !important; width: 100px; }
         }
     </style>
-<script src="../../assets/analytics.js"></script>
 </head>
 <body>
 
-    <div class="level-bar" id="level-bar"></div>
-    <div class="instruction-box" id="instr">Генерация задания...</div>
-    <div id="board"></div>
+<header>
+    <h1>Генератор уравнений: раскрытие скобок и решение</h1>
+    <p class="subtitle">7 уровней сложности: от положительных чисел до отрицательного множителя · «защита от 0x» · все примеры уникальны</p>
+</header>
 
-    <div id="final-area">
-        <h2 id="final-eq-label" style="margin:0 0 10px 0;">4x = 16</h2>
-        <div style="display: flex; gap: 10px; align-items: center; justify-content: center;">
-            <span style="font-size: 2rem; font-weight: bold;">x = </span>
-            <input type="number" id="answer-input" placeholder="?">
-        </div>
-        <button class="btn-check" onclick="checkFinalAnswer()">Проверить</button>
-        <button class="btn-next" onclick="loadNextLevel()">Следующий уровень ➡</button>
+<div class="stepper" id="stepper">
+    <div class="step-item active" data-step="1"><b>1</b> Скобки</div>
+    <div class="step-item" data-step="2"><b>2</b> Перенос</div>
+    <div class="step-item" data-step="3"><b>3</b> Приведение</div>
+    <div class="step-item" data-step="4"><b>4</b> Ответ</div>
+</div>
+
+<div class="guide">
+    <div class="guide-title" id="guideTitle"></div>
+    <div class="guide-row">🎯 <span id="guideGoal"></span></div>
+    <div class="guide-row">👆 <span id="guideAction"></span></div>
+    <div class="guide-row rule">📖 <span id="guideRule"></span>
+        <button class="hint-btn" id="hintBtn" title="Показать, что трогать">💡</button>
+    </div>
+</div>
+
+<div class="board" id="board" data-step="1">
+    <div class="level-line">
+        <span class="level-badge" id="levelBadge">Уровень 1 из 7</span>
+        <span class="score" id="score">Решено: 0</span>
     </div>
 
-    <div id="victory-screen">
-        <h1 style="font-size: 5rem; margin-bottom: 0;">🎲</h1>
-        <h1>КУРС ЗАВЕРШЕН!</h1>
+    <div class="equation-area">
+        <div class="zone left" id="zoneLeft"></div>
+        <div class="eq-sign">=</div>
+        <div class="zone right" id="zoneRight"></div>
+    </div>
+
+    <div class="answer-area hidden" id="answerArea">
+        <span class="big-x">x</span>
+        <span class="big-eq">=</span>
+        <input class="answer-x" id="answerInput" type="number" step="any" placeholder="?">
+        <button class="btn primary" id="checkBtn">Проверить</button>
+    </div>
+
+    <div class="msg" id="msg"></div>
+
+    <div class="controls">
+        <button class="btn secondary" id="resetBtn">🎲 Новый пример</button>
+        <button class="btn primary hidden" id="nextBtn">Следующий уровень ➡</button>
+    </div>
+</div>
+
+<div class="overlay hidden" id="finishOverlay">
+    <div class="finish-card">
+        <h2>🎉 КУРС ЗАВЕРШЕН!</h2>
         <p>Каждое задание было уникальным.</p>
-        <button class="btn-check" onclick="location.reload()" style="max-width: 200px;">Новые примеры</button>
+        <button class="btn" id="restartBtn">Новые примеры</button>
     </div>
+</div>
+
+<div class="toast hidden" id="onboardToast">👆 Возьми круг-множитель и перетащи его на карточку со скобками!</div>
 
 <script>
-    // --- ГЕНЕРАТОР УРАВНЕНИЙ ---
-    function getRandomInt(min, max) {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
+/* ═══════════ СОСТОЯНИЕ ═══════════ */
+const TOTAL_LEVELS = 7;
+let level = 1, solved = 0, step = 1, eq = null;
+let leftCards = [], rightCards = [];
+let used = new Set();
+let drag = null;
+let attempts = 0, uidCounter = 0;
+let busy = false;
+let productsSolved = false;
+let pendingMerges = { left: null, right: null };
+const uid = () => ++uidCounter;
+
+const $ = id => document.getElementById(id);
+const zoneL = $('zoneLeft'), zoneR = $('zoneRight'), board = $('board');
+
+/* ═══════════ ТЕМЫ УРОВНЕЙ ═══════════ */
+const LEVEL_THEMES = {
+    1: 'Уровень 1: всё положительное. Освой механику шагов.',
+    2: 'Уровень 2: минус появился ВНУТРИ скобки — следи за знаками произведений!',
+    3: 'Уровень 3: минус перед x справа. При переносе через «=» знак перевернётся!',
+    4: 'Уровень 4: правая часть начинается с отрицательного числа.',
+    5: 'Уровень 5: МНОЖИТЕЛЬ перед скобкой отрицательный (красный круг). Минус·минус = плюс!',
+    6: 'Уровень 6: ответ будет отрицательным. Не потеряй минус!',
+    7: 'Уровень 7: знаки вперемешку, числа крупнее. Финальное испытание!'
+};
+
+const STEP_GUIDES = {
+    1: { title: 'Шаг 1 из 4: Раскрой скобки',
+         goal: 'Избавиться от скобки: умножить число снаружи на каждое слагаемое внутри.',
+         action: 'Перетащи круг-множитель на скобку — число встанет к каждому слагаемому. Затем сам посчитай оба произведения и впиши их в окошки вместе со знаком.',
+         rule: 'a·(b + c) = a·b + a·c.  Знаки умножения: +·+ = +,  −·+ = −,  −·− = +.' },
+    2: { title: 'Шаг 2 из 4: Перенеси слагаемые',
+         goal: 'Слагаемые с x собрать слева, числа — справа. Тогда уравнение решится.',
+         action: 'Перетаскивай карточки через «=»: синие (с x) — влево, оранжевые (числа) — вправо. Следи за знаком: карточка мигает — значит, знак сейчас сменится!',
+         rule: 'При переносе через «=» знак слагаемого меняется на противоположный: − станет +, и наоборот.' },
+    3: { title: 'Шаг 3 из 4: Приведи подобные',
+         goal: 'Оставить одну карточку с x слева и одно число справа.',
+         action: 'Перетащи карточку НА карточку того же цвета — они встанут в пример. Сам посчитай сумму и впиши её вместе со знаком.',
+         rule: 'Складывать можно только подобные: x с x, числа с числами.' },
+    4: { title: 'Шаг 4 из 4: Найди x',
+         goal: 'Уравнение стало простым: kx = m. Осталось только разделить.',
+         action: 'Раздели правую часть на коэффициент при x и введи ответ со знаком.',
+         rule: 'Пример: 4x = 16 → x = 16 ÷ 4 = 4.  А −4x = 16 → x = −4.' }
+};
+
+/* ═══════════ ГЕНЕРАТОР С ПРОГРЕССИЕЙ ═══════════ */
+function rnd(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+function gen() {
+    const L = Math.min(level, TOTAL_LEVELS);
+    const bMax = L <= 2 ? 3 : (L <= 5 ? 4 : 5);
+    const cMax = L <= 2 ? 5 : (L <= 5 ? 8 : 12);
+    const eMax = L <= 2 ? 3 : (L <= 5 ? 5 : 8);
+
+    for (let g = 0; g < 3000; g++) {
+        let a;
+        if (L === 5)          a = -rnd(2, 3);
+        else if (L === 7)     a = rnd(2, 4) * (Math.random() < .5 ? -1 : 1);
+        else                  a = rnd(2, L <= 2 ? 3 : 4);
+
+        const b = rnd(2, bMax);
+        const cSign = (L === 1 || L === 5) ? 1 : (L === 2) ? -1 : (Math.random() < .6 ? -1 : 1);
+        const eSign = (L <= 2 || L === 5) ? 1 : (L === 3) ? -1 : (Math.random() < .6 ? -1 : 1);
+        const xSign = (L === 6) ? -1 : (L === 7) ? (Math.random() < .5 ? -1 : 1) : 1;
+
+        const c = rnd(1, cMax) * cSign;
+        const e = rnd(1, eMax) * eSign;
+        const k = a * b - e;
+        if (k === 0 || Math.abs(k) > 12) continue;
+        const x0 = rnd(1, L >= 6 ? 9 : 8) * xSign;
+        const m = k * x0;
+        if (Math.abs(m) > 48) continue;
+        const ac = a * c;
+        const d = m + ac;
+        if (d === 0 || Math.abs(d) > 60) continue;
+
+        if (L === 1 && (a < 0 || c < 0 || e < 0 || d < 0)) continue;
+        if (L === 2 && (a < 0 || c > 0 || e < 0 || d < 0)) continue;
+        if (L === 3 && (a < 0 || e > 0 || d < 0)) continue;
+        if (L === 4 && (a < 0 || d > 0)) continue;
+        if (L === 5 && (a > 0 || c < 0 || e < 0 || x0 < 0)) continue;
+        if (L === 6 && (a < 0 || x0 > 0)) continue;
+
+        const sig = [a, b, c, d, e].join(',');
+        if (used.has(sig)) continue;
+        used.add(sig);
+        return { a, b, c, e, k, m, ac, d, x0 };
     }
+    used.clear(); return gen();
+}
 
-    function getRandomNonZero(min, max) {
-        let val = 0;
-        while (val === 0) val = getRandomInt(min, max);
-        return val;
-    }
+/* ═══════════ ФОРМАТИРОВАНИЕ ═══════════ */
+const minus = s => String(s).replace(/-/g, '−');
+/* приведение ввода к числу: принимает и дефис, и юникод-минус, и запятую */
+function parseNum(raw) { return parseFloat(String(raw).trim().replace('−', '-').replace(',', '.')); }
+function xLabel(v) { const a = Math.abs(v); return (a === 1 ? 'x' : a + 'x'); }
+function absLabel(card) { return card.type === 'x' ? xLabel(card.value) : String(Math.abs(card.value)); }
+function signOf(v) { return v < 0 ? '−' : '+'; }
+function cardText(card, first) {
+    const sign = card.value < 0 ? '− ' : (first ? '' : '+ ');
+    return sign + absLabel(card);
+}
+function finalText() { return `${eq.k < 0 ? '−' : ''}${Math.abs(eq.k) === 1 ? '' : Math.abs(eq.k)}x = ${minus(eq.m)}`; }
 
-    // Эта функция создает параметры уровня на лету
-    function generateLevelData(levelNum) {
-        let ans, mult, brackNum, rightXCoeff, bracketExtra = null;
-        
-        // Базовые настройки диапазонов
-        switch(levelNum) {
-            case 1: 
-                ans = getRandomInt(2, 6);
-                mult = getRandomInt(2, 4);
-                brackNum = getRandomInt(1, 5);
-                rightXCoeff = -1 * getRandomInt(1, 2); 
-                break;
-            case 2: 
-                ans = getRandomInt(2, 9);
-                mult = getRandomInt(3, 5);
-                brackNum = getRandomInt(2, 6);
-                rightXCoeff = -1 * getRandomInt(1, 3);
-                break;
-            case 3: 
-                ans = getRandomInt(2, 8);
-                mult = getRandomInt(2, 5);
-                brackNum = -1 * getRandomInt(1, 5); 
-                rightXCoeff = -1 * getRandomInt(1, 3);
-                break;
-            case 4: 
-                ans = getRandomInt(2, 7);
-                mult = getRandomInt(3, 6);
-                brackNum = getRandomInt(1, 4);
-                rightXCoeff = getRandomInt(2, 4); 
-                break;
-            case 5: 
-                ans = -1 * getRandomInt(2, 6);
-                mult = getRandomInt(2, 4);
-                brackNum = getRandomInt(3, 8);
-                rightXCoeff = -1 * getRandomInt(1, 2);
-                break;
-            case 6: 
-                ans = getRandomInt(5, 15);
-                mult = getRandomInt(6, 10);
-                brackNum = getRandomNonZero(-3, 3);
-                rightXCoeff = getRandomNonZero(-5, 5);
-                break;
-            case 7: 
-                ans = 0;
-                mult = getRandomInt(3, 7);
-                brackNum = getRandomInt(2, 9);
-                rightXCoeff = getRandomNonZero(-3, 3);
-                break;
-            case 8: // Отрицательный множитель
-                ans = getRandomInt(2, 7);
-                mult = -1 * getRandomInt(2, 4);
-                brackNum = getRandomInt(1, 5);
-                rightXCoeff = getRandomInt(2, 5);
-                break;
-            case 9: // Отрицательный множитель + минус внутри
-                ans = getRandomInt(2, 8);
-                mult = -1 * getRandomInt(2, 5);
-                brackNum = -1 * getRandomInt(1, 6);
-                rightXCoeff = -1 * getRandomInt(1, 3);
-                break;
-            case 10: // BOSS
-                ans = getRandomInt(2, 5);
-                mult = getRandomInt(2, 4);
-                brackNum = getRandomNonZero(-3, 3);
-                rightXCoeff = 0; 
-                bracketExtra = { val: '2x', coeff: 2 }; 
-                break;
-        }
+function findCard(id) {
+    let c = leftCards.find(x => x.id === id);  if (c) return { card: c, side: 'left' };
+    c = rightCards.find(x => x.id === id);     if (c) return { card: c, side: 'right' };
+    return null;
+}
 
-        // --- ЗАЩИТА ОТ 0x = 0 (Исправление ошибки) ---
-        // Вычисляем, какой коэффициент при X получится СЛЕВА после раскрытия.
-        let leftXCoeff = mult;
-        if (levelNum === 10 && bracketExtra) {
-            leftXCoeff = mult * (1 + bracketExtra.coeff); // x + 2x = 3x -> mult * 3
-        }
+/* ═══════════ РЕНДЕР ═══════════ */
+function makeCard(card, first, opts = {}) {
+    const el = document.createElement('div');
+    el.className = 'card ' + card.type + (opts.locked ? ' locked' : '') + (opts.anim ? ' pop-in' : '');
+    el.textContent = cardText(card, first);
+    if (opts.anim) el.style.animationDelay = (opts.delay || 0) + 's';
+    el.dataset.id = card.id; el.dataset.side = opts.side;
 
-        // Если коэффициент справа равен коэффициенту слева, они уничтожатся.
-        // Меняем правый коэффициент, пока он не станет другим.
-        while (rightXCoeff === leftXCoeff) {
-            rightXCoeff = rightXCoeff + 1; // Просто сдвигаем
-        }
-        // ----------------------------------------------
-
-        // Вычисляем свободный член
-        let leftVal;
-        if (levelNum === 10) {
-            leftVal = mult * (ans + brackNum + (bracketExtra.coeff * ans));
-        } else {
-            leftVal = mult * (ans + brackNum);
-        }
-
-        const rightConst = leftVal - (rightXCoeff * ans);
-
-        // Формируем структуру
-        const rightSideArr = [{ val: rightConst, type: 'num' }];
-        
-        if (rightXCoeff !== 0) {
-            let sign = rightXCoeff > 0 ? '+' : '-';
-            let txt = Math.abs(rightXCoeff) === 1 ? 'x' : Math.abs(rightXCoeff) + 'x';
-            rightSideArr.push({ val: txt, sign: sign, type: 'var' });
-        }
-
-        return {
-            id: levelNum,
-            mult: mult,
-            bracket: { var: 'x', num: brackNum, extra: bracketExtra },
-            rightSide: rightSideArr,
-            ans: ans
-        };
-    }
-
-    // --- ПЕРЕМЕННЫЕ ИГРЫ ---
-    const TOTAL_LEVELS = 10;
-    let currentLevelIndex = 0;
-    let currentData = null;
-    let state = { step: 1, brackets: { x: false, num: false, extra: false } };
-
-    // DOM
-    const board = document.getElementById('board');
-    const instr = document.getElementById('instr');
-    const finalArea = document.getElementById('final-area');
-    const answerInput = document.getElementById('answer-input');
-    const btnCheck = document.querySelector('.btn-check');
-    const btnNext = document.querySelector('.btn-next');
-    const levelBar = document.getElementById('level-bar');
-
-    // --- ИНИЦИАЛИЗАЦИЯ ---
-    function initGame() {
-        levelBar.innerHTML = '';
-        for (let i = 0; i < TOTAL_LEVELS; i++) {
-            const dot = document.createElement('div');
-            dot.className = 'level-dot';
-            dot.innerText = i + 1;
-            if (i === 0) dot.classList.add('active');
-            levelBar.appendChild(dot);
-        }
-        loadLevel(0);
-    }
-
-    function loadLevel(index) {
-        currentLevelIndex = index;
-        currentData = generateLevelData(index + 1);
-        
-        state = { step: 1, brackets: { x: false, num: false, extra: false } };
-        board.innerHTML = '';
-        finalArea.style.display = 'none';
-        btnCheck.style.display = 'block';
-        btnNext.style.display = 'none';
-        answerInput.value = '';
-        
-        document.querySelectorAll('.level-dot').forEach((dot, idx) => {
-            dot.classList.remove('active');
-            if (idx < index) dot.classList.add('done');
-            if (idx === index) dot.classList.add('active');
+    if (opts.draggable) {
+        el.draggable = true;
+        el.addEventListener('dragstart', ev => {
+            drag = { kind: 'card', id: card.id, from: opts.side };
+            ev.dataTransfer.setData('text/plain', 'card');
         });
-
-        startStep1();
+        el.addEventListener('dragend', () => { drag = null; });
     }
 
-    // --- ЭТАП 1: ФОНТАНЧИК ---
-    function startStep1() {
-        instr.innerText = `Уровень ${currentLevelIndex + 1}: Раскрой скобки.`;
-        instr.style.color = "var(--primary)";
-
-        const row = document.createElement('div');
-        row.className = 'row';
-        row.id = 'row-1';
-
-        const numSign = currentData.bracket.num >= 0 ? '+' : '−';
-        
-        let rightHTML = '';
-        currentData.rightSide.forEach((item, i) => {
-            let s = item.sign || (typeof item.val === 'number' && item.val < 0 ? '-' : '+');
-            let v = item.val;
-            if (typeof v === 'number' && v < 0) v = Math.abs(v);
-            if (i === 0 && s === '+' && !item.sign) s = ''; 
-            rightHTML += createStaticCard(s, v, item.type);
+    if (opts.mergeTarget) {
+        el.addEventListener('dragover', ev => {
+            if (step !== 3 || busy || !drag || drag.kind !== 'card' || drag.id === card.id) return;
+            const src = findCard(drag.id);
+            if (!src || src.side !== opts.side || src.card.type !== card.type) return;
+            ev.preventDefault();
+            el.classList.add('drop-target');
         });
-
-        let extraHTML = '';
-        if (currentData.bracket.extra) {
-            extraHTML = `
-                <span class="sign-span" style="margin:0 8px; font-weight:bold">+</span>
-                <div class="target-slot" data-target="extra">${currentData.bracket.extra.val}</div>
-            `;
-        }
-
-        row.innerHTML = `
-            <div class="side">
-                <div class="multiplier" draggable="true" id="mult">${currentData.mult}</div>
-                <div class="bracket-group">
-                    (
-                    <div class="target-slot" data-target="x">${currentData.bracket.var}</div>
-                    <span class="sign-span" style="margin:0 8px; font-weight:bold">${numSign}</span>
-                    <div class="target-slot" data-target="num">${Math.abs(currentData.bracket.num)}</div>
-                    ${extraHTML}
-                    )
-                </div>
-            </div>
-            <div class="equals">=</div>
-            <div class="side">${rightHTML}</div>
-        `;
-
-        board.appendChild(row);
-        setupStep1Events(row);
-    }
-
-    function createStaticCard(sign, val, type) {
-        return `<div class="card" data-type="${type}" style="cursor:default">
-            <span class="sign">${sign}</span><span class="val">${val}</span>
-        </div>`;
-    }
-
-    function setupStep1Events(row) {
-        const mult = row.querySelector('#mult');
-        const slots = row.querySelectorAll('.target-slot');
-
-        mult.addEventListener('dragstart', () => {
-            slots.forEach(s => {
-                const t = s.dataset.target;
-                if (!state.brackets[t]) s.classList.add('active');
-            });
-        });
-        mult.addEventListener('dragend', () => slots.forEach(s => s.classList.remove('active')));
-
-        slots.forEach(slot => {
-            slot.addEventListener('dragover', e => e.preventDefault());
-            slot.addEventListener('drop', e => {
-                e.preventDefault();
-                const target = slot.dataset.target;
-                if (state.brackets[target]) return;
-
-                const multiplierVal = currentData.mult;
-                
-                if (target === 'x') {
-                    // Знак при X уже "вшит" в текст, если мультипликатор отрицательный
-                    // Например -3 * x = -3x. Для тренажера просто пишем число
-                    slot.innerText = multiplierVal + 'x';
-                    state.brackets.x = true;
-                } 
-                else if (target === 'num') {
-                    const product = multiplierVal * currentData.bracket.num;
-                    const signSpan = slot.previousElementSibling;
-                    if (product >= 0) signSpan.innerText = '+';
-                    else signSpan.innerText = '−';
-                    slot.innerText = Math.abs(product);
-                    state.brackets.num = true;
-                }
-                else if (target === 'extra') {
-                    const product = multiplierVal * currentData.bracket.extra.coeff;
-                    const signSpan = slot.previousElementSibling;
-                    if (product >= 0) signSpan.innerText = '+';
-                    else signSpan.innerText = '−';
-                    slot.innerText = Math.abs(product) + 'x';
-                    state.brackets.extra = true;
-                }
-                
-                slot.classList.add('done');
-                slot.classList.remove('active');
-
-                const needsExtra = !!currentData.bracket.extra;
-                if (state.brackets.x && state.brackets.num && (!needsExtra || state.brackets.extra)) {
-                    mult.style.opacity = '0';
-                    setTimeout(startStep2, 800);
-                }
-            });
+        el.addEventListener('dragleave', () => el.classList.remove('drop-target'));
+        el.addEventListener('drop', ev => {
+            ev.preventDefault();
+            el.classList.remove('drop-target');
+            if (step !== 3 || busy || !drag || drag.id === card.id) return;
+            startMerge(drag.id, card.id, opts.side);
+            drag = null;
         });
     }
+    return el;
+}
 
-    // --- ЭТАП 2: СОРТИРОВКА ---
-    function startStep2() {
-        state.step = 2;
-        document.getElementById('row-1').classList.add('history');
-        instr.innerText = "Этап 2: Иксы — влево, числа — вправо.";
+function renderSide(zone, cards, side, animIds) {
+    const pm = pendingMerges[side];
+    if (step === 3 && pm && cards.some(c => c.id === pm.a) && cards.some(c => c.id === pm.b)) {
+        const a = cards.find(c => c.id === pm.a);
+        const b = cards.find(c => c.id === pm.b);
+        const w = document.createElement('div');
+        w.className = 'merge-widget';
+        w.innerHTML =
+            `<span>${cardText(a, true).trim()}</span>` +
+            `<span class="mw-op">${signOf(b.value)}</span>` +
+            `<span>${absLabel(b)}</span>` +
+            `<span class="mw-eq">=</span>` +
+            `<input class="merge-in" id="mergeIn_${side}" type="number" step="any" placeholder="?">` +
+            (a.type === 'x' ? `<span class="xsuf">x</span>` : '');
+        zone.appendChild(w);
+        w.querySelector('input').addEventListener('input', () => validateMerge(side));
+        return;
+    }
+    const canDrag = (step === 2 || step === 3);
+    cards.forEach((c, i) => zone.appendChild(makeCard(c, i === 0, {
+        side, draggable: canDrag, mergeTarget: step === 3,
+        locked: step === 1 && side === 'right',
+        anim: animIds.includes(c.id), delay: i * 0.35
+    })));
+}
 
-        const row = document.createElement('div');
-        row.className = 'row';
-        row.innerHTML = `<div class="side" id="zone-left"></div><div class="equals">=</div><div class="side" id="zone-right"></div>`;
-        board.appendChild(row);
+function renderAll(animIds = []) {
+    zoneL.innerHTML = ''; zoneR.innerHTML = '';
 
-        const lZone = row.querySelector('#zone-left');
-        const rZone = row.querySelector('#zone-right');
+    if (step === 1 && leftCards.length === 0) {
+        const circle = document.createElement('div');
+        circle.className = 'circle' + (eq.a < 0 ? ' neg' : '');
+        circle.textContent = minus(String(eq.a)); circle.id = 'multCircle';
+        circle.draggable = true;
+        circle.addEventListener('dragstart', ev => { drag = { kind: 'circle' }; ev.dataTransfer.setData('text/plain', 'circle'); });
+        circle.addEventListener('dragend', () => { drag = null; });
 
-        // Создаем левые
-        let xSign = currentData.mult >= 0 ? '+' : '-';
-        let xVal = Math.abs(currentData.mult) === 1 ? 'x' : Math.abs(currentData.mult) + 'x';
-        createInteractiveCard(lZone, xSign, xVal, 'var');
-        
-        const numVal = currentData.mult * currentData.bracket.num;
-        createInteractiveCard(lZone, numVal >= 0 ? '+' : '-', Math.abs(numVal), 'num');
+        const br = document.createElement('div');
+        br.className = 'bracket'; br.id = 'bracketCard';
+        br.innerHTML =
+            `<span class="par">(</span>` +
+            `<span class="bterm" id="bterm1">${eq.b === 1 ? '' : eq.b}x</span>` +
+            `<span class="bop">${eq.c < 0 ? '−' : '+'}</span>` +
+            `<span class="bterm" id="bterm2">${Math.abs(eq.c)}</span>` +
+            `<span class="par">)</span>`;
 
-        if (currentData.bracket.extra) {
-             const exCoeff = currentData.mult * currentData.bracket.extra.coeff;
-             createInteractiveCard(lZone, exCoeff >= 0 ? '+' : '-', Math.abs(exCoeff) + 'x', 'var');
+        zoneL.append(circle, br);
+        rightCards.forEach((c, i) => zoneR.appendChild(makeCard(c, i === 0, { locked: true, side: 'right' })));
+        if (level === 1 && !localStorage.getItem('op_onboard')) {
+            $('onboardToast').classList.remove('hidden');
+            circle.classList.add('pulse-hint');
         }
+    } else {
+        renderSide(zoneL, leftCards, 'left', animIds);
+        renderSide(zoneR, rightCards, 'right', animIds);
+    }
+}
 
-        // Создаем правые
-        currentData.rightSide.forEach((item, i) => {
-            let s = item.sign || (typeof item.val === 'number' && item.val < 0 ? '-' : '+');
-            let v = item.val;
-            if (typeof v === 'number' && v < 0) v = Math.abs(v);
-            if (i === 0 && !item.sign && s === '+') s = '+';
-            createInteractiveCard(rZone, s, v, item.type);
-        });
+function setStep(n) {
+    step = n; board.dataset.step = n;
+    const g = STEP_GUIDES[n];
+    $('guideTitle').textContent = g.title;
+    $('guideGoal').textContent = g.goal;
+    $('guideAction').textContent = g.action;
+    $('guideRule').textContent = g.rule;
+    document.querySelectorAll('.step-item').forEach(el => {
+        const s = +el.dataset.step;
+        el.classList.toggle('active', s === n);
+        el.classList.toggle('done', s < n);
+    });
+}
 
-        setupDragSystem(lZone, rZone);
+function msg(text, type) {
+    const m = $('msg'); m.textContent = text;
+    m.className = 'msg' + (type ? ' ' + type : '');
+}
+
+/* ═══════════ ШАГ 1 ═══════════ */
+function doOpening() {
+    if (busy) return;
+    busy = true;
+    $('onboardToast').classList.add('hidden');
+    localStorage.setItem('op_onboard', '1');
+
+    const circle = $('multCircle'), br = $('bracketCard');
+    if (!circle || !br) { busy = false; return; }
+    circle.classList.add('spent');
+    circle.draggable = false;
+
+    const myEq = eq;
+    const neg = eq.a < 0;
+    const t1 = br.querySelector('#bterm1');
+    const t2 = br.querySelector('#bterm2');
+    const aStr = minus(String(eq.a));
+    const prod2Str = minus(`${eq.a}·${eq.c < 0 ? '(' + eq.c + ')' : eq.c}`);
+
+    setTimeout(() => {
+        if (eq !== myEq) return;
+        t1.innerHTML = `<span class="inrow"><span class="mult${neg ? ' neg' : ''}">${aStr}·</span>${eq.b === 1 ? '' : eq.b}x</span>`;
+        t2.innerHTML = `<span class="inrow"><span class="mult${neg ? ' neg' : ''}">${aStr}·</span>${Math.abs(eq.c)}</span>`;
+        msg(`Число ${aStr} вошло в скобку и встало к каждому слагаемому. Скобка ещё нужна!`, 'ok');
+    }, 350);
+
+    setTimeout(() => {
+        if (eq !== myEq) return;
+        br.querySelector('.bop').textContent = '+';
+        t1.innerHTML = `<span class="prompt${neg ? ' neg' : ''}">${minus(`${eq.a}·${eq.b === 1 ? '' : eq.b}x`)}</span>` +
+                       `<span class="inrow"><input class="prod-in" id="prod1" type="number" step="any" placeholder="?"><span class="xsuf">x</span></span>`;
+        t2.innerHTML = `<span class="prompt${neg ? ' neg' : ''}">${prod2Str}</span>` +
+                       `<span class="inrow"><input class="prod-in" id="prod2" type="number" step="any" placeholder="?"></span>`;
+        $('prod1').addEventListener('input', validateProducts);
+        $('prod2').addEventListener('input', validateProducts);
+        msg('Посчитай оба произведения ВМЕСТЕ со знаком и впиши их в окошки.', 'ok');
+        setTimeout(() => { const p = $('prod1'); if (p) p.focus(); }, 120);
+        busy = false;
+    }, 1400);
+}
+
+function validateProducts() {
+    if (productsSolved) return;
+    const i1 = $('prod1'), i2 = $('prod2');
+    if (!i1 || !i2) return;
+    const r1 = i1.value.trim(), r2 = i2.value.trim();
+    const v1 = parseNum(r1), v2 = parseNum(r2);
+    const c1 = eq.a * eq.b, c2 = eq.a * eq.c;
+    const e1 = (r1 === ''), e2 = (r2 === '');
+
+    i1.classList.toggle('good', v1 === c1);
+    i1.classList.toggle('bad', !e1 && v1 !== c1);
+    i2.classList.toggle('good', v2 === c2);
+    i2.classList.toggle('bad', !e2 && v2 !== c2);
+
+    if (!e1 && !e2 && (v1 !== c1 || v2 !== c2)) {
+        msg(`Пока не то. Вспомни знаки умножения: ${minus(String(eq.a))}·${eq.b === 1 ? '' : eq.b}x и ${minus(`${eq.a}·${eq.c < 0 ? '(' + eq.c + ')' : eq.c}`)}.`, 'err');
     }
 
-    function createInteractiveCard(parent, sign, val, type) {
-        const div = document.createElement('div');
-        div.className = 'card';
-        div.draggable = true;
-        div.dataset.type = type;
-        div.dataset.id = Math.random().toString(36).substr(2, 9);
-        div.innerHTML = `<span class="sign" data-val="${sign}">${sign}</span><span class="val">${val}</span>`;
-        parent.appendChild(div);
-    }
+    if (v1 === c1 && v2 === c2) {
+        productsSolved = true;
+        i1.disabled = true; i2.disabled = true;
+        msg('Верно! Произведения посчитаны — скобка больше не нужна.', 'ok');
 
-    function setupDragSystem(lZone, rZone) {
-        const zones = [lZone, rZone];
-        let draggedItem = null;
-        let startZone = null;
+        const br = $('bracketCard');
+        const myEq = eq;
+        const ab = eq.a * eq.b, ac = eq.a * eq.c;
 
-        zones.forEach(zone => {
-            zone.addEventListener('dragstart', e => {
-                if (!e.target.closest('.card')) return;
-                draggedItem = e.target.closest('.card');
-                startZone = zone;
-                draggedItem.classList.add('alert-sign');
-                setTimeout(() => draggedItem.style.opacity = '0.5', 0);
-                zones.forEach(z => z.classList.add('highlight'));
-            });
-            zone.addEventListener('dragend', () => {
-                if(draggedItem) { draggedItem.style.opacity = '1'; draggedItem.classList.remove('alert-sign'); }
-                zones.forEach(z => z.classList.remove('highlight'));
-                draggedItem = null;
-            });
-            zone.addEventListener('dragover', e => e.preventDefault());
-            zone.addEventListener('drop', e => {
-                e.preventDefault();
-                if (!draggedItem) return;
-                const targetCard = e.target.closest('.card');
-
-                if (targetCard && targetCard !== draggedItem) {
-                    if (state.step === 2) showError("Сначала расставь всё по местам!");
-                    else handleMerge(draggedItem, targetCard);
-                    return;
-                }
-                if (zone !== startZone) handleMagicFlip(draggedItem, zone);
-                else zone.appendChild(draggedItem);
-            });
-        });
-    }
-
-    function handleMagicFlip(card, targetZone) {
-        targetZone.appendChild(card);
-        card.style.opacity = '1';
         setTimeout(() => {
-            card.classList.add('flipping');
+            if (eq !== myEq) return;
+            const t1 = br.querySelector('#bterm1'), t2 = br.querySelector('#bterm2');
+            if (!t1 || !t2) return;
+            t1.classList.add('calc'); t2.classList.add('calc');
             setTimeout(() => {
-                const signEl = card.querySelector('.sign');
-                const newSign = signEl.dataset.val === '+' ? '-' : '+';
-                signEl.innerText = newSign;
-                signEl.dataset.val = newSign;
-                signEl.style.color = "var(--danger)";
-            }, 400);
-            setTimeout(() => {
-                card.classList.remove('flipping');
-                checkSortStatus();
-            }, 800);
-        }, 50);
-    }
+                if (eq !== myEq) return;
+                t1.innerHTML = (ab < 0 ? '−' : '') + xLabel(ab);
+                t2.innerHTML = minus(String(ac));
+            }, 230);
+        }, 400);
 
-    function checkSortStatus() {
-        const lZone = document.getElementById('zone-left');
-        const rZone = document.getElementById('zone-right');
-        const leftOk = Array.from(lZone.children).every(c => c.dataset.type === 'var');
-        const rightOk = Array.from(rZone.children).every(c => c.dataset.type === 'num');
-        
-        if (leftOk && rightOk && lZone.children.length > 0 && rZone.children.length > 0) {
-            state.step = 3;
-            instr.innerText = "Этап 3: Соедини карточки.";
-            instr.style.color = "var(--success)";
-        }
-    }
-
-    // --- ЭТАП 3: СЛИЯНИЕ ---
-    function handleMerge(src, dest) {
-        if (src.dataset.type !== dest.dataset.type) {
-            showError("Нельзя складывать буквы с числами!");
-            return;
-        }
-
-        const val1 = parseVal(src);
-        const val2 = parseVal(dest);
-        const sum = val1 + val2;
-        const type = dest.dataset.type;
-        const newAbs = Math.abs(sum);
-        let newTxt = newAbs;
-        if (type === 'var') newTxt = (newAbs === 1 ? '' : newAbs) + 'x';
-
-        dest.querySelector('.val').innerText = newTxt;
-        const newSign = sum >= 0 ? '+' : '-';
-        dest.querySelector('.sign').innerText = newSign;
-        dest.querySelector('.sign').dataset.val = newSign;
-        dest.querySelector('.sign').style.color = "#64748b";
-        dest.classList.add('pop');
-        src.remove();
-
-        const lZone = document.getElementById('zone-left');
-        const rZone = document.getElementById('zone-right');
-        if (lZone.children.length === 1 && rZone.children.length === 1) setupFinal();
-    }
-
-    function parseVal(card) {
-        const sign = card.querySelector('.sign').dataset.val === '-' ? -1 : 1;
-        let txt = card.querySelector('.val').innerText.replace('x', '');
-        if (txt === '') txt = '1';
-        return parseInt(txt) * sign;
-    }
-
-    function setupFinal() {
-        state.step = 4;
-        instr.innerText = "Финал: Найди x.";
-        const lZone = document.getElementById('zone-left');
-        const rZone = document.getElementById('zone-right');
-        const lText = lZone.children[0].innerText.replace('+', '').trim();
-        const rText = rZone.children[0].innerText.replace('+', '').trim();
-        
-        document.getElementById('final-eq-label').innerText = `${lText} = ${rText}`;
-        document.querySelectorAll('.card').forEach(c => c.draggable = false);
-        finalArea.style.display = 'flex';
-        finalArea.style.animation = "popAnim 0.5s ease";
-    }
-
-    function checkFinalAnswer() {
-        const val = parseInt(answerInput.value);
-        if (val === currentData.ans) {
-            instr.innerText = "Верно!";
-            btnCheck.style.display = 'none';
-            btnNext.style.display = 'block';
-        } else {
-            showError("Подумай еще...");
-            answerInput.classList.add('error');
-            setTimeout(() => answerInput.classList.remove('error'), 500);
-        }
-    }
-
-    function loadNextLevel() {
-        if (currentLevelIndex + 1 < TOTAL_LEVELS) {
-            loadLevel(currentLevelIndex + 1);
-        } else {
-            document.getElementById('victory-screen').style.display = 'flex';
-        }
-    }
-
-    function showError(msg) {
-        const old = instr.innerText;
-        instr.innerText = msg;
-        instr.classList.add('error');
         setTimeout(() => {
-            instr.classList.remove('error');
-            instr.innerText = old;
-        }, 1500);
+            if (eq !== myEq) return;
+            br.querySelectorAll('.par').forEach(p => p.classList.add('gone'));
+        }, 1200);
+
+        setTimeout(() => {
+            if (eq !== myEq || step !== 1) return;
+            const id1 = uid(), id2 = uid();
+            leftCards = [ { type: 'x',   value: ab, id: id1 },
+                          { type: 'num', value: ac, id: id2 } ];
+            board.classList.add('opened');
+            renderAll([id1, id2]);
+            msg(`Скобка раскрыта: слева ${ab < 0 ? '−' : ''}${xLabel(ab)} ${ac < 0 ? '−' : '+'} ${Math.abs(ac)}.`, 'ok');
+            setTimeout(() => {
+                if (eq !== myEq || step !== 1) return;
+                setStep(2); renderAll();
+                msg('Карточки справа проснулись. Перетаскивай их через «=» и следи за знаком!', 'ok');
+            }, 900);
+        }, 1800);
+    }
+}
+
+/* ═══════════ ШАГ 2 ═══════════ */
+function moveCard(payload, toSide) {
+    if (busy) return;
+    const fromArr = payload.from === 'left' ? leftCards : rightCards;
+    const toArr = toSide === 'left' ? leftCards : rightCards;
+    const idx = fromArr.findIndex(c => c.id === payload.id);
+    if (idx < 0) return;
+    const card = fromArr.splice(idx, 1)[0];
+    const flipped = (toSide !== payload.from);
+    const oldValue = card.value;
+    if (flipped) card.value *= -1;
+    toArr.push(card);
+    const isFirst = (toArr[0].id === card.id);
+
+    if (flipped) {
+        busy = true;
+        renderAll();
+        const el = document.querySelector(`[data-id="${card.id}"]`);
+        if (el) animateFlip(el, card, oldValue, isFirst);
+        msg(`Карточка перешла через «=»: смотри — она мигает, сейчас знак сменится с ${signOf(oldValue)} на ${signOf(card.value)}.`, 'ok');
+        setTimeout(() => {
+            busy = false;
+            afterStep2Move();
+        }, 2800);
+    } else {
+        renderAll([card.id]);
+        afterStep2Move();
+    }
+}
+
+function animateFlip(el, card, oldValue, isFirst) {
+    const oldSign = oldValue < 0 ? '−' : (isFirst ? '' : '+');
+    const oldSpace = (oldValue < 0 || !isFirst) ? ' ' : '';
+    el.innerHTML = `<span class="sign-part">${oldSign}</span>${oldSpace}<span class="abs-part">${absLabel(card)}</span>`;
+    el.classList.add('flip-prep');
+    setTimeout(() => {
+        el.classList.remove('flip-prep');
+        el.classList.add('flip');
+    }, 1200);
+    setTimeout(() => {
+        const newSign = signOf(card.value);
+        const newSpace = (card.value < 0 || !isFirst) ? ' ' : '';
+        el.innerHTML = `<span class="sign-part sign-swap">${newSign}</span>${newSpace}<span class="abs-part">${absLabel(card)}</span>`;
+    }, 1900);
+    setTimeout(() => {
+        el.classList.remove('flip');
+        el.textContent = cardText(card, isFirst);
+    }, 2600);
+}
+
+function step2Complete() {
+    return leftCards.length > 0 && rightCards.length > 0 &&
+           leftCards.every(c => c.type === 'x') && rightCards.every(c => c.type === 'num');
+}
+
+function afterStep2Move() {
+    if (step !== 2 || !step2Complete()) return;
+    setTimeout(() => {
+        if (step !== 2) return;
+        setStep(3); renderAll();
+        msg('Все x слева, все числа справа. Теперь приведи подобные: перетащи карточку на карточку того же цвета и сам посчитай сумму.', 'ok');
+    }, 800);
+}
+
+/* ═══════════ ШАГ 3 ═══════════ */
+function startMerge(aId, bId, side) {
+    if (busy || aId === bId || pendingMerges[side]) return;
+    const A = findCard(aId), B = findCard(bId);
+    if (!A || !B || A.side !== side || B.side !== side) return;
+    if (A.card.type !== B.card.type) { msg('Складывать можно только карточки одного цвета.', 'err'); return; }
+    pendingMerges[side] = { a: aId, b: bId };
+    renderAll();
+    msg('Карточки встали в пример. Посчитай их сумму и впиши в окошко вместе со знаком.', 'ok');
+    setTimeout(() => { const i = document.getElementById('mergeIn_' + side); if (i) i.focus(); }, 120);
+}
+
+function validateMerge(side) {
+    const pm = pendingMerges[side];
+    if (!pm) return;
+    const inp = document.getElementById('mergeIn_' + side);
+    if (!inp) return;
+    const cards = (side === 'left') ? leftCards : rightCards;
+    const a = cards.find(c => c.id === pm.a);
+    const b = cards.find(c => c.id === pm.b);
+    if (!a || !b) return;
+
+    const raw = inp.value.trim();
+    const isEmpty = (raw === '');
+    const correct = a.value + b.value;
+    const v = parseNum(raw);
+
+    inp.classList.toggle('good', v === correct);
+    inp.classList.toggle('bad', !isEmpty && v !== correct);
+
+    if (!isEmpty && v !== correct) {
+        msg(`Пока не то: ${cardText(a, true).trim()} ${signOf(b.value)} ${absLabel(b)} = ? ${a.type === 'x' ? 'Сложи коэффициенты при x.' : 'Сложи числа.'} Не забудь про знак!`, 'err');
     }
 
-    initGame();
+    if (v === correct) {
+        const merged = { type: a.type, value: correct, id: uid() };
+        if (side === 'left') leftCards = [merged]; else rightCards = [merged];
+        pendingMerges[side] = null;
+        renderAll([merged.id]);
+        msg(`Верно: получилось ${cardText(merged, true).trim()}.`, 'ok');
+        maybeFinishStep3();
+    }
+}
+
+function maybeFinishStep3() {
+    if (step !== 3) return;
+    if (!(leftCards.length === 1 && leftCards[0].type === 'x' &&
+          rightCards.length === 1 && rightCards[0].type === 'num')) return;
+    setTimeout(() => {
+        if (step !== 3) return;
+        setStep(4); renderAll();
+        $('answerArea').classList.remove('hidden');
+        attempts = 0; $('answerInput').value = ''; $('answerInput').disabled = false;
+        msg('Найди x: раздели число справа на коэффициент при x и введи ответ со знаком.', 'ok');
+    }, 900);
+}
+
+/* ═══════════ ШАГ 4 ═══════════ */
+$('checkBtn').addEventListener('click', () => {
+    const val = parseNum($('answerInput').value);
+    if (isNaN(val)) { msg('Введи значение x.', 'err'); return; }
+    if (val === eq.x0) {
+        solved++; $('score').textContent = 'Решено: ' + solved;
+        $('answerInput').disabled = true;
+        msg(`Верно! x = ${minus(eq.x0)} 🎉`, 'ok');
+        $('nextBtn').classList.remove('hidden');
+        confetti();
+        if (window.trackGoal) trackGoal('task_solved', { trainer: 'opening', level: level });
+    } else {
+        attempts++;
+        let text = `Пока нет. Чтобы найти x, раздели ${minus(eq.m)} на ${minus(eq.k)}. Проверь знак ответа!`;
+        if (attempts >= 3) text += ` Подсказка: x = ${minus(eq.m)} ÷ ${minus(eq.k)}.`;
+        msg(text, 'err');
+    }
+});
+
+/* ═══════════ DRAG-AND-DROP ═══════════ */
+function zoneDnD(zone, side) {
+    zone.addEventListener('dragover', ev => {
+        if (!drag || busy) return;
+        if (step === 1 && side === 'left' && drag.kind === 'circle') { ev.preventDefault(); zone.classList.add('zone-active'); }
+        if (step === 2 && drag.kind === 'card') { ev.preventDefault(); zone.classList.add('zone-active'); }
+    });
+    zone.addEventListener('dragleave', () => zone.classList.remove('zone-active'));
+    zone.addEventListener('drop', ev => {
+        ev.preventDefault(); zone.classList.remove('zone-active');
+        if (!drag || busy) return;
+        if (step === 1 && side === 'left' && drag.kind === 'circle') doOpening();
+        else if (step === 2 && drag.kind === 'card') moveCard(drag, side);
+        drag = null;
+    });
+}
+zoneDnD(zoneL, 'left'); zoneDnD(zoneR, 'right');
+
+/* ═══════════ ПОДСКАЗКА 💡 ═══════════ */
+$('hintBtn').addEventListener('click', () => {
+    let el = null;
+    if (step === 1) el = document.getElementById('prod1') || $('multCircle');
+    if (step === 2) el = zoneR.querySelector('.card.x');
+    if (step === 3) el = document.querySelector('.merge-in') || zoneL.querySelector('.card');
+    if (step === 4) el = $('answerInput');
+    if (!el) return;
+    el.classList.add('pulse-hint');
+    setTimeout(() => el.classList.remove('pulse-hint'), 3000);
+});
+
+/* ═══════════ УРОВНИ ═══════════ */
+function startLevel() {
+    eq = gen();
+    leftCards = [];
+    rightCards = [ { type: 'num', value: eq.d, id: uid() },
+                   { type: 'x', value: eq.e, id: uid() } ];
+    drag = null; attempts = 0; busy = false;
+    productsSolved = false;
+    pendingMerges = { left: null, right: null };
+    board.classList.remove('opened');
+    $('levelBadge').textContent = `Уровень ${level} из ${TOTAL_LEVELS}`;
+    $('answerArea').classList.add('hidden');
+    $('nextBtn').classList.add('hidden');
+    msg(LEVEL_THEMES[level] || '', 'ok');
+    setStep(1);
+    renderAll();
+    if (window.trackGoal) trackGoal('trainer_started', { trainer: 'opening', level: level });
+}
+
+$('nextBtn').addEventListener('click', () => {
+    level++;
+    if (level > TOTAL_LEVELS) {
+        $('finishOverlay').classList.remove('hidden');
+        if (window.trackGoal) trackGoal('course_finished', { trainer: 'opening' });
+    } else startLevel();
+});
+$('resetBtn').addEventListener('click', startLevel);
+$('restartBtn').addEventListener('click', () => {
+    level = 1; $('finishOverlay').classList.add('hidden'); startLevel();
+});
+
+function confetti() {
+    const colors = ['#4a7dff', '#e67e22', '#27ae60', '#e74c3c', '#f1c40f', '#6c5ce7'];
+    for (let i = 0; i < 26; i++) {
+        const p = document.createElement('div');
+        p.className = 'confetti';
+        p.style.left = Math.random() * 100 + 'vw';
+        p.style.background = colors[i % colors.length];
+        p.style.animationDelay = (Math.random() * .4) + 's';
+        document.body.appendChild(p);
+        setTimeout(() => p.remove(), 1900);
+    }
+}
+
+startLevel();
 </script>
+<script src="../../assets/analytics.js"></script>
 </body>
-
 </html>
