@@ -17,25 +17,24 @@ ym(106746549, 'init', {
     accurateTrackBounce: true,
     trackLinks: true
 });
+
 // --- НАЧАЛО КОДА КНОПКИ "ДОМОЙ" ---
 document.addEventListener("DOMContentLoaded", function() {
-    // 1. Проверяем, не находимся ли мы уже на главной странице
-    // (чтобы кнопка не появлялась в самом меню)
-    const isHomePage = window.location.pathname.endsWith('/math-6-grade/') || 
-                       window.location.pathname.endsWith('/index.html') ||
-                       window.location.pathname === '/';
     
-    // Если это главная - ничего не делаем
-    if (isHomePage && document.title.includes("Меню")) return; 
+    // Надежная проверка: кнопка нужна ТОЛЬКО если мы находимся внутри папки тренажеров
+    const isTrainerPage = window.location.pathname.includes('/trainers/');
+    
+    // Если это не тренажер (значит это главная страница) — просто выходим
+    if (!isTrainerPage) return; 
 
-    // 2. Создаем кнопку
+    // Создаем кнопку
     const homeBtn = document.createElement('a');
     homeBtn.innerHTML = "🏠 Меню";
     
-    // ВАЖНО: Ссылка ведет в корень репозитория
+    // Ссылка ведет в корень репозитория
     homeBtn.href = "/math-6-grade/"; 
     
-    // 3. Добавляем стили прямо через JS (чтобы не лезть в CSS файлы)
+    // Добавляем стили
     Object.assign(homeBtn.style, {
         position: 'fixed',
         top: '20px',
@@ -49,13 +48,13 @@ document.addEventListener("DOMContentLoaded", function() {
         fontFamily: 'Segoe UI, sans-serif',
         fontWeight: 'bold',
         fontSize: '14px',
-        zIndex: '9999', // Чтобы была поверх всего
+        zIndex: '9999',
         border: '1px solid #eee',
         transition: 'transform 0.2s',
         cursor: 'pointer'
     });
 
-    // 4. Эффект при наведении
+    // Эффекты при наведении
     homeBtn.onmouseenter = () => {
         homeBtn.style.transform = 'scale(1.05)';
         homeBtn.style.backgroundColor = '#f8f9fa';
@@ -67,7 +66,7 @@ document.addEventListener("DOMContentLoaded", function() {
         homeBtn.style.boxShadow = '0 4px 10px rgba(0,0,0,0.15)';
     };
 
-    // 5. Вставляем кнопку в тело страницы
+    // Вставляем кнопку в тело страницы
     document.body.appendChild(homeBtn);
 });
 // --- КОНЕЦ КОДА КНОПКИ ---
