@@ -21,52 +21,73 @@ ym(106746549, 'init', {
 // --- НАЧАЛО КОДА КНОПКИ "ДОМОЙ" ---
 document.addEventListener("DOMContentLoaded", function() {
     
-    // Надежная проверка: кнопка нужна ТОЛЬКО если мы находимся внутри папки тренажеров
+    // Проверка: кнопка нужна ТОЛЬКО внутри папки тренажеров
     const isTrainerPage = window.location.pathname.includes('/trainers/');
-    
-    // Если это не тренажер (значит это главная страница) — просто выходим
     if (!isTrainerPage) return; 
 
-    // Создаем кнопку
+    // Определяем мобильное устройство
+    const isMobile = window.innerWidth <= 600;
+
     const homeBtn = document.createElement('a');
-    homeBtn.innerHTML = "🏠 Меню";
-    
-    // Ссылка ведет в корень репозитория
+    // На смартфонах оставляем только эмодзи домика
+    homeBtn.innerHTML = isMobile ? "🏠" : "🏠 Меню";
     homeBtn.href = "/math-6-grade/"; 
     
-    // Добавляем стили
+    // Стили кнопки
     Object.assign(homeBtn.style, {
         position: 'fixed',
         top: '20px',
         left: '20px',
-        padding: '10px 15px',
-        backgroundColor: '#ffffff',
+        padding: isMobile ? '10px 12px' : '10px 15px',
+        backgroundColor: 'rgba(255, 255, 255, 0.85)', // Слегка прозрачный белый
+        backdropFilter: 'blur(5px)', // Эффект матового стекла (iOS style)
         color: '#333',
         textDecoration: 'none',
         borderRadius: '30px',
         boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
         fontFamily: 'Segoe UI, sans-serif',
         fontWeight: 'bold',
-        fontSize: '14px',
+        fontSize: isMobile ? '18px' : '14px',
         zIndex: '9999',
-        border: '1px solid #eee',
-        transition: 'transform 0.2s',
-        cursor: 'pointer'
+        border: '1px solid rgba(238, 238, 238, 0.5)',
+        transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)', // Плавная анимация
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        opacity: '1',
+        transform: 'translateY(0)'
     });
 
     // Эффекты при наведении
     homeBtn.onmouseenter = () => {
-        homeBtn.style.transform = 'scale(1.05)';
-        homeBtn.style.backgroundColor = '#f8f9fa';
-        homeBtn.style.boxShadow = '0 6px 15px rgba(0,0,0,0.2)';
+        if (window.scrollY <= 50) {
+            homeBtn.style.transform = 'scale(1.05)';
+            homeBtn.style.backgroundColor = '#ffffff';
+        }
     };
     homeBtn.onmouseleave = () => {
-        homeBtn.style.transform = 'scale(1)';
-        homeBtn.style.backgroundColor = '#ffffff';
-        homeBtn.style.boxShadow = '0 4px 10px rgba(0,0,0,0.15)';
+        if (window.scrollY <= 50) {
+            homeBtn.style.transform = 'scale(1)';
+            homeBtn.style.backgroundColor = 'rgba(255, 255, 255, 0.85)';
+        }
     };
 
-    // Вставляем кнопку в тело страницы
     document.body.appendChild(homeBtn);
+
+    // Логика исчезновения при прокрутке
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) {
+            // Прячем кнопку (уводим чуть вверх и делаем прозрачной)
+            homeBtn.style.opacity = '0';
+            homeBtn.style.pointerEvents = 'none';
+            homeBtn.style.transform = 'translateY(-20px)';
+        } else {
+            // Показываем кнопку, если вернулись наверх
+            homeBtn.style.opacity = '1';
+            homeBtn.style.pointerEvents = 'auto';
+            homeBtn.style.transform = 'translateY(0)';
+        }
+    });
 });
 // --- КОНЕЦ КОДА КНОПКИ ---
