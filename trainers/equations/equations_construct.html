@@ -16,17 +16,14 @@
             --success-glow: rgba(16, 185, 129, 0.5);
             --error: #ef4444;
             --error-glow: rgba(239, 68, 68, 0.5);
+            --warning: #f59e0b;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --highlight: #8b5cf6;
             --math-font: 'Fira Code', 'Courier New', Courier, monospace;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -42,406 +39,135 @@
         }
 
         .top-bar {
-            position: fixed;
-            top: 0; left: 0; width: 100%;
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            z-index: 1000;
-            padding: 15px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 20px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            position: fixed; top: 0; left: 0; width: 100%;
+            background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1); z-index: 1000;
+            padding: 15px 20px; display: flex; align-items: center; justify-content: center;
+            flex-wrap: wrap; gap: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
         }
 
-        .progress-text {
-            font-weight: 700;
-            color: var(--primary);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 1rem;
-        }
-
-        .progress-dots {
-            display: flex;
-            gap: 8px;
-        }
-
+        .progress-text { font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; font-size: 1rem; }
+        .progress-dots { display: flex; gap: 8px; }
         .progress-dot {
-            width: 12px; height: 12px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            width: 12px; height: 12px; border-radius: 50%; background: rgba(255, 255, 255, 0.1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 1px solid rgba(255, 255, 255, 0.2);
         }
-
-        .progress-dot.active {
-            background: var(--success);
-            border-color: var(--success);
-            transform: scale(1.3);
-            box-shadow: 0 0 12px var(--success-glow);
-        }
+        .progress-dot.active { background: var(--success); border-color: var(--success); transform: scale(1.3); box-shadow: 0 0 12px var(--success-glow); }
 
         .workbook {
-            max-width: 850px;
-            margin: 0 auto;
-            background: var(--bg-panel);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-            padding: 40px;
-            border-radius: 20px;
+            max-width: 850px; margin: 0 auto; background: var(--bg-panel); backdrop-filter: blur(10px);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); padding: 40px; border-radius: 20px;
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .task-container {
-            display: none;
-            animation: fadeIn 0.5s ease;
-        }
+        .task-container { display: none; animation: fadeIn 0.5s ease; }
+        .task-container.active { display: block; }
 
-        .task-container.active {
-            display: block;
-        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        h2 {
-            font-size: 1.5rem;
-            color: var(--text-main);
-            margin-bottom: 25px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.05);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+        h2 { font-size: 1.5rem; color: var(--text-main); margin-bottom: 25px; padding-bottom: 10px; border-bottom: 2px solid rgba(255, 255, 255, 0.05); text-transform: uppercase; letter-spacing: 1px; }
 
         .problem-box {
-            background: rgba(59, 130, 246, 0.1);
-            padding: 20px 25px;
-            border-left: 4px solid var(--primary);
-            margin-bottom: 30px;
-            border-radius: 0 12px 12px 0;
-            font-size: 1.15rem;
-            color: var(--text-main);
+            background: rgba(59, 130, 246, 0.1); padding: 20px 25px; border-left: 4px solid var(--primary);
+            margin-bottom: 30px; border-radius: 0 12px 12px 0; font-size: 1.15rem; color: var(--text-main);
             box-shadow: inset 0 0 20px rgba(59, 130, 246, 0.05);
         }
 
         .highlight-var {
-            background-color: rgba(139, 92, 246, 0.2);
-            color: #c4b5fd;
-            padding: 2px 8px;
-            border-radius: 6px;
-            font-weight: 700;
-            display: inline-block;
-            font-family: var(--math-font);
-            border: 1px solid rgba(139, 92, 246, 0.3);
+            background-color: rgba(139, 92, 246, 0.2); color: #c4b5fd; padding: 2px 8px; border-radius: 6px;
+            font-weight: 700; display: inline-block; font-family: var(--math-font); border: 1px solid rgba(139, 92, 246, 0.3);
         }
 
         .step {
-            margin-bottom: 20px;
-            padding: 20px 25px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            background-color: var(--bg-step);
-            display: none;
-            transition: all 0.3s ease;
+            margin-bottom: 20px; padding: 20px 25px; border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px; background-color: var(--bg-step); display: none; transition: all 0.3s ease;
         }
+        .step.active { display: block; animation: fadeInStep 0.4s ease forwards; border-color: rgba(59, 130, 246, 0.3); box-shadow: 0 0 15px rgba(0,0,0,0.2); }
 
-        .step.active {
-            display: block;
-            animation: fadeInStep 0.4s ease forwards;
-            border-color: rgba(59, 130, 246, 0.3);
-            box-shadow: 0 0 15px rgba(0,0,0,0.2);
-        }
+        @keyframes fadeInStep { 0% { opacity: 0; transform: translateX(-10px); } 100% { opacity: 1; transform: translateX(0); } }
 
-        @keyframes fadeInStep {
-            0% { opacity: 0; transform: translateX(-10px); }
-            100% { opacity: 1; transform: translateX(0); }
-        }
+        .step-title { font-weight: 700; color: var(--text-muted); margin-bottom: 15px; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1px; }
 
-        .step-title {
-            font-weight: 700;
-            color: var(--text-muted);
-            margin-bottom: 15px;
-            font-size: 0.95rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+        .expression { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; font-family: var(--math-font); font-size: 1.25rem; color: #e2e8f0; margin: 15px 0; }
 
-        .expression {
-            margin: 15px 0;
-            display: flex;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 8px;
-            font-family: var(--math-font);
-            font-size: 1.25rem;
-            color: #e2e8f0;
-        }
-
-        .brief-grid {
-            display: grid;
-            grid-template-columns: auto 1fr;
-            gap: 15px 25px;
-            margin: 15px 0;
-            align-items: baseline;
-            font-family: var(--math-font);
-            font-size: 1.2rem;
-        }
+        .brief-grid { display: grid; grid-template-columns: auto 1fr; gap: 15px 25px; margin: 15px 0; align-items: baseline; font-family: var(--math-font); font-size: 1.2rem; }
         .brief-label { font-weight: normal; color: var(--text-muted); text-align: right; }
         .brief-value { display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px; color: #e2e8f0; }
 
-        /* --- ПОЛЯ ВВОДА --- */
+        /* --- ПОЛЯ ВВОДА (РУЧНОЙ ВВОД) --- */
         .input-field {
-            padding: 4px 8px;
-            border: none;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 4px 4px 0 0;
-            font-size: 1.3rem;
-            text-align: center;
-            background: rgba(0, 0, 0, 0.2);
-            outline: none;
-            transition: all 0.2s;
-            font-family: var(--math-font);
-            font-weight: 700;
-            color: var(--text-main);
+            padding: 4px 8px; border: none; border-bottom: 2px solid rgba(255, 255, 255, 0.2); border-radius: 4px 4px 0 0;
+            font-size: 1.3rem; text-align: center; background: rgba(0, 0, 0, 0.2); outline: none; transition: all 0.2s;
+            font-family: var(--math-font); font-weight: 700; color: var(--text-main);
         }
 
-        /* Умная настройка ширины для инпутов */
         .w-xs { width: 50px; }
         .w-sm { width: 70px; }
         .w-md { width: 90px; }
         .w-lg { width: 140px; }
 
-        .input-field:focus {
-            border-bottom-color: var(--primary);
-            background: rgba(59, 130, 246, 0.1);
-            box-shadow: 0 4px 10px -4px var(--primary-glow);
-        }
+        .input-field:focus { border-bottom-color: var(--primary); background: rgba(59, 130, 246, 0.1); box-shadow: 0 4px 10px -4px var(--primary-glow); }
+        .input-field.correct, .step-drop.correct { border-bottom-color: var(--success); border-color: var(--success); color: var(--success); text-shadow: 0 0 8px var(--success-glow); pointer-events: none; background: rgba(16, 185, 129, 0.1); }
+        .input-field.wrong, .step-drop.wrong { border-bottom-color: var(--error); border-color: var(--error); color: var(--error); text-shadow: 0 0 8px var(--error-glow); background: rgba(239, 68, 68, 0.1); animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
 
-        .input-field.correct, .step-drop.correct {
-            border-bottom-color: var(--success);
-            border-color: var(--success);
-            color: var(--success);
-            text-shadow: 0 0 8px var(--success-glow);
-            pointer-events: none;
-            background: rgba(16, 185, 129, 0.1);
-        }
-
-        .input-field.wrong, .step-drop.wrong {
-            border-bottom-color: var(--error);
-            border-color: var(--error);
-            color: var(--error);
-            text-shadow: 0 0 8px var(--error-glow);
-            background: rgba(239, 68, 68, 0.1);
-            animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
-        }
-
-        @keyframes shake {
-            10%, 90% { transform: translateX(-2px); }
-            20%, 80% { transform: translateX(3px); }
-            30%, 50%, 70% { transform: translateX(-5px); }
-            40%, 60% { transform: translateX(5px); }
-        }
+        @keyframes shake { 10%, 90% { transform: translateX(-2px); } 20%, 80% { transform: translateX(3px); } 30%, 50%, 70% { transform: translateX(-5px); } 40%, 60% { transform: translateX(5px); } }
 
         /* --- DRAG & DROP --- */
-        .var-selection-area {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 15px;
-            margin-top: 10px;
-            background: rgba(0, 0, 0, 0.2);
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px dashed rgba(255, 255, 255, 0.1);
-        }
-
+        .var-selection-area { display: flex; flex-direction: column; align-items: flex-start; gap: 15px; margin-top: 10px; background: rgba(0, 0, 0, 0.2); padding: 20px; border-radius: 12px; border: 1px dashed rgba(255, 255, 255, 0.1); }
+        
         .var-dropzone {
-            display: inline-flex;
-            justify-content: center;
-            align-items: center;
-            width: 45px;
-            height: 45px;
-            border: 2px dashed var(--highlight);
-            border-radius: 8px;
-            background: rgba(139, 92, 246, 0.1);
-            color: var(--highlight);
-            font-weight: bold;
-            font-size: 1.5rem;
-            font-family: var(--math-font);
-            transition: all 0.3s;
-            margin: 0 5px;
-            box-shadow: 0 0 10px rgba(139, 92, 246, 0.2);
+            display: inline-flex; justify-content: center; align-items: center; width: 45px; height: 45px;
+            border: 2px dashed var(--highlight); border-radius: 8px; background: rgba(139, 92, 246, 0.1);
+            color: var(--highlight); font-weight: bold; font-size: 1.5rem; font-family: var(--math-font);
+            transition: all 0.3s; margin: 0; box-shadow: 0 0 10px rgba(139, 92, 246, 0.2);
         }
 
-        /* Слот-приемник в шагах (авто-ширина) */
-        .step-drop {
-            min-width: 40px;
-            width: auto;
-            height: 38px;
-            font-size: 1.25rem;
-            border-color: var(--primary);
-            background: rgba(59, 130, 246, 0.1);
-            color: var(--primary);
-            box-shadow: none;
-            margin: 0;
-            padding: 0 10px;
-            vertical-align: bottom;
-        }
+        .step-drop { min-width: 40px; width: auto; height: 38px; font-size: 1.25rem; border-color: var(--primary); background: rgba(59, 130, 246, 0.1); color: var(--primary); box-shadow: none; padding: 0 10px; vertical-align: bottom; }
+        
+        .var-dropzone.drag-over { transform: scale(1.1); background: rgba(139, 92, 246, 0.3); box-shadow: 0 0 20px rgba(139, 92, 246, 0.5); }
+        .var-dropzone.filled { border: 2px solid var(--primary); color: var(--text-main); background: rgba(255, 255, 255, 0.1); text-shadow: none; }
+        .drop-highlight.filled { border-color: var(--success); background: rgba(16, 185, 129, 0.1); color: var(--success); box-shadow: 0 0 15px var(--success-glow); text-shadow: 0 0 5px var(--success); }
 
-        .var-dropzone.drag-over {
-            transform: scale(1.1);
-            background: rgba(139, 92, 246, 0.3);
-            box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
-        }
-
-        .var-dropzone.filled {
-            border: 2px solid var(--primary);
-            color: var(--text-main);
-            background: rgba(255, 255, 255, 0.1);
-            text-shadow: none;
-        }
-
-        .drop-highlight.filled {
-            border-color: var(--success);
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--success);
-            box-shadow: 0 0 15px var(--success-glow);
-            text-shadow: 0 0 5px var(--success);
-        }
-
-        .var-inventory {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-bottom: 10px;
-        }
+        .var-inventory { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
 
         .var-token {
-            width: 45px; height: 45px;
-            background: linear-gradient(135deg, #4c1d95, #7c3aed);
-            color: white;
-            display: flex; justify-content: center; align-items: center;
-            font-size: 1.5rem; 
-            font-weight: bold;
-            font-family: var(--math-font);
-            border-radius: 10px;
-            cursor: grab;
-            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: all 0.2s;
+            width: 45px; height: 45px; background: linear-gradient(135deg, #4c1d95, #7c3aed); color: white;
+            display: flex; justify-content: center; align-items: center; font-size: 1.5rem; font-weight: bold;
+            font-family: var(--math-font); border-radius: 8px; cursor: grab; box-shadow: 0 4px 10px rgba(124, 58, 237, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2); transition: all 0.2s;
         }
 
-        .val-token {
-            background: linear-gradient(135deg, #0ea5e9, #2563eb);
-            box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3);
-            width: auto;
-            min-width: 40px;
-            padding: 0 10px;
-            height: 40px;
-            font-size: 1.25rem;
-        }
+        .val-token { background: linear-gradient(135deg, #0ea5e9, #2563eb); width: auto; min-width: 40px; padding: 0 10px; height: 40px; font-size: 1.25rem; }
+        .op-token { background: linear-gradient(135deg, #f59e0b, #d97706); width: 40px; height: 40px; font-size: 1.4rem; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3); }
 
         .var-token:active { cursor: grabbing; transform: scale(0.95); }
-        .var-token:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(124, 58, 237, 0.6); border-color: white; }
+        .var-token:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.4); border-color: white; }
 
-        .inventory-hint {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 5px;
-        }
+        .inventory-hint { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block; width: 100%; }
 
-        .v-var {
-            font-style: normal;
-            font-weight: bold;
-            color: #a78bfa;
-            text-shadow: 0 0 8px rgba(167, 139, 250, 0.5);
-            margin: 0 2px;
-        }
+        .v-var { font-style: normal; font-weight: bold; color: #a78bfa; text-shadow: 0 0 8px rgba(167, 139, 250, 0.5); margin: 0 2px; }
 
-        /* --- КНОПКИ --- */
         .btn {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            padding: 12px 25px; border: none; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer;
+            transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; text-transform: uppercase; letter-spacing: 1px;
         }
-
-        .check-btn {
-            background-color: rgba(59, 130, 246, 0.1);
-            color: var(--primary);
-            border: 1px solid var(--primary);
-            margin-top: 15px;
-        }
-        .check-btn:hover { 
-            background-color: var(--primary); 
-            color: white;
-            box-shadow: 0 0 15px var(--primary-glow); 
-        }
-        
-        .next-task-btn {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-            padding: 15px 30px;
-            font-size: 1.1rem;
-            margin-top: 20px;
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-        }
+        .check-btn { background-color: rgba(59, 130, 246, 0.1); color: var(--primary); border: 1px solid var(--primary); margin-top: 15px; }
+        .check-btn:hover { background-color: var(--primary); color: white; box-shadow: 0 0 15px var(--primary-glow); }
+        .next-task-btn { background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 15px 30px; font-size: 1.1rem; margin-top: 20px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
         .next-task-btn:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5); }
 
-        .success-msg {
-            color: var(--success);
-            font-weight: 700;
-            margin-left: 15px;
-            display: none;
-            font-family: var(--math-font);
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            text-shadow: 0 0 5px var(--success-glow);
-        }
+        .success-msg { color: var(--success); font-weight: 700; margin-left: 15px; display: none; font-family: var(--math-font); animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-shadow: 0 0 5px var(--success-glow); }
+        @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
-        .final-answer {
-            text-align: center;
-            font-size: 1.25rem;
-            padding: 30px;
-            background: rgba(16, 185, 129, 0.05);
-            border-radius: 12px;
-            margin-top: 25px;
-            display: none;
-            border: 1px solid rgba(16, 185, 129, 0.2);
-            box-shadow: inset 0 0 20px rgba(16, 185, 129, 0.05);
-        }
-        
-        .final-answer strong {
-            color: var(--success);
-            font-family: var(--math-font);
-        }
+        .final-answer { text-align: center; font-size: 1.25rem; padding: 30px; background: rgba(16, 185, 129, 0.05); border-radius: 12px; margin-top: 25px; display: none; border: 1px solid rgba(16, 185, 129, 0.2); box-shadow: inset 0 0 20px rgba(16, 185, 129, 0.05); }
+        .final-answer strong { color: var(--success); font-family: var(--math-font); }
 
-        .completion-screen {
-            display: none;
-            text-align: center;
-            padding: 50px 20px;
-        }
-        .completion-screen h1 { color: var(--success); font-size: 3rem; text-shadow: 0 0 20px var(--success-glow); border: none; }
+        .completion-screen { display: none; text-align: center; padding: 50px 20px; }
+        .completion-screen h1 { color: var(--success); font-size: 3rem; text-shadow: 0 0 20px var(--success-glow); }
         .completion-screen p { font-size: 1.2rem; color: var(--text-muted); margin-top: 15px; }
 
         @media (max-width: 600px) {
-            .workbook { padding: 25px 20px; border-radius: 16px; }
+            .workbook { padding: 25px 20px; }
             .brief-grid { grid-template-columns: 1fr; gap: 8px; }
             .brief-label { text-align: left; color: #94a3b8; }
             .expression { gap: 6px; font-size: 1.15rem; }
@@ -450,10 +176,7 @@
             .step-drop { height: 34px; font-size: 1.1rem; padding: 0 8px; }
             .var-token { width: 42px; height: 42px; font-size: 1.3rem; }
             .val-token { height: 36px; font-size: 1.1rem; }
-            .w-xs { width: 40px; }
-            .w-sm { width: 60px; }
-            .w-md { width: 80px; }
-            .w-lg { width: 110px; }
+            .op-token { width: 36px; height: 36px; font-size: 1.2rem; }
         }
     </style>
 </head>
@@ -477,8 +200,8 @@
             <div class="step-title">1. Обозначь неизвестное</div>
             <div class="var-selection-area">
                 <div class="expression">Пусть масса одной части равна <div class="var-dropzone drop-highlight" id="drop-task1" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropVar(event, 1)">?</div> г.</div>
-                <div class="inventory-hint">Перетащи или нажми на любую букву:</div>
                 <div class="var-inventory">
+                    <span class="inventory-hint">Перетащи любую букву:</span>
                     <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(1, 'x')">x</div>
                     <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(1, 'y')">y</div>
                     <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(1, 'z')">z</div>
@@ -491,33 +214,40 @@
 
         <div class="step">
             <div class="step-title">2. Вырази массы продуктов</div>
-            <div class="inventory-hint">Собери выражения из элементов:</div>
             <div class="var-inventory">
+                <span class="inventory-hint">Собери выражения из элементов (используй знаки):</span>
                 <div class="var-token val-token v-a" draggable="true" ondragstart="dragToken(event)"></div>
                 <div class="var-token val-token v-b" draggable="true" ondragstart="dragToken(event)"></div>
                 <div class="var-token val-token v-c" draggable="true" ondragstart="dragToken(event)"></div>
                 <div class="var-token user-var-token" draggable="true" ondragstart="dragToken(event)">x</div>
+                <div class="var-token op-token" draggable="true" ondragstart="dragToken(event)">+</div>
+                <div class="var-token op-token" draggable="true" ondragstart="dragToken(event)">–</div>
+                <div class="var-token op-token" draggable="true" ondragstart="dragToken(event)">·</div>
+                <div class="var-token op-token" draggable="true" ondragstart="dragToken(event)">:</div>
             </div>
             
             <div class="brief-grid">
                 <div class="brief-label">Яблоки:</div>
                 <div class="brief-value">
                     <div class="var-dropzone step-drop i-a" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> ЧАСТ. =
-                    <div class="var-dropzone step-drop i-a" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> ·
+                    <div class="var-dropzone step-drop i-a" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div>
+                    <div class="var-dropzone step-drop" data-ans="*" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div>
                     <div class="var-dropzone step-drop i-x" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> г
                 </div>
                 
                 <div class="brief-label">Изюм:</div>
                 <div class="brief-value">
                     <div class="var-dropzone step-drop i-b" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> ЧАСТ. =
-                    <div class="var-dropzone step-drop i-b" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> ·
+                    <div class="var-dropzone step-drop i-b" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div>
+                    <div class="var-dropzone step-drop" data-ans="*" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div>
                     <div class="var-dropzone step-drop i-x" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> г
                 </div>
                 
                 <div class="brief-label">Чернослив:</div>
                 <div class="brief-value">
                     <div class="var-dropzone step-drop i-c" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> ЧАСТ. =
-                    <div class="var-dropzone step-drop i-c" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> ·
+                    <div class="var-dropzone step-drop i-c" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div>
+                    <div class="var-dropzone step-drop" data-ans="*" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div>
                     <div class="var-dropzone step-drop i-x" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> г
                 </div>
             </div>
@@ -527,15 +257,20 @@
 
         <div class="step">
             <div class="step-title">3. Составь уравнение (сумма масс равна общей массе)</div>
-            <div class="inventory-hint">Собери уравнение из масс:</div>
             <div class="var-inventory">
+                <span class="inventory-hint">Собери уравнение (используй знаки сложения):</span>
                 <div class="var-token val-token" draggable="true" ondragstart="dragToken(event)"><span class="v-a"></span><span class="v-var">x</span></div>
                 <div class="var-token val-token" draggable="true" ondragstart="dragToken(event)"><span class="v-b"></span><span class="v-var">x</span></div>
                 <div class="var-token val-token" draggable="true" ondragstart="dragToken(event)"><span class="v-c"></span><span class="v-var">x</span></div>
+                <div class="var-token op-token" draggable="true" ondragstart="dragToken(event)">+</div>
+                <div class="var-token op-token" draggable="true" ondragstart="dragToken(event)">–</div>
+                <div class="var-token op-token" draggable="true" ondragstart="dragToken(event)">·</div>
             </div>
             <div class="expression">
-                <div class="var-dropzone step-drop i-ax" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> + 
-                <div class="var-dropzone step-drop i-bx" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> + 
+                <div class="var-dropzone step-drop i-ax" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div>
+                <div class="var-dropzone step-drop" data-ans="+" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div>
+                <div class="var-dropzone step-drop i-bx" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div>
+                <div class="var-dropzone step-drop" data-ans="+" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div>
                 <div class="var-dropzone step-drop i-cx" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> = <span class="v-T"></span>
             </div>
             <button class="btn check-btn" onclick="checkStep(this)">Проверить</button>
@@ -580,8 +315,8 @@
             <div class="step-title">1. Обозначь неизвестное</div>
             <div class="var-selection-area">
                 <div class="expression">Пусть скорость 1-го поезда <div class="var-dropzone drop-highlight" id="drop-task2" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropVar(event, 2)">?</div> км/ч.</div>
-                <div class="inventory-hint">Выбери любую букву:</div>
                 <div class="var-inventory">
+                    <span class="inventory-hint">Выбери любую букву:</span>
                     <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(2, 'x')">x</div>
                     <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(2, 'y')">y</div>
                     <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(2, 'v')">v</div>
@@ -594,29 +329,37 @@
 
         <div class="step">
             <div class="step-title">2. Вырази скорость второго и путь каждого</div>
-            <div class="inventory-hint">Собери выражения из элементов:</div>
             <div class="var-inventory">
+                <span class="inventory-hint">Собери выражения из элементов:</span>
                 <div class="var-token val-token v-t" draggable="true" ondragstart="dragToken(event)"></div>
                 <div class="var-token val-token v-dV" draggable="true" ondragstart="dragToken(event)"></div>
                 <div class="var-token user-var-token" draggable="true" ondragstart="dragToken(event)">x</div>
+                <div class="var-token op-token" draggable="true" ondragstart="dragToken(event)">+</div>
+                <div class="var-token op-token" draggable="true" ondragstart="dragToken(event)">–</div>
+                <div class="var-token op-token" draggable="true" ondragstart="dragToken(event)">·</div>
+                <div class="var-token op-token" draggable="true" ondragstart="dragToken(event)">:</div>
             </div>
             <div class="brief-grid">
                 <div class="brief-label">Скорость 2-го:</div>
                 <div class="brief-value">
-                    <div class="var-dropzone step-drop i-x" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> + 
+                    <div class="var-dropzone step-drop i-x" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> 
+                    <div class="var-dropzone step-drop" data-ans="+" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> 
                     <div class="var-dropzone step-drop i-dV" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> км/ч
                 </div>
                 
                 <div class="brief-label">Путь 1-го:</div>
                 <div class="brief-value">
-                    <div class="var-dropzone step-drop i-t" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> ч · 
+                    <div class="var-dropzone step-drop i-t" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> ч 
+                    <div class="var-dropzone step-drop" data-ans="*" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> 
                     <div class="var-dropzone step-drop i-x" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> км/ч
                 </div>
                 
                 <div class="brief-label">Путь 2-го:</div>
                 <div class="brief-value">
-                    <div class="var-dropzone step-drop i-t" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> ч · ( 
-                    <div class="var-dropzone step-drop i-x" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> + 
+                    <div class="var-dropzone step-drop i-t" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> ч 
+                    <div class="var-dropzone step-drop" data-ans="*" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> ( 
+                    <div class="var-dropzone step-drop i-x" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> 
+                    <div class="var-dropzone step-drop" data-ans="+" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> 
                     <div class="var-dropzone step-drop i-dV" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> ) км/ч
                 </div>
             </div>
@@ -626,13 +369,16 @@
 
         <div class="step">
             <div class="step-title">3. Составь уравнение (сумма путей равна расстоянию)</div>
-            <div class="inventory-hint">Перетащи готовые пути поездов:</div>
             <div class="var-inventory">
+                <span class="inventory-hint">Перетащи готовые пути поездов:</span>
                 <div class="var-token val-token" draggable="true" ondragstart="dragToken(event)"><span class="v-t"></span><span class="v-var">x</span></div>
                 <div class="var-token val-token" draggable="true" ondragstart="dragToken(event)"><span class="v-t"></span>(<span class="v-var">x</span>+<span class="v-dV"></span>)</div>
+                <div class="var-token op-token" draggable="true" ondragstart="dragToken(event)">+</div>
+                <div class="var-token op-token" draggable="true" ondragstart="dragToken(event)">–</div>
             </div>
             <div class="expression">
-                <div class="var-dropzone step-drop i-tx" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> + 
+                <div class="var-dropzone step-drop i-tx" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> 
+                <div class="var-dropzone step-drop" data-ans="+" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> 
                 <div class="var-dropzone step-drop i-t_x_plus_dV" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> = <span class="v-D"></span>
             </div>
             <button class="btn check-btn" onclick="checkStep(this)">Проверить</button>
@@ -681,8 +427,8 @@
             <div class="step-title">1. Обозначь неизвестное</div>
             <div class="var-selection-area">
                 <div class="expression">Пусть в первой корзине <div class="var-dropzone drop-highlight" id="drop-task3" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropVar(event, 3)">?</div> яблок.</div>
-                <div class="inventory-hint">Выбери любую букву:</div>
                 <div class="var-inventory">
+                    <span class="inventory-hint">Выбери любую букву:</span>
                     <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(3, 'x')">x</div>
                     <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(3, 'y')">y</div>
                     <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(3, 'z')">z</div>
@@ -695,14 +441,19 @@
 
         <div class="step">
             <div class="step-title">2. Вырази количество во второй корзине</div>
-            <div class="inventory-hint">Собери выражение:</div>
             <div class="var-inventory">
+                <span class="inventory-hint">Собери выражение:</span>
                 <div class="var-token val-token v-m" draggable="true" ondragstart="dragToken(event)"></div>
                 <div class="var-token user-var-token" draggable="true" ondragstart="dragToken(event)">x</div>
+                <div class="var-token op-token" draggable="true" ondragstart="dragToken(event)">+</div>
+                <div class="var-token op-token" draggable="true" ondragstart="dragToken(event)">–</div>
+                <div class="var-token op-token" draggable="true" ondragstart="dragToken(event)">·</div>
+                <div class="var-token op-token" draggable="true" ondragstart="dragToken(event)">:</div>
             </div>
             <div class="expression" style="margin-top: 15px;">
                 Во второй: 
-                <div class="var-dropzone step-drop i-m" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> РАЗА · 
+                <div class="var-dropzone step-drop i-m" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> 
+                <div class="var-dropzone step-drop" data-ans="*" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> 
                 <div class="var-dropzone step-drop i-x" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> ябл.
             </div>
             <button class="btn check-btn" onclick="checkStep(this)">Проверить</button>
@@ -724,8 +475,8 @@
 
         <div class="step">
             <div class="step-title">4. Составь уравнение (стало поровну)</div>
-            <div class="inventory-hint">Перетащи выражения из предыдущего шага:</div>
             <div class="var-inventory">
+                <span class="inventory-hint">Перетащи выражения из предыдущего шага:</span>
                 <div class="var-token val-token" draggable="true" ondragstart="dragToken(event)"><span class="v-var">x</span>+<span class="v-k"></span></div>
                 <div class="var-token val-token" draggable="true" ondragstart="dragToken(event)"><span class="v-m"></span><span class="v-var">x</span>-<span class="v-k"></span></div>
             </div>
@@ -768,31 +519,71 @@
         </div>
 
         <div class="step active step-var-select">
-            <div class="step-title">1. Обозначь меньший отрезок</div>
-            <div class="var-selection-area">
-                <div class="expression">Пусть длина CB = <div class="var-dropzone drop-highlight" id="drop-task4" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropVar(event, 4)">?</div> см.</div>
-                <div class="inventory-hint">Выбери любую букву:</div>
-                <div class="var-inventory">
-                    <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(4, 'x')">x</div>
-                    <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(4, 'y')">y</div>
-                    <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(4, 'L')">L</div>
-                    <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(4, 'a')">a</div>
-                    <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(4, 'c')">c</div>
+            <div class="step-title">1. Обозначь меньший отрезок на чертеже</div>
+            
+            <div style="display: flex; align-items: center; margin: 60px 0 40px; position: relative;">
+                <!-- Больший отрезок AC -->
+                <div style="flex: 1.5; border-bottom: 4px solid var(--primary); position: relative; height: 20px;">
+                    <div style="position: absolute; top: -50px; width: 100%; display: flex; justify-content: center; gap: 5px;">
+                        <div class="var-dropzone" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="wrongVarDrop(event, 'Отрезок AC визуально длиннее (на d см больше)! Выбери меньший отрезок.')">?</div>
+                    </div>
+                    <div style="position: absolute; left: 0; bottom: -8px; width: 4px; height: 16px; background: var(--primary);"></div>
+                    <div style="position: absolute; left: -5px; bottom: -35px; font-weight: bold; font-family: var(--math-font); color: var(--text-muted);">A</div>
+                    <div style="position: absolute; right: 0; bottom: -8px; width: 4px; height: 16px; background: var(--primary);"></div>
+                    <div style="position: absolute; right: -5px; bottom: -35px; font-weight: bold; font-family: var(--math-font); color: var(--text-muted);">C</div>
+                </div>
+                <!-- Меньший отрезок CB -->
+                <div style="flex: 1; border-bottom: 4px solid var(--primary); position: relative; height: 20px;">
+                    <div style="position: absolute; top: -50px; width: 100%; display: flex; justify-content: center; gap: 5px;">
+                        <div class="var-dropzone drop-highlight" id="drop-task4" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropVar(event, 4)">?</div>
+                    </div>
+                    <div style="position: absolute; right: 0; bottom: -8px; width: 4px; height: 16px; background: var(--primary);"></div>
+                    <div style="position: absolute; right: -5px; bottom: -35px; font-weight: bold; font-family: var(--math-font); color: var(--text-muted);">B</div>
                 </div>
             </div>
-            <span class="success-msg" style="margin-top: 15px;">✓ Буква зафиксирована!</span>
+
+            <div class="var-inventory">
+                <span class="inventory-hint">Перетащи букву в верное окно на чертеже:</span>
+                <div class="var-token" draggable="true" ondragstart="dragToken(event)">x</div>
+                <div class="var-token" draggable="true" ondragstart="dragToken(event)">y</div>
+                <div class="var-token" draggable="true" ondragstart="dragToken(event)">L</div>
+                <div class="var-token" draggable="true" ondragstart="dragToken(event)">a</div>
+            </div>
+            <span class="success-msg" style="margin-top: 15px;">✓ Меньший отрезок определен!</span>
         </div>
 
         <div class="step">
-            <div class="step-title">2. Вырази длину AC</div>
-            <div class="inventory-hint">Собери выражение:</div>
+            <div class="step-title">2. Вырази длину большего отрезка (AC)</div>
+            
+            <div style="display: flex; align-items: center; margin: 60px 0 40px; position: relative;">
+                <div style="flex: 1.5; border-bottom: 4px solid var(--primary); position: relative; height: 20px;">
+                    <div style="position: absolute; top: -50px; width: 100%; display: flex; justify-content: center; gap: 5px;">
+                        <div class="var-dropzone step-drop i-x" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div>
+                        <div class="var-dropzone step-drop" data-ans="+" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div>
+                        <div class="var-dropzone step-drop i-d" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div>
+                    </div>
+                    <div style="position: absolute; left: 0; bottom: -8px; width: 4px; height: 16px; background: var(--primary);"></div>
+                    <div style="position: absolute; left: -5px; bottom: -35px; font-weight: bold; font-family: var(--math-font); color: var(--text-muted);">A</div>
+                    <div style="position: absolute; right: 0; bottom: -8px; width: 4px; height: 16px; background: var(--primary);"></div>
+                    <div style="position: absolute; right: -5px; bottom: -35px; font-weight: bold; font-family: var(--math-font); color: var(--text-muted);">C</div>
+                </div>
+                <div style="flex: 1; border-bottom: 4px solid var(--primary); position: relative; height: 20px;">
+                    <div style="position: absolute; top: -50px; width: 100%; display: flex; justify-content: center; gap: 5px;">
+                        <div class="var-dropzone drop-highlight filled v-var">x</div>
+                    </div>
+                    <div style="position: absolute; right: 0; bottom: -8px; width: 4px; height: 16px; background: var(--primary);"></div>
+                    <div style="position: absolute; right: -5px; bottom: -35px; font-weight: bold; font-family: var(--math-font); color: var(--text-muted);">B</div>
+                </div>
+            </div>
+
             <div class="var-inventory">
+                <span class="inventory-hint">Собери выражение:</span>
                 <div class="var-token val-token v-d" draggable="true" ondragstart="dragToken(event)"></div>
                 <div class="var-token user-var-token" draggable="true" ondragstart="dragToken(event)">x</div>
-            </div>
-            <div class="expression" style="margin-top: 15px;">
-                AC = <div class="var-dropzone step-drop i-x" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> + 
-                     <div class="var-dropzone step-drop i-d" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> см.
+                <div class="var-token op-token" draggable="true" ondragstart="dragToken(event)">+</div>
+                <div class="var-token op-token" draggable="true" ondragstart="dragToken(event)">–</div>
+                <div class="var-token op-token" draggable="true" ondragstart="dragToken(event)">·</div>
+                <div class="var-token op-token" draggable="true" ondragstart="dragToken(event)">:</div>
             </div>
             <button class="btn check-btn" onclick="checkStep(this)">Проверить</button>
             <span class="success-msg">✓ Верно!</span>
@@ -800,13 +591,16 @@
 
         <div class="step">
             <div class="step-title">3. Составь уравнение (сумма равна AB)</div>
-            <div class="inventory-hint">Перетащи отрезки:</div>
             <div class="var-inventory">
+                <span class="inventory-hint">Перетащи отрезки:</span>
                 <div class="var-token val-token" draggable="true" ondragstart="dragToken(event)"><span class="v-var">x</span></div>
                 <div class="var-token val-token" draggable="true" ondragstart="dragToken(event)"><span class="v-var">x</span>+<span class="v-d"></span></div>
+                <div class="var-token op-token" draggable="true" ondragstart="dragToken(event)">+</div>
+                <div class="var-token op-token" draggable="true" ondragstart="dragToken(event)">–</div>
             </div>
             <div class="expression">
-                <div class="var-dropzone step-drop i-x" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> + 
+                <div class="var-dropzone step-drop i-x" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> 
+                <div class="var-dropzone step-drop" data-ans="+" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> 
                 ( <div class="var-dropzone step-drop i-x_plus_d" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> ) = <span class="v-L"></span>
             </div>
             <button class="btn check-btn" onclick="checkStep(this)">Проверить</button>
@@ -853,8 +647,8 @@
             <div class="step-title">1. Обозначь цену карандаша</div>
             <div class="var-selection-area">
                 <div class="expression">Карандаш стоит <div class="var-dropzone drop-highlight" id="drop-task5" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropVar(event, 5)">?</div> руб.</div>
-                <div class="inventory-hint">Выбери любую букву:</div>
                 <div class="var-inventory">
+                    <span class="inventory-hint">Выбери любую букву:</span>
                     <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(5, 'x')">x</div>
                     <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(5, 'y')">y</div>
                     <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(5, 'z')">z</div>
@@ -867,22 +661,28 @@
 
         <div class="step">
             <div class="step-title">2. Вырази цены остальных</div>
-            <div class="inventory-hint">Собери выражения из элементов:</div>
             <div class="var-inventory">
+                <span class="inventory-hint">Собери выражения из элементов:</span>
                 <div class="var-token val-token v-m" draggable="true" ondragstart="dragToken(event)"></div>
                 <div class="var-token val-token v-d" draggable="true" ondragstart="dragToken(event)"></div>
                 <div class="var-token user-var-token" draggable="true" ondragstart="dragToken(event)">x</div>
+                <div class="var-token op-token" draggable="true" ondragstart="dragToken(event)">+</div>
+                <div class="var-token op-token" draggable="true" ondragstart="dragToken(event)">–</div>
+                <div class="var-token op-token" draggable="true" ondragstart="dragToken(event)">·</div>
+                <div class="var-token op-token" draggable="true" ondragstart="dragToken(event)">:</div>
             </div>
             <div class="brief-grid">
                 <div class="brief-label">Ручка:</div>
                 <div class="brief-value">
-                    <div class="var-dropzone step-drop i-m" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> · 
+                    <div class="var-dropzone step-drop i-m" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> 
+                    <div class="var-dropzone step-drop" data-ans="*" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> 
                     <div class="var-dropzone step-drop i-x" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> руб.
                 </div>
                 
                 <div class="brief-label">Линейка:</div>
                 <div class="brief-value">
-                    <div class="var-dropzone step-drop i-x" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> – 
+                    <div class="var-dropzone step-drop i-x" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> 
+                    <div class="var-dropzone step-drop" data-ans="-" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> 
                     <div class="var-dropzone step-drop i-d" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> руб.
                 </div>
             </div>
@@ -892,15 +692,19 @@
 
         <div class="step">
             <div class="step-title">3. Составь уравнение</div>
-            <div class="inventory-hint">Перетащи цены предметов:</div>
             <div class="var-inventory">
+                <span class="inventory-hint">Перетащи цены предметов:</span>
                 <div class="var-token val-token" draggable="true" ondragstart="dragToken(event)"><span class="v-var">x</span></div>
                 <div class="var-token val-token" draggable="true" ondragstart="dragToken(event)"><span class="v-m"></span><span class="v-var">x</span></div>
                 <div class="var-token val-token" draggable="true" ondragstart="dragToken(event)"><span class="v-var">x</span>-<span class="v-d"></span></div>
+                <div class="var-token op-token" draggable="true" ondragstart="dragToken(event)">+</div>
+                <div class="var-token op-token" draggable="true" ondragstart="dragToken(event)">–</div>
             </div>
             <div class="expression">
-                <div class="var-dropzone step-drop i-x" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> + 
-                <div class="var-dropzone step-drop i-mx" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> + 
+                <div class="var-dropzone step-drop i-x" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> 
+                <div class="var-dropzone step-drop" data-ans="+" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> 
+                <div class="var-dropzone step-drop i-mx" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> 
+                <div class="var-dropzone step-drop" data-ans="+" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> 
                 ( <div class="var-dropzone step-drop i-x_minus_d" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> ) = <span class="v-C"></span>
             </div>
             <button class="btn check-btn" onclick="checkStep(this)">Проверить</button>
@@ -948,8 +752,8 @@
             <div class="step-title">1. Обозначь неизвестное</div>
             <div class="var-selection-area">
                 <div class="expression">Ручка стоит <div class="var-dropzone drop-highlight" id="drop-task6" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropVar(event, 6)">?</div> руб.</div>
-                <div class="inventory-hint">Выбери любую букву:</div>
                 <div class="var-inventory">
+                    <span class="inventory-hint">Выбери любую букву:</span>
                     <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(6, 'x')">x</div>
                     <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(6, 'y')">y</div>
                     <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(6, 'z')">z</div>
@@ -962,13 +766,18 @@
 
         <div class="step">
             <div class="step-title">2. Цена тетради</div>
-            <div class="inventory-hint">Собери выражение:</div>
             <div class="var-inventory">
+                <span class="inventory-hint">Собери выражение:</span>
                 <div class="var-token val-token v-d" draggable="true" ondragstart="dragToken(event)"></div>
                 <div class="var-token user-var-token" draggable="true" ondragstart="dragToken(event)">x</div>
+                <div class="var-token op-token" draggable="true" ondragstart="dragToken(event)">+</div>
+                <div class="var-token op-token" draggable="true" ondragstart="dragToken(event)">–</div>
+                <div class="var-token op-token" draggable="true" ondragstart="dragToken(event)">·</div>
+                <div class="var-token op-token" draggable="true" ondragstart="dragToken(event)">:</div>
             </div>
             <div class="expression" style="margin-top: 15px;">
-                Тетрадь: <div class="var-dropzone step-drop i-x" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> + 
+                Тетрадь: <div class="var-dropzone step-drop i-x" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> 
+                         <div class="var-dropzone step-drop" data-ans="+" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> 
                          <div class="var-dropzone step-drop i-d" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> руб.
             </div>
             <button class="btn check-btn" onclick="checkStep(this)">Проверить</button>
@@ -977,24 +786,28 @@
 
         <div class="step">
             <div class="step-title">3. Вырази стоимость всей покупки</div>
-            <div class="inventory-hint">Перетащи значения в слоты:</div>
             <div class="var-inventory">
+                <span class="inventory-hint">Перетащи значения в слоты:</span>
                 <div class="var-token val-token v-n1" draggable="true" ondragstart="dragToken(event)"></div>
                 <div class="var-token val-token v-n2" draggable="true" ondragstart="dragToken(event)"></div>
-                <div class="var-token val-token v-d" draggable="true" ondragstart="dragToken(event)"></div>
+                <div class="var-token val-token" draggable="true" ondragstart="dragToken(event)"><span class="v-var">x</span>+<span class="v-d"></span></div>
                 <div class="var-token user-var-token" draggable="true" ondragstart="dragToken(event)">x</div>
+                <div class="var-token op-token" draggable="true" ondragstart="dragToken(event)">+</div>
+                <div class="var-token op-token" draggable="true" ondragstart="dragToken(event)">–</div>
+                <div class="var-token op-token" draggable="true" ondragstart="dragToken(event)">·</div>
             </div>
             <div class="brief-grid">
                 <div class="brief-label"><span class="v-n1"></span> тетр.:</div>
                 <div class="brief-value">
-                    <div class="var-dropzone step-drop i-n1" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> · ( 
-                    <div class="var-dropzone step-drop i-x" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> + 
-                    <div class="var-dropzone step-drop i-d" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> ) руб.
+                    <div class="var-dropzone step-drop i-n1" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> 
+                    <div class="var-dropzone step-drop" data-ans="*" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> ( 
+                    <div class="var-dropzone step-drop i-x_plus_d" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> ) руб.
                 </div>
                 
                 <div class="brief-label"><span class="v-n2"></span> ручек:</div>
                 <div class="brief-value">
-                    <div class="var-dropzone step-drop i-n2" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> · 
+                    <div class="var-dropzone step-drop i-n2" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> 
+                    <div class="var-dropzone step-drop" data-ans="*" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> 
                     <div class="var-dropzone step-drop i-x" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> руб.
                 </div>
             </div>
@@ -1004,13 +817,16 @@
 
         <div class="step">
             <div class="step-title">4. Составь уравнение</div>
-            <div class="inventory-hint">Собери стоимости:</div>
             <div class="var-inventory">
+                <span class="inventory-hint">Собери стоимости:</span>
                 <div class="var-token val-token" draggable="true" ondragstart="dragToken(event)"><span class="v-n1"></span>(<span class="v-var">x</span>+<span class="v-d"></span>)</div>
                 <div class="var-token val-token" draggable="true" ondragstart="dragToken(event)"><span class="v-n2"></span><span class="v-var">x</span></div>
+                <div class="var-token op-token" draggable="true" ondragstart="dragToken(event)">+</div>
+                <div class="var-token op-token" draggable="true" ondragstart="dragToken(event)">–</div>
             </div>
             <div class="expression">
-                <div class="var-dropzone step-drop i-n1_x_plus_d" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> + 
+                <div class="var-dropzone step-drop i-n1_x_plus_d" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> 
+                <div class="var-dropzone step-drop" data-ans="+" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> 
                 <div class="var-dropzone step-drop i-n2x" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> = <span class="v-C"></span>
             </div>
             <button class="btn check-btn" onclick="checkStep(this)">Проверить</button>
@@ -1197,6 +1013,30 @@
         const variable = e.dataTransfer.getData('text/plain');
         if (variable) selectVar(taskId, variable);
     }
+    
+    // Специальная функция для ловли ошибок на чертеже в Задаче 4
+    function wrongVarDrop(e, msg) {
+        e.preventDefault();
+        e.currentTarget.classList.remove('drag-over');
+        
+        let errTip = document.getElementById('geom-error');
+        if (!errTip) {
+            errTip = document.createElement('div');
+            errTip.id = 'geom-error';
+            errTip.style.color = 'var(--error)';
+            errTip.style.fontWeight = 'bold';
+            errTip.style.marginTop = '20px';
+            errTip.style.textAlign = 'center';
+            e.currentTarget.closest('.step').appendChild(errTip);
+        }
+        errTip.textContent = msg;
+        
+        e.currentTarget.classList.remove('wrong');
+        void e.currentTarget.offsetWidth;
+        e.currentTarget.classList.add('wrong');
+        
+        setTimeout(() => { if(errTip) errTip.textContent = ''; }, 3000);
+    }
 
     function selectVar(taskId, variable) {
         userVars[taskId] = variable;
@@ -1234,10 +1074,13 @@
         }
     }
 
-    // Удаляем кириллицу, пробелы, звездочки и знаки умножения (·)
+    // Сохраняем математические знаки, унифицируем умножение и минус
     function cleanStr(str) {
         const map = {'х':'x', 'у':'y', 'а':'a', 'с':'c', 'е':'e', 'п':'n', 'н':'n', 'з':'z', 'р':'p', 'в':'b'};
-        return str.trim().toLowerCase().replace(/[хуасепнзрв]/g, m => map[m]).replace(/\s+/g, '').replace(/[\*·]/g, '');
+        let s = str.trim().toLowerCase().replace(/[хуасепнзрв]/g, m => map[m]).replace(/\s+/g, '');
+        s = s.replace(/·/g, '*');
+        s = s.replace(/–/g, '-');
+        return s;
     }
 
     function checkStep(btn) {
@@ -1259,10 +1102,16 @@
             let rawActual = inp.tagName.toLowerCase() === 'input' ? inp.value : inp.textContent;
             if (rawActual === '?') rawActual = ''; 
             
-            const actual = cleanStr(rawActual);
+            let actual = cleanStr(rawActual);
+            
+            // Если ожидаемый ответ не содержит знака умножения, а ученик его ввёл в input, прощаем
+            if (!expected.includes('*') && inp.tagName.toLowerCase() === 'input') {
+                actual = actual.replace(/\*/g, '');
+            }
 
             let isCorrect = (actual === expected);
             
+            // Проверка перестановки (a+b = b+a)
             if (!isCorrect && expected.includes('+')) {
                 let parts = expected.split('+');
                 if (parts.length === 2 && actual === parts[1] + '+' + parts[0]) {
