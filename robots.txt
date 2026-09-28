@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://godspace.github.io/math-6-grade/sitemap.xml
