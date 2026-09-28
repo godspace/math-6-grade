@@ -3,961 +3,853 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Тренажер разложения на простые множители</title>
+    <title>Тренажер: Разложение на простые множители</title>
+    <script src="../../assets/analytics.js" defer></script>
     <style>
+        :root {
+            --bg-color: #0f172a;
+            --panel-bg: rgba(30, 41, 59, 0.7);
+            --primary: #3b82f6;
+            --primary-glow: rgba(59, 130, 246, 0.5);
+            --success: #10b981;
+            --success-glow: rgba(16, 185, 129, 0.5);
+            --error: #ef4444;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            user-select: none;
         }
         
         body {
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.15) 0px, transparent 50%);
+            color: var(--text-main);
             min-height: 100vh;
-            padding: 20px;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            padding: 20px;
+            overflow: hidden;
         }
-        
-        .container {
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            width: 100%;
             max-width: 800px;
-            width: 100%;
-            background-color: white;
-            border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            position: relative;
-            overflow: hidden;
         }
-        
-        .container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 6px;
-            background: linear-gradient(90deg, #3498db, #2ecc71, #3498db);
-        }
-        
+
         h1 {
-            color: #2c3e50;
-            text-align: center;
-            margin-bottom: 10px;
-            font-weight: 700;
-            font-size: 32px;
+            font-size: 2rem;
+            margin-bottom: 5px;
+            background: linear-gradient(to right, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        
-        .subtitle {
-            text-align: center;
-            color: #7f8c8d;
-            margin-bottom: 30px;
-            font-size: 18px;
-        }
-        
-        .card {
-            background-color: #f8f9fa;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 25px;
-            border-left: 4px solid #3498db;
-            text-align: center;
-        }
-        
-        .target-label {
-            font-weight: 600;
-            font-size: 18px;
-            color: #2c3e50;
-            margin-bottom: 15px;
-        }
-        
-        .target-number {
-            font-size: 42px;
-            font-weight: 700;
-            color: #3498db;
-            background-color: white;
-            padding: 15px 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+
+        .level-badge {
             display: inline-block;
-            margin-bottom: 15px;
-        }
-        
-        .level-info {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 15px;
-            margin-top: 15px;
-        }
-        
-        .level-label {
-            font-weight: 600;
-            color: #2c3e50;
-        }
-        
-        .level-value {
-            font-weight: 700;
-            color: #e74c3c;
-            background-color: white;
-            padding: 5px 15px;
+            background: rgba(139, 92, 246, 0.2);
+            color: #c4b5fd;
+            padding: 6px 16px;
             border-radius: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        
-        .available-primes {
+            font-size: 1rem;
+            font-weight: bold;
+            border: 1px solid rgba(139, 92, 246, 0.3);
             margin-top: 10px;
-            font-size: 14px;
-            color: #7f8c8d;
+            box-shadow: 0 0 10px rgba(139, 92, 246, 0.2);
         }
-        
-        .progress-container {
-            margin: 20px 0;
-        }
-        
-        .progress-label {
+
+        /* Игровое поле */
+        .game-board {
+            width: 100%;
+            max-width: 700px;
+            background: var(--panel-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 40px 20px;
             display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 14px;
-            color: #7f8c8d;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden; 
         }
-        
-        .progress-bar {
-            height: 10px;
-            background-color: #e9ecef;
-            border-radius: 5px;
-            overflow: hidden;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #3498db, #2ecc71);
-            width: 0%;
-            transition: width 0.5s ease;
-        }
-        
-        .factors-container {
+
+        /* Строка собранных множителей (Уравнение) */
+        .factors-row {
             display: flex;
             align-items: center;
             justify-content: center;
             flex-wrap: wrap;
-            margin: 30px 0;
-            gap: 5px;
+            gap: 10px;
             min-height: 80px;
+            margin-bottom: 30px;
+            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 16px;
+            width: 90%;
         }
-        
-        .factor-input {
-            width: 70px;
-            height: 70px;
-            padding: 10px;
-            text-align: center;
-            border: 2px solid #e0e0e0;
+
+        .factor-item {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--success);
+            text-shadow: 0 0 10px var(--success-glow);
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .active-target {
+            color: white;
+            background: rgba(59, 130, 246, 0.2);
+            border: 2px dashed #3b82f6;
+            padding: 5px 15px;
             border-radius: 12px;
-            font-size: 24px;
-            font-weight: 600;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+            animation: pulseTarget 2s infinite ease-in-out;
+            text-shadow: none;
             transition: all 0.3s ease;
-            background-color: white;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
-        
-        .factor-input:focus {
-            border-color: #3498db;
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
-            outline: none;
+
+        @keyframes pulseTarget {
+            0%, 100% { transform: scale(1); border-color: rgba(59, 130, 246, 0.5); }
+            50% { transform: scale(1.05); border-color: #3b82f6; box-shadow: 0 0 20px rgba(59, 130, 246, 0.6); }
         }
-        
-        .factor-input.valid {
-            border-color: #2ecc71;
-            background-color: rgba(46, 204, 113, 0.05);
+
+        .original-target {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--text-muted);
         }
-        
-        .factor-input.invalid {
-            border-color: #e74c3c;
-            background-color: rgba(231, 76, 60, 0.05);
-        }
-        
+
         .multiply-sign {
-            font-size: 28px;
-            margin: 0 15px;
-            font-weight: 700;
-            color: #7f8c8d;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            animation: fadeIn 0.3s ease forwards;
+            margin: 0 5px;
         }
-        
-        .controls {
+
+        /* Целевое число и диаграмма */
+        .target-container {
+            width: 180px;
+            height: 180px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
             display: flex;
             justify-content: center;
-            gap: 15px;
-            margin: 25px 0;
-            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 40px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
         }
-        
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
+
+        .target-container.drag-over {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: var(--primary);
+            transform: scale(1.05);
+            box-shadow: 0 0 30px var(--primary-glow);
+        }
+
+        .pie-background {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 50%;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1;
+        }
+
+        .labels-container {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .sector-label {
+            position: absolute;
+            top: 50%; left: 50%;
+            font-weight: 800;
+            color: white;
+            text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.8);
             transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* Анимации Успеха/Ошибки */
+        @keyframes successPulse {
+            0% { transform: scale(1); filter: brightness(1); }
+            50% { transform: scale(1.2); filter: brightness(1.5); color: var(--success); text-shadow: 0 0 30px var(--success-glow); background: rgba(16, 185, 129, 0.2); border-color: var(--success); }
+            100% { transform: scale(1); filter: brightness(1); }
         }
         
-        .btn-primary {
-            background-color: #3498db;
-            color: white;
+        @keyframes shakeError {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); color: var(--error); border-color: var(--error); background: rgba(239, 68, 68, 0.2); }
+            40%, 80% { transform: translateX(10px); color: var(--error); border-color: var(--error); background: rgba(239, 68, 68, 0.2); }
         }
-        
-        .btn-primary:hover {
-            background-color: #2980b9;
-            transform: translateY(-2px);
-        }
-        
-        .btn-warning {
-            background-color: #f39c12;
-            color: white;
-        }
-        
-        .btn-warning:hover {
-            background-color: #e67e22;
-            transform: translateY(-2px);
-        }
-        
-        .result {
-            text-align: center;
-            margin-top: 20px;
-            padding: 20px;
-            border-radius: 12px;
-            font-size: 18px;
-            display: none;
-            animation: fadeIn 0.5s ease;
-        }
-        
-        .success {
-            background-color: #d4f5e2;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
-        .celebration {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(255, 255, 255, 0.9);
+
+        .anim-success { animation: successPulse 0.6s ease; }
+        .anim-error { animation: shakeError 0.5s ease; animation-iteration-count: 1; }
+
+        /* Внутриигровой оверлей для математического вопроса */
+        .quiz-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(5px);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 1000;
-            animation: fadeIn 0.5s ease;
+            z-index: 50;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
         }
-        
-        .celebration-content {
-            background: linear-gradient(135deg, #2ecc71, #27ae60);
-            color: white;
-            padding: 40px;
-            border-radius: 20px;
-            text-align: center;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
-            max-width: 500px;
-            width: 90%;
-            animation: scaleIn 0.5s ease;
+
+        .quiz-overlay.active {
+            opacity: 1;
+            pointer-events: all;
         }
-        
-        .celebration h2 {
-            font-size: 36px;
+
+        .quiz-title {
+            color: var(--primary);
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
             margin-bottom: 20px;
+        }
+
+        .quiz-question {
+            font-size: 3.5rem;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 30px;
             display: flex;
             align-items: center;
-            justify-content: center;
             gap: 15px;
         }
-        
-        .celebration p {
-            font-size: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .celebration .btn {
-            margin: 0 auto;
-            display: block;
-        }
-        
-        .level-up {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(255, 255, 255, 0.9);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            animation: fadeIn 0.5s ease;
-        }
-        
-        .level-up-content {
-            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+
+        .quiz-input {
+            width: 120px;
+            font-size: 3rem;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px dashed rgba(255, 255, 255, 0.5);
             color: white;
-            padding: 40px;
-            border-radius: 20px;
-            text-align: center;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
-            max-width: 500px;
-            width: 90%;
-            animation: scaleIn 0.5s ease;
+            border-radius: 16px;
+            padding: 10px;
+            outline: none;
+            font-family: inherit;
+            font-weight: bold;
+            transition: all 0.2s;
         }
-        
-        .level-up h2 {
-            font-size: 36px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
+
+        .quiz-input:focus {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+            box-shadow: 0 0 20px var(--success-glow);
         }
-        
-        .level-up p {
-            font-size: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .level-up .btn {
-            margin: 0 auto;
-            display: block;
-        }
-        
-        .stats {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #e0e0e0;
-        }
-        
-        .stat-item {
-            text-align: center;
-        }
-        
-        .stat-value {
-            font-size: 24px;
-            font-weight: 700;
-            color: #3498db;
-        }
-        
-        .stat-label {
-            font-size: 14px;
-            color: #7f8c8d;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        @keyframes scaleIn {
-            from { transform: scale(0.8); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-        
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
-            40% {transform: translateY(-10px);}
-            60% {transform: translateY(-5px);}
-        }
-        
-        .bounce {
-            animation: bounce 1s;
-        }
-        
-        /* Убираем стрелочки у числовых полей */
-        input[type=number]::-webkit-outer-spin-button,
-        input[type=number]::-webkit-inner-spin-button {
+
+        .quiz-input::-webkit-outer-spin-button,
+        .quiz-input::-webkit-inner-spin-button {
             -webkit-appearance: none;
             margin: 0;
         }
-        
-        input[type=number] {
-            -moz-appearance: textfield;
+
+        .quiz-btn {
+            margin-top: 30px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+            transition: transform 0.2s;
         }
-        
-        /* Адаптивность */
+
+        .quiz-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Инвентарь */
+        .inventory-hint {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .primes-inventory {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            transition: opacity 0.3s, transform 0.3s;
+        }
+
+        .prime-token {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            border-radius: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            cursor: grab;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .prime-token:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(37, 99, 235, 0.6); }
+        .prime-token:active { cursor: grabbing; transform: scale(0.95); }
+
+        /* Кнопка перехода к следующему раунду */
+        .next-round-container {
+            display: none;
+            margin-top: -10px;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .btn-next {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            font-size: 1.4rem;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+            transition: all 0.2s;
+        }
+
+        .btn-next:hover { transform: scale(1.05) translateY(-2px); box-shadow: 0 8px 25px rgba(16, 185, 129, 0.6); }
+
+        /* Конфетти */
+        .confetti-particle {
+            position: absolute;
+            width: 10px; height: 10px;
+            border-radius: 2px;
+            pointer-events: none;
+            z-index: 999;
+            animation: confettiBurst 1s ease-out forwards;
+        }
+
+        @keyframes confettiBurst {
+            0% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
+            100% { transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) rotate(var(--rot)) scale(0); opacity: 0; }
+        }
+
+        /* Прогресс-бар */
+        .progress-tracker {
+            position: absolute;
+            top: 20px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .progress-dot {
+            width: 12px; height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            transition: background 0.3s, box-shadow 0.3s;
+        }
+
+        .progress-dot.filled {
+            background: var(--success);
+            box-shadow: 0 0 10px var(--success-glow);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            80% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
         @media (max-width: 600px) {
-            .container {
-                padding: 20px;
-            }
-            
-            h1 {
-                font-size: 24px;
-            }
-            
-            .target-number {
-                font-size: 32px;
-                padding: 12px 24px;
-            }
-            
-            .factor-input {
-                width: 60px;
-                height: 60px;
-                font-size: 20px;
-            }
-            
-            .multiply-sign {
-                font-size: 20px;
-                margin: 0 10px;
-            }
-            
-            .btn {
-                padding: 10px 16px;
-                font-size: 14px;
-            }
-            
-            .controls {
-                gap: 10px;
-            }
-            
-            .celebration h2,
-            .level-up h2 {
-                font-size: 28px;
-            }
-            
-            .celebration p,
-            .level-up p {
-                font-size: 18px;
-            }
+            .target-container { width: 150px; height: 150px; }
+            .factor-item, .original-target { font-size: 1.5rem; }
+            .prime-token { width: 55px; height: 55px; font-size: 1.3rem; }
+            .active-target { padding: 4px 10px; }
+            .btn-next { font-size: 1.2rem; padding: 12px 30px; }
+            .quiz-question { font-size: 2.5rem; }
+            .quiz-input { width: 80px; font-size: 2.5rem; }
         }
     </style>
-<script src="../../assets/analytics.js"></script>
 </head>
 <body>
-    <div class="container">
-        <h1>Разложение на простые множители</h1>
-        <p class="subtitle">Тренажер для отработки навыков разложения чисел</p>
-        
-        <div class="card">
-            <div class="target-label">Разложите число:</div>
-            <div class="target-number" id="target-number">42</div>
-            
-            <div class="level-info">
-                <div class="level-label">Уровень:</div>
-                <div class="level-value" id="current-level">1</div>
-            </div>
-            
-            <div class="available-primes" id="available-primes">
-                Доступные простые числа: 2, 3, 5
-            </div>
-            
-            <div class="progress-container">
-                <div class="progress-label">
-                    <span>Текущий результат:</span>
-                    <span id="current-product">1</span>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progress-fill"></div>
-                </div>
-            </div>
+
+    <header>
+        <h1>Разложение на множители</h1>
+        <div class="level-badge" id="level-indicator">Разминка</div>
+    </header>
+
+    <div class="game-board" id="game-board">
+        <div class="progress-tracker" id="progress-tracker">
+            <!-- Точки прогресса -->
         </div>
-        
-        <div class="factors-container" id="factors-container">
-            <!-- Множители будут добавляться динамически -->
+
+        <div class="factors-row" id="factors-row">
+            <!-- Уравнение рендерится здесь -->
         </div>
-        
-        <div class="controls">
-            <button class="btn btn-primary" id="add-factor-btn">
-                <span>+</span> Добавить множитель
-            </button>
-            <button class="btn btn-warning" id="remove-factor-btn">
-                <span>−</span> Удалить множитель
-            </button>
+
+        <div class="target-container" id="target-zone">
+            <div class="pie-background" id="pie-bg"></div>
+            <div id="labels-container" class="labels-container"></div>
         </div>
+
+        <div class="inventory-hint" id="hint-text">Перетащи множитель на круг или нажми</div>
         
-        <div class="result" id="result"></div>
-        
-        <div class="stats">
-            <div class="stat-item">
-                <div class="stat-value" id="problems-solved">0</div>
-                <div class="stat-label">Решено задач</div>
+        <div class="primes-inventory" id="inventory">
+            <!-- Токены простых чисел -->
+        </div>
+
+        <div class="next-round-container" id="next-btn-container">
+            <button class="btn-next" onclick="startNextRound()">Дальше ➔</button>
+        </div>
+
+        <!-- Оверлей для устного счета -->
+        <div class="quiz-overlay" id="quiz-overlay">
+            <div class="quiz-title">Отлично! А теперь посчитай:</div>
+            <div class="quiz-question">
+                <span id="quiz-dividend">12</span> : <span id="quiz-divisor">2</span> = <input type="number" id="quiz-input" class="quiz-input" autocomplete="off">
             </div>
-            <div class="stat-item">
-                <div class="stat-value" id="success-rate">100%</div>
-                <div class="stat-label">Успешность</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" id="level-progress">0/3</div>
-                <div class="stat-label">Прогресс уровня</div>
-            </div>
+            <button class="quiz-btn" onclick="submitQuiz()">Проверить</button>
         </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Элементы DOM
-            const targetNumberElement = document.getElementById('target-number');
-            const currentProductElement = document.getElementById('current-product');
-            const progressFillElement = document.getElementById('progress-fill');
-            const factorsContainer = document.getElementById('factors-container');
-            const addFactorBtn = document.getElementById('add-factor-btn');
-            const removeFactorBtn = document.getElementById('remove-factor-btn');
-            const resultElement = document.getElementById('result');
-            const currentLevelElement = document.getElementById('current-level');
-            const availablePrimesElement = document.getElementById('available-primes');
-            const levelProgressElement = document.getElementById('level-progress');
+        const levels = [
+            { name: "Разминка", primes: [2], min: 4, max: 16, factorsCount: [2, 3, 4], requiredWins: 3 },
+            { name: "Двойки и Тройки", primes: [2, 3], min: 6, max: 27, factorsCount: [2, 3], requiredWins: 4 },
+            { name: "Магия пятерки", primes: [2, 3, 5], min: 10, max: 50, factorsCount: [2, 3], requiredWins: 4 },
+            { name: "Таблица на 7", primes: [2, 3, 5, 7], min: 14, max: 49, factorsCount: [2], requiredWins: 4 },
+            { name: "Большие числа", primes: [2, 3, 5, 11, 13], min: 22, max: 65, factorsCount: [2], requiredWins: 3 },
+            { name: "Босс-файт 💀", primes: [2, 3, 5, 7], min: 50, max: 210, factorsCount: [3, 4], requiredWins: 5 }
+        ];
+
+        let currentLevelIdx = 0;
+        let winsInLevel = 0;
+        let currentTarget = 0;
+        let originalTarget = 0;
+        let activeFactors = [];
+        let isRoundOver = false;
+        let pendingPrime = null;
+        
+        // Хранилище уже решенных чисел на текущем уровне для предотвращения повторов
+        let usedNumbersForLevel = new Set();
+
+        const gameBoard = document.getElementById('game-board');
+        const targetZone = document.getElementById('target-zone');
+        const pieBg = document.getElementById('pie-bg');
+        const labelsContainer = document.getElementById('labels-container');
+        const factorsRow = document.getElementById('factors-row');
+        const inventory = document.getElementById('inventory');
+        const hintText = document.getElementById('hint-text');
+        const nextBtnContainer = document.getElementById('next-btn-container');
+        const tracker = document.getElementById('progress-tracker');
+        const levelBadge = document.getElementById('level-indicator');
+
+        // Quiz elements
+        const quizOverlay = document.getElementById('quiz-overlay');
+        const quizDividend = document.getElementById('quiz-dividend');
+        const quizDivisor = document.getElementById('quiz-divisor');
+        const quizInput = document.getElementById('quiz-input');
+
+        function isPrime(num) {
+            if (num <= 1) return false;
+            if (num <= 3) return true;
+            if (num % 2 === 0 || num % 3 === 0) return false;
+            for (let i = 5; i * i <= num; i += 6) {
+                if (num % i === 0 || num % (i + 2) === 0) return false;
+            }
+            return true;
+        }
+
+        function initGame() {
+            updateLevelUI();
+            renderTracker();
+            generateNewNumber();
+            setupDropZone();
             
-            // Статистика
-            const problemsSolvedElement = document.getElementById('problems-solved');
-            const successRateElement = document.getElementById('success-rate');
+            quizInput.addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') submitQuiz();
+            });
+        }
+
+        function updateLevelUI() {
+            levelBadge.textContent = levels[currentLevelIdx].name;
+            renderInventory();
+        }
+
+        // Вспомогательная функция генерации кандидата
+        function generateCandidate(level) {
+            let num = 1;
+            const factorsCount = level.factorsCount[Math.floor(Math.random() * level.factorsCount.length)];
+            let forcedPrime = null;
             
-            // Система уровней
-            const levels = [
-                { 
-                    primes: [2, 3, 5], 
-                    requiredCorrect: 3,
-                    min: 6, // Минимальное число для первого уровня
-                    max: 30 // Максимальное число для первого уровня
-                },
-                { 
-                    primes: [2, 3, 5, 7], 
-                    requiredCorrect: 5,
-                    min: 30, // Минимальное число для уровня 2
-                    max: 100 // Максимальное число для уровня 2
-                },
-                { 
-                    primes: [2, 3, 5, 7, 11], 
-                    requiredCorrect: 7,
-                    min: 100, // Минимальное число для уровня 3
-                    max: 200 // Максимальное число для уровня 3
-                }
-            ];
+            if ((currentLevelIdx === 3 || currentLevelIdx === 4) && Math.random() > 0.5) {
+                forcedPrime = level.primes[level.primes.length - 1];
+            }
             
-            // Текущие значения
-            let targetNumber = 42;
-            let currentProduct = 1;
-            let problemsSolved = 0;
-            let successRate = 100;
+            for(let i = 0; i < factorsCount; i++) {
+                let randomPrime = (i === 0 && forcedPrime) ? forcedPrime : level.primes[Math.floor(Math.random() * level.primes.length)];
+                num *= randomPrime;
+            }
+            return num;
+        }
+
+        function generateNewNumber() {
+            const level = levels[currentLevelIdx];
+            let num;
             let attempts = 0;
-            let successfulAttempts = 0;
-            let currentLevel = 0;
-            let correctAtCurrentLevel = 0;
-            let usedNumbers = new Set(); // Для отслеживания использованных чисел
-            let currentDifficulty = 2; // Начинаем с 2 множителей
-            
-            // Функция для проверки, является ли число простым
-            function isPrime(num) {
-                if (num < 2) return false;
-                if (num === 2) return true;
-                if (num % 2 === 0) return false;
-                
-                for (let i = 3; i <= Math.sqrt(num); i += 2) {
-                    if (num % i === 0) return false;
-                }
-                return true;
-            }
-            
-            // Функция для получения всех возможных комбинаций чисел для уровня
-            function generateAllPossibleNumbers(level) {
-                const numbers = new Set();
-                const primes = level.primes;
-                const min = level.min;
-                const max = level.max;
-                
-                // Генерируем числа с 2 множителями
-                for (let i = 0; i < primes.length; i++) {
-                    for (let j = i; j < primes.length; j++) {
-                        const product = primes[i] * primes[j];
-                        if (product >= min && product <= max && !isPrime(product)) {
-                            numbers.add(product);
-                        }
-                    }
-                }
-                
-                // Генерируем числа с 3 множителями
-                for (let i = 0; i < primes.length; i++) {
-                    for (let j = i; j < primes.length; j++) {
-                        for (let k = j; k < primes.length; k++) {
-                            const product = primes[i] * primes[j] * primes[k];
-                            if (product >= min && product <= max && !isPrime(product)) {
-                                numbers.add(product);
-                            }
-                        }
-                    }
-                }
-                
-                // Генерируем числа с 4 множителями (для более высоких уровней)
-                for (let i = 0; i < primes.length; i++) {
-                    for (let j = i; j < primes.length; j++) {
-                        for (let k = j; k < primes.length; k++) {
-                            for (let l = k; l < primes.length; l++) {
-                                const product = primes[i] * primes[j] * primes[k] * primes[l];
-                                if (product >= min && product <= max && !isPrime(product)) {
-                                    numbers.add(product);
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                return Array.from(numbers).sort((a, b) => a - b);
-            }
-            
-            // Функция для генерации случайного составного числа для текущего уровня
-            function generateCompositeNumberForLevel() {
-                const level = levels[currentLevel];
-                let availableNumbers = generateAllPossibleNumbers(level);
-                
-                // Фильтруем уже использованные числа
-                availableNumbers = availableNumbers.filter(num => !usedNumbers.has(num));
-                
-                // Если все числа использованы, очищаем список использованных
-                if (availableNumbers.length === 0) {
-                    usedNumbers.clear();
-                    availableNumbers = generateAllPossibleNumbers(level);
-                }
-                
-                // Выбираем случайное число из доступных
-                const randomIndex = Math.floor(Math.random() * availableNumbers.length);
-                const number = availableNumbers[randomIndex];
-                
-                // Добавляем число в использованные
-                usedNumbers.add(number);
-                
-                return number;
-            }
-            
-            // Функция для создания группы множителя
-            function createFactorGroup() {
-                const factorGroup = document.createElement('div');
-                factorGroup.className = 'factor-group';
-                
-                const multiplySign = document.createElement('span');
-                multiplySign.className = 'multiply-sign';
-                multiplySign.textContent = '×';
-                
-                const factorInput = document.createElement('input');
-                factorInput.type = 'number';
-                factorInput.className = 'factor-input';
-                factorInput.min = '2';
-                factorInput.placeholder = '?';
-                factorInput.inputMode = 'numeric';
-                
-                // Обработчик для ввода данных
-                factorInput.addEventListener('input', updateCurrentProduct);
-                
-                factorGroup.appendChild(multiplySign);
-                factorGroup.appendChild(factorInput);
-                
-                return factorGroup;
-            }
-            
-            // Функция для обновления состояния кнопки удаления
-            function updateRemoveButtonState() {
-                removeFactorBtn.disabled = factorsContainer.children.length <= 1;
-            }
-            
-            // Функция для обновления текущего произведения и прогресса
-            function updateCurrentProduct() {
-                const factorInputs = document.querySelectorAll('.factor-input');
-                currentProduct = 1;
-                let allValid = true;
-                
-                factorInputs.forEach(input => {
-                    const value = parseInt(input.value);
-                    if (!isNaN(value) && value > 1) {
-                        currentProduct *= value;
-                        
-                        // Проверяем, является ли множитель простым числом
-                        // и допустим ли он на текущем уровне
-                        const level = levels[currentLevel];
-                        if (isPrime(value) && level.primes.includes(value)) {
-                            input.classList.remove('invalid');
-                            input.classList.add('valid');
-                        } else {
-                            input.classList.remove('valid');
-                            input.classList.add('invalid');
-                            allValid = false;
-                        }
-                    } else {
-                        input.classList.remove('valid', 'invalid');
-                        if (input.value !== '') {
-                            input.classList.add('invalid');
-                            allValid = false;
-                        }
-                    }
-                });
-                
-                currentProductElement.textContent = currentProduct;
-                
-                // Обновляем прогресс-бар
-                const progressPercent = Math.min(100, (currentProduct / targetNumber) * 100);
-                progressFillElement.style.width = `${progressPercent}%`;
-                
-                // Подсвечиваем поле результата
-                if (currentProduct === targetNumber && allValid) {
-                    currentProductElement.style.color = '#27ae60';
-                    currentProductElement.style.fontWeight = 'bold';
-                    progressFillElement.style.background = 'linear-gradient(90deg, #3498db, #2ecc71)';
-                    
-                    // Автоматически проверяем решение, если произведение совпадает
-                    setTimeout(checkSolution, 500);
-                } else if (currentProduct > targetNumber) {
-                    currentProductElement.style.color = '#e74c3c';
-                    progressFillElement.style.background = '#e74c3c';
-                } else {
-                    currentProductElement.style.color = '#7f8c8d';
-                    progressFillElement.style.background = 'linear-gradient(90deg, #3498db, #2ecc71)';
-                }
-            }
-            
-            // Функция для проверки решения
-            function checkSolution() {
+            const MAX_ATTEMPTS = 100; // Алгоритмическая страховка от бесконечного цикла
+
+            // Rejection Sampling: генерируем пока число не подойдет под условия или мы не исчерпаем попытки
+            do {
+                num = generateCandidate(level);
                 attempts++;
-                const factorInputs = document.querySelectorAll('.factor-input');
-                let allPrimes = true;
-                let allFilled = true;
-                let allInLevel = true;
                 
-                const level = levels[currentLevel];
+                if (attempts > MAX_ATTEMPTS) {
+                    // Если уникальные комбинации закончились, очищаем историю уровня
+                    usedNumbersForLevel.clear();
+                    attempts = 0;
+                }
                 
-                factorInputs.forEach(input => {
-                    const value = parseInt(input.value);
-                    
-                    if (isNaN(value) || value < 2) {
-                        allFilled = false;
-                        input.classList.add('invalid');
-                    } else if (!isPrime(value)) {
-                        allPrimes = false;
-                        input.classList.add('invalid');
-                    } else if (!level.primes.includes(value)) {
-                        allInLevel = false;
-                        input.classList.add('invalid');
-                    }
+            } while (
+                num < level.min || 
+                num > level.max || 
+                usedNumbersForLevel.has(num)
+            );
+
+            // Сохраняем сгенерированное уникальное число
+            usedNumbersForLevel.add(num);
+
+            currentTarget = num;
+            originalTarget = num;
+            activeFactors = [];
+            isRoundOver = false;
+            
+            inventory.style.display = 'flex';
+            hintText.style.display = 'block';
+            hintText.textContent = "Перетащи множитель на круг или нажми";
+            hintText.style.color = "var(--text-muted)";
+            nextBtnContainer.style.display = 'none';
+
+            renderEquation(); 
+            updatePieChart(); 
+        }
+
+        function renderEquation() {
+            factorsRow.innerHTML = '';
+            let htmlParts = [];
+            
+            activeFactors.forEach(factor => {
+                htmlParts.push(`<span class="factor-item">${factor}</span>`);
+                htmlParts.push(`<span class="multiply-sign">×</span>`);
+            });
+            
+            if (isRoundOver) {
+                htmlParts.push(`<span class="factor-item">${currentTarget}</span>`);
+            } else {
+                htmlParts.push(`<span class="factor-item active-target" id="active-target-el">${currentTarget}</span>`);
+            }
+            
+            htmlParts.push(`<span class="multiply-sign">=</span>`);
+            htmlParts.push(`<span class="original-target">${originalTarget}</span>`);
+            
+            factorsRow.innerHTML = htmlParts.join('');
+        }
+
+        function renderInventory() {
+            inventory.innerHTML = '';
+            const level = levels[currentLevelIdx];
+            
+            level.primes.forEach(prime => {
+                const token = document.createElement('div');
+                token.className = 'prime-token';
+                token.textContent = prime;
+                token.draggable = true;
+                
+                token.addEventListener('dragstart', (e) => {
+                    if(isRoundOver) return;
+                    e.dataTransfer.setData('text/plain', prime);
+                    token.style.opacity = '0.5';
                 });
                 
-                if (!allFilled) {
-                    showResult('Заполните все поля простыми множителями!', 'error');
-                    return;
+                token.addEventListener('dragend', () => {
+                    token.style.opacity = '1';
+                    targetZone.classList.remove('drag-over');
+                });
+
+                token.addEventListener('click', () => tryDivide(prime));
+
+                inventory.appendChild(token);
+            });
+        }
+
+        function setupDropZone() {
+            targetZone.addEventListener('dragover', (e) => {
+                if(isRoundOver) return;
+                e.preventDefault();
+                targetZone.classList.add('drag-over');
+            });
+
+            targetZone.addEventListener('dragleave', () => {
+                targetZone.classList.remove('drag-over');
+            });
+
+            targetZone.addEventListener('drop', (e) => {
+                if(isRoundOver) return;
+                e.preventDefault();
+                targetZone.classList.remove('drag-over');
+                const primeStr = e.dataTransfer.getData('text/plain');
+                if (primeStr) {
+                    tryDivide(parseInt(primeStr));
                 }
+            });
+        }
+
+        function updatePieChart() {
+            labelsContainer.innerHTML = '';
+
+            if (activeFactors.length === 0) {
+                pieBg.style.background = 'rgba(59, 130, 246, 0.4)';
                 
-                if (!allPrimes) {
-                    showResult('Все множители должны быть простыми числами!', 'error');
-                    return;
+                const label = document.createElement('div');
+                label.className = 'sector-label';
+                label.textContent = originalTarget;
+                label.style.transform = `translate(-50%, -50%)`;
+                label.style.fontSize = '3rem';
+                labelsContainer.appendChild(label);
+                return;
+            }
+
+            const slicesCount = activeFactors.reduce((acc, val) => acc * val, 1);
+            let stops = [];
+            const step = 360 / slicesCount;
+            const lineThickness = slicesCount > 30 ? 0.2 : (slicesCount > 10 ? 0.5 : 1.5);
+            const colors = ['rgba(59, 130, 246, 0.4)', 'rgba(139, 92, 246, 0.4)', 'rgba(16, 185, 129, 0.4)'];
+            
+            const R = slicesCount > 15 ? 65 : 55; 
+            const fontSize = slicesCount > 20 ? '0.7rem' : (slicesCount > 8 ? '1rem' : '1.5rem');
+
+            for(let i = 0; i < slicesCount; i++) {
+                const angleStart = i * step;
+                const angleEnd = (i + 1) * step;
+                const colorIdx = (slicesCount % 2 !== 0) ? (i % 3) : (i % 2);
+                const color = colors[colorIdx];
+                
+                stops.push(`${color} ${angleStart}deg`);
+                stops.push(`${color} ${angleEnd - lineThickness}deg`);
+                stops.push(`rgba(255, 255, 255, 0.9) ${angleEnd - lineThickness}deg`);
+                stops.push(`rgba(255, 255, 255, 0.9) ${angleEnd}deg`);
+
+                const middleAngle = angleStart + (step / 2);
+                const rad = middleAngle * (Math.PI / 180);
+                
+                const x = R * Math.sin(rad);
+                const y = -R * Math.cos(rad);
+
+                const label = document.createElement('div');
+                label.className = 'sector-label';
+                label.textContent = currentTarget; 
+                label.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
+                label.style.fontSize = fontSize;
+                labelsContainer.appendChild(label);
+            }
+            
+            pieBg.style.background = `conic-gradient(${stops.join(', ')})`;
+            
+            pieBg.style.transform = 'scale(1.08)';
+            setTimeout(() => {
+                pieBg.style.transform = 'scale(1)';
+            }, 250);
+        }
+
+        function tryDivide(prime) {
+            if (isRoundOver) return;
+            const targetEl = document.getElementById('active-target-el');
+
+            if (currentTarget % prime === 0) {
+                pendingPrime = prime;
+                showMathQuiz();
+            } else {
+                if (targetEl) {
+                    targetEl.classList.remove('anim-error', 'anim-success');
+                    void targetEl.offsetWidth;
+                    targetEl.classList.add('anim-error');
                 }
-                
-                if (!allInLevel) {
-                    showResult(`На текущем уровне можно использовать только простые числа: ${level.primes.join(', ')}`, 'error');
-                    return;
+                if (navigator.vibrate) navigator.vibrate(200);
+            }
+        }
+
+        function showMathQuiz() {
+            quizDividend.textContent = currentTarget;
+            quizDivisor.textContent = pendingPrime;
+            quizInput.value = '';
+            
+            quizOverlay.classList.add('active');
+            
+            setTimeout(() => {
+                quizInput.focus();
+            }, 100);
+        }
+
+        function submitQuiz() {
+            const answer = parseInt(quizInput.value);
+            const expectedQuotient = currentTarget / pendingPrime;
+
+            quizOverlay.classList.remove('active');
+
+            if (answer === expectedQuotient) {
+                applyDivision();
+            } else {
+                resetRoundWithError();
+            }
+        }
+
+        function applyDivision() {
+            const targetEl = document.getElementById('active-target-el');
+            
+            currentTarget = currentTarget / pendingPrime;
+            activeFactors.push(pendingPrime);
+            pendingPrime = null;
+            
+            updatePieChart();
+
+            if (isPrime(currentTarget)) {
+                isRoundOver = true;
+            }
+
+            if (targetEl) {
+                targetEl.classList.remove('anim-error', 'anim-success');
+                void targetEl.offsetWidth; 
+                targetEl.classList.add('anim-success');
+            }
+
+            setTimeout(() => {
+                renderEquation();
+
+                if (isRoundOver) {
+                    setTimeout(handleWin, 800); 
                 }
+            }, 300); 
+        }
+
+        function resetRoundWithError() {
+            pendingPrime = null;
+            currentTarget = originalTarget;
+            activeFactors = [];
+            isRoundOver = false;
+
+            gameBoard.classList.add('anim-error');
+            setTimeout(() => gameBoard.classList.remove('anim-error'), 500);
+            if (navigator.vibrate) navigator.vibrate([200, 100, 200]); 
+
+            updatePieChart();
+            renderEquation();
+
+            hintText.textContent = "Ошибка при вычислении! Число сброшено.";
+            hintText.style.color = "var(--error)";
+            
+            setTimeout(() => {
+                hintText.textContent = "Перетащи множитель на круг или нажми";
+                hintText.style.color = "var(--text-muted)";
+            }, 3000);
+        }
+
+        function renderTracker() {
+            tracker.innerHTML = '';
+            const required = levels[currentLevelIdx].requiredWins;
+            for(let i=0; i<required; i++) {
+                const dot = document.createElement('div');
+                dot.className = `progress-dot ${i < winsInLevel ? 'filled' : ''}`;
+                tracker.appendChild(dot);
+            }
+        }
+
+        function fireConfetti() {
+            const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+            const rect = targetZone.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+
+            for (let i = 0; i < 60; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'confetti-particle';
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.left = `${centerX}px`;
+                particle.style.top = `${centerY}px`;
                 
-                if (currentProduct === targetNumber) {
-                    showCelebration();
-                    problemsSolved++;
-                    successfulAttempts++;
-                    correctAtCurrentLevel++;
-                    problemsSolvedElement.textContent = problemsSolved;
-                    updateSuccessRate();
-                    updateLevelProgress();
-                    
-                    // Добавляем анимацию успеха
-                    currentProductElement.classList.add('bounce');
-                    setTimeout(() => {
-                        currentProductElement.classList.remove('bounce');
-                    }, 1000);
-                    
-                    // Проверяем, нужно ли повысить уровень
-                    if (correctAtCurrentLevel >= levels[currentLevel].requiredCorrect && currentLevel < levels.length - 1) {
-                        setTimeout(levelUp, 1500);
-                    }
+                const angle = Math.random() * Math.PI * 2;
+                const velocity = 80 + Math.random() * 150;
+                const tx = Math.cos(angle) * velocity;
+                const ty = Math.sin(angle) * velocity - 50; 
+                const rot = Math.random() * 720;
+                
+                particle.style.setProperty('--tx', `${tx}px`);
+                particle.style.setProperty('--ty', `${ty}px`);
+                particle.style.setProperty('--rot', `${rot}deg`);
+                
+                document.body.appendChild(particle);
+                
+                setTimeout(() => particle.remove(), 1000);
+            }
+        }
+
+        function handleWin() {
+            winsInLevel++;
+            renderTracker();
+            
+            inventory.style.display = 'none';
+            hintText.style.display = 'none';
+            nextBtnContainer.style.display = 'block';
+
+            fireConfetti();
+        }
+
+        function startNextRound() {
+            if (winsInLevel >= levels[currentLevelIdx].requiredWins) {
+                if (currentLevelIdx < levels.length - 1) {
+                    currentLevelIdx++;
+                    winsInLevel = 0;
+                    usedNumbersForLevel.clear(); // Очищаем историю при переходе на новый уровень
+                    updateLevelUI();
                 } else {
-                    showResult(`Произведение множителей (${currentProduct}) не равно заданному числу (${targetNumber}). Попробуйте еще раз!`, 'error');
-                    updateSuccessRate();
+                    winsInLevel = 0; 
+                    usedNumbersForLevel.clear();
                 }
+                renderTracker();
             }
             
-            // Функция для повышения уровня
-            function levelUp() {
-                currentLevel++;
-                correctAtCurrentLevel = 0;
-                currentDifficulty = 2; // Сбрасываем сложность
-                usedNumbers.clear(); // Очищаем использованные числа
-                currentLevelElement.textContent = currentLevel + 1;
-                updateAvailablePrimes();
-                updateLevelProgress();
-                
-                const levelUpModal = document.createElement('div');
-                levelUpModal.className = 'level-up';
-                levelUpModal.innerHTML = `
-                    <div class="level-up-content">
-                        <h2>🎉 Новый уровень! 🎉</h2>
-                        <p>Поздравляем! Вы перешли на уровень ${currentLevel + 1}!</p>
-                        <p>Теперь доступны новые простые числа: ${levels[currentLevel].primes.join(', ')}</p>
-                        <button class="btn btn-primary" id="continue-level-btn">
-                            <span>➡</span> Продолжить
-                        </button>
-                    </div>
-                `;
-                
-                document.body.appendChild(levelUpModal);
-                
-                // Обработчик для кнопки продолжения
-                document.getElementById('continue-level-btn').addEventListener('click', function() {
-                    document.body.removeChild(levelUpModal);
-                    resetWithNewNumber();
-                });
-            }
-            
-            // Функция для обновления отображения доступных простых чисел
-            function updateAvailablePrimes() {
-                const level = levels[currentLevel];
-                availablePrimesElement.textContent = `Доступные простые числа: ${level.primes.join(', ')}`;
-            }
-            
-            // Функция для обновления прогресса уровня
-            function updateLevelProgress() {
-                const level = levels[currentLevel];
-                levelProgressElement.textContent = `${correctAtCurrentLevel}/${level.requiredCorrect}`;
-            }
-            
-            // Функция для показа праздничного сообщения
-            function showCelebration() {
-                const celebration = document.createElement('div');
-                celebration.className = 'celebration';
-                celebration.innerHTML = `
-                    <div class="celebration-content">
-                        <h2>🎉 Поздравляем! 🎉</h2>
-                        <p>Вы правильно разложили число ${targetNumber} на простые множители!</p>
-                        <button class="btn btn-success" id="continue-btn">
-                            <span>➡</span> Продолжить
-                        </button>
-                    </div>
-                `;
-                
-                document.body.appendChild(celebration);
-                
-                // Обработчик для кнопки продолжения
-                document.getElementById('continue-btn').addEventListener('click', function() {
-                    document.body.removeChild(celebration);
-                    resetWithNewNumber();
-                });
-                
-                // Автоматическое продолжение через 5 секунд
-                setTimeout(() => {
-                    if (document.body.contains(celebration)) {
-                        document.body.removeChild(celebration);
-                        resetWithNewNumber();
-                    }
-                }, 5000);
-            }
-            
-            // Функция для обновления показателя успешности
-            function updateSuccessRate() {
-                successRate = Math.round((successfulAttempts / attempts) * 100);
-                successRateElement.textContent = `${successRate}%`;
-            }
-            
-            // Функция для отображения результата
-            function showResult(message, type) {
-                resultElement.textContent = message;
-                resultElement.className = 'result ' + type;
-                resultElement.style.display = 'block';
-                
-                // Автоматически скрываем сообщение об ошибке через 5 секунд
-                if (type === 'error') {
-                    setTimeout(() => {
-                        resultElement.style.display = 'none';
-                    }, 5000);
-                }
-            }
-            
-            // Функция для добавления нового поля множителя
-            function addFactorField() {
-                const factorGroup = createFactorGroup();
-                factorsContainer.appendChild(factorGroup);
-                updateRemoveButtonState();
-                
-                // Фокусируемся на новом поле
-                const newInput = factorGroup.querySelector('.factorInput');
-                if (newInput) newInput.focus();
-            }
-            
-            // Функция для удаления последнего множителя
-            function removeLastFactor() {
-                if (factorsContainer.children.length > 1) {
-                    const lastFactor = factorsContainer.lastChild;
-                    factorsContainer.removeChild(lastFactor);
-                    updateCurrentProduct();
-                    updateRemoveButtonState();
-                }
-            }
-            
-            // Функция для сброса и генерации нового числа
-            function resetWithNewNumber() {
-                // Генерируем новое составное число для текущего уровня
-                targetNumber = generateCompositeNumberForLevel();
-                targetNumberElement.textContent = targetNumber;
-                
-                // Очищаем контейнер с множителями
-                factorsContainer.innerHTML = '';
-                
-                // Добавляем первую группу множителей (без знака умножения)
-                const firstFactorGroup = document.createElement('div');
-                firstFactorGroup.className = 'factor-group';
-                
-                const firstFactorInput = document.createElement('input');
-                firstFactorInput.type = 'number';
-                firstFactorInput.className = 'factor-input';
-                firstFactorInput.min = '2';
-                firstFactorInput.placeholder = '?';
-                firstFactorInput.inputMode = 'numeric';
-                firstFactorInput.addEventListener('input', updateCurrentProduct);
-                
-                firstFactorGroup.appendChild(firstFactorInput);
-                factorsContainer.appendChild(firstFactorGroup);
-                
-                // Добавляем вторую группу множителей
-                const secondFactorGroup = createFactorGroup();
-                factorsContainer.appendChild(secondFactorGroup);
-                
-                // Сбрасываем текущий результат
-                currentProduct = 1;
-                currentProductElement.textContent = '1';
-                currentProductElement.style.color = '#7f8c8d';
-                
-                // Сбрасываем прогресс-бар
-                progressFillElement.style.width = '0%';
-                
-                // Скрываем сообщение о результате
-                resultElement.style.display = 'none';
-                
-                // Обновляем состояние кнопки удаления
-                updateRemoveButtonState();
-            }
-            
-            // Назначаем обработчики событий
-            addFactorBtn.addEventListener('click', addFactorField);
-            removeFactorBtn.addEventListener('click', removeLastFactor);
-            
-            // Инициализируем с случайным составным числом
-            resetWithNewNumber();
-            updateAvailablePrimes();
-            updateLevelProgress();
-        });
+            generateNewNumber();
+        }
+
+        window.addEventListener('DOMContentLoaded', initGame);
+
     </script>
 </body>
 </html>
