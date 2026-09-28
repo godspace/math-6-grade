@@ -21,23 +21,19 @@ ym(106746549, 'init', {
 // --- НАЧАЛО КОДА КНОПКИ "ДОМОЙ" ---
 document.addEventListener("DOMContentLoaded", function() {
     
-    // Проверка: кнопка нужна ТОЛЬКО внутри папки тренажеров
     const isTrainerPage = window.location.pathname.includes('/trainers/');
     if (!isTrainerPage) return; 
 
-    // Определяем мобильное устройство
     const isMobile = window.innerWidth <= 600;
 
     const homeBtn = document.createElement('a');
     homeBtn.innerHTML = isMobile ? "🏠" : "🏠 Меню";
     homeBtn.href = "/math-6-grade/"; 
     
-    // Базовые стили
     Object.assign(homeBtn.style, {
         position: 'fixed',
         top: '15px',
         left: '15px',
-        // На смартфоне делаем идеально круглую кнопку
         padding: isMobile ? '0' : '10px 15px',
         width: isMobile ? '45px' : 'auto',
         height: isMobile ? '45px' : 'auto',
@@ -62,25 +58,23 @@ document.addEventListener("DOMContentLoaded", function() {
     document.body.appendChild(homeBtn);
 
     let fadeTimeout;
+    // На смартфонах убираем паузу (150мс для защиты от спама событий скролла), на ПК оставляем 2.5 секунды
+    const delayBeforeFade = isMobile ? 150 : 2500;
 
     function wakeUp() {
-        // Мгновенное пробуждение (переход за 0.2с)
         homeBtn.style.transition = 'opacity 0.2s ease, transform 0.2s ease, background-color 0.2s ease';
         homeBtn.style.opacity = '1';
         homeBtn.style.transform = 'scale(1)';
         
         clearTimeout(fadeTimeout);
         
-        // Плавное затухание после 2.5 секунд бездействия
         fadeTimeout = setTimeout(() => {
-            // Очень долгий и плавный переход (1.5с)
             homeBtn.style.transition = 'opacity 1.5s ease-in-out, transform 1.5s ease-in-out';
-            homeBtn.style.opacity = '0.12'; // Становится почти прозрачной
-            homeBtn.style.transform = 'scale(0.9)'; // Слегка "сжимается"
-        }, 2500);
+            homeBtn.style.opacity = '0.12'; 
+            homeBtn.style.transform = 'scale(0.9)'; 
+        }, delayBeforeFade);
     }
 
-    // Эффекты при наведении мыши (кнопка не должна гаснуть, пока курсор на ней)
     homeBtn.onmouseenter = () => {
         clearTimeout(fadeTimeout);
         homeBtn.style.transition = 'all 0.2s ease';
@@ -92,15 +86,14 @@ document.addEventListener("DOMContentLoaded", function() {
     homeBtn.onmouseleave = () => {
         homeBtn.style.transform = 'scale(1)';
         homeBtn.style.backgroundColor = 'rgba(255, 255, 255, 0.85)';
-        wakeUp(); // Запускаем таймер затухания снова
+        wakeUp(); 
     };
 
-    // Пробуждаем кнопку при любой активности пользователя на странице
     window.addEventListener('scroll', wakeUp, { passive: true });
     window.addEventListener('mousemove', wakeUp, { passive: true });
     window.addEventListener('touchstart', wakeUp, { passive: true });
+    window.addEventListener('touchend', wakeUp, { passive: true });
 
-    // Запускаем первичный цикл при загрузке страницы
     wakeUp();
 });
 // --- КОНЕЦ КОДА КНОПКИ ---
