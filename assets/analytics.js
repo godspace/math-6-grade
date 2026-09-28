@@ -29,65 +29,78 @@ document.addEventListener("DOMContentLoaded", function() {
     const isMobile = window.innerWidth <= 600;
 
     const homeBtn = document.createElement('a');
-    // На смартфонах оставляем только эмодзи домика
     homeBtn.innerHTML = isMobile ? "🏠" : "🏠 Меню";
     homeBtn.href = "/math-6-grade/"; 
     
-    // Стили кнопки
+    // Базовые стили
     Object.assign(homeBtn.style, {
         position: 'fixed',
-        top: '20px',
-        left: '20px',
-        padding: isMobile ? '10px 12px' : '10px 15px',
-        backgroundColor: 'rgba(255, 255, 255, 0.85)', // Слегка прозрачный белый
-        backdropFilter: 'blur(5px)', // Эффект матового стекла (iOS style)
+        top: '15px',
+        left: '15px',
+        // На смартфоне делаем идеально круглую кнопку
+        padding: isMobile ? '0' : '10px 15px',
+        width: isMobile ? '45px' : 'auto',
+        height: isMobile ? '45px' : 'auto',
+        backgroundColor: 'rgba(255, 255, 255, 0.85)',
+        backdropFilter: 'blur(5px)',
         color: '#333',
         textDecoration: 'none',
         borderRadius: '30px',
         boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
         fontFamily: 'Segoe UI, sans-serif',
         fontWeight: 'bold',
-        fontSize: isMobile ? '18px' : '14px',
+        fontSize: isMobile ? '20px' : '14px',
         zIndex: '9999',
         border: '1px solid rgba(238, 238, 238, 0.5)',
-        transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)', // Плавная анимация
         cursor: 'pointer',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        opacity: '1',
-        transform: 'translateY(0)'
+        boxSizing: 'border-box'
     });
-
-    // Эффекты при наведении
-    homeBtn.onmouseenter = () => {
-        if (window.scrollY <= 50) {
-            homeBtn.style.transform = 'scale(1.05)';
-            homeBtn.style.backgroundColor = '#ffffff';
-        }
-    };
-    homeBtn.onmouseleave = () => {
-        if (window.scrollY <= 50) {
-            homeBtn.style.transform = 'scale(1)';
-            homeBtn.style.backgroundColor = 'rgba(255, 255, 255, 0.85)';
-        }
-    };
 
     document.body.appendChild(homeBtn);
 
-    // Логика исчезновения при прокрутке
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 50) {
-            // Прячем кнопку (уводим чуть вверх и делаем прозрачной)
-            homeBtn.style.opacity = '0';
-            homeBtn.style.pointerEvents = 'none';
-            homeBtn.style.transform = 'translateY(-20px)';
-        } else {
-            // Показываем кнопку, если вернулись наверх
-            homeBtn.style.opacity = '1';
-            homeBtn.style.pointerEvents = 'auto';
-            homeBtn.style.transform = 'translateY(0)';
-        }
-    });
+    let fadeTimeout;
+
+    function wakeUp() {
+        // Мгновенное пробуждение (переход за 0.2с)
+        homeBtn.style.transition = 'opacity 0.2s ease, transform 0.2s ease, background-color 0.2s ease';
+        homeBtn.style.opacity = '1';
+        homeBtn.style.transform = 'scale(1)';
+        
+        clearTimeout(fadeTimeout);
+        
+        // Плавное затухание после 2.5 секунд бездействия
+        fadeTimeout = setTimeout(() => {
+            // Очень долгий и плавный переход (1.5с)
+            homeBtn.style.transition = 'opacity 1.5s ease-in-out, transform 1.5s ease-in-out';
+            homeBtn.style.opacity = '0.12'; // Становится почти прозрачной
+            homeBtn.style.transform = 'scale(0.9)'; // Слегка "сжимается"
+        }, 2500);
+    }
+
+    // Эффекты при наведении мыши (кнопка не должна гаснуть, пока курсор на ней)
+    homeBtn.onmouseenter = () => {
+        clearTimeout(fadeTimeout);
+        homeBtn.style.transition = 'all 0.2s ease';
+        homeBtn.style.transform = 'scale(1.05)';
+        homeBtn.style.backgroundColor = '#ffffff';
+        homeBtn.style.opacity = '1';
+    };
+    
+    homeBtn.onmouseleave = () => {
+        homeBtn.style.transform = 'scale(1)';
+        homeBtn.style.backgroundColor = 'rgba(255, 255, 255, 0.85)';
+        wakeUp(); // Запускаем таймер затухания снова
+    };
+
+    // Пробуждаем кнопку при любой активности пользователя на странице
+    window.addEventListener('scroll', wakeUp, { passive: true });
+    window.addEventListener('mousemove', wakeUp, { passive: true });
+    window.addEventListener('touchstart', wakeUp, { passive: true });
+
+    // Запускаем первичный цикл при загрузке страницы
+    wakeUp();
 });
 // --- КОНЕЦ КОДА КНОПКИ ---
