@@ -4,7 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Тренажёр: Решение уравнений (6 класс)</title>
+    <script src="../../assets/analytics.js" defer></script>
     <style>
+        :root {
+            --bg-base: #0f172a;
+            --bg-panel: rgba(30, 41, 59, 0.7);
+            --bg-step: rgba(15, 23, 42, 0.6);
+            --primary: #3b82f6;
+            --primary-glow: rgba(59, 130, 246, 0.5);
+            --success: #10b981;
+            --success-glow: rgba(16, 185, 129, 0.5);
+            --error: #ef4444;
+            --error-glow: rgba(239, 68, 68, 0.5);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --highlight: #8b5cf6;
+            --math-font: 'Fira Code', 'Courier New', Courier, monospace;
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -12,66 +29,76 @@
         }
 
         body {
-            font-family: 'Times New Roman', Times, serif;
-            background-color: #f5f5f5;
-            /* Отступ сверху, чтобы контент не прятался под закрепленной панелью */
-            padding: 80px 20px 40px; 
-            font-size: 14pt;
-            line-height: 1.5;
-            color: #333;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-base);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.15) 0px, transparent 50%);
+            color: var(--text-main);
+            padding: 90px 15px 40px; 
+            font-size: 1.1rem;
+            line-height: 1.6;
+            min-height: 100vh;
         }
 
-        /* Закрепленная панель прогресса */
         .top-bar {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background: #ffffff;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            top: 0; left: 0; width: 100%;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             z-index: 1000;
             padding: 15px 20px;
             display: flex;
             align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
         }
 
         .progress-text {
-            font-weight: bold;
-            font-size: 14pt;
-            color: #2c3e50;
-            min-width: 150px;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 1rem;
         }
 
-        .progress-wrapper {
-            flex-grow: 1;
-            height: 12px;
-            background: #e0e0e0;
-            border-radius: 6px;
-            overflow: hidden;
-            margin: 0 20px;
+        .progress-dots {
+            display: flex;
+            gap: 8px;
         }
 
-        .progress-fill {
-            height: 100%;
-            background: #27ae60;
-            width: 0%;
-            transition: width 0.5s ease;
+        .progress-dot {
+            width: 12px; height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        /* Основной контейнер */
+        .progress-dot.active {
+            background: var(--success);
+            border-color: var(--success);
+            transform: scale(1.3);
+            box-shadow: 0 0 12px var(--success-glow);
+        }
+
         .workbook {
-            max-width: 900px;
+            max-width: 850px;
             margin: 0 auto;
-            background: white;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            padding: 30px 40px;
-            border-radius: 12px;
-            border-top: 8px solid #2c3e50;
+            background: var(--bg-panel);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .task-container {
             display: none;
-            animation: fadeIn 0.5s;
+            animation: fadeIn 0.5s ease;
         }
 
         .task-container.active {
@@ -79,536 +106,951 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(15px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
         h2 {
-            font-size: 20pt;
-            color: #2c3e50;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #2c3e50;
+            font-size: 1.5rem;
+            color: var(--text-main);
+            margin-bottom: 25px;
             padding-bottom: 10px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .problem-box {
-            background-color: #e8f4f8;
-            padding: 15px 20px;
-            border-left: 5px solid #3498db;
+            background: rgba(59, 130, 246, 0.1);
+            padding: 20px 25px;
+            border-left: 4px solid var(--primary);
             margin-bottom: 30px;
-            font-size: 14pt;
-            border-radius: 0 8px 8px 0;
+            border-radius: 0 12px 12px 0;
+            font-size: 1.15rem;
+            color: var(--text-main);
+            box-shadow: inset 0 0 20px rgba(59, 130, 246, 0.05);
+        }
+
+        .highlight-var {
+            background-color: rgba(139, 92, 246, 0.2);
+            color: #c4b5fd;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-weight: 700;
+            display: inline-block;
+            font-family: var(--math-font);
+            border: 1px solid rgba(139, 92, 246, 0.3);
         }
 
         .step {
             margin-bottom: 20px;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            background-color: #fafafa;
+            padding: 20px 25px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            background-color: var(--bg-step);
             display: none;
+            transition: all 0.3s ease;
         }
 
         .step.active {
             display: block;
-            animation: fadeIn 0.4s;
+            animation: fadeInStep 0.4s ease forwards;
+            border-color: rgba(59, 130, 246, 0.3);
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        }
+
+        @keyframes fadeInStep {
+            0% { opacity: 0; transform: translateX(-10px); }
+            100% { opacity: 1; transform: translateX(0); }
         }
 
         .step-title {
-            font-weight: bold;
-            font-size: 14pt;
-            color: #2c3e50;
-            margin-bottom: 10px;
-            border-bottom: 1px dashed #ccc;
-            padding-bottom: 5px;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .expression {
-            margin: 10px 0;
-            font-size: 14pt;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            font-family: var(--math-font);
+            font-size: 1.25rem;
+            color: #e2e8f0;
         }
 
-        .brief-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 10px 0;
+        .brief-grid {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 15px 25px;
+            margin: 15px 0;
+            align-items: baseline;
+            font-family: var(--math-font);
+            font-size: 1.2rem;
         }
-        .brief-table td {
-            padding: 8px 5px;
-            border: none;
-            border-bottom: 1px solid #ddd;
-        }
-        .brief-table td:first-child { width: 35%; font-weight: bold; }
+        .brief-label { font-weight: normal; color: var(--text-muted); text-align: right; }
+        .brief-value { display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px; color: #e2e8f0; }
 
+        /* --- ПОЛЯ ВВОДА --- */
         .input-field {
-            width: 65px;
+            padding: 4px 8px;
             border: none;
-            border-bottom: 2px solid #3498db;
-            margin: 0 5px;
-            height: 1.8em;
-            font-size: 14pt;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px 4px 0 0;
+            font-size: 1.3rem;
             text-align: center;
-            background: transparent;
+            background: rgba(0, 0, 0, 0.2);
             outline: none;
-            transition: all 0.3s;
+            transition: all 0.2s;
+            font-family: var(--math-font);
+            font-weight: 700;
+            color: var(--text-main);
         }
-        .input-large { width: 90px; }
+
+        /* Умная настройка ширины для инпутов */
+        .w-xs { width: 50px; }
+        .w-sm { width: 70px; }
+        .w-md { width: 90px; }
+        .w-lg { width: 140px; }
 
         .input-field:focus {
-            border-bottom: 2px solid #e67e22;
-            background-color: #fff3e0;
+            border-bottom-color: var(--primary);
+            background: rgba(59, 130, 246, 0.1);
+            box-shadow: 0 4px 10px -4px var(--primary-glow);
         }
 
-        .input-field.correct {
-            border-bottom: 2px solid #27ae60;
-            background-color: #e8f8f5;
-            color: #27ae60;
-            font-weight: bold;
+        .input-field.correct, .step-drop.correct {
+            border-bottom-color: var(--success);
+            border-color: var(--success);
+            color: var(--success);
+            text-shadow: 0 0 8px var(--success-glow);
             pointer-events: none;
+            background: rgba(16, 185, 129, 0.1);
         }
 
-        .input-field.wrong {
-            border-bottom: 2px solid #e74c3c;
-            background-color: #fdedec;
+        .input-field.wrong, .step-drop.wrong {
+            border-bottom-color: var(--error);
+            border-color: var(--error);
+            color: var(--error);
+            text-shadow: 0 0 8px var(--error-glow);
+            background: rgba(239, 68, 68, 0.1);
+            animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translateX(-2px); }
+            20%, 80% { transform: translateX(3px); }
+            30%, 50%, 70% { transform: translateX(-5px); }
+            40%, 60% { transform: translateX(5px); }
+        }
+
+        /* --- DRAG & DROP --- */
+        .var-selection-area {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+            margin-top: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+        }
+
+        .var-dropzone {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 45px;
+            height: 45px;
+            border: 2px dashed var(--highlight);
+            border-radius: 8px;
+            background: rgba(139, 92, 246, 0.1);
+            color: var(--highlight);
+            font-weight: bold;
+            font-size: 1.5rem;
+            font-family: var(--math-font);
+            transition: all 0.3s;
+            margin: 0 5px;
+            box-shadow: 0 0 10px rgba(139, 92, 246, 0.2);
+        }
+
+        /* Слот-приемник в шагах (авто-ширина) */
+        .step-drop {
+            min-width: 40px;
+            width: auto;
+            height: 38px;
+            font-size: 1.25rem;
+            border-color: var(--primary);
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--primary);
+            box-shadow: none;
+            margin: 0;
+            padding: 0 10px;
+            vertical-align: bottom;
+        }
+
+        .var-dropzone.drag-over {
+            transform: scale(1.1);
+            background: rgba(139, 92, 246, 0.3);
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+        }
+
+        .var-dropzone.filled {
+            border: 2px solid var(--primary);
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.1);
+            text-shadow: none;
+        }
+
+        .drop-highlight.filled {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            box-shadow: 0 0 15px var(--success-glow);
+            text-shadow: 0 0 5px var(--success);
+        }
+
+        .var-inventory {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .var-token {
+            width: 45px; height: 45px;
+            background: linear-gradient(135deg, #4c1d95, #7c3aed);
+            color: white;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 1.5rem; 
+            font-weight: bold;
+            font-family: var(--math-font);
+            border-radius: 10px;
+            cursor: grab;
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.2s;
+        }
+
+        .val-token {
+            background: linear-gradient(135deg, #0ea5e9, #2563eb);
+            box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3);
+            width: auto;
+            min-width: 40px;
+            padding: 0 10px;
+            height: 40px;
+            font-size: 1.25rem;
+        }
+
+        .var-token:active { cursor: grabbing; transform: scale(0.95); }
+        .var-token:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(124, 58, 237, 0.6); border-color: white; }
+
+        .inventory-hint {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .v-var {
+            font-style: normal;
+            font-weight: bold;
+            color: #a78bfa;
+            text-shadow: 0 0 8px rgba(167, 139, 250, 0.5);
+            margin: 0 2px;
+        }
+
+        /* --- КНОПКИ --- */
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .check-btn {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: var(--primary);
+            border: 1px solid var(--primary);
             margin-top: 15px;
-            padding: 8px 16px;
-            background-color: #3498db;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 12pt;
-            cursor: pointer;
-            transition: 0.3s;
         }
-
-        .check-btn:hover { background-color: #2980b9; }
+        .check-btn:hover { 
+            background-color: var(--primary); 
+            color: white;
+            box-shadow: 0 0 15px var(--primary-glow); 
+        }
         
         .next-task-btn {
-            margin-top: 20px;
-            padding: 12px 24px;
-            background-color: #27ae60;
+            background: linear-gradient(135deg, #10b981, #059669);
             color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 14pt;
-            cursor: pointer;
-            font-weight: bold;
-            display: inline-block;
-            transition: 0.3s;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
         }
-        .next-task-btn:hover { background-color: #219150; }
+        .next-task-btn:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5); }
 
         .success-msg {
-            color: #27ae60;
-            font-weight: bold;
+            color: var(--success);
+            font-weight: 700;
             margin-left: 15px;
             display: none;
+            font-family: var(--math-font);
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-shadow: 0 0 5px var(--success-glow);
         }
 
         .final-answer {
             text-align: center;
-            font-size: 15pt;
-            padding: 20px;
-            background-color: #fcf3cf;
-            border-radius: 8px;
-            margin-top: 20px;
+            font-size: 1.25rem;
+            padding: 30px;
+            background: rgba(16, 185, 129, 0.05);
+            border-radius: 12px;
+            margin-top: 25px;
             display: none;
-            border: 2px solid #f1c40f;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            box-shadow: inset 0 0 20px rgba(16, 185, 129, 0.05);
         }
         
+        .final-answer strong {
+            color: var(--success);
+            font-family: var(--math-font);
+        }
+
         .completion-screen {
             display: none;
             text-align: center;
-            padding: 40px;
+            padding: 50px 20px;
         }
-        .completion-screen h1 { color: #27ae60; font-size: 28pt; margin-bottom: 20px; }
+        .completion-screen h1 { color: var(--success); font-size: 3rem; text-shadow: 0 0 20px var(--success-glow); border: none; }
+        .completion-screen p { font-size: 1.2rem; color: var(--text-muted); margin-top: 15px; }
+
+        @media (max-width: 600px) {
+            .workbook { padding: 25px 20px; border-radius: 16px; }
+            .brief-grid { grid-template-columns: 1fr; gap: 8px; }
+            .brief-label { text-align: left; color: #94a3b8; }
+            .expression { gap: 6px; font-size: 1.15rem; }
+            .step { padding: 20px 15px; }
+            .var-dropzone { width: 40px; height: 40px; font-size: 1.3rem; }
+            .step-drop { height: 34px; font-size: 1.1rem; padding: 0 8px; }
+            .var-token { width: 42px; height: 42px; font-size: 1.3rem; }
+            .val-token { height: 36px; font-size: 1.1rem; }
+            .w-xs { width: 40px; }
+            .w-sm { width: 60px; }
+            .w-md { width: 80px; }
+            .w-lg { width: 110px; }
+        }
     </style>
-<script src="../../assets/analytics.js"></script>
 </head>
 <body>
 
 <div class="top-bar">
     <div class="progress-text" id="progress-text">Задача 1 из 6</div>
-    <div class="progress-wrapper">
-        <div class="progress-fill" id="progress-fill"></div>
-    </div>
+    <div class="progress-dots" id="progress-dots"></div>
 </div>
 
 <div class="workbook">
 
+    <!-- Задание 1 -->
     <div class="task-container active" id="task1">
         <h2>Лист 1. Задача на части</h2>
         <div class="problem-box">
-            <strong>Условие:</strong> Для приготовления компота берут <span class="v-a"></span> части яблок, <span class="v-b"></span> части изюма и <span class="v-c"></span> частей чернослива. Всего получилось <span class="v-T"></span> г смеси. Сколько граммов изюма взяли?
+            <strong>Условие:</strong> Для приготовления компота берут <span class="highlight-var v-a"></span> части яблок, <span class="highlight-var v-b"></span> части изюма и <span class="highlight-var v-c"></span> частей чернослива. Всего получилось <span class="highlight-var v-T"></span> г смеси. Сколько граммов изюма взяли?
         </div>
         
-        <div class="step active">
+        <div class="step active step-var-select">
             <div class="step-title">1. Обозначь неизвестное</div>
-            <div class="expression">Пусть масса одной части равна <input type="text" class="input-field i-x"> г.</div>
-            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
-            <span class="success-msg">✓ Верно!</span>
+            <div class="var-selection-area">
+                <div class="expression">Пусть масса одной части равна <div class="var-dropzone drop-highlight" id="drop-task1" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropVar(event, 1)">?</div> г.</div>
+                <div class="inventory-hint">Перетащи или нажми на любую букву:</div>
+                <div class="var-inventory">
+                    <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(1, 'x')">x</div>
+                    <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(1, 'y')">y</div>
+                    <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(1, 'z')">z</div>
+                    <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(1, 'a')">a</div>
+                    <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(1, 'n')">n</div>
+                </div>
+            </div>
+            <span class="success-msg" style="margin-top: 15px;">✓ Буква зафиксирована!</span>
         </div>
 
         <div class="step">
             <div class="step-title">2. Вырази массы продуктов</div>
-            <table class="brief-table">
-                <tr><td>Яблоки:</td><td><span class="v-a"></span> · <input type="text" class="input-field i-x"> = <input type="text" class="input-field i-ax"> г</td></tr>
-                <tr><td>Изюм:</td><td><span class="v-b"></span> · <input type="text" class="input-field i-x"> = <input type="text" class="input-field i-bx"> г</td></tr>
-                <tr><td>Чернослив:</td><td><span class="v-c"></span> · <input type="text" class="input-field i-x"> = <input type="text" class="input-field i-cx"> г</td></tr>
-            </table>
-            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <div class="inventory-hint">Собери выражения из элементов:</div>
+            <div class="var-inventory">
+                <div class="var-token val-token v-a" draggable="true" ondragstart="dragToken(event)"></div>
+                <div class="var-token val-token v-b" draggable="true" ondragstart="dragToken(event)"></div>
+                <div class="var-token val-token v-c" draggable="true" ondragstart="dragToken(event)"></div>
+                <div class="var-token user-var-token" draggable="true" ondragstart="dragToken(event)">x</div>
+            </div>
+            
+            <div class="brief-grid">
+                <div class="brief-label">Яблоки:</div>
+                <div class="brief-value">
+                    <div class="var-dropzone step-drop i-a" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> ЧАСТ. =
+                    <div class="var-dropzone step-drop i-a" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> ·
+                    <div class="var-dropzone step-drop i-x" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> г
+                </div>
+                
+                <div class="brief-label">Изюм:</div>
+                <div class="brief-value">
+                    <div class="var-dropzone step-drop i-b" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> ЧАСТ. =
+                    <div class="var-dropzone step-drop i-b" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> ·
+                    <div class="var-dropzone step-drop i-x" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> г
+                </div>
+                
+                <div class="brief-label">Чернослив:</div>
+                <div class="brief-value">
+                    <div class="var-dropzone step-drop i-c" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> ЧАСТ. =
+                    <div class="var-dropzone step-drop i-c" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> ·
+                    <div class="var-dropzone step-drop i-x" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> г
+                </div>
+            </div>
+            <button class="btn check-btn" onclick="checkStep(this)">Проверить</button>
             <span class="success-msg">✓ Верно!</span>
         </div>
 
         <div class="step">
             <div class="step-title">3. Составь уравнение (сумма масс равна общей массе)</div>
-            <div class="expression"><input type="text" class="input-field i-ax"> + <input type="text" class="input-field i-bx"> + <input type="text" class="input-field i-cx"> = <span class="v-T"></span></div>
-            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <div class="inventory-hint">Собери уравнение из масс:</div>
+            <div class="var-inventory">
+                <div class="var-token val-token" draggable="true" ondragstart="dragToken(event)"><span class="v-a"></span><span class="v-var">x</span></div>
+                <div class="var-token val-token" draggable="true" ondragstart="dragToken(event)"><span class="v-b"></span><span class="v-var">x</span></div>
+                <div class="var-token val-token" draggable="true" ondragstart="dragToken(event)"><span class="v-c"></span><span class="v-var">x</span></div>
+            </div>
+            <div class="expression">
+                <div class="var-dropzone step-drop i-ax" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> + 
+                <div class="var-dropzone step-drop i-bx" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> + 
+                <div class="var-dropzone step-drop i-cx" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> = <span class="v-T"></span>
+            </div>
+            <button class="btn check-btn" onclick="checkStep(this)">Проверить</button>
             <span class="success-msg">✓ Верно!</span>
         </div>
 
         <div class="step">
             <div class="step-title">4. Приведи подобные слагаемые</div>
-            <div class="expression">( <input type="text" class="input-field i-a"> + <input type="text" class="input-field i-b"> + <input type="text" class="input-field i-c"> ) · x = <span class="v-T"></span></div>
-            <div class="expression"><input type="text" class="input-field i-sum_abc"> · x = <span class="v-T"></span></div>
-            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <div class="expression">( <input type="text" class="input-field w-xs i-a"> + <input type="text" class="input-field w-xs i-b"> + <input type="text" class="input-field w-xs i-c"> ) · <span class="v-var">x</span> = <span class="v-T"></span></div>
+            <div class="expression"><input type="text" class="input-field w-xs i-sum_abc"> · <span class="v-var">x</span> = <span class="v-T"></span></div>
+            <button class="btn check-btn" onclick="checkStep(this)">Проверить</button>
             <span class="success-msg">✓ Верно!</span>
         </div>
 
         <div class="step">
-            <div class="step-title">5. Найди x (одну часть)</div>
-            <div class="expression">x = <span class="v-T"></span> : <input type="text" class="input-field i-sum_abc"> = <input type="text" class="input-field input-large i-val_x"></div>
-            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <div class="step-title">5. Найди неизвестное (одну часть)</div>
+            <div class="expression"><span class="v-var">x</span> = <span class="v-T"></span> : <input type="text" class="input-field w-xs i-sum_abc"> = <input type="text" class="input-field w-sm i-val_x"></div>
+            <button class="btn check-btn" onclick="checkStep(this)">Проверить</button>
             <span class="success-msg">✓ Верно!</span>
         </div>
 
         <div class="step">
             <div class="step-title">6. Найди массу изюма</div>
-            <div class="expression">Изюм: <span class="v-b"></span> · <input type="text" class="input-field input-large i-val_x"> = <input type="text" class="input-field input-large i-val_bx"> г</div>
-            <button class="check-btn" onclick="checkStep(this)">Готово!</button>
+            <div class="expression">Изюм: <span class="v-b"></span> · <input type="text" class="input-field w-sm i-val_x"> = <input type="text" class="input-field w-md i-val_bx"> г</div>
+            <button class="btn check-btn" onclick="checkStep(this)">Готово!</button>
         </div>
 
         <div class="final-answer">
-            <strong>Ответ:</strong> изюма <strong><span class="v-val_bx"></span></strong> г.<br>
-            <button class="next-task-btn" onclick="nextTask()">Перейти к следующей задаче</button>
+            Ответ: изюма <strong><span class="v-val_bx"></span> г</strong>.<br>
+            <button class="btn next-task-btn" onclick="nextTask()">Перейти к следующей задаче</button>
         </div>
     </div>
 
+    <!-- Задание 2 -->
     <div class="task-container" id="task2">
         <h2>Лист 2. Задача на движение</h2>
         <div class="problem-box">
-            <strong>Условие:</strong> Из двух городов, расстояние между которыми <span class="v-D"></span> км, выехали навстречу друг другу два поезда. Скорость одного неизвестна, а скорость другого на <span class="v-dV"></span> км/ч больше. Они встретились через <span class="v-t"></span> часа. Найдите скорость каждого поезда.
+            <strong>Условие:</strong> Из двух городов, расстояние между которыми <span class="highlight-var v-D"></span> км, выехали навстречу друг другу два поезда. Скорость одного неизвестна, а скорость другого на <span class="highlight-var v-dV"></span> км/ч больше. Они встретились через <span class="highlight-var v-t"></span> часа. Найдите скорость каждого поезда.
         </div>
 
-        <div class="step active">
+        <div class="step active step-var-select">
             <div class="step-title">1. Обозначь неизвестное</div>
-            <div class="expression">Пусть скорость первого поезда <input type="text" class="input-field i-x"> км/ч.</div>
-            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
-            <span class="success-msg">✓ Верно!</span>
+            <div class="var-selection-area">
+                <div class="expression">Пусть скорость 1-го поезда <div class="var-dropzone drop-highlight" id="drop-task2" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropVar(event, 2)">?</div> км/ч.</div>
+                <div class="inventory-hint">Выбери любую букву:</div>
+                <div class="var-inventory">
+                    <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(2, 'x')">x</div>
+                    <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(2, 'y')">y</div>
+                    <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(2, 'v')">v</div>
+                    <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(2, 's')">s</div>
+                    <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(2, 'n')">n</div>
+                </div>
+            </div>
+            <span class="success-msg" style="margin-top: 15px;">✓ Буква зафиксирована!</span>
         </div>
 
         <div class="step">
             <div class="step-title">2. Вырази скорость второго и путь каждого</div>
-            <table class="brief-table">
-                <tr><td>Скорость второго:</td><td><input type="text" class="input-field i-x"> + <span class="v-dV"></span> км/ч</td></tr>
-                <tr><td>Путь первого за <span class="v-t"></span> ч:</td><td><span class="v-t"></span> · <input type="text" class="input-field i-x"> км</td></tr>
-                <tr><td>Путь второго за <span class="v-t"></span> ч:</td><td><span class="v-t"></span> · (<input type="text" class="input-field i-x"> + <span class="v-dV"></span>) км</td></tr>
-            </table>
-            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <div class="inventory-hint">Собери выражения из элементов:</div>
+            <div class="var-inventory">
+                <div class="var-token val-token v-t" draggable="true" ondragstart="dragToken(event)"></div>
+                <div class="var-token val-token v-dV" draggable="true" ondragstart="dragToken(event)"></div>
+                <div class="var-token user-var-token" draggable="true" ondragstart="dragToken(event)">x</div>
+            </div>
+            <div class="brief-grid">
+                <div class="brief-label">Скорость 2-го:</div>
+                <div class="brief-value">
+                    <div class="var-dropzone step-drop i-x" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> + 
+                    <div class="var-dropzone step-drop i-dV" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> км/ч
+                </div>
+                
+                <div class="brief-label">Путь 1-го:</div>
+                <div class="brief-value">
+                    <div class="var-dropzone step-drop i-t" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> ч · 
+                    <div class="var-dropzone step-drop i-x" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> км/ч
+                </div>
+                
+                <div class="brief-label">Путь 2-го:</div>
+                <div class="brief-value">
+                    <div class="var-dropzone step-drop i-t" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> ч · ( 
+                    <div class="var-dropzone step-drop i-x" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> + 
+                    <div class="var-dropzone step-drop i-dV" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> ) км/ч
+                </div>
+            </div>
+            <button class="btn check-btn" onclick="checkStep(this)">Проверить</button>
             <span class="success-msg">✓ Верно!</span>
         </div>
 
         <div class="step">
             <div class="step-title">3. Составь уравнение (сумма путей равна расстоянию)</div>
-            <div class="expression"><span class="v-t"></span>·<input type="text" class="input-field i-x"> + <span class="v-t"></span>·(<input type="text" class="input-field i-x"> + <span class="v-dV"></span>) = <span class="v-D"></span></div>
-            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <div class="inventory-hint">Перетащи готовые пути поездов:</div>
+            <div class="var-inventory">
+                <div class="var-token val-token" draggable="true" ondragstart="dragToken(event)"><span class="v-t"></span><span class="v-var">x</span></div>
+                <div class="var-token val-token" draggable="true" ondragstart="dragToken(event)"><span class="v-t"></span>(<span class="v-var">x</span>+<span class="v-dV"></span>)</div>
+            </div>
+            <div class="expression">
+                <div class="var-dropzone step-drop i-tx" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> + 
+                <div class="var-dropzone step-drop i-t_x_plus_dV" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> = <span class="v-D"></span>
+            </div>
+            <button class="btn check-btn" onclick="checkStep(this)">Проверить</button>
             <span class="success-msg">✓ Верно!</span>
         </div>
 
         <div class="step">
             <div class="step-title">4. Раскрой скобки и приведи подобные</div>
-            <div class="expression"><input type="text" class="input-field i-tx"> + <input type="text" class="input-field i-tx"> + <span class="v-tdV"></span> = <span class="v-D"></span></div>
-            <div class="expression">(<input type="text" class="input-field i-t"> + <input type="text" class="input-field i-t">) · x + <span class="v-tdV"></span> = <span class="v-D"></span></div>
-            <div class="expression"><input type="text" class="input-field i-2t">·x + <span class="v-tdV"></span> = <span class="v-D"></span></div>
-            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <div class="expression"><input type="text" class="input-field w-sm i-tx"> + <input type="text" class="input-field w-sm i-tx"> + <span class="v-tdV"></span> = <span class="v-D"></span></div>
+            <div class="expression">( <input type="text" class="input-field w-xs i-t"> + <input type="text" class="input-field w-xs i-t"> ) · <span class="v-var">x</span> + <span class="v-tdV"></span> = <span class="v-D"></span></div>
+            <div class="expression"><input type="text" class="input-field w-xs i-2t">·<span class="v-var">x</span> + <span class="v-tdV"></span> = <span class="v-D"></span></div>
+            <button class="btn check-btn" onclick="checkStep(this)">Проверить</button>
             <span class="success-msg">✓ Верно!</span>
         </div>
 
         <div class="step">
             <div class="step-title">5. Реши уравнение</div>
-            <div class="expression"><input type="text" class="input-field i-2t">·x = <span class="v-D"></span> – <span class="v-tdV"></span></div>
-            <div class="expression"><input type="text" class="input-field i-2t">·x = <span class="v-D_minus_tdV"></span></div>
-            <div class="expression">x = <span class="v-D_minus_tdV"></span> : <input type="text" class="input-field i-2t"> = <input type="text" class="input-field i-val_x"></div>
-            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <div class="expression"><input type="text" class="input-field w-xs i-2t">·<span class="v-var">x</span> = <span class="v-D"></span> – <span class="v-tdV"></span></div>
+            <div class="expression"><input type="text" class="input-field w-xs i-2t">·<span class="v-var">x</span> = <span class="v-D_minus_tdV"></span></div>
+            <div class="expression"><span class="v-var">x</span> = <span class="v-D_minus_tdV"></span> : <input type="text" class="input-field w-xs i-2t"> = <input type="text" class="input-field w-md i-val_x"></div>
+            <button class="btn check-btn" onclick="checkStep(this)">Проверить</button>
             <span class="success-msg">✓ Верно!</span>
         </div>
 
         <div class="step">
             <div class="step-title">6. Найди скорости</div>
-            <div class="expression">Первый поезд: <input type="text" class="input-field i-val_x"> км/ч</div>
-            <div class="expression">Второй поезд: <input type="text" class="input-field i-val_x"> + <span class="v-dV"></span> = <input type="text" class="input-field i-val_v2"> км/ч</div>
-            <button class="check-btn" onclick="checkStep(this)">Готово!</button>
+            <div class="expression">Первый: <input type="text" class="input-field w-md i-val_x"> км/ч</div>
+            <div class="expression">Второй: <input type="text" class="input-field w-md i-val_x"> + <span class="v-dV"></span> = <input type="text" class="input-field w-md i-val_v2"> км/ч</div>
+            <button class="btn check-btn" onclick="checkStep(this)">Готово!</button>
         </div>
 
         <div class="final-answer">
-            <strong>Ответ:</strong> скорости поездов <strong><span class="v-val_x"></span></strong> км/ч и <strong><span class="v-val_v2"></span></strong> км/ч.<br>
-            <button class="next-task-btn" onclick="nextTask()">Перейти к следующей задаче</button>
+            Ответ: <strong><span class="v-val_x"></span></strong> км/ч и <strong><span class="v-val_v2"></span></strong> км/ч.<br>
+            <button class="btn next-task-btn" onclick="nextTask()">Перейти к следующей задаче</button>
         </div>
     </div>
 
+    <!-- Задание 3 -->
     <div class="task-container" id="task3">
         <h2>Лист 3. Задача на равенство</h2>
         <div class="problem-box">
-            <strong>Условие:</strong> В первой корзине яблок в <span class="v-m"></span> раза меньше, чем во второй. Если из второй переложить в первую <span class="v-k"></span> яблок, то яблок в корзинах станет поровну. Сколько яблок было первоначально?
+            <strong>Условие:</strong> В первой корзине яблок в <span class="highlight-var v-m"></span> раза меньше, чем во второй. Если из второй переложить в первую <span class="highlight-var v-k"></span> яблок, то их станет поровну. Сколько было первоначально?
         </div>
 
-        <div class="step active">
+        <div class="step active step-var-select">
             <div class="step-title">1. Обозначь неизвестное</div>
-            <div class="expression">Пусть в первой корзине <input type="text" class="input-field i-x"> яблок.</div>
-            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
-            <span class="success-msg">✓ Верно!</span>
+            <div class="var-selection-area">
+                <div class="expression">Пусть в первой корзине <div class="var-dropzone drop-highlight" id="drop-task3" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropVar(event, 3)">?</div> яблок.</div>
+                <div class="inventory-hint">Выбери любую букву:</div>
+                <div class="var-inventory">
+                    <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(3, 'x')">x</div>
+                    <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(3, 'y')">y</div>
+                    <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(3, 'z')">z</div>
+                    <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(3, 'a')">a</div>
+                    <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(3, 'k')">k</div>
+                </div>
+            </div>
+            <span class="success-msg" style="margin-top: 15px;">✓ Буква зафиксирована!</span>
         </div>
 
         <div class="step">
             <div class="step-title">2. Вырази количество во второй корзине</div>
-            <div class="expression">Во второй корзине: <span class="v-m"></span> · <input type="text" class="input-field i-x"> = <input type="text" class="input-field i-mx"> ябл.</div>
-            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <div class="inventory-hint">Собери выражение:</div>
+            <div class="var-inventory">
+                <div class="var-token val-token v-m" draggable="true" ondragstart="dragToken(event)"></div>
+                <div class="var-token user-var-token" draggable="true" ondragstart="dragToken(event)">x</div>
+            </div>
+            <div class="expression" style="margin-top: 15px;">
+                Во второй: 
+                <div class="var-dropzone step-drop i-m" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> РАЗА · 
+                <div class="var-dropzone step-drop i-x" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> ябл.
+            </div>
+            <button class="btn check-btn" onclick="checkStep(this)">Проверить</button>
             <span class="success-msg">✓ Верно!</span>
         </div>
 
         <div class="step">
             <div class="step-title">3. Что станет после перекладывания?</div>
-            <table class="brief-table">
-                <tr><td>В первой станет:</td><td><input type="text" class="input-field i-x"> + <span class="v-k"></span></td></tr>
-                <tr><td>Во второй станет:</td><td><input type="text" class="input-field i-mx"> – <span class="v-k"></span></td></tr>
-            </table>
-            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <div class="brief-grid">
+                <div class="brief-label">В первой станет:</div>
+                <div class="brief-value"><input type="text" class="input-field w-sm i-x"> + <span class="v-k"></span></div>
+                
+                <div class="brief-label">Во второй станет:</div>
+                <div class="brief-value"><input type="text" class="input-field w-sm i-mx"> – <span class="v-k"></span></div>
+            </div>
+            <button class="btn check-btn" onclick="checkStep(this)">Проверить</button>
             <span class="success-msg">✓ Верно!</span>
         </div>
 
         <div class="step">
             <div class="step-title">4. Составь уравнение (стало поровну)</div>
-            <div class="expression"><input type="text" class="input-field i-x"> + <span class="v-k"></span> = <input type="text" class="input-field i-mx"> – <span class="v-k"></span></div>
-            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <div class="inventory-hint">Перетащи выражения из предыдущего шага:</div>
+            <div class="var-inventory">
+                <div class="var-token val-token" draggable="true" ondragstart="dragToken(event)"><span class="v-var">x</span>+<span class="v-k"></span></div>
+                <div class="var-token val-token" draggable="true" ondragstart="dragToken(event)"><span class="v-m"></span><span class="v-var">x</span>-<span class="v-k"></span></div>
+            </div>
+            <div class="expression">
+                <div class="var-dropzone step-drop i-x_plus_k" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> = 
+                <div class="var-dropzone step-drop i-mx_minus_k" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div>
+            </div>
+            <button class="btn check-btn" onclick="checkStep(this)">Проверить</button>
             <span class="success-msg">✓ Верно!</span>
         </div>
 
         <div class="step">
-            <div class="step-title">5. Перенеси слагаемые с "x" влево, числа вправо</div>
-            <div class="expression"><input type="text" class="input-field i-x"> – <input type="text" class="input-field i-mx"> = –<span class="v-k"></span> – <span class="v-k"></span></div>
-            <div class="expression">( <input type="text" class="input-field i-1"> – <input type="text" class="input-field i-m"> )·x = –<span class="v-2k"></span></div>
-            <div class="expression"><input type="text" class="input-field i-1_minus_m">·x = –<span class="v-2k"></span></div>
-            <div class="expression">x = (–<span class="v-2k"></span>) : (<input type="text" class="input-field i-1_minus_m">) = <input type="text" class="input-field i-val_x"></div>
-            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <div class="step-title">5. Перенеси слагаемые с неизвестным влево, числа вправо</div>
+            <div class="expression"><input type="text" class="input-field w-sm i-x"> – <input type="text" class="input-field w-sm i-mx"> = –<span class="v-k"></span> – <span class="v-k"></span></div>
+            <div class="expression">( <input type="text" class="input-field w-xs i-1"> – <input type="text" class="input-field w-xs i-m"> )·<span class="v-var">x</span> = –<span class="v-2k"></span></div>
+            <div class="expression"><input type="text" class="input-field w-xs i-1_minus_m">·<span class="v-var">x</span> = –<span class="v-2k"></span></div>
+            <div class="expression"><span class="v-var">x</span> = (–<span class="v-2k"></span>) : ( <input type="text" class="input-field w-xs i-1_minus_m"> ) = <input type="text" class="input-field w-md i-val_x"></div>
+            <button class="btn check-btn" onclick="checkStep(this)">Проверить</button>
             <span class="success-msg">✓ Верно!</span>
         </div>
 
         <div class="step">
             <div class="step-title">6. Найди количество яблок</div>
-            <div class="expression">Первая корзина: <input type="text" class="input-field i-val_x"> ябл.</div>
-            <div class="expression">Вторая корзина: <span class="v-m"></span>·<input type="text" class="input-field i-val_x"> = <input type="text" class="input-field i-val_mx"> ябл.</div>
-            <button class="check-btn" onclick="checkStep(this)">Готово!</button>
+            <div class="expression">В первой: <input type="text" class="input-field w-md i-val_x"> ябл.</div>
+            <div class="expression">Во второй: <span class="v-m"></span> · <input type="text" class="input-field w-md i-val_x"> = <input type="text" class="input-field w-md i-val_mx"> ябл.</div>
+            <button class="btn check-btn" onclick="checkStep(this)">Готово!</button>
         </div>
 
         <div class="final-answer">
-            <strong>Ответ:</strong> в первой <span class="v-val_x"></span> ябл., во второй <span class="v-val_mx"></span> ябл.<br>
-            <button class="next-task-btn" onclick="nextTask()">Перейти к следующей задаче</button>
+            Ответ: в первой <strong><span class="v-val_x"></span></strong>, во второй <strong><span class="v-val_mx"></span></strong>.<br>
+            <button class="btn next-task-btn" onclick="nextTask()">Перейти к следующей задаче</button>
         </div>
     </div>
 
+    <!-- Задание 4 -->
     <div class="task-container" id="task4">
-        <h2>Лист 4. Геометрическая задача</h2>
+        <h2>Лист 4. Геометрия</h2>
         <div class="problem-box">
-            <strong>Условие:</strong> Длина отрезка AB равна <span class="v-L"></span> см. Точка C делит его на два отрезка AC и CB. Отрезок AC на <span class="v-d"></span> см длиннее отрезка CB. Найдите длину отрезка CB.
+            <strong>Условие:</strong> Длина отрезка AB равна <span class="highlight-var v-L"></span> см. Точка C делит его на два отрезка AC и CB. Отрезок AC на <span class="highlight-var v-d"></span> см длиннее отрезка CB. Найдите длину отрезка CB.
         </div>
 
-        <div class="step active">
+        <div class="step active step-var-select">
             <div class="step-title">1. Обозначь меньший отрезок</div>
-            <div class="expression">Пусть длина CB = <input type="text" class="input-field i-x"> см.</div>
-            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
-            <span class="success-msg">✓ Верно!</span>
+            <div class="var-selection-area">
+                <div class="expression">Пусть длина CB = <div class="var-dropzone drop-highlight" id="drop-task4" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropVar(event, 4)">?</div> см.</div>
+                <div class="inventory-hint">Выбери любую букву:</div>
+                <div class="var-inventory">
+                    <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(4, 'x')">x</div>
+                    <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(4, 'y')">y</div>
+                    <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(4, 'L')">L</div>
+                    <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(4, 'a')">a</div>
+                    <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(4, 'c')">c</div>
+                </div>
+            </div>
+            <span class="success-msg" style="margin-top: 15px;">✓ Буква зафиксирована!</span>
         </div>
 
         <div class="step">
             <div class="step-title">2. Вырази длину AC</div>
-            <div class="expression">AC = <input type="text" class="input-field input-large i-x_plus_d"> см.</div>
-            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <div class="inventory-hint">Собери выражение:</div>
+            <div class="var-inventory">
+                <div class="var-token val-token v-d" draggable="true" ondragstart="dragToken(event)"></div>
+                <div class="var-token user-var-token" draggable="true" ondragstart="dragToken(event)">x</div>
+            </div>
+            <div class="expression" style="margin-top: 15px;">
+                AC = <div class="var-dropzone step-drop i-x" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> + 
+                     <div class="var-dropzone step-drop i-d" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> см.
+            </div>
+            <button class="btn check-btn" onclick="checkStep(this)">Проверить</button>
             <span class="success-msg">✓ Верно!</span>
         </div>
 
         <div class="step">
-            <div class="step-title">3. Составь уравнение (сумма отрезков равна AB)</div>
-            <div class="expression"><input type="text" class="input-field i-x"> + (<input type="text" class="input-field input-large i-x_plus_d">) = <span class="v-L"></span></div>
-            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <div class="step-title">3. Составь уравнение (сумма равна AB)</div>
+            <div class="inventory-hint">Перетащи отрезки:</div>
+            <div class="var-inventory">
+                <div class="var-token val-token" draggable="true" ondragstart="dragToken(event)"><span class="v-var">x</span></div>
+                <div class="var-token val-token" draggable="true" ondragstart="dragToken(event)"><span class="v-var">x</span>+<span class="v-d"></span></div>
+            </div>
+            <div class="expression">
+                <div class="var-dropzone step-drop i-x" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> + 
+                ( <div class="var-dropzone step-drop i-x_plus_d" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> ) = <span class="v-L"></span>
+            </div>
+            <button class="btn check-btn" onclick="checkStep(this)">Проверить</button>
             <span class="success-msg">✓ Верно!</span>
         </div>
 
         <div class="step">
             <div class="step-title">4. Приведи подобные</div>
-            <div class="expression"><input type="text" class="input-field i-x"> + <input type="text" class="input-field i-x"> + <span class="v-d"></span> = <span class="v-L"></span></div>
-            <div class="expression"><input type="text" class="input-field i-2">·x + <span class="v-d"></span> = <span class="v-L"></span></div>
-            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <div class="expression"><input type="text" class="input-field w-sm i-x"> + <input type="text" class="input-field w-sm i-x"> + <span class="v-d"></span> = <span class="v-L"></span></div>
+            <div class="expression"><input type="text" class="input-field w-xs i-2">·<span class="v-var">x</span> + <span class="v-d"></span> = <span class="v-L"></span></div>
+            <button class="btn check-btn" onclick="checkStep(this)">Проверить</button>
             <span class="success-msg">✓ Верно!</span>
         </div>
 
         <div class="step">
             <div class="step-title">5. Реши уравнение</div>
-            <div class="expression"><input type="text" class="input-field i-2">·x = <span class="v-L"></span> – <span class="v-d"></span></div>
-            <div class="expression"><input type="text" class="input-field i-2">·x = <span class="v-L_minus_d"></span></div>
-            <div class="expression">x = <span class="v-L_minus_d"></span> : <input type="text" class="input-field i-2"> = <input type="text" class="input-field i-val_x"></div>
-            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <div class="expression"><input type="text" class="input-field w-xs i-2">·<span class="v-var">x</span> = <span class="v-L"></span> – <span class="v-d"></span></div>
+            <div class="expression"><input type="text" class="input-field w-xs i-2">·<span class="v-var">x</span> = <span class="v-L_minus_d"></span></div>
+            <div class="expression"><span class="v-var">x</span> = <span class="v-L_minus_d"></span> : <input type="text" class="input-field w-xs i-2"> = <input type="text" class="input-field w-md i-val_x"></div>
+            <button class="btn check-btn" onclick="checkStep(this)">Проверить</button>
             <span class="success-msg">✓ Верно!</span>
         </div>
 
         <div class="step">
-            <div class="step-title">6. Найди длины отрезков</div>
-            <div class="expression">CB = <input type="text" class="input-field i-val_x"> см</div>
-            <div class="expression">AC = <input type="text" class="input-field i-val_x"> + <span class="v-d"></span> = <input type="text" class="input-field i-val_AC"> см</div>
-            <button class="check-btn" onclick="checkStep(this)">Готово!</button>
+            <div class="step-title">6. Финиш</div>
+            <div class="expression">CB = <input type="text" class="input-field w-md i-val_x"> см</div>
+            <button class="btn check-btn" onclick="checkStep(this)">Готово!</button>
         </div>
 
         <div class="final-answer">
-            <strong>Ответ:</strong> длина CB = <strong><span class="v-val_x"></span></strong> см.<br>
-            <button class="next-task-btn" onclick="nextTask()">Перейти к следующей задаче</button>
+            Ответ: CB = <strong><span class="v-val_x"></span></strong> см.<br>
+            <button class="btn next-task-btn" onclick="nextTask()">Перейти к следующей задаче</button>
         </div>
     </div>
 
+    <!-- Задание 5 -->
     <div class="task-container" id="task5">
         <h2>Лист 5. Задача на стоимость</h2>
         <div class="problem-box">
-            <strong>Условие:</strong> За ручку, карандаш и линейку заплатили <span class="v-C"></span> рублей. Ручка стоит в <span class="v-m"></span> раза дороже карандаша, а линейка стоит на <span class="v-d"></span> рублей дешевле карандаша. Найдите цену карандаша.
+            <strong>Условие:</strong> За ручку, карандаш и линейку заплатили <span class="highlight-var v-C"></span> руб. Ручка в <span class="highlight-var v-m"></span> раза дороже карандаша, а линейка на <span class="highlight-var v-d"></span> руб. дешевле карандаша. Найдите цену карандаша.
         </div>
 
-        <div class="step active">
+        <div class="step active step-var-select">
             <div class="step-title">1. Обозначь цену карандаша</div>
-            <div class="expression">Пусть карандаш стоит <input type="text" class="input-field i-x"> руб.</div>
-            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <div class="var-selection-area">
+                <div class="expression">Карандаш стоит <div class="var-dropzone drop-highlight" id="drop-task5" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropVar(event, 5)">?</div> руб.</div>
+                <div class="inventory-hint">Выбери любую букву:</div>
+                <div class="var-inventory">
+                    <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(5, 'x')">x</div>
+                    <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(5, 'y')">y</div>
+                    <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(5, 'z')">z</div>
+                    <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(5, 'p')">p</div>
+                    <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(5, 'c')">c</div>
+                </div>
+            </div>
+            <span class="success-msg" style="margin-top: 15px;">✓ Буква зафиксирована!</span>
+        </div>
+
+        <div class="step">
+            <div class="step-title">2. Вырази цены остальных</div>
+            <div class="inventory-hint">Собери выражения из элементов:</div>
+            <div class="var-inventory">
+                <div class="var-token val-token v-m" draggable="true" ondragstart="dragToken(event)"></div>
+                <div class="var-token val-token v-d" draggable="true" ondragstart="dragToken(event)"></div>
+                <div class="var-token user-var-token" draggable="true" ondragstart="dragToken(event)">x</div>
+            </div>
+            <div class="brief-grid">
+                <div class="brief-label">Ручка:</div>
+                <div class="brief-value">
+                    <div class="var-dropzone step-drop i-m" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> · 
+                    <div class="var-dropzone step-drop i-x" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> руб.
+                </div>
+                
+                <div class="brief-label">Линейка:</div>
+                <div class="brief-value">
+                    <div class="var-dropzone step-drop i-x" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> – 
+                    <div class="var-dropzone step-drop i-d" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> руб.
+                </div>
+            </div>
+            <button class="btn check-btn" onclick="checkStep(this)">Проверить</button>
             <span class="success-msg">✓ Верно!</span>
         </div>
 
         <div class="step">
-            <div class="step-title">2. Вырази цены остальных предметов</div>
-            <table class="brief-table">
-                <tr><td>Ручка:</td><td><span class="v-m"></span> · <input type="text" class="input-field i-x"> руб.</td></tr>
-                <tr><td>Линейка:</td><td><input type="text" class="input-field input-large i-x_minus_d"> руб.</td></tr>
-            </table>
-            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
-            <span class="success-msg">✓ Верно!</span>
-        </div>
-
-        <div class="step">
-            <div class="step-title">3. Составь уравнение (сумма равна <span class="v-C"></span>)</div>
-            <div class="expression"><input type="text" class="input-field i-x"> + <input type="text" class="input-field i-mx"> + (<input type="text" class="input-field input-large i-x_minus_d">) = <span class="v-C"></span></div>
-            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <div class="step-title">3. Составь уравнение</div>
+            <div class="inventory-hint">Перетащи цены предметов:</div>
+            <div class="var-inventory">
+                <div class="var-token val-token" draggable="true" ondragstart="dragToken(event)"><span class="v-var">x</span></div>
+                <div class="var-token val-token" draggable="true" ondragstart="dragToken(event)"><span class="v-m"></span><span class="v-var">x</span></div>
+                <div class="var-token val-token" draggable="true" ondragstart="dragToken(event)"><span class="v-var">x</span>-<span class="v-d"></span></div>
+            </div>
+            <div class="expression">
+                <div class="var-dropzone step-drop i-x" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> + 
+                <div class="var-dropzone step-drop i-mx" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> + 
+                ( <div class="var-dropzone step-drop i-x_minus_d" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> ) = <span class="v-C"></span>
+            </div>
+            <button class="btn check-btn" onclick="checkStep(this)">Проверить</button>
             <span class="success-msg">✓ Верно!</span>
         </div>
 
         <div class="step">
             <div class="step-title">4. Приведи подобные</div>
-            <div class="expression"><input type="text" class="input-field i-x"> + <input type="text" class="input-field i-mx"> + <input type="text" class="input-field i-x"> – <span class="v-d"></span> = <span class="v-C"></span></div>
-            <div class="expression">( <input type="text" class="input-field i-1"> + <input type="text" class="input-field i-m"> + <input type="text" class="input-field i-1"> )·x – <span class="v-d"></span> = <span class="v-C"></span></div>
-            <div class="expression"><input type="text" class="input-field i-m_plus_2">·x – <span class="v-d"></span> = <span class="v-C"></span></div>
-            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <div class="expression"><input type="text" class="input-field w-sm i-x"> + <input type="text" class="input-field w-sm i-mx"> + <input type="text" class="input-field w-sm i-x"> – <span class="v-d"></span> = <span class="v-C"></span></div>
+            <div class="expression">( <input type="text" class="input-field w-xs i-1"> + <input type="text" class="input-field w-xs i-m"> + <input type="text" class="input-field w-xs i-1"> )·<span class="v-var">x</span> – <span class="v-d"></span> = <span class="v-C"></span></div>
+            <div class="expression"><input type="text" class="input-field w-xs i-m_plus_2">·<span class="v-var">x</span> – <span class="v-d"></span> = <span class="v-C"></span></div>
+            <button class="btn check-btn" onclick="checkStep(this)">Проверить</button>
             <span class="success-msg">✓ Верно!</span>
         </div>
 
         <div class="step">
             <div class="step-title">5. Реши уравнение</div>
-            <div class="expression"><input type="text" class="input-field i-m_plus_2">·x = <span class="v-C"></span> + <span class="v-d"></span></div>
-            <div class="expression"><input type="text" class="input-field i-m_plus_2">·x = <span class="v-C_plus_d"></span></div>
-            <div class="expression">x = <span class="v-C_plus_d"></span> : <input type="text" class="input-field i-m_plus_2"> = <input type="text" class="input-field i-val_x"></div>
-            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <div class="expression"><input type="text" class="input-field w-xs i-m_plus_2">·<span class="v-var">x</span> = <span class="v-C"></span> + <span class="v-d"></span></div>
+            <div class="expression"><input type="text" class="input-field w-xs i-m_plus_2">·<span class="v-var">x</span> = <span class="v-C_plus_d"></span></div>
+            <div class="expression"><span class="v-var">x</span> = <span class="v-C_plus_d"></span> : <input type="text" class="input-field w-xs i-m_plus_2"> = <input type="text" class="input-field w-md i-val_x"></div>
+            <button class="btn check-btn" onclick="checkStep(this)">Проверить</button>
             <span class="success-msg">✓ Верно!</span>
         </div>
 
         <div class="step">
-            <div class="step-title">6. Найди цену каждого предмета</div>
-            <div class="expression">Карандаш: <input type="text" class="input-field i-val_x"> руб.</div>
-            <div class="expression">Ручка: <span class="v-m"></span>·<input type="text" class="input-field i-val_x"> = <input type="text" class="input-field i-val_mx"> руб.</div>
-            <div class="expression">Линейка: <input type="text" class="input-field i-val_x"> – <span class="v-d"></span> = <input type="text" class="input-field i-val_ruler"> руб.</div>
-            <button class="check-btn" onclick="checkStep(this)">Готово!</button>
+            <div class="step-title">6. Найди цену карандаша</div>
+            <div class="expression">Карандаш: <input type="text" class="input-field w-md i-val_x"> руб.</div>
+            <button class="btn check-btn" onclick="checkStep(this)">Готово!</button>
         </div>
 
         <div class="final-answer">
-            <strong>Ответ:</strong> карандаш стоит <strong><span class="v-val_x"></span></strong> руб.<br>
-            <button class="next-task-btn" onclick="nextTask()">Перейти к последней задаче</button>
+            Ответ: карандаш стоит <strong><span class="v-val_x"></span> руб</strong>.<br>
+            <button class="btn next-task-btn" onclick="nextTask()">Перейти к последней задаче</button>
         </div>
     </div>
 
+    <!-- Задание 6 -->
     <div class="task-container" id="task6">
         <h2>Лист 6. Задача на покупку</h2>
         <div class="problem-box">
-            <strong>Условие:</strong> За <span class="v-n1"></span> тетрадей и <span class="v-n2"></span> ручек заплатили <span class="v-C"></span> рублей. Тетрадь дороже ручки на <span class="v-d"></span> рублей. Найдите цену тетради и ручки.
+            <strong>Условие:</strong> За <span class="highlight-var v-n1"></span> тетрадей и <span class="highlight-var v-n2"></span> ручек заплатили <span class="highlight-var v-C"></span> рублей. Тетрадь дороже ручки на <span class="highlight-var v-d"></span> рублей. Найдите цены.
         </div>
 
-        <div class="step active">
+        <div class="step active step-var-select">
             <div class="step-title">1. Обозначь неизвестное</div>
-            <div class="expression">Пусть ручка стоит <input type="text" class="input-field i-x"> руб.</div>
-            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
-            <span class="success-msg">✓ Верно!</span>
+            <div class="var-selection-area">
+                <div class="expression">Ручка стоит <div class="var-dropzone drop-highlight" id="drop-task6" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropVar(event, 6)">?</div> руб.</div>
+                <div class="inventory-hint">Выбери любую букву:</div>
+                <div class="var-inventory">
+                    <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(6, 'x')">x</div>
+                    <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(6, 'y')">y</div>
+                    <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(6, 'z')">z</div>
+                    <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(6, 'a')">a</div>
+                    <div class="var-token" draggable="true" ondragstart="dragToken(event)" onclick="selectVar(6, 'b')">b</div>
+                </div>
+            </div>
+            <span class="success-msg" style="margin-top: 15px;">✓ Буква зафиксирована!</span>
         </div>
 
         <div class="step">
-            <div class="step-title">2. Вырази цену тетради</div>
-            <div class="expression">Тетрадь стоит <input type="text" class="input-field input-large i-x_plus_d"> руб.</div>
-            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <div class="step-title">2. Цена тетради</div>
+            <div class="inventory-hint">Собери выражение:</div>
+            <div class="var-inventory">
+                <div class="var-token val-token v-d" draggable="true" ondragstart="dragToken(event)"></div>
+                <div class="var-token user-var-token" draggable="true" ondragstart="dragToken(event)">x</div>
+            </div>
+            <div class="expression" style="margin-top: 15px;">
+                Тетрадь: <div class="var-dropzone step-drop i-x" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> + 
+                         <div class="var-dropzone step-drop i-d" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> руб.
+            </div>
+            <button class="btn check-btn" onclick="checkStep(this)">Проверить</button>
             <span class="success-msg">✓ Верно!</span>
         </div>
 
         <div class="step">
             <div class="step-title">3. Вырази стоимость всей покупки</div>
-            <table class="brief-table">
-                <tr><td>Стоимость <span class="v-n1"></span> тетрадей:</td><td><span class="v-n1"></span> · (<input type="text" class="input-field input-large i-x_plus_d">) руб.</td></tr>
-                <tr><td>Стоимость <span class="v-n2"></span> ручек:</td><td><span class="v-n2"></span> · <input type="text" class="input-field i-x"> руб.</td></tr>
-            </table>
-            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <div class="inventory-hint">Перетащи значения в слоты:</div>
+            <div class="var-inventory">
+                <div class="var-token val-token v-n1" draggable="true" ondragstart="dragToken(event)"></div>
+                <div class="var-token val-token v-n2" draggable="true" ondragstart="dragToken(event)"></div>
+                <div class="var-token val-token v-d" draggable="true" ondragstart="dragToken(event)"></div>
+                <div class="var-token user-var-token" draggable="true" ondragstart="dragToken(event)">x</div>
+            </div>
+            <div class="brief-grid">
+                <div class="brief-label"><span class="v-n1"></span> тетр.:</div>
+                <div class="brief-value">
+                    <div class="var-dropzone step-drop i-n1" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> · ( 
+                    <div class="var-dropzone step-drop i-x" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> + 
+                    <div class="var-dropzone step-drop i-d" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> ) руб.
+                </div>
+                
+                <div class="brief-label"><span class="v-n2"></span> ручек:</div>
+                <div class="brief-value">
+                    <div class="var-dropzone step-drop i-n2" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> · 
+                    <div class="var-dropzone step-drop i-x" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> руб.
+                </div>
+            </div>
+            <button class="btn check-btn" onclick="checkStep(this)">Проверить</button>
             <span class="success-msg">✓ Верно!</span>
         </div>
 
         <div class="step">
             <div class="step-title">4. Составь уравнение</div>
-            <div class="expression"><span class="v-n1"></span>·(<input type="text" class="input-field input-large i-x_plus_d">) + <span class="v-n2"></span>·<input type="text" class="input-field i-x"> = <span class="v-C"></span></div>
-            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <div class="inventory-hint">Собери стоимости:</div>
+            <div class="var-inventory">
+                <div class="var-token val-token" draggable="true" ondragstart="dragToken(event)"><span class="v-n1"></span>(<span class="v-var">x</span>+<span class="v-d"></span>)</div>
+                <div class="var-token val-token" draggable="true" ondragstart="dragToken(event)"><span class="v-n2"></span><span class="v-var">x</span></div>
+            </div>
+            <div class="expression">
+                <div class="var-dropzone step-drop i-n1_x_plus_d" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> + 
+                <div class="var-dropzone step-drop i-n2x" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="dropToken(event)">?</div> = <span class="v-C"></span>
+            </div>
+            <button class="btn check-btn" onclick="checkStep(this)">Проверить</button>
             <span class="success-msg">✓ Верно!</span>
         </div>
 
         <div class="step">
             <div class="step-title">5. Раскрой скобки и приведи подобные</div>
-            <div class="expression"><input type="text" class="input-field i-n1x"> + <input type="text" class="input-field input-large i-n1d"> + <input type="text" class="input-field i-n2x"> = <span class="v-C"></span></div>
-            <div class="expression">(<input type="text" class="input-field i-n1"> + <input type="text" class="input-field i-n2">)·x + <span class="v-n1d"></span> = <span class="v-C"></span></div>
-            <div class="expression"><input type="text" class="input-field i-sum_nx"> + <span class="v-n1d"></span> = <span class="v-C"></span></div>
-            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <div class="expression"><input type="text" class="input-field w-sm i-n1x"> + <input type="text" class="input-field w-sm i-n1d"> + <input type="text" class="input-field w-sm i-n2x"> = <span class="v-C"></span></div>
+            <div class="expression">( <input type="text" class="input-field w-xs i-n1"> + <input type="text" class="input-field w-xs i-n2"> )·<span class="v-var">x</span> + <span class="v-n1d"></span> = <span class="v-C"></span></div>
+            <div class="expression"><input type="text" class="input-field w-sm i-sum_nx"> + <span class="v-n1d"></span> = <span class="v-C"></span></div>
+            <button class="btn check-btn" onclick="checkStep(this)">Проверить</button>
             <span class="success-msg">✓ Верно!</span>
         </div>
 
         <div class="step">
             <div class="step-title">6. Реши уравнение</div>
-            <div class="expression"><input type="text" class="input-field i-sum_nx"> = <span class="v-C"></span> – <span class="v-n1d"></span></div>
-            <div class="expression"><input type="text" class="input-field i-sum_nx"> = <span class="v-C_minus_n1d"></span></div>
-            <div class="expression">x = <span class="v-C_minus_n1d"></span> : <input type="text" class="input-field i-sum_n"> = <input type="text" class="input-field i-val_x"></div>
-            <button class="check-btn" onclick="checkStep(this)">Проверить</button>
+            <div class="expression"><input type="text" class="input-field w-sm i-sum_nx"> = <span class="v-C"></span> – <span class="v-n1d"></span></div>
+            <div class="expression"><input type="text" class="input-field w-sm i-sum_nx"> = <span class="v-C_minus_n1d"></span></div>
+            <div class="expression"><span class="v-var">x</span> = <span class="v-C_minus_n1d"></span> : <input type="text" class="input-field w-xs i-sum_n"> = <input type="text" class="input-field w-md i-val_x"></div>
+            <button class="btn check-btn" onclick="checkStep(this)">Проверить</button>
             <span class="success-msg">✓ Верно!</span>
         </div>
 
         <div class="step">
             <div class="step-title">7. Найди цены</div>
-            <div class="expression">Ручка: <input type="text" class="input-field i-val_x"> руб.</div>
-            <div class="expression">Тетрадь: <input type="text" class="input-field i-val_x"> + <span class="v-d"></span> = <input type="text" class="input-field i-val_note"> руб.</div>
-            <button class="check-btn" onclick="checkStep(this)">Завершить!</button>
+            <div class="expression">Ручка: <input type="text" class="input-field w-md i-val_x"> руб.</div>
+            <div class="expression">Тетрадь: <input type="text" class="input-field w-md i-val_x"> + <span class="v-d"></span> = <input type="text" class="input-field w-md i-val_note"> руб.</div>
+            <button class="btn check-btn" onclick="checkStep(this)">Завершить!</button>
         </div>
 
         <div class="final-answer">
-            <strong>Ответ:</strong> ручка стоит <span class="v-val_x"></span> руб., тетрадь стоит <span class="v-val_note"></span> руб.<br>
-            <button class="next-task-btn" onclick="finishAll()">Завершить тренажёр</button>
+            Ответ: ручка — <strong><span class="v-val_x"></span></strong> руб., тетрадь — <strong><span class="v-val_note"></span></strong> руб.<br>
+            <button class="btn next-task-btn" onclick="finishAll()">Завершить тренажёр</button>
         </div>
     </div>
 
     <div class="completion-screen" id="completion-screen">
         <h1>🎉 Поздравляем! 🎉</h1>
-        <p>Вы успешно решили все 6 задач тренажёра и отлично потренировали уравнения!</p>
+        <p>Вы успешно решили все 6 задач и отлично потренировали уравнения!</p>
     </div>
 
 </div>
@@ -616,20 +1058,38 @@
 <script>
     let currentTask = 1;
     const totalTasks = 6;
+    
+    let userVars = { 1: 'x', 2: 'x', 3: 'x', 4: 'x', 5: 'x', 6: 'x' };
 
-    // Вспомогательная функция внедрения данных в DOM
+    function renderDots() {
+        const dotsContainer = document.getElementById('progress-dots');
+        dotsContainer.innerHTML = '';
+        for (let i = 1; i <= totalTasks; i++) {
+            const dot = document.createElement('div');
+            dot.className = `progress-dot ${i <= currentTask ? 'active' : ''}`;
+            dotsContainer.appendChild(dot);
+        }
+    }
+
+    function updateProgress(taskCompleted = false) {
+        let displayTask = currentTask;
+        if (taskCompleted && currentTask === totalTasks) {
+            document.getElementById('progress-text').innerText = 'Все задачи решены!';
+            return;
+        }
+        document.getElementById('progress-text').innerText = 'Задача ' + displayTask + ' из ' + totalTasks;
+        renderDots();
+    }
+
     function inject(taskId, vars) {
         for (let key in vars) {
-            // Заполняем текст
             document.querySelectorAll(`#${taskId} .v-${key}`).forEach(el => el.textContent = vars[key]);
-            // Устанавливаем правильные ответы (data-ans)
             document.querySelectorAll(`#${taskId} .i-${key}`).forEach(el => el.setAttribute('data-ans', vars[key]));
         }
     }
 
-    // Генерация всех случайных данных (ответы всегда целые)
     function initAllTasks() {
-        // --- Задача 1 ---
+        // Задача 1
         let t1_a = Math.floor(Math.random()*3)+2; 
         let t1_b = Math.floor(Math.random()*3)+2; 
         let t1_c = Math.floor(Math.random()*4)+4; 
@@ -642,7 +1102,7 @@
             'sum_abc': t1_a + t1_b + t1_c
         });
 
-        // --- Задача 2 ---
+        // Задача 2
         let t2_t = Math.floor(Math.random()*3)+2; 
         let t2_dV = (Math.floor(Math.random()*3)+2)*5; 
         let t2_x = (Math.floor(Math.random()*7)+10)*5; 
@@ -650,20 +1110,22 @@
         inject('task2', {
             'D': t2_D, 'dV': t2_dV, 't': t2_t, 'x': 'x', 'val_x': t2_x,
             'tx': t2_t+'x', 'tdV': t2_t*t2_dV, '2t': 2*t2_t,
+            't_x_plus_dV': t2_t + '(x+' + t2_dV + ')',
             'D_minus_tdV': t2_D - t2_t*t2_dV, 'val_v2': t2_x + t2_dV
         });
 
-        // --- Задача 3 ---
-        let t3_m = Math.floor(Math.random()*2)+4; // 4 или 5
+        // Задача 3
+        let t3_m = Math.floor(Math.random()*2)+4;
         let t3_x = (Math.floor(Math.random()*4)+2)*10; 
         let t3_k = (t3_m - 1) * t3_x / 2; 
         inject('task3', {
             'm': t3_m, 'k': t3_k, 'x': 'x', 'mx': t3_m+'x',
+            'x_plus_k': 'x+' + t3_k, 'mx_minus_k': t3_m + 'x-' + t3_k,
             '1': 1, '2k': 2*t3_k, '1_minus_m': 1 - t3_m,
             'val_x': t3_x, 'val_mx': t3_m*t3_x
         });
 
-        // --- Задача 4 ---
+        // Задача 4
         let t4_d = Math.floor(Math.random()*6)+3; 
         let t4_x = Math.floor(Math.random()*15)+10; 
         let t4_L = 2*t4_x + t4_d;
@@ -673,7 +1135,7 @@
             'val_x': t4_x, 'val_AC': t4_x + t4_d
         });
 
-        // --- Задача 5 ---
+        // Задача 5
         let t5_m = Math.floor(Math.random()*3)+2; 
         let t5_d = (Math.floor(Math.random()*3)+2)*5; 
         let t5_x = t5_d + (Math.floor(Math.random()*5)+1)*5; 
@@ -685,7 +1147,7 @@
             'val_mx': t5_m*t5_x, 'val_ruler': t5_x - t5_d
         });
 
-        // --- Задача 6 ---
+        // Задача 6
         let t6_n1 = Math.floor(Math.random()*4)+2; 
         let t6_n2 = Math.floor(Math.random()*4)+3; 
         let t6_d = (Math.floor(Math.random()*5)+2)*5; 
@@ -694,6 +1156,7 @@
         inject('task6', {
             'n1': t6_n1, 'n2': t6_n2, 'C': t6_C, 'd': t6_d,
             'x': 'x', 'x_plus_d': 'x+'+t6_d,
+            'n1_x_plus_d': t6_n1 + '(x+' + t6_d + ')',
             'n1x': t6_n1+'x', 'n1d': t6_n1*t6_d, 'n2x': t6_n2+'x',
             'sum_nx': (t6_n1+t6_n2)+'x', 'sum_n': t6_n1+t6_n2,
             'C_minus_n1d': t6_C - t6_n1*t6_d, 'val_x': t6_x,
@@ -703,24 +1166,103 @@
         updateProgress();
     }
 
-    // Очистка ввода от пробелов, знаков умножения и кириллицы
-    function cleanStr(str) {
-        return str.trim().toLowerCase().replace(/х/g, 'x').replace(/\s+/g, '').replace(/\*/g, '');
+    // --- Универсальный Drag & Drop ---
+    function allowDrop(e) {
+        e.preventDefault();
+        e.currentTarget.classList.add('drag-over');
     }
 
-    // Проверка одного шага
+    function leaveDrop(e) {
+        e.currentTarget.classList.remove('drag-over');
+    }
+
+    function dragToken(e) {
+        e.dataTransfer.setData('text/plain', e.target.textContent.trim());
+    }
+
+    function dropToken(e) {
+        e.preventDefault();
+        e.currentTarget.classList.remove('drag-over');
+        const val = e.dataTransfer.getData('text/plain');
+        if (val && val !== '?') {
+            e.currentTarget.textContent = val;
+            e.currentTarget.classList.add('filled');
+            e.currentTarget.classList.remove('wrong');
+        }
+    }
+
+    function dropVar(e, taskId) {
+        e.preventDefault();
+        e.currentTarget.classList.remove('drag-over');
+        const variable = e.dataTransfer.getData('text/plain');
+        if (variable) selectVar(taskId, variable);
+    }
+
+    function selectVar(taskId, variable) {
+        userVars[taskId] = variable;
+        
+        const dropzone = document.getElementById(`drop-task${taskId}`);
+        dropzone.textContent = variable;
+        dropzone.classList.add('filled');
+        
+        const taskContainer = document.getElementById(`task${taskId}`);
+        
+        taskContainer.querySelectorAll('.v-var').forEach(el => {
+            el.textContent = variable;
+        });
+
+        taskContainer.querySelectorAll('.user-var-token').forEach(el => {
+            el.textContent = variable;
+        });
+
+        const step1 = dropzone.closest('.step');
+        const inv = step1.querySelector('.var-inventory');
+        if(inv) inv.style.display = 'none';
+        const hint = step1.querySelector('.inventory-hint');
+        if(hint) hint.style.display = 'none';
+
+        const msg = step1.querySelector('.success-msg');
+        if(msg) msg.style.display = 'inline-flex';
+
+        const nextStep = step1.nextElementSibling;
+        if (nextStep && nextStep.classList.contains('step')) {
+            nextStep.classList.add('active');
+            setTimeout(() => {
+                const firstInput = nextStep.querySelector('.input-field');
+                if (firstInput) firstInput.focus();
+            }, 100);
+        }
+    }
+
+    // Удаляем кириллицу, пробелы, звездочки и знаки умножения (·)
+    function cleanStr(str) {
+        const map = {'х':'x', 'у':'y', 'а':'a', 'с':'c', 'е':'e', 'п':'n', 'н':'n', 'з':'z', 'р':'p', 'в':'b'};
+        return str.trim().toLowerCase().replace(/[хуасепнзрв]/g, m => map[m]).replace(/\s+/g, '').replace(/[\*·]/g, '');
+    }
+
     function checkStep(btn) {
         const step = btn.closest('.step');
-        const inputs = step.querySelectorAll('.input-field');
+        const taskContainer = step.closest('.task-container');
+        const taskId = parseInt(taskContainer.id.replace('task', ''));
+        const userVar = userVars[taskId]; 
+        
+        const inputs = step.querySelectorAll('.input-field, .step-drop');
         let allCorrect = true;
 
         inputs.forEach(inp => {
-            const expected = cleanStr(inp.getAttribute('data-ans'));
-            const actual = cleanStr(inp.value);
+            let baseExpected = inp.getAttribute('data-ans');
+            if(!baseExpected) return;
+
+            let expectedStr = baseExpected.replace(/x/g, userVar);
+            const expected = cleanStr(expectedStr);
+            
+            let rawActual = inp.tagName.toLowerCase() === 'input' ? inp.value : inp.textContent;
+            if (rawActual === '?') rawActual = ''; 
+            
+            const actual = cleanStr(rawActual);
 
             let isCorrect = (actual === expected);
             
-            // Засчитываем, если просят x+5, а ввели 5+x
             if (!isCorrect && expected.includes('+')) {
                 let parts = expected.split('+');
                 if (parts.length === 2 && actual === parts[1] + '+' + parts[0]) {
@@ -732,6 +1274,8 @@
                 inp.classList.add('correct');
                 inp.classList.remove('wrong');
             } else {
+                inp.classList.remove('wrong'); 
+                void inp.offsetWidth; 
                 inp.classList.add('wrong');
                 allCorrect = false;
             }
@@ -740,26 +1284,21 @@
         if (allCorrect) {
             btn.style.display = 'none';
             const msg = step.querySelector('.success-msg');
-            if(msg) msg.style.display = 'inline';
+            if(msg) msg.style.display = 'inline-flex';
 
             const nextStep = step.nextElementSibling;
             if (nextStep && nextStep.classList.contains('step')) {
                 nextStep.classList.add('active');
+                setTimeout(() => {
+                    const firstInput = nextStep.querySelector('.input-field');
+                    if (firstInput) firstInput.focus();
+                }, 100);
             } else {
                 const finalBox = step.parentElement.querySelector('.final-answer');
                 if (finalBox) finalBox.style.display = 'block';
-                updateProgress(true); // заполняем шаг в прогрессе
+                updateProgress(true);
             }
         }
-    }
-
-    function updateProgress(taskCompleted = false) {
-        let percent = ((currentTask - 1) / totalTasks) * 100;
-        if (taskCompleted) {
-            percent = (currentTask / totalTasks) * 100;
-        }
-        document.getElementById('progress-fill').style.width = percent + '%';
-        document.getElementById('progress-text').innerText = 'Задача ' + currentTask + ' из ' + totalTasks;
     }
 
     function nextTask() {
@@ -775,11 +1314,23 @@
     function finishAll() {
         document.getElementById(`task${currentTask}`).classList.remove('active');
         document.getElementById('completion-screen').style.display = 'block';
-        document.getElementById('progress-text').innerText = 'Все задачи решены!';
+        updateProgress(true);
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    window.onload = initAllTasks;
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && e.target.classList.contains('input-field')) {
+            const step = e.target.closest('.step');
+            const btn = step.querySelector('.check-btn');
+            if (btn && btn.style.display !== 'none') {
+                btn.click();
+            }
+        }
+    });
+
+    window.onload = () => {
+        initAllTasks();
+    };
 </script>
 
 </body>
