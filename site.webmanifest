@@ -1,0 +1,19 @@
+{
+  "name": "Математика — 6 класс",
+  "short_name": "Математика 6",
+  "icons": [
+    {
+      "src": "/math-6-grade/favicon-48x48.png",
+      "sizes": "48x48",
+      "type": "image/png"
+    },
+    {
+      "src": "/math-6-grade/favicon-180x180.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#070b2a",
+  "background_color": "#070b2a",
+  "display": "standalone"
+}
