@@ -213,8 +213,12 @@
             overflow-x: auto;
             padding-bottom: 10px;
             scrollbar-width: none; /* Firefox */
+            cursor: grab;
         }
         .drops-grid::-webkit-scrollbar { display: none; } /* Chrome */
+        .drops-grid:active {
+            cursor: grabbing;
+        }
         
         .drop-card {
             flex: 0 0 280px;
@@ -229,6 +233,7 @@
             position: relative;
             overflow: hidden;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            user-select: none;
         }
         .drop-card::before {
             content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -281,6 +286,19 @@
                 grid-template-columns: 1fr 1fr;
                 gap: 0 20px;
             }
+        }
+
+        /* Особая карточка для финала / ВПР */
+        .zone-vpr {
+            background: linear-gradient(145deg, rgba(245, 158, 11, 0.08) 0%, rgba(30, 41, 59, 0.8) 100%);
+            border-color: rgba(245, 158, 11, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        .zone-vpr::after {
+            content: ''; position: absolute; top: 0; right: 0; width: 200px; height: 200px;
+            background: radial-gradient(circle, rgba(245, 158, 11, 0.15) 0%, transparent 70%);
+            pointer-events: none;
         }
 
         .zone-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px;}
@@ -407,6 +425,22 @@
             <a href="trainers/divisibility/gcd.html" class="drop-card">
                 <span class="tag">Speedrun</span>
                 <div class="title">Нахождение НОД</div>
+            </a>
+            <a href="trainers/fractions/comparison.html" class="drop-card">
+                <span class="tag">Warm-up</span>
+                <div class="title">Сравнение обыкновенных дробей</div>
+            </a>
+            <a href="trainers/divisibility/signs.html" class="drop-card">
+                <span class="tag">Cyber-scan</span>
+                <div class="title">Признаки делимости (2, 3, 5, 9, 10)</div>
+            </a>
+            <a href="trainers/rational/coordinates-pro.html" class="drop-card">
+                <span class="tag">Hardcore</span>
+                <div class="title">Координатная прямая PRO</div>
+            </a>
+            <a href="trainers/motion/motion.html" class="drop-card">
+                <span class="tag">Survival</span>
+                <div class="title">Задачи на движение</div>
             </a>
         </div>
     </section>
@@ -582,7 +616,7 @@
             </div>
         </div>
 
-        <!-- Зона 6 (Микс) -->
+        <!-- Зона 6 -->
         <div class="zone-card">
             <div class="zone-header">
                 <h3 class="zone-title">🌡️ Выживание</h3>
@@ -604,10 +638,23 @@
                         <span class="mission-desc">Отрицательные числа</span>
                     </div>
                 </a>
-                <a href="https://godspace.github.io/vpr-math-6/index.html" class="mission-link" style="margin-top: 10px; border-color: var(--accent-yellow);">
-                    <span class="mission-icon">🏆</span>
-                    <div class="mission-info"><span class="mission-name" style="color: var(--accent-yellow);">Тренировка ВПР</span></div>
-                    <span class="badge badge-legendary">ФИНАЛ</span>
+            </div>
+        </div>
+
+        <!-- Отдельная зона: Тренировка ВПР (Финал) -->
+        <div class="zone-card zone-vpr">
+            <div class="zone-header">
+                <h3 class="zone-title" style="color: var(--accent-yellow);">🏆 Зона: Итоговый Экзамен</h3>
+                <span class="badge badge-legendary">ФИНАЛ</span>
+            </div>
+            <div class="missions-list">
+                <a href="https://godspace.github.io/vpr-math-6/index.html" class="mission-link" style="border-color: rgba(245, 158, 11, 0.3); background: rgba(245, 158, 11, 0.05);">
+                    <span class="mission-icon">🎯</span>
+                    <div class="mission-info">
+                        <span class="mission-name" style="color: var(--accent-yellow); font-weight: 700;">Тренировка ВПР по математике</span>
+                        <span class="mission-desc">Полный симулятор экзаменационных заданий</span>
+                    </div>
+                    <span class="badge badge-legendary">Старт</span>
                 </a>
             </div>
         </div>
@@ -643,6 +690,56 @@
 </main>
 
 <script>
+    // Скрипт для прокрутки мышью блока "Квесты дня"
+    const slider = document.querySelector('.drops-grid');
+    let isDown = false;
+    let startX;
+    let scrollLeft;
+    let isDragging = false;
+
+    slider.addEventListener('mousedown', (e) => {
+        isDown = true;
+        isDragging = false;
+        startX = e.pageX - slider.offsetLeft;
+        scrollLeft = slider.scrollLeft;
+    });
+
+    slider.addEventListener('mouseleave', () => {
+        isDown = false;
+    });
+
+    slider.addEventListener('mouseup', () => {
+        isDown = false;
+    });
+
+    slider.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - slider.offsetLeft;
+        const walk = (x - startX) * 1.5;
+        
+        if (Math.abs(walk) > 5) {
+            isDragging = true;
+        }
+        
+        slider.scrollLeft = scrollLeft - walk;
+    });
+
+    // Блокируем случайные переходы по ссылкам при перетаскивании
+    const cards = slider.querySelectorAll('.drop-card');
+    cards.forEach(card => {
+        card.addEventListener('click', (e) => {
+            if (isDragging) {
+                e.preventDefault(); 
+                e.stopPropagation();
+            }
+        });
+        
+        card.addEventListener('dragstart', (e) => {
+            e.preventDefault();
+        });
+    });
+
     // Скрипт для открытия/закрытия деталей FAQ
     document.querySelectorAll('.faq details').forEach(detail => {
         detail.addEventListener('toggle', (e) => {
