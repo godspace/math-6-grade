@@ -1,51 +1,116 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <link rel="icon" href="/math-6-grade/favicon.ico" sizes="any">
-  <link rel="icon" type="image/png" sizes="16x16" href="/math-6-grade/favicon-16x16.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/math-6-grade/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="48x48" href="/math-6-grade/favicon-48x48.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="/math-6-grade/apple-touch-icon.png">
-  <link rel="manifest" href="/math-6-grade/site.webmanifest">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Тренажер: Нахождение НОК</title>
-<script src="../../assets/analytics.js"></script>
-
+<title>Тренажер: Нахождение НОК | Математика 6 класс</title>
+<link rel="icon" href="/math-6-grade/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="16x16" href="/math-6-grade/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/math-6-grade/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="48x48" href="/math-6-grade/favicon-48x48.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/math-6-grade/apple-touch-icon.png">
+<link rel="manifest" href="/math-6-grade/site.webmanifest">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
 <style>
+  :root {
+    --primary: #8E44AD; /* Фиолетовый для НОК (чтобы отличать от НОД) */
+    --primary-hover: #9B59B6;
+    --success: #00B894;
+    --warning: #FDCB6E;
+    --danger: #FF7675;
+    --bg-gradient: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+    --text-main: #2D3436;
+    --text-muted: #636E72;
+  }
+
   body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Nunito', sans-serif;
     display: flex;
     justify-content: center;
-    background-color: #f4f7f6;
+    align-items: center;
+    background: var(--bg-gradient);
+    min-height: 100vh;
     margin: 0;
     padding: 20px;
     user-select: none; 
     -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
   }
+
   .container {
-    background: white;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-    max-width: 680px;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(12px);
+    padding: 35px 30px;
+    border-radius: 24px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1), inset 0 0 0 2px rgba(255,255,255,0.6);
+    max-width: 750px;
     width: 100%;
     text-align: center;
+    position: relative;
+    overflow: hidden;
   }
-  h2 {
-    color: #333;
-    margin-top: 0;
+
+  /* Мнемонический заголовок НОК */
+  .mnemonic-container {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
   }
+  .mnem-word {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: white;
+    padding: 10px 15px;
+    border-radius: 16px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    border: 2px solid #DFE6E9;
+  }
+  .mnem-main {
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--text-main);
+  }
+  .mnem-letter {
+    font-size: 28px;
+    color: var(--primary);
+  }
+  .mnem-sub {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-top: 2px;
+  }
+  .mnem-word:nth-child(2) .mnem-letter { color: var(--warning); }
+  .mnem-word:nth-child(3) .mnem-letter { color: var(--success); }
+
+  /* Инструкции */
   #instructions {
-    color: #555;
-    font-size: 18px;
-    font-weight: bold;
-    margin-bottom: 20px;
-    min-height: 48px;
-    transition: color 0.3s;
+    color: var(--primary);
+    font-size: 19px;
+    font-weight: 900;
+    margin-bottom: 25px;
+    min-height: 30px;
+    background: rgba(142, 68, 173, 0.1);
+    padding: 15px 20px;
+    border-radius: 16px;
+    border: 2px dashed rgba(142, 68, 173, 0.4);
+    display: inline-block;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    transition: all 0.3s;
   }
+
+  .pop-anim {
+    animation: highlight-pop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  @keyframes highlight-pop {
+    0% { transform: scale(0.85); opacity: 0.5; }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
   .row {
     margin: 15px 0;
     display: flex;
@@ -53,175 +118,201 @@
     justify-content: center;
     flex-wrap: wrap;
     gap: 8px;
-    font-size: 22px;
-    min-height: 46px;
+    font-size: 24px;
+    min-height: 55px;
   }
+
+  /* Метки с числами */
   .label {
-    font-weight: bold;
-    color: #444;
+    font-weight: 900;
+    color: var(--text-main);
     margin-right: 10px;
-    width: 60px;
+    width: 75px;
     text-align: right;
-    padding: 5px;
-    border-radius: 6px;
-    transition: background 0.2s, color 0.2s;
+    padding: 6px 12px;
+    border-radius: 12px;
+    transition: all 0.2s;
+  }
+  .label.interactive {
+    cursor: pointer;
+    background: rgba(142, 68, 173, 0.1);
+    border: 2px solid rgba(142, 68, 173, 0.3);
+    color: var(--primary);
   }
   .label.interactive:hover {
-    background: #e3f2fd;
-    color: #1976D2;
-    cursor: pointer;
+    background: var(--primary);
+    color: white;
+    transform: scale(1.05);
   }
   .label.wrong {
-    color: white;
-    background: #F44336;
+    background: var(--danger) !important;
+    color: white !important;
+    border-color: var(--danger) !important;
     animation: shake 0.4s;
   }
-  .factor {
-    padding: 10px 16px;
-    background: #e0e6ed;
-    border-radius: 8px;
-    font-weight: bold;
-    color: #333;
-    transition: all 0.2s ease;
-  }
-  
-  /* Состояния множителей */
-  .factor.base {
-    background: #9C27B0;
+  .label.base-selected {
+    background: var(--primary);
     color: white;
-    box-shadow: 0 4px 6px rgba(156, 39, 176, 0.3);
+    box-shadow: 0 4px 10px rgba(142, 68, 173, 0.4);
+    border-color: var(--primary);
   }
-  .factor.interactive {
+
+  /* Дизайн множителей */
+  .factor {
+    padding: 8px 18px;
+    background: #DFE6E9;
+    border-radius: 20px; 
+    font-weight: 800;
+    color: var(--text-main);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    display: inline-block;
+    box-shadow: inset 0 -2px 0 rgba(0,0,0,0.1);
+  }
+  .factor.base {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 4px 10px rgba(142, 68, 173, 0.3), inset 0 -2px 0 rgba(0,0,0,0.2);
+  }
+  .factor.clickable {
     cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05), inset 0 -2px 0 rgba(0,0,0,0.1);
   }
-  .factor.interactive:hover:not(.added) {
-    background: #cdd5df;
-    transform: translateY(-2px);
+  .factor.clickable:hover:not(.added) {
+    background: var(--warning);
+    color: #2D3436;
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1), inset 0 -2px 0 rgba(0,0,0,0.1);
   }
   .factor.added {
-    background: #4CAF50;
+    background: var(--success);
     color: white;
-    box-shadow: 0 4px 6px rgba(76, 175, 80, 0.3);
     cursor: default;
+    transform: scale(1);
+    box-shadow: 0 4px 15px rgba(0, 184, 148, 0.3);
   }
   .factor.wrong {
-    background: #F44336 !important;
+    background: var(--danger) !important;
     color: white !important;
     animation: shake 0.4s;
   }
-  .sign {
-    color: #999;
-  }
-  .input-group {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  input[type="number"].factor-input {
-    font-size: 18px;
-    width: 60px;
+
+  .sign { color: var(--text-muted); font-size: 20px; font-weight: 800; }
+  
+  /* Пазл-слоты */
+  input[type="number"].slot-input {
+    font-family: 'Nunito', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    width: 45px;
+    height: 45px;
     text-align: center;
-    padding: 8px;
-    border: 2px solid #2196F3;
-    border-radius: 6px;
+    padding: 0;
+    border: 3px dashed #B2BEC3;
+    border-radius: 14px;
     outline: none;
+    color: var(--primary);
+    background: rgba(255,255,255,0.5);
+    transition: all 0.2s;
   }
-  input[type="number"].factor-input:focus {
-    box-shadow: 0 0 8px rgba(33, 150, 243, 0.4);
+  input[type="number"].slot-input:focus {
+    border-style: solid;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(142, 68, 173, 0.15);
+    background: #fff;
+    transform: scale(1.1);
   }
-  input[type="number"].factor-input.wrong {
-    border-color: #F44336;
-    background-color: #ffebee;
+  input[type="number"].slot-input.wrong {
+    border-style: solid;
+    border-color: var(--danger);
+    background-color: #ffeaa7;
+    color: var(--danger);
     animation: shake 0.4s;
   }
-  .add-btn {
-    background: #2196F3;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    width: 36px;
-    height: 36px;
-    font-size: 18px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .add-btn:hover {
-    background: #1976D2;
-  }
+
+  input[type=number]::-webkit-inner-spin-button, 
+  input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  input[type=number] { -moz-appearance: textfield; }
+
   .check-icon {
-    color: #4CAF50;
-    font-weight: bold;
+    color: var(--success);
+    font-weight: 900;
     margin-left: 10px;
-  }
-  .lcm-area {
-    margin-top: 25px;
-    padding: 20px;
-    border: 2px dashed #9C27B0;
-    border-radius: 10px;
-    background: #fbf0ff;
-    min-height: 80px;
-  }
-  .lcm-title {
     font-size: 18px;
-    color: #7B1FA2;
-    margin-bottom: 10px;
+    background: rgba(0, 184, 148, 0.1);
+    padding: 6px 12px;
+    border-radius: 20px;
   }
-  #lcm-factors {
-    font-size: 24px;
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 15px;
+
+  .lcm-area {
+    margin-top: 30px;
+    padding: 25px;
+    border: 3px dashed rgba(142, 68, 173, 0.4);
+    border-radius: 20px;
+    background: rgba(142, 68, 173, 0.05);
+    min-height: 80px;
+    transition: all 0.3s;
   }
+
+  .lcm-title { font-size: 18px; color: var(--primary); margin-bottom: 15px; font-weight: 800; }
+
+  #lcm-factors { font-size: 32px; font-weight: 800; color: var(--primary); }
+
   .btn {
-    padding: 12px 24px;
-    background: #2196F3;
+    padding: 14px 28px;
+    background: var(--primary);
     color: white;
     border: none;
-    border-radius: 8px;
+    border-radius: 14px;
     cursor: pointer;
-    font-size: 16px;
-    font-weight: bold;
-    margin-top: 15px;
-    transition: background 0.2s;
+    font-size: 18px;
+    font-weight: 800;
+    font-family: 'Nunito', sans-serif;
+    margin-top: 20px;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 6px 15px rgba(142, 68, 173, 0.3);
   }
-  .btn:hover {
-    background: #1976D2;
-  }
-  #lcm-input {
-    font-size: 20px;
-    width: 100px;
-    text-align: center;
-    padding: 8px;
-    margin: 0 10px;
-    border: 2px solid #ccc;
-    border-radius: 6px;
-  }
-  .hidden {
-    display: none !important;
-  }
+  
+  .btn:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(142, 68, 173, 0.4); }
+  .btn:active { transform: translateY(1px); }
+
+  .hidden { display: none !important; opacity: 0; }
+  
   #message {
     font-size: 18px;
-    font-weight: bold;
-    margin-top: 20px;
-    min-height: 24px;
+    font-weight: 800;
+    margin-top: 15px;
+    min-height: 48px;
+    border-radius: 12px;
+    padding: 10px;
+    transition: all 0.3s;
   }
   
   @keyframes shake {
     0% { transform: translateX(0); }
-    25% { transform: translateX(-5px); }
-    50% { transform: translateX(5px); }
-    75% { transform: translateX(-5px); }
+    25% { transform: translateX(-6px) rotate(-3deg); }
+    50% { transform: translateX(6px) rotate(3deg); }
+    75% { transform: translateX(-6px) rotate(-3deg); }
     100% { transform: translateX(0); }
+  }
+
+  #confetti-canvas {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 100;
   }
 </style>
 </head>
 <body>
 
 <div class="container">
-  <h2>Поиск НОК</h2>
-  <div id="instructions">Шаг 1. Разложи каждое число на простые множители.</div>
+  <canvas id="confetti-canvas"></canvas>
+  
+  <div class="mnemonic-container">
+    <div class="mnem-word"><div class="mnem-main"><span class="mnem-letter">Н</span>аименьшее</div><div class="mnem-sub">самое маленькое</div></div>
+    <div class="mnem-word"><div class="mnem-main"><span class="mnem-letter">О</span>бщее</div><div class="mnem-sub">делится на все</div></div>
+    <div class="mnem-word"><div class="mnem-main"><span class="mnem-letter">К</span>ратное</div><div class="mnem-sub">вмещает в себя</div></div>
+  </div>
+
+  <div id="instructions"></div>
   
   <div id="game-board"></div>
   
@@ -229,15 +320,21 @@
     <div class="lcm-title">Сборка НОК:</div>
     <div id="lcm-factors"></div>
     
-    <div id="final-answer-area" class="hidden" style="margin-top: 15px; display: flex; justify-content: center; align-items: center;">
-      <span style="font-size: 20px; font-weight: bold;">НОК = </span>
-      <input type="number" id="lcm-input" placeholder="?">
-      <button class="btn" style="margin-top: 0;" onclick="checkLCM()">Проверить</button>
+    <div id="final-answer-area" class="hidden" style="margin-top: 20px; display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 10px;">
+      <span style="font-size: 22px; font-weight: 800; color: var(--text-main);">НОК = </span>
+      <input type="number" id="lcm-input" class="slot-input" style="width: 80px; border-style: solid; border-color: var(--text-muted); color: var(--text-main);" placeholder="?">
+      <button class="btn" style="margin-top: 0;" id="lcm-submit-btn" onclick="checkLCM()">Ответить ✨</button>
     </div>
+  </div>
+
+  <!-- Блок проверки -->
+  <div id="verification-area" class="lcm-area hidden" style="border-color: var(--warning); background: rgba(253, 203, 110, 0.1);">
+    <div class="lcm-title" style="color: #d35400;">Проверка (Раздели НОК на каждое число):</div>
+    <div id="verification-board"></div>
   </div>
   
   <p id="message"></p>
-  <button class="btn" onclick="initGame()" style="background: #607D8B;">Новое задание</button>
+  <button id="restart-btn" class="btn hidden" onclick="initGame()" style="background: var(--text-main); box-shadow: 0 6px 15px rgba(45, 52, 54, 0.3);">Новое задание 🎲</button>
 </div>
 
 <script>
@@ -247,13 +344,14 @@
   ];
   
   let currentSet = [];
-  let remainders = [];
-  let factorsArr = []; 
+  let targetFactors = []; 
+  let factorsArr = [];    
   let baseIndex = -1;
   let addedFactors = [];
   let expectedLCM = 1;
   let currentStage = 1; 
-  let targetMissingFactors = []; // Массив множителей, которые предстоит найти ученику
+
+  function vibrate(ms) { if ('vibrate' in navigator) navigator.vibrate(ms); }
 
   function isPrime(num) {
     if (num < 2) return false;
@@ -270,38 +368,73 @@
     let factors = [];
     let d = 2;
     while (num >= 2) {
-      if (num % d === 0) {
-        factors.push(d);
-        num /= d;
-      } else {
-        d++;
-      }
+      if (num % d === 0) { factors.push(d); num /= d; } else { d++; }
     }
     return factors;
+  }
+
+  function setInstruction(htmlText, stage) {
+    const instr = document.getElementById('instructions');
+    instr.innerHTML = htmlText;
+    
+    instr.classList.remove('pop-anim');
+    void instr.offsetWidth; 
+    instr.classList.add('pop-anim');
+
+    if (stage === 1) {
+      instr.style.background = 'rgba(142, 68, 173, 0.1)';
+      instr.style.color = 'var(--primary)';
+      instr.style.borderColor = 'rgba(142, 68, 173, 0.4)';
+    } else if (stage === 2) {
+      instr.style.background = 'rgba(253, 203, 110, 0.15)';
+      instr.style.color = '#d35400';
+      instr.style.borderColor = 'var(--warning)';
+    } else if (stage === 3 || stage === 5) {
+      instr.style.background = 'rgba(0, 184, 148, 0.1)';
+      instr.style.color = 'var(--success)';
+      instr.style.borderColor = 'rgba(0, 184, 148, 0.4)';
+    } else if (stage === 4) {
+      instr.style.background = 'rgba(142, 68, 173, 0.1)';
+      instr.style.color = 'var(--primary)';
+      instr.style.borderColor = 'rgba(142, 68, 173, 0.4)';
+    }
   }
 
   function initGame() {
     currentStage = 1;
     baseIndex = -1;
     addedFactors = [];
-    targetMissingFactors = [];
-    document.getElementById('message').innerText = '';
+    
+    const msg = document.getElementById('message');
+    msg.innerText = ''; msg.style.background = 'transparent';
     document.getElementById('lcm-factors').innerHTML = '';
     document.getElementById('lcm-area').classList.add('hidden');
     document.getElementById('final-answer-area').classList.add('hidden');
-    document.getElementById('lcm-input').value = '';
+    document.getElementById('verification-area').classList.add('hidden');
+    document.getElementById('restart-btn').classList.add('hidden'); 
     
-    let instr = document.getElementById('instructions');
-    instr.innerHTML = 'Шаг 1. Разложи каждое число на простые множители.';
-    instr.style.color = '#555';
+    let lcmInput = document.getElementById('lcm-input');
+    lcmInput.value = ''; lcmInput.disabled = false; lcmInput.style.borderColor = 'var(--text-muted)';
+    document.getElementById('lcm-submit-btn').classList.remove('hidden');
+    
+    const ctx = document.getElementById('confetti-canvas').getContext('2d');
+    ctx.clearRect(0, 0, 750, 750);
+
+    setInstruction('Шаг 1. 🎯 Заполни пустые слоты простыми множителями', 1);
 
     currentSet = sets[Math.floor(Math.random() * sets.length)];
+    // Перемешиваем, чтобы наибольшее число не всегда было последним
     currentSet.sort(() => Math.random() - 0.5);
     
-    remainders = [...currentSet];
-    factorsArr = [[], [], []];
+    targetFactors = currentSet.map(n => getPrimeFactors(n));
+    factorsArr = [];
+    
+    targetFactors.forEach(row => {
+        let slots = Array(row.length).fill().map(() => ({value: null, state: 'empty', isNeeded: false}));
+        factorsArr.push(slots);
+    });
+    
     expectedLCM = currentSet.reduce((acc, val) => lcm(acc, val), 1);
-
     render();
   }
 
@@ -321,160 +454,200 @@
       if (currentStage === 2) {
         label.classList.add('interactive');
         label.onclick = () => selectBase(rowIndex);
+      } else if (currentStage > 2 && rowIndex === baseIndex) {
+        label.classList.add('base-selected');
       }
+      
       rowDiv.appendChild(label);
       
+      let allFilled = true;
+
       row.forEach((factorObj, colIndex) => {
-        let span = document.createElement('span');
-        span.className = 'factor ' + factorObj.state;
-        span.innerText = factorObj.value;
-        
-        if (currentStage === 3 && factorObj.state === 'interactive') {
-          span.onclick = function() { tryAddFactor(rowIndex, colIndex, this); };
+        if (factorObj.value !== null) {
+            let span = document.createElement('span');
+            let classes = 'factor ' + factorObj.state;
+            span.className = classes;
+            span.innerText = factorObj.value;
+            
+            if (currentStage === 3 && factorObj.state === 'clickable') {
+                span.onclick = () => tryAddFactor(rowIndex, colIndex, span);
+            }
+            rowDiv.appendChild(span);
+        } else {
+            allFilled = false;
+            let input = document.createElement('input');
+            input.type = 'number';
+            input.className = 'slot-input';
+            input.id = `slot-${rowIndex}-${colIndex}`;
+            
+            input.onchange = (e) => handleSlotInput(rowIndex, colIndex, e.target);
+            input.onkeypress = (e) => { if (e.key === 'Enter') handleSlotInput(rowIndex, colIndex, e.target); };
+            
+            rowDiv.appendChild(input);
         }
         
-        rowDiv.appendChild(span);
-        
-        if (colIndex < row.length - 1 || (currentStage === 1 && remainders[rowIndex] > 1)) {
+        if (colIndex < row.length - 1) {
           let mul = document.createElement('span');
           mul.className = 'sign';
-          mul.innerHTML = ' &times; ';
+          mul.innerHTML = '&times;';
           rowDiv.appendChild(mul);
         }
       });
 
-      if (currentStage === 1) {
-        if (remainders[rowIndex] > 1) {
-          let group = document.createElement('div');
-          group.className = 'input-group';
-
-          let input = document.createElement('input');
-          input.type = 'number';
-          input.className = 'factor-input';
-          input.id = 'input-' + rowIndex;
-          input.onkeypress = (e) => { if (e.key === 'Enter') addFactor(rowIndex); };
-          
-          let btn = document.createElement('button');
-          btn.className = 'add-btn';
-          btn.innerHTML = '&#10003;';
-          btn.onclick = () => addFactor(rowIndex);
-
-          group.appendChild(input);
-          group.appendChild(btn);
-          rowDiv.appendChild(group);
-        } else {
+      if (currentStage === 1 && allFilled) {
           let check = document.createElement('span');
           check.className = 'check-icon';
-          check.innerHTML = '&#10004; Готово';
+          check.innerHTML = '&#10004;';
           rowDiv.appendChild(check);
-        }
       }
-      
       board.appendChild(rowDiv);
     });
-
-    if (currentStage === 1) {
-      for (let i = 0; i < remainders.length; i++) {
-        if (remainders[i] > 1) {
-          let inp = document.getElementById('input-' + i);
-          if (inp) inp.focus();
-          break;
-        }
-      }
-    }
   }
 
-  function addFactor(rowIndex) {
-    let input = document.getElementById('input-' + rowIndex);
-    let val = parseInt(input.value);
+  function handleSlotInput(r, c, inputEl) {
+    let val = parseInt(inputEl.value);
+    if (!val) return;
 
-    if (val && isPrime(val) && remainders[rowIndex] % val === 0) {
-      factorsArr[rowIndex].push({value: val, state: 'normal'});
-      remainders[rowIndex] /= val;
-      checkStage1Progress();
-    } else {
-      input.classList.add('wrong');
-      setTimeout(() => input.classList.remove('wrong'), 400);
+    if (!isPrime(val)) {
+        showError(inputEl, "❌ В слоты подходят только простые числа! (2, 3, 5, 7...)");
+        inputEl.value = '';
+        return;
     }
+    
+    let targetCount = targetFactors[r].filter(n => n === val).length;
+    let currentlyLocked = factorsArr[r].filter(obj => obj.value === val).length;
+
+    if (targetCount === 0) {
+        showError(inputEl, `❌ Число ${currentSet[r]} не делится на ${val}!`);
+        inputEl.value = '';
+        return;
+    }
+
+    if (currentlyLocked >= targetCount) {
+        showError(inputEl, `❌ Все множители "${val}" для числа ${currentSet[r]} уже найдены!`);
+        inputEl.value = '';
+        return;
+    }
+
+    factorsArr[r][c].value = val;
+    factorsArr[r][c].state = 'normal';
+    document.getElementById('message').innerText = ''; 
+    document.getElementById('message').style.background = 'transparent';
+    vibrate(20);
+    render();
+    
+    setTimeout(() => {
+        let nextInput = document.querySelector('#game-board .slot-input');
+        if (nextInput) {
+            nextInput.focus();
+        } else {
+            checkStage1Progress(); 
+        }
+    }, 50);
+  }
+
+  function showError(inputEl, text) {
+      vibrate([50, 50, 50]); 
+      if(inputEl) {
+          inputEl.classList.add('wrong');
+          setTimeout(() => inputEl.classList.remove('wrong'), 400);
+      }
+      let msg = document.getElementById('message');
+      msg.innerText = text;
+      msg.style.color = 'var(--danger)';
+      msg.style.background = 'rgba(255, 118, 117, 0.1)';
   }
 
   function checkStage1Progress() {
-    if (remainders.every(r => r === 1)) {
+    let allComplete = factorsArr.every(row => row.every(obj => obj.value !== null));
+    if (allComplete) {
       currentStage = 2;
-      let instr = document.getElementById('instructions');
-      instr.innerHTML = 'Шаг 2. Кликни по самому числу (слева), которое является <b>наибольшим</b>.';
-      instr.style.color = '#9C27B0';
+      setInstruction('Шаг 2. 👑 Кликни по <b>наибольшему</b> числу слева — оно станет нашей Базой.', 2);
+      render(); 
     }
-    render();
   }
 
   function selectBase(rowIndex) {
     let maxVal = Math.max(...currentSet);
     if (currentSet[rowIndex] !== maxVal) {
       let label = document.getElementById('label-' + rowIndex);
-      label.classList.add('wrong');
-      setTimeout(() => label.classList.remove('wrong'), 400);
+      showError(label, '❌ Базой всегда выбираем самое большое число!');
       return;
     }
 
+    vibrate(50);
     baseIndex = rowIndex;
     currentStage = 3;
     
-    // Формируем список множителей полного НОК
-    let fullLCMFactors = getPrimeFactors(expectedLCM);
-    let baseFactors = factorsArr[baseIndex].map(f => f.value);
-    
-    // Вычисляем, какие множители предстоит найти ученику
-    targetMissingFactors = [...fullLCMFactors];
-    baseFactors.forEach(val => {
-      let idx = targetMissingFactors.indexOf(val);
-      if (idx > -1) targetMissingFactors.splice(idx, 1);
-    });
-    
-    // Красим базу
     factorsArr[baseIndex].forEach(f => f.state = 'base');
-
-    // Делаем все остальные множители интерактивными, но без подсказок
-    for (let i = 0; i < factorsArr.length; i++) {
-      if (i === baseIndex) continue;
-      factorsArr[i].forEach(f => {
-        f.state = 'interactive';
-      });
-    }
-
-    let instr = document.getElementById('instructions');
-    instr.innerHTML = 'Шаг 3. Самостоятельно определи и кликни по недостающим множителям в остальных числах.';
-    instr.style.color = '#FF9800';
+    
+    document.getElementById('message').innerText = ''; 
+    document.getElementById('message').style.background = 'transparent';
     
     document.getElementById('lcm-area').classList.remove('hidden');
+    
+    // Пересчитываем недостающие множители
+    let isMissingAny = recalcCoverage();
     updateLCMArea();
     render();
-    
-    // Если недостающих множителей нет (редкий случай, но возможный)
-    if (targetMissingFactors.length === 0) checkIfStage3Done();
+
+    if (!isMissingAny) {
+        checkIfStage3Done();
+    } else {
+        setInstruction('Шаг 3. 🧩 Кликай по <b>недостающим</b> множителям в других рядах, чтобы добавить их к Базе.', 3);
+    }
+  }
+
+  // Умный алгоритм вычисления недостающих множителей "на лету"
+  function recalcCoverage() {
+      let currentAssembly = [];
+      factorsArr[baseIndex].forEach(f => currentAssembly.push(f.value));
+      addedFactors.forEach(val => currentAssembly.push(val));
+
+      let anyNeeded = false;
+
+      factorsArr.forEach((row, rowIndex) => {
+          if (rowIndex === baseIndex) return;
+          let pool = [...currentAssembly];
+          
+          row.forEach(f => {
+              if (f.state === 'added') {
+                  let idx = pool.indexOf(f.value);
+                  if (idx > -1) pool.splice(idx, 1);
+                  f.isNeeded = false; 
+              } else {
+                  let idx = pool.indexOf(f.value);
+                  if (idx > -1) {
+                      pool.splice(idx, 1);
+                      f.isNeeded = false; 
+                      f.state = 'normal'; // Покрыт Базой
+                  } else {
+                      f.isNeeded = true;  
+                      f.state = 'clickable'; // Доступен для клика
+                      anyNeeded = true;
+                  }
+              }
+          });
+      });
+      return anyNeeded;
   }
 
   function tryAddFactor(rowIndex, colIndex, btnElement) {
     let f = factorsArr[rowIndex][colIndex];
-    let val = f.value;
     
-    // Проверяем, нужен ли этот множитель для формирования НОК
-    let neededIdx = targetMissingFactors.indexOf(val);
-    
-    if (neededIdx > -1) {
-      // Правильный выбор
-      targetMissingFactors.splice(neededIdx, 1);
+    if (f.isNeeded) {
+      vibrate(20);
       f.state = 'added';
-      addedFactors.push(val);
+      addedFactors.push(f.value);
       addedFactors.sort((a, b) => a - b);
       
+      let isMissingAny = recalcCoverage();
       updateLCMArea();
       render();
-      checkIfStage3Done();
+      
+      if (!isMissingAny) checkIfStage3Done();
     } else {
-      // Неправильный выбор (множитель уже учтен в базе или выбран ранее)
-      btnElement.classList.add('wrong');
-      setTimeout(() => btnElement.classList.remove('wrong'), 400);
+      showError(btnElement, "❌ Этот множитель уже покрыт Базой!");
     }
   }
 
@@ -483,46 +656,166 @@
     let baseVal = currentSet[baseIndex];
     let baseFactorsStr = factorsArr[baseIndex].map(f => f.value).join(' &times; ');
 
-    let html = `<span style="color: #9C27B0; font-size: 32px;">${baseVal}</span> <span style="font-size: 16px; color: #888; vertical-align: middle;">(${baseFactorsStr})</span>`;
+    let html = `<span style="color: var(--primary); font-size: 32px;">${baseVal}</span> <span style="font-size: 16px; color: var(--text-muted); vertical-align: middle;">(${baseFactorsStr})</span>`;
 
     if (addedFactors.length > 0) {
       html += ` <span class="sign" style="font-size: 32px;">&times;</span> ` + 
-              addedFactors.map(v => `<span style="color: #4CAF50; font-size: 32px;">${v}</span>`).join(' <span class="sign" style="font-size: 32px;">&times;</span> ');
+              addedFactors.map(v => `<span style="color: var(--success); font-size: 32px;">${v}</span>`).join(' <span class="sign" style="font-size: 32px;">&times;</span> ');
     }
     area.innerHTML = html;
   }
 
   function checkIfStage3Done() {
-    if (targetMissingFactors.length === 0) {
-       currentStage = 4;
-       let instr = document.getElementById('instructions');
-       instr.innerHTML = 'Шаг 4. Умножь базу на добавленные множители и введи НОК.';
-       instr.style.color = '#2196F3';
-       
-       // Снимаем интерактивность с оставшихся элементов
-       factorsArr.forEach(row => {
-         row.forEach(f => {
-           if (f.state === 'interactive') f.state = 'normal';
-         });
-       });
-       render();
-       
-       document.getElementById('final-answer-area').classList.remove('hidden');
-       setTimeout(() => document.getElementById('lcm-input').focus(), 100);
-    }
+    currentStage = 4;
+    setInstruction('Шаг 4. 🧮 Умножь Базу на добавленные множители и вычисли НОК.', 4);
+    
+    factorsArr.forEach(row => {
+        row.forEach(f => {
+            if (f.state === 'clickable') f.state = 'normal';
+        });
+    });
+    render();
+    
+    document.getElementById('final-answer-area').classList.remove('hidden');
+    setTimeout(() => document.getElementById('lcm-input').focus(), 100);
   }
 
   function checkLCM() {
-    let inputVal = parseInt(document.getElementById('lcm-input').value);
+    let inputEl = document.getElementById('lcm-input');
+    let inputVal = parseInt(inputEl.value);
     let msg = document.getElementById('message');
     
     if (inputVal === expectedLCM) {
-      msg.innerText = 'Правильно! НОК = ' + expectedLCM + ' 🎉';
-      msg.style.color = '#4CAF50';
+      msg.innerHTML = '🏆 <b>Отлично!</b> НОК = ' + expectedLCM + '. Теперь давай его проверим!';
+      msg.style.color = 'var(--success)';
+      msg.style.background = 'rgba(0, 184, 148, 0.1)';
+      inputEl.style.borderColor = 'var(--success)';
+      inputEl.disabled = true;
+      document.getElementById('lcm-submit-btn').classList.add('hidden');
+      vibrate([100, 50, 100]); 
+      
+      setTimeout(() => {
+          setupVerification();
+      }, 1000);
     } else {
-      msg.innerText = 'Ошибка. Проверь вычисления и попробуй снова!';
-      msg.style.color = '#F44336';
+      showError(inputEl, '❌ Ошибка в расчетах. Проверь умножение!');
     }
+  }
+
+  function setupVerification() {
+      currentStage = 5;
+      setInstruction('Шаг 5. 🕵️‍♂️ Проверка! Раздели найденный НОК на каждое исходное число.', 5);
+      document.getElementById('verification-area').classList.remove('hidden');
+      
+      const vBoard = document.getElementById('verification-board');
+      vBoard.innerHTML = '';
+      
+      currentSet.forEach((num, idx) => {
+          let rDiv = document.createElement('div');
+          rDiv.className = 'row';
+          rDiv.style.minHeight = '50px';
+          
+          let lbl = document.createElement('div');
+          lbl.className = 'label';
+          lbl.style.width = '140px';
+          lbl.innerHTML = `${expectedLCM} &divide; ${num} =`;
+          
+          let inp = document.createElement('input');
+          inp.type = 'number';
+          inp.className = 'slot-input';
+          inp.id = `verif-${idx}`;
+          inp.style.borderColor = 'var(--warning)';
+          inp.style.color = 'var(--text-main)';
+          inp.onchange = (e) => checkVerifInput(idx, e.target);
+          inp.onkeypress = (e) => { if(e.key === 'Enter') checkVerifInput(idx, e.target); };
+          
+          let check = document.createElement('span');
+          check.className = 'check-icon hidden';
+          check.id = `verif-check-${idx}`;
+          check.innerHTML = '&#10004;';
+          
+          rDiv.appendChild(lbl);
+          rDiv.appendChild(inp);
+          rDiv.appendChild(check);
+          vBoard.appendChild(rDiv);
+      });
+      
+      setTimeout(() => { document.getElementById('verif-0').focus(); }, 100);
+  }
+
+  function checkVerifInput(idx, inpEl) {
+      let val = parseInt(inpEl.value);
+      if(!val) return;
+      let expected = expectedLCM / currentSet[idx];
+      
+      if(val === expected) {
+          inpEl.disabled = true;
+          inpEl.style.borderColor = 'var(--success)';
+          inpEl.style.color = 'var(--success)';
+          inpEl.style.background = 'rgba(0, 184, 148, 0.1)';
+          document.getElementById(`verif-check-${idx}`).classList.remove('hidden');
+          
+          let msg = document.getElementById('message');
+          msg.innerText = ''; msg.style.background = 'transparent';
+          vibrate(20);
+          
+          let nextInp = document.querySelector('#verification-board .slot-input:not(:disabled)');
+          if(nextInp) {
+              nextInp.focus();
+          } else {
+              finalizeGame();
+          }
+      } else {
+          showError(inpEl, "❌ Ошибка при делении! Посчитай внимательнее.");
+          inpEl.value = '';
+      }
+  }
+
+  function finalizeGame() {
+      setInstruction('🎉 Идеально! Тренажёр пройден.', 5);
+      let msg = document.getElementById('message');
+      msg.innerHTML = '🏆 <b>Блестяще!</b> НОК найден и успешно проверен!';
+      msg.style.color = 'var(--success)';
+      msg.style.background = 'rgba(0, 184, 148, 0.1)';
+      document.getElementById('restart-btn').classList.remove('hidden');
+      vibrate([100, 50, 100, 50, 200]); 
+      fireConfetti();
+  }
+
+  function fireConfetti() {
+    const canvas = document.getElementById('confetti-canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+    
+    let particles = [];
+    const colors = ['#8E44AD', '#00B894', '#FDCB6E', '#FF7675', '#0984E3'];
+    
+    for(let i=0; i<70; i++) {
+      particles.push({
+        x: canvas.width / 2,
+        y: canvas.height / 2 + 50,
+        r: Math.random() * 6 + 4,
+        dx: Math.random() * 10 - 5,
+        dy: Math.random() * -10 - 5,
+        color: colors[Math.floor(Math.random() * colors.length)]
+      });
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      particles.forEach((p) => {
+        p.dy += 0.3; 
+        p.x += p.dx;
+        p.y += p.dy;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+        ctx.fillStyle = p.color;
+        ctx.fill();
+      });
+    }
+    animate();
   }
 
   initGame();
