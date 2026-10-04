@@ -49,14 +49,14 @@ document.addEventListener("DOMContentLoaded", function() {
     gtScript.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
     document.body.appendChild(gtScript);
 
-    // 2. Создаем НАШУ стильную кастомную панель языков
+    // 2. Создаем НАШУ стильную кастомную панель языков (EN, ES, ZH)
     const langPanel = document.createElement('div');
     langPanel.style.cssText = 'position:fixed; top:15px; right:15px; z-index:9999; display:flex; gap:8px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(5px); padding: 8px 12px; border-radius: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); border: 1px solid rgba(238, 238, 238, 0.5); font-family: "Segoe UI", sans-serif; align-items: center;';
     
     const languages = [
-        { code: 'ru', text: 'RU' },
         { code: 'en', text: 'EN' },
-        { code: 'es', text: 'ES' }
+        { code: 'es', text: 'ES' },
+        { code: 'zh-CN', text: 'ZH' }
     ];
 
     languages.forEach(lang => {
@@ -70,8 +70,7 @@ document.addEventListener("DOMContentLoaded", function() {
         btn.onclick = () => {
             const selectField = document.querySelector(".goog-te-combo");
             if (selectField) {
-                // Если юзер кликает RU, мы передаем пустую строку, чтобы вернуть оригинальный язык
-                selectField.value = lang.code === 'ru' ? '' : lang.code;
+                selectField.value = lang.code;
                 selectField.dispatchEvent(new Event('change'));
             }
         };
