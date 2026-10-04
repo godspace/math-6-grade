@@ -29,7 +29,8 @@
         body {
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
             margin: 0;
-            height: 100vh;
+            height: 100vh; /* Фолбэк для старых браузеров */
+            height: 100dvh; /* Динамическая высота для обхода панелей навигации */
             display: flex;
             background-color: var(--bg-color);
             overflow: hidden;
@@ -39,7 +40,6 @@
             touch-action: none; 
         }
 
-        /* --- Кнопка шторки (по центру слева) --- */
         #sidebar-toggle {
             display: none;
             position: fixed;
@@ -50,8 +50,8 @@
             height: 64px;
             background: #fff;
             border: 1px solid #cbd5e1;
-            border-left: none; /* Убираем левую границу, чтобы сливалась с краем */
-            border-radius: 0 16px 16px 0; /* Закругляем только правые углы */
+            border-left: none; 
+            border-radius: 0 16px 16px 0; 
             box-shadow: 4px 0 12px rgba(0,0,0,0.1);
             z-index: 600;
             cursor: pointer;
@@ -62,17 +62,9 @@
         }
         #sidebar-toggle:hover { background: var(--primary-light); }
         
-        #sidebar-toggle.open {
-            left: 250px; /* Сдвигаем вместе с сайдбаром */
-        }
-        
-        #sidebar-toggle svg {
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        #sidebar-toggle.open svg {
-            transform: rotate(180deg); /* Переворачиваем стрелочку */
-        }
+        #sidebar-toggle.open { left: 250px; }
+        #sidebar-toggle svg { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        #sidebar-toggle.open svg { transform: rotate(180deg); }
 
         #sidebar-overlay {
             display: none;
@@ -89,8 +81,8 @@
             width: 250px;
             background: var(--sidebar-bg);
             border-right: 1px solid #e2e8f0;
-            /* Отступ сверху уменьшен, так как гамбургера там больше нет */
-            padding: 24px 12px 16px 12px; 
+            /* Увеличенный нижний отступ с учетом safe-area */
+            padding: 24px 12px calc(24px + env(safe-area-inset-bottom, 0px)) 12px; 
             display: flex;
             flex-direction: column;
             gap: 16px;
@@ -101,28 +93,24 @@
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* --- Мобильная адаптация --- */
         @media (max-width: 768px) {
             #sidebar-toggle { display: flex; }
             #sidebar {
                 position: fixed;
-                top: 0; left: 0; height: 100vh;
+                top: 0; left: 0; 
+                height: 100vh;
+                height: 100dvh;
                 transform: translateX(-100%);
             }
             #sidebar.open { transform: translateX(0); }
             #sidebar-overlay.visible { display: block; opacity: 1; }
             #empty-state { width: 80%; }
+            
+            /* Чуть приподнимаем HUD на мобильных */
+            #hud { bottom: calc(28px + env(safe-area-inset-bottom, 0px)) !important; }
         }
 
-        .section-title {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #64748b;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
+        .section-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; font-weight: 700; margin-bottom: 8px; }
         .tools-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
         .tools-grid.full { grid-template-columns: 1fr; }
 
@@ -183,7 +171,6 @@
         .board-item.item-single { height: 40px; }
         .board-item.item-fraction { height: 80px; }
         .board-item.item-auto { height: auto; padding: 10px; }
-
         .board-item:hover { box-shadow: 0 0 0 1px rgba(203, 213, 225, 0.8); }
 
         .board-item.dragging {
@@ -245,7 +232,10 @@
         .seg-row-del:hover { background: #fee2e2; }
 
         #hud {
-            position: absolute; bottom: 20px; right: 20px; background: rgba(255,255,255,0.9);
+            position: absolute; 
+            bottom: calc(20px + env(safe-area-inset-bottom, 0px)); 
+            right: 20px; 
+            background: rgba(255,255,255,0.9);
             backdrop-filter: blur(4px); padding: 8px 16px; border-radius: 20px;
             border: 1px solid #cbd5e1; font-size: 14px; font-weight: 600; color: #475569;
             box-shadow: var(--shadow-soft); display: flex; gap: 12px; align-items: center;
@@ -378,10 +368,9 @@
         emptyState.style.opacity = surface.children.length > 0 ? '0' : '1';
     }
 
-    // Управление мобильной шторкой
     function toggleSidebar() {
         const isOpen = sidebar.classList.toggle('open');
-        sidebarToggle.classList.toggle('open', isOpen); // Добавляем класс кнопке для сдвига и поворота стрелки
+        sidebarToggle.classList.toggle('open', isOpen); 
         
         if (isOpen) {
             sidebarOverlay.classList.add('visible');
