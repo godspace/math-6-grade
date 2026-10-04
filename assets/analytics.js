@@ -19,7 +19,7 @@ ym(106746549, 'init', {
     trackLinks: true
 });
 
-// --- Стили: разрешаем баннеру сдвигать страницу и наши кнопки вниз ---
+// --- Стили для плавного смещения кнопок при появлении/закрытии баннера ---
 const style = document.createElement('style');
 style.innerHTML = `
     #google_translate_element { display: none !important; }
@@ -29,18 +29,19 @@ style.innerHTML = `
         transition: top 0.3s ease !important;
     }
 
-    /* Когда Гугл сдвигает body, наши фиксированные панели тоже плавно уезжают вниз */
-    body[style*="top"] .floating-ui-element {
-        transform: translateY(var(--goog-banner-height, 40px));
-    }
-
     .floating-ui-element {
         transition: transform 0.3s ease, opacity 0.3s ease;
+        transform: translateY(0px); /* По умолчанию на месте */
+    }
+
+    /* Когда Гугл сдвигает body вниз, кнопки тоже едут за ним */
+    body.goog-banner-active .floating-ui-element {
+        transform: translateY(var(--banner-offset, 40px));
     }
 `;
 document.head.appendChild(style);
 
-// --- Глобальная функция инициализации (работает под капотом) ---
+// --- Глобальная функция инициализации ---
 window.googleTranslateElementInit = function() {
     new google.translate.TranslateElement({
         pageLanguage: 'ru',
@@ -92,7 +93,20 @@ document.addEventListener("DOMContentLoaded", function() {
 
     document.body.appendChild(langPanel);
 
-    // 3. Логика для страниц тренажеров (Кнопка Меню и совместное затухание)
+    // 3. Отслеживаем появление и закрытие баннера Google Translate через MutationObserver
+    const observer = new MutationObserver(() => {
+        const bodyTop = parseInt(document.body.style.top, 10);
+        if (bodyTop && bodyTop > 0) {
+            document.body.classList.add('goog-banner-active');
+            // Динамически подстраиваем сдвиг под реальную высоту баннера Гугла
+            document.documentElement.style.setProperty('--banner-offset', bodyTop + 'px');
+        } else {
+            document.body.classList.remove('goog-banner-active');
+        }
+    });
+    observer.observe(document.body, { attributes: true, attributeFilter: ['style'] });
+
+    // 4. Логика для страниц тренажеров (Кнопка Меню и совместное затухание)
     if (isTrainerPage) {
         const homeBtn = document.createElement('a');
         homeBtn.className = 'floating-ui-element';
@@ -120,7 +134,7 @@ document.addEventListener("DOMContentLoaded", function() {
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center', // Исправлено с justify-content на justifyContent
+            justifyContent: 'center',
             boxSizing: 'border-box'
         });
         document.body.appendChild(homeBtn);
