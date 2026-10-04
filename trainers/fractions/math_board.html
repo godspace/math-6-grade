@@ -29,8 +29,8 @@
         body {
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
             margin: 0;
-            height: 100vh; /* Фолбэк для старых браузеров */
-            height: 100dvh; /* Динамическая высота для обхода панелей навигации */
+            height: 100vh;
+            height: 100dvh;
             display: flex;
             background-color: var(--bg-color);
             overflow: hidden;
@@ -79,10 +79,11 @@
 
         #sidebar {
             width: 250px;
+            box-sizing: border-box; /* Исправляет проблему с высотой и прокруткой */
             background: var(--sidebar-bg);
             border-right: 1px solid #e2e8f0;
-            /* Увеличенный нижний отступ с учетом safe-area */
-            padding: 24px 12px calc(24px + env(safe-area-inset-bottom, 0px)) 12px; 
+            /* Увеличенный нижний отступ для комфортного скролла */
+            padding: 24px 12px calc(40px + env(safe-area-inset-bottom, 0px)) 12px; 
             display: flex;
             flex-direction: column;
             gap: 16px;
@@ -106,7 +107,6 @@
             #sidebar-overlay.visible { display: block; opacity: 1; }
             #empty-state { width: 80%; }
             
-            /* Чуть приподнимаем HUD на мобильных */
             #hud { bottom: calc(28px + env(safe-area-inset-bottom, 0px)) !important; }
         }
 
