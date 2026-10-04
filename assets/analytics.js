@@ -23,6 +23,7 @@ ym(106746549, 'init', {
 window.googleTranslateElementInit = function() {
     new google.translate.TranslateElement({
         pageLanguage: 'ru',
+        includedLanguages: 'en,es,fr', // Ограничиваем список: Английский, Испанский, Французский
         layout: google.translate.TranslateElement.InlineLayout.SIMPLE
     }, 'google_translate_element');
 };
@@ -32,8 +33,18 @@ document.addEventListener("DOMContentLoaded", function() {
     const isTrainerPage = window.location.pathname.includes('/trainers/');
     const isMobile = window.innerWidth <= 600;
     
+    // --- 1. Создаем контейнер Переводчика (ДЛЯ ВСЕХ СТРАНИЦ) ---
+    const translateDiv = document.createElement('div');
+    translateDiv.id = 'google_translate_element';
+    translateDiv.style.cssText = 'position:fixed; top:15px; right:15px; z-index:9999;';
+    document.body.appendChild(translateDiv);
+
+    const gtScript = document.createElement('script');
+    gtScript.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+    document.body.appendChild(gtScript);
+
+    // --- 2. Логика для страниц тренажеров (Кнопка Меню и совместное затухание) ---
     if (isTrainerPage) {
-        // --- 1. Создаем кнопку "Меню" ---
         const homeBtn = document.createElement('a');
         homeBtn.innerHTML = isMobile ? "🏠" : "🏠 Меню";
         homeBtn.href = "/math-6-grade/"; 
@@ -64,17 +75,6 @@ document.addEventListener("DOMContentLoaded", function() {
         });
         document.body.appendChild(homeBtn);
 
-        // --- 2. Создаем контейнер Переводчика ---
-        const translateDiv = document.createElement('div');
-        translateDiv.id = 'google_translate_element';
-        translateDiv.style.cssText = 'position:fixed; top:15px; right:15px; z-index:9999;';
-        document.body.appendChild(translateDiv);
-
-        const gtScript = document.createElement('script');
-        gtScript.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
-        document.body.appendChild(gtScript);
-
-        // --- 3. Общая логика затухания интерфейса ---
         let fadeTimeout;
         const delayBeforeFade = isMobile ? 150 : 2500;
 
@@ -102,14 +102,13 @@ document.addEventListener("DOMContentLoaded", function() {
             }, delayBeforeFade);
         }
 
-        // Обработка наведения на Меню
         homeBtn.onmouseenter = () => {
             clearTimeout(fadeTimeout);
             homeBtn.style.transition = 'all 0.2s ease';
             homeBtn.style.transform = 'scale(1.05)';
             homeBtn.style.backgroundColor = '#ffffff';
             homeBtn.style.opacity = '1';
-            translateDiv.style.opacity = '1'; // заодно будим переводчик
+            translateDiv.style.opacity = '1'; 
         };
         
         homeBtn.onmouseleave = () => {
@@ -118,11 +117,10 @@ document.addEventListener("DOMContentLoaded", function() {
             wakeUp(); 
         };
 
-        // Обработка наведения на Переводчик
         translateDiv.onmouseenter = () => {
             clearTimeout(fadeTimeout);
             translateDiv.style.opacity = '1';
-            homeBtn.style.opacity = '1'; // заодно будим меню
+            homeBtn.style.opacity = '1'; 
         };
         
         translateDiv.onmouseleave = () => {
@@ -135,16 +133,5 @@ document.addEventListener("DOMContentLoaded", function() {
         window.addEventListener('touchend', wakeUp, { passive: true });
 
         wakeUp();
-
-    } else {
-        // Если это главная страница, выводим переводчик без затухания, так как там он ничего не перекрывает
-        const translateDiv = document.createElement('div');
-        translateDiv.id = 'google_translate_element';
-        translateDiv.style.cssText = 'position:fixed; top:15px; right:15px; z-index:9999;';
-        document.body.appendChild(translateDiv);
-
-        const gtScript = document.createElement('script');
-        gtScript.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
-        document.body.appendChild(gtScript);
     }
 });
