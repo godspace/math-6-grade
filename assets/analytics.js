@@ -143,7 +143,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // 5. Умное управление видимостью при скролле и бездействии
     let fadeTimeout;
-    const delayBeforeFade = isMobile ? 1000 : 2500;
+    const delayBeforeFade = isMobile ? 2500 : 2500;
 
     function showElements() {
         if (window.scrollY < 50) {
