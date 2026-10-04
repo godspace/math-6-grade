@@ -19,18 +19,23 @@ ym(106746549, 'init', {
     trackLinks: true
 });
 
-// --- Разрешаем баннеру сдвигать страницу вместо перекрытия ---
+// --- Стили: разрешаем баннеру сдвигать страницу и наши кнопки вниз ---
 const style = document.createElement('style');
 style.innerHTML = `
     #google_translate_element { display: none !important; }
-    /* Возвращаем стандартное поведение сдвига body */
+    
     body { 
         position: relative !important; 
         transition: top 0.3s ease !important;
     }
-    /* Сдвигаем нашу кнопку меню вместе со страницей, когда появляется баннер */
-    body > .home-btn-wrapper { 
-        transition: top 0.3s ease !important;
+
+    /* Когда Гугл сдвигает body, наши фиксированные панели тоже плавно уезжают вниз */
+    body[style*="top"] .floating-ui-element {
+        transform: translateY(var(--goog-banner-height, 40px));
+    }
+
+    .floating-ui-element {
+        transition: transform 0.3s ease, opacity 0.3s ease;
     }
 `;
 document.head.appendChild(style);
@@ -56,8 +61,9 @@ document.addEventListener("DOMContentLoaded", function() {
     gtScript.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
     document.body.appendChild(gtScript);
 
-    // 2. Создаем НАШУ стильную кастомную панель языков (EN, ES, ZH)
+    // 2. Создаем нашу панель языков (EN, ES, ZH)
     const langPanel = document.createElement('div');
+    langPanel.className = 'floating-ui-element';
     langPanel.style.cssText = 'position:fixed; top:15px; right:15px; z-index:9999; display:flex; gap:8px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(5px); padding: 8px 12px; border-radius: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); border: 1px solid rgba(238, 238, 238, 0.5); font-family: "Segoe UI", sans-serif; align-items: center;';
     
     const languages = [
@@ -89,6 +95,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // 3. Логика для страниц тренажеров (Кнопка Меню и совместное затухание)
     if (isTrainerPage) {
         const homeBtn = document.createElement('a');
+        homeBtn.className = 'floating-ui-element';
         homeBtn.innerHTML = isMobile ? "🏠" : "🏠 Меню";
         homeBtn.href = "/math-6-grade/"; 
         
@@ -113,7 +120,7 @@ document.addEventListener("DOMContentLoaded", function() {
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
+            justifyContent: 'center', // Исправлено с justify-content на justifyContent
             boxSizing: 'border-box'
         });
         document.body.appendChild(homeBtn);
@@ -124,7 +131,6 @@ document.addEventListener("DOMContentLoaded", function() {
         function wakeUp() {
             homeBtn.style.transition = 'opacity 0.2s ease, transform 0.2s ease, background-color 0.2s ease';
             homeBtn.style.opacity = '1';
-            homeBtn.style.transform = 'scale(1)';
             
             langPanel.style.transition = 'opacity 0.2s ease';
             langPanel.style.opacity = '1';
@@ -132,9 +138,8 @@ document.addEventListener("DOMContentLoaded", function() {
             clearTimeout(fadeTimeout);
             
             fadeTimeout = setTimeout(() => {
-                homeBtn.style.transition = 'opacity 1.5s ease-in-out, transform 1.5s ease-in-out';
+                homeBtn.style.transition = 'opacity 1.5s ease-in-out';
                 homeBtn.style.opacity = '0.12'; 
-                homeBtn.style.transform = 'scale(0.9)'; 
                 
                 langPanel.style.transition = 'opacity 1.5s ease-in-out';
                 langPanel.style.opacity = '0.12';
@@ -144,14 +149,12 @@ document.addEventListener("DOMContentLoaded", function() {
         homeBtn.onmouseenter = () => {
             clearTimeout(fadeTimeout);
             homeBtn.style.transition = 'all 0.2s ease';
-            homeBtn.style.transform = 'scale(1.05)';
             homeBtn.style.backgroundColor = '#ffffff';
             homeBtn.style.opacity = '1';
             langPanel.style.opacity = '1'; 
         };
         
         homeBtn.onmouseleave = () => {
-            homeBtn.style.transform = 'scale(1)';
             homeBtn.style.backgroundColor = 'rgba(255, 255, 255, 0.85)';
             wakeUp(); 
         };
