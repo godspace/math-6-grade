@@ -19,31 +19,68 @@ ym(106746549, 'init', {
     trackLinks: true
 });
 
-// --- Глобальная функция инициализации Google Translate ---
+// --- Скрываем стандартный интерфейс Google Translate CSS-стилями ---
+const style = document.createElement('style');
+style.innerHTML = `
+    #google_translate_element { display: none !important; }
+    .goog-te-banner-frame { display: none !important; }
+    body { top: 0 !important; }
+`;
+document.head.appendChild(style);
+
+// --- Глобальная функция инициализации (работает под капотом) ---
 window.googleTranslateElementInit = function() {
     new google.translate.TranslateElement({
         pageLanguage: 'ru',
-        includedLanguages: 'en,es,fr', // Ограничиваем список: Английский, Испанский, Французский
-        layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+        autoDisplay: false
     }, 'google_translate_element');
 };
 
 document.addEventListener("DOMContentLoaded", function() {
-    
     const isTrainerPage = window.location.pathname.includes('/trainers/');
     const isMobile = window.innerWidth <= 600;
     
-    // --- 1. Создаем контейнер Переводчика (ДЛЯ ВСЕХ СТРАНИЦ) ---
-    const translateDiv = document.createElement('div');
-    translateDiv.id = 'google_translate_element';
-    translateDiv.style.cssText = 'position:fixed; top:15px; right:15px; z-index:9999;';
-    document.body.appendChild(translateDiv);
+    // 1. Создаем скрытый контейнер для движка Google
+    const hiddenTranslateDiv = document.createElement('div');
+    hiddenTranslateDiv.id = 'google_translate_element';
+    document.body.appendChild(hiddenTranslateDiv);
 
     const gtScript = document.createElement('script');
     gtScript.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
     document.body.appendChild(gtScript);
 
-    // --- 2. Логика для страниц тренажеров (Кнопка Меню и совместное затухание) ---
+    // 2. Создаем НАШУ стильную кастомную панель языков
+    const langPanel = document.createElement('div');
+    langPanel.style.cssText = 'position:fixed; top:15px; right:15px; z-index:9999; display:flex; gap:8px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(5px); padding: 8px 12px; border-radius: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); border: 1px solid rgba(238, 238, 238, 0.5); font-family: "Segoe UI", sans-serif; align-items: center;';
+    
+    const languages = [
+        { code: 'ru', text: 'RU' },
+        { code: 'en', text: 'EN' },
+        { code: 'es', text: 'ES' }
+    ];
+
+    languages.forEach(lang => {
+        const btn = document.createElement('button');
+        btn.innerText = lang.text;
+        btn.style.cssText = 'background: transparent; border: none; cursor: pointer; font-weight: bold; color: #333; font-size: 14px; padding: 4px 8px; border-radius: 15px; transition: 0.2s;';
+        
+        btn.onmouseenter = () => btn.style.backgroundColor = 'rgba(0,0,0,0.1)';
+        btn.onmouseleave = () => btn.style.backgroundColor = 'transparent';
+        
+        btn.onclick = () => {
+            const selectField = document.querySelector(".goog-te-combo");
+            if (selectField) {
+                // Если юзер кликает RU, мы передаем пустую строку, чтобы вернуть оригинальный язык
+                selectField.value = lang.code === 'ru' ? '' : lang.code;
+                selectField.dispatchEvent(new Event('change'));
+            }
+        };
+        langPanel.appendChild(btn);
+    });
+
+    document.body.appendChild(langPanel);
+
+    // 3. Логика для страниц тренажеров (Кнопка Меню и совместное затухание)
     if (isTrainerPage) {
         const homeBtn = document.createElement('a');
         homeBtn.innerHTML = isMobile ? "🏠" : "🏠 Меню";
@@ -79,26 +116,22 @@ document.addEventListener("DOMContentLoaded", function() {
         const delayBeforeFade = isMobile ? 150 : 2500;
 
         function wakeUp() {
-            // Пробуждаем меню
             homeBtn.style.transition = 'opacity 0.2s ease, transform 0.2s ease, background-color 0.2s ease';
             homeBtn.style.opacity = '1';
             homeBtn.style.transform = 'scale(1)';
             
-            // Пробуждаем переводчик
-            translateDiv.style.transition = 'opacity 0.2s ease';
-            translateDiv.style.opacity = '1';
+            langPanel.style.transition = 'opacity 0.2s ease';
+            langPanel.style.opacity = '1';
             
             clearTimeout(fadeTimeout);
             
             fadeTimeout = setTimeout(() => {
-                // Прячем меню
                 homeBtn.style.transition = 'opacity 1.5s ease-in-out, transform 1.5s ease-in-out';
                 homeBtn.style.opacity = '0.12'; 
                 homeBtn.style.transform = 'scale(0.9)'; 
                 
-                // Прячем переводчик
-                translateDiv.style.transition = 'opacity 1.5s ease-in-out';
-                translateDiv.style.opacity = '0.12';
+                langPanel.style.transition = 'opacity 1.5s ease-in-out';
+                langPanel.style.opacity = '0.12';
             }, delayBeforeFade);
         }
 
@@ -108,7 +141,7 @@ document.addEventListener("DOMContentLoaded", function() {
             homeBtn.style.transform = 'scale(1.05)';
             homeBtn.style.backgroundColor = '#ffffff';
             homeBtn.style.opacity = '1';
-            translateDiv.style.opacity = '1'; 
+            langPanel.style.opacity = '1'; 
         };
         
         homeBtn.onmouseleave = () => {
@@ -117,13 +150,13 @@ document.addEventListener("DOMContentLoaded", function() {
             wakeUp(); 
         };
 
-        translateDiv.onmouseenter = () => {
+        langPanel.onmouseenter = () => {
             clearTimeout(fadeTimeout);
-            translateDiv.style.opacity = '1';
+            langPanel.style.opacity = '1';
             homeBtn.style.opacity = '1'; 
         };
         
-        translateDiv.onmouseleave = () => {
+        langPanel.onmouseleave = () => {
             wakeUp();
         };
 
