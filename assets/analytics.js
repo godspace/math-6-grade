@@ -19,7 +19,7 @@ ym(106746549, 'init', {
     trackLinks: true
 });
 
-// --- Стили для плавного смещения кнопок при появлении/закрытии баннера ---
+// --- Стили для плавного смещения и исчезновения элементов ---
 const style = document.createElement('style');
 style.innerHTML = `
     #google_translate_element { display: none !important; }
@@ -30,11 +30,12 @@ style.innerHTML = `
     }
 
     .floating-ui-element {
-        transition: transform 0.3s ease, opacity 0.3s ease;
-        transform: translateY(0px); /* По умолчанию на месте */
+        transition: transform 0.3s ease, opacity 0.4s ease;
+        transform: translateY(0px);
+        opacity: 1;
     }
 
-    /* Когда Гугл сдвигает body вниз, кнопки тоже едут за ним */
+    /* Когда Гугл сдвигает body вниз, кнопки едут за ним */
     body.goog-banner-active .floating-ui-element {
         transform: translateY(var(--banner-offset, 40px));
     }
@@ -62,7 +63,7 @@ document.addEventListener("DOMContentLoaded", function() {
     gtScript.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
     document.body.appendChild(gtScript);
 
-    // 2. Создаем нашу панель языков (EN, ES, ZH)
+    // 2. Создаем панель языков (EN, ES, ZH)
     const langPanel = document.createElement('div');
     langPanel.className = 'floating-ui-element';
     langPanel.style.cssText = 'position:fixed; top:15px; right:15px; z-index:9999; display:flex; gap:8px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(5px); padding: 8px 12px; border-radius: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); border: 1px solid rgba(238, 238, 238, 0.5); font-family: "Segoe UI", sans-serif; align-items: center;';
@@ -93,12 +94,11 @@ document.addEventListener("DOMContentLoaded", function() {
 
     document.body.appendChild(langPanel);
 
-    // 3. Отслеживаем появление и закрытие баннера Google Translate через MutationObserver
+    // 3. Отслеживаем появление/закрытие баннера Google Translate
     const observer = new MutationObserver(() => {
         const bodyTop = parseInt(document.body.style.top, 10);
         if (bodyTop && bodyTop > 0) {
             document.body.classList.add('goog-banner-active');
-            // Динамически подстраиваем сдвиг под реальную высоту баннера Гугла
             document.documentElement.style.setProperty('--banner-offset', bodyTop + 'px');
         } else {
             document.body.classList.remove('goog-banner-active');
@@ -106,9 +106,10 @@ document.addEventListener("DOMContentLoaded", function() {
     });
     observer.observe(document.body, { attributes: true, attributeFilter: ['style'] });
 
-    // 4. Логика для страниц тренажеров (Кнопка Меню и совместное затухание)
+    // 4. Логика для страниц тренажеров (Кнопка Меню)
+    let homeBtn = null;
     if (isTrainerPage) {
-        const homeBtn = document.createElement('a');
+        homeBtn = document.createElement('a');
         homeBtn.className = 'floating-ui-element';
         homeBtn.innerHTML = isMobile ? "🏠" : "🏠 Меню";
         homeBtn.href = "/math-6-grade/"; 
@@ -138,56 +139,82 @@ document.addEventListener("DOMContentLoaded", function() {
             boxSizing: 'border-box'
         });
         document.body.appendChild(homeBtn);
+    }
 
-        let fadeTimeout;
-        const delayBeforeFade = isMobile ? 150 : 2500;
+    // 5. Умное управление видимостью при скролле и бездействии
+    let fadeTimeout;
+    const delayBeforeFade = isMobile ? 150 : 2500;
 
-        function wakeUp() {
-            homeBtn.style.transition = 'opacity 0.2s ease, transform 0.2s ease, background-color 0.2s ease';
-            homeBtn.style.opacity = '1';
-            
-            langPanel.style.transition = 'opacity 0.2s ease';
+    function showElements() {
+        // Показываем элементы только если пользователь находится в самом верху страницы (скролл < 50px)
+        if (window.scrollY < 50) {
+            if (homeBtn) {
+                homeBtn.style.opacity = '1';
+                homeBtn.style.pointerEvents = 'auto';
+            }
             langPanel.style.opacity = '1';
-            
+            langPanel.style.pointerEvents = 'auto';
+
             clearTimeout(fadeTimeout);
-            
             fadeTimeout = setTimeout(() => {
-                homeBtn.style.transition = 'opacity 1.5s ease-in-out';
-                homeBtn.style.opacity = '0.12'; 
-                
-                langPanel.style.transition = 'opacity 1.5s ease-in-out';
+                if (homeBtn) homeBtn.style.opacity = '0.12';
                 langPanel.style.opacity = '0.12';
             }, delayBeforeFade);
         }
+    }
 
+    function hideElements() {
+        // Если проскроллили вниз — жестко прячем элементы
+        if (window.scrollY >= 50) {
+            if (homeBtn) {
+                homeBtn.style.opacity = '0';
+                homeBtn.style.pointerEvents = 'none';
+            }
+            langPanel.style.opacity = '0';
+            langPanel.style.pointerEvents = 'none';
+        }
+    }
+
+    // События для пробуждения при наведении на углы (если пользователь вернулся к верху)
+    if (homeBtn) {
         homeBtn.onmouseenter = () => {
-            clearTimeout(fadeTimeout);
-            homeBtn.style.transition = 'all 0.2s ease';
-            homeBtn.style.backgroundColor = '#ffffff';
-            homeBtn.style.opacity = '1';
-            langPanel.style.opacity = '1'; 
+            if (window.scrollY < 50) {
+                clearTimeout(fadeTimeout);
+                homeBtn.style.opacity = '1';
+                homeBtn.style.backgroundColor = '#ffffff';
+                langPanel.style.opacity = '1';
+            }
         };
-        
         homeBtn.onmouseleave = () => {
             homeBtn.style.backgroundColor = 'rgba(255, 255, 255, 0.85)';
-            wakeUp(); 
+            showElements();
         };
+    }
 
-        langPanel.onmouseenter = () => {
+    langPanel.onmouseenter = () => {
+        if (window.scrollY < 50) {
             clearTimeout(fadeTimeout);
             langPanel.style.opacity = '1';
-            homeBtn.style.opacity = '1'; 
-        };
-        
-        langPanel.onmouseleave = () => {
-            wakeUp();
-        };
+            if (homeBtn) homeBtn.style.opacity = '1';
+        }
+    };
+    langPanel.onmouseleave = () => {
+        showElements();
+    };
 
-        window.addEventListener('scroll', wakeUp, { passive: true });
-        window.addEventListener('mousemove', wakeUp, { passive: true });
-        window.addEventListener('touchstart', wakeUp, { passive: true });
-        window.addEventListener('touchend', wakeUp, { passive: true });
+    // Слушаем скролл и движения
+    window.addEventListener('scroll', () => {
+        if (window.scrollY >= 50) {
+            hideElements();
+        } else {
+            showElements();
+        }
+    }, { passive: true });
 
-        wakeUp();
-    }
+    window.addEventListener('mousemove', showElements, { passive: true });
+    window.addEventListener('touchstart', showElements, { passive: true });
+    window.addEventListener('touchend', showElements, { passive: true });
+
+    // Инициализация при загрузке
+    showElements();
 });
