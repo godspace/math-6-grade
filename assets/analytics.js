@@ -19,12 +19,19 @@ ym(106746549, 'init', {
     trackLinks: true
 });
 
-// --- Скрываем стандартный интерфейс Google Translate CSS-стилями ---
+// --- Разрешаем баннеру сдвигать страницу вместо перекрытия ---
 const style = document.createElement('style');
 style.innerHTML = `
     #google_translate_element { display: none !important; }
-    .goog-te-banner-frame { display: none !important; }
-    body { top: 0 !important; }
+    /* Возвращаем стандартное поведение сдвига body */
+    body { 
+        position: relative !important; 
+        transition: top 0.3s ease !important;
+    }
+    /* Сдвигаем нашу кнопку меню вместе со страницей, когда появляется баннер */
+    body > .home-btn-wrapper { 
+        transition: top 0.3s ease !important;
+    }
 `;
 document.head.appendChild(style);
 
