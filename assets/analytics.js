@@ -146,7 +146,6 @@ document.addEventListener("DOMContentLoaded", function() {
     const delayBeforeFade = isMobile ? 150 : 2500;
 
     function showElements() {
-        // Показываем элементы только если пользователь находится в самом верху страницы (скролл < 50px)
         if (window.scrollY < 50) {
             if (homeBtn) {
                 homeBtn.style.opacity = '1';
@@ -164,7 +163,6 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function hideElements() {
-        // Если проскроллили вниз — жестко прячем элементы
         if (window.scrollY >= 50) {
             if (homeBtn) {
                 homeBtn.style.opacity = '0';
@@ -175,7 +173,6 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    // События для пробуждения при наведении на углы (если пользователь вернулся к верху)
     if (homeBtn) {
         homeBtn.onmouseenter = () => {
             if (window.scrollY < 50) {
@@ -202,7 +199,6 @@ document.addEventListener("DOMContentLoaded", function() {
         showElements();
     };
 
-    // Слушаем скролл и движения
     window.addEventListener('scroll', () => {
         if (window.scrollY >= 50) {
             hideElements();
@@ -215,6 +211,5 @@ document.addEventListener("DOMContentLoaded", function() {
     window.addEventListener('touchstart', showElements, { passive: true });
     window.addEventListener('touchend', showElements, { passive: true });
 
-    // Инициализация при загрузке
     showElements();
 });
