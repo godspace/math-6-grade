@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Тренажер: Интерактивная доска | Математика 6 класс</title>
     
     <link rel="icon" href="/math-6-grade/favicon.ico" sizes="any">
@@ -36,6 +36,7 @@
             color: var(--text-color);
             user-select: none;
             -webkit-user-select: none;
+            touch-action: none; /* Отключаем системные жесты для корректного touch-драга */
         }
 
         #sidebar {
@@ -61,213 +62,112 @@
             margin-bottom: 8px;
         }
 
-        .tools-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-        }
-
+        .tools-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
         .tools-grid.full { grid-template-columns: 1fr; }
 
         .palette-item {
-            background: #fff;
-            border: 2px solid #cbd5e1;
-            padding: 8px;
-            border-radius: var(--radius);
-            cursor: pointer;
-            text-align: center;
-            font-size: 1.3rem;
-            font-family: 'Cambria Math', serif;
+            background: #fff; border: 2px solid #cbd5e1; padding: 8px;
+            border-radius: var(--radius); cursor: pointer; text-align: center;
+            font-size: 1.3rem; font-family: 'Cambria Math', serif;
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex;
+            align-items: center; justify-content: center; font-weight: 700;
         }
-
         .palette-item:hover {
-            border-color: var(--primary-color);
-            background: var(--primary-light);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-soft);
-            color: var(--primary-color);
+            border-color: var(--primary-color); background: var(--primary-light);
+            transform: translateY(-2px); box-shadow: var(--shadow-soft); color: var(--primary-color);
         }
-
         .palette-item:active { transform: scale(0.95); }
 
-        .preview-fraction {
-            display: inline-flex;
-            flex-direction: column;
-            align-items: center;
-            font-size: 0.8em;
-            line-height: 1;
-        }
+        .preview-fraction { display: inline-flex; flex-direction: column; align-items: center; font-size: 0.8em; line-height: 1; }
         .preview-fraction span:first-child { border-bottom: 2px solid currentColor; padding: 0 4px; }
 
         .action-btn {
-            padding: 10px;
-            border: none;
-            border-radius: var(--radius);
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-            font-size: 0.95rem;
-            font-family: inherit;
+            padding: 10px; border: none; border-radius: var(--radius);
+            font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 0.95rem; font-family: inherit;
         }
         .btn-primary { background: var(--primary-light); color: var(--primary-color); border: 1px solid var(--primary-color); }
         .btn-primary:hover { background: var(--primary-color); color: #fff; }
 
-        .btn-danger { background: #fee2e2; color: #ef4444; }
-        .btn-danger:hover { background: #fecaca; }
-        
         .btn-reset { background: #f1f5f9; color: #475569; margin-top: auto; }
         .btn-reset:hover { background: #e2e8f0; }
 
-        #viewport {
-            flex-grow: 1;
-            position: relative;
-            overflow: hidden;
-            cursor: default;
-        }
+        /* Ghost button для удаления */
+        .btn-danger { background: transparent; color: #ef4444; border: 1px solid #fecaca; }
+        .btn-danger:hover { background: #fee2e2; }
 
-        #surface {
-            position: absolute;
-            top: 0;
-            left: 0;
-            transform-origin: 0 0; 
-            width: 0; 
-            height: 0;
-            overflow: visible; 
-        }
-
+        #viewport { flex-grow: 1; position: relative; overflow: hidden; cursor: default; }
+        #surface { position: absolute; top: 0; left: 0; transform-origin: 0 0; width: 0; height: 0; overflow: visible; }
+        
         #grid-bg {
-            position: fixed;
-            top: -5000px; left: -5000px;
-            width: 10000px; height: 10000px;
+            position: fixed; top: -5000px; left: -5000px; width: 10000px; height: 10000px;
             background-color: var(--bg-color);
-            background-image: 
-                linear-gradient(var(--grid-color) 1px, transparent 1px),
-                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
-            background-size: 20px 20px;
-            pointer-events: none;
-            z-index: -1;
+            background-image: linear-gradient(var(--grid-color) 1px, transparent 1px), linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 20px 20px; pointer-events: none; z-index: -1;
+        }
+
+        /* Empty State */
+        #empty-state {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            color: #94a3b8; font-size: 1.2rem; font-weight: 500; text-align: center;
+            pointer-events: none; transition: opacity 0.3s ease; z-index: 10;
         }
 
         .board-item {
-            position: absolute;
-            background: transparent; 
-            padding: 0 10px;
-            border-radius: var(--radius);
-            box-shadow: none; 
-            cursor: grab;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid transparent; 
+            position: absolute; background: transparent; padding: 0 10px;
+            border-radius: var(--radius); cursor: grab; display: inline-flex;
+            align-items: center; justify-content: center; border: 1px solid transparent; 
             font-family: 'Cambria Math', 'Times New Roman', serif;
-            transition: background 0.2s, box-shadow 0.2s, border-color 0.2s, opacity 0.2s;
-            box-sizing: border-box; 
+            transition: box-shadow 0.2s, opacity 0.2s; box-sizing: border-box; 
         }
 
         .board-item.item-single { height: 40px; }
         .board-item.item-fraction { height: 80px; }
         .board-item.item-auto { height: auto; padding: 10px; }
 
-        .board-item:hover { border-color: rgba(203, 213, 225, 0.8); }
+        .board-item:hover { box-shadow: 0 0 0 1px rgba(203, 213, 225, 0.8); }
 
         .board-item.dragging {
-            background: rgba(255, 255, 255, 0.8);
-            opacity: 0.25;
-            box-shadow: var(--shadow-floating);
-            cursor: grabbing;
-            z-index: 1000 !important;
-            border-color: var(--primary-color);
+            background: rgba(255, 255, 255, 0.8); opacity: 0.8;
+            box-shadow: var(--shadow-floating); cursor: grabbing; z-index: 1000 !important;
+            border-color: transparent;
         }
 
+        /* Улучшенное состояние фокуса/селекта */
         .board-item.selected {
-            background: transparent;
-            border-color: var(--primary-color);
-            border-width: 2px;
-            z-index: 999;
+            background: transparent; box-shadow: 0 0 0 2px var(--primary-color);
+            border-color: transparent; z-index: 999;
         }
 
-        .item-fraction-bar .segment-resize-handle {
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s;
-        }
-        .item-fraction-bar:hover .segment-resize-handle,
-        .item-fraction-bar.selected .segment-resize-handle {
-            opacity: 1;
-            pointer-events: auto;
-        }
+        .item-fraction-bar .segment-resize-handle { opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+        .item-fraction-bar:hover .segment-resize-handle, .item-fraction-bar.selected .segment-resize-handle { opacity: 1; pointer-events: auto; }
 
+        /* Современная кнопка удаления */
         .delete-btn {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            width: 20px;
-            height: 20px;
-            background: #ef4444;
-            color: white;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer;
-            opacity: 0;
-            transition: 0.2s;
-            pointer-events: auto;
-            z-index: 10;
+            position: absolute; top: -10px; right: -10px; width: 24px; height: 24px;
+            background: rgba(239, 68, 68, 0.9); backdrop-filter: blur(4px); color: white;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; opacity: 0; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: scale(0.8); pointer-events: auto; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        .board-item:hover > .delete-btn { opacity: 1; }
+        .board-item:hover > .delete-btn, .board-item.selected > .delete-btn { opacity: 1; transform: scale(1); }
+        .delete-btn:hover { background: #dc2626; transform: scale(1.1); }
 
         .smart-input {
-            border: none;
-            background: transparent;
-            font-family: inherit;
-            font-size: 24px;
-            height: 28px;
-            line-height: 28px;
-            margin: 0;
-            padding: 0;
-            text-align: center;
-            outline: none;
-            min-width: 20px;
-            width: 30px;
-            color: #0f172a;
-            user-select: text;
-            -webkit-user-select: text;
+            border: none; background: transparent; font-family: inherit; font-size: 24px;
+            height: 28px; line-height: 28px; margin: 0; padding: 0 2px; text-align: center;
+            outline: none; min-width: 20px; width: 30px; color: #0f172a;
+            user-select: text; -webkit-user-select: text; transition: 0.2s; border-radius: 4px;
         }
+        .smart-input:focus { background: var(--primary-light); box-shadow: 0 0 0 2px #c7d2fe; }
         
-        .fraction-box { 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            height: 100%; 
-            margin: 0 4px; 
-        }
-        .numerator { 
-            border-bottom: 2px solid #0f172a; 
-            padding: 0 4px 2px; 
-            display: flex; 
-            justify-content: center; 
-            align-items: flex-end;
-            height: 50%;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        .denominator { 
-            padding: 2px 4px 0; 
-            display: flex; 
-            justify-content: center; 
-            align-items: flex-start;
-            height: 50%;
-            width: 100%;
-            box-sizing: border-box;
-        }
+        .fraction-box { display: flex; flex-direction: column; align-items: center; height: 100%; margin: 0 4px; }
+        .numerator { border-bottom: 2px solid #0f172a; padding: 0 4px 2px; display: flex; justify-content: center; align-items: flex-end; height: 50%; width: 100%; box-sizing: border-box; }
+        .denominator { padding: 2px 4px 0; display: flex; justify-content: center; align-items: flex-start; height: 50%; width: 100%; box-sizing: border-box; }
         .mixed-container { display: flex; align-items: center; height: 100%; gap: 6px; }
         .operator-text { font-size: 28px; font-weight: bold; color: #334155; padding: 0 4px;}
 
+        /* Контейнер отрезков (без изменений) */
         .seg-container { display: flex; flex-direction: column; gap: 16px; padding: 4px; min-width: 350px; }
         .seg-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 2px dashed #e2e8f0; padding-bottom: 12px; font-family: 'Inter', sans-serif; font-size: 14px; color: #475569; gap: 12px; }
         .scale-wrap { display: flex; align-items: center; gap: 4px; font-weight: 600;}
@@ -289,22 +189,15 @@
         .seg-row-del:hover { background: #fee2e2; }
 
         #hud {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(255,255,255,0.9);
-            backdrop-filter: blur(4px);
-            padding: 8px 16px;
-            border-radius: 20px;
-            border: 1px solid #cbd5e1;
-            font-size: 14px;
-            font-weight: 600;
-            color: #475569;
-            box-shadow: var(--shadow-soft);
-            display: flex;
-            gap: 15px;
-            align-items: center;
+            position: absolute; bottom: 20px; right: 20px; background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(4px); padding: 8px 16px; border-radius: 20px;
+            border: 1px solid #cbd5e1; font-size: 14px; font-weight: 600; color: #475569;
+            box-shadow: var(--shadow-soft); display: flex; gap: 12px; align-items: center;
         }
+        
+        /* Кнопки зума в HUD */
+        .zoom-btn { background: none; border: none; cursor: pointer; font-size: 18px; color: #64748b; font-weight: bold; padding: 0 4px; transition: 0.2s; }
+        .zoom-btn:hover { color: var(--primary-color); transform: scale(1.1); }
     </style>
     <script src="../../assets/analytics.js"></script>
 </head>
@@ -385,16 +278,21 @@
 </div>
 
 <div id="viewport">
-    <div id="grid-bg"></div> <div id="surface"></div>
+    <div id="grid-bg"></div> 
+    <div id="empty-state">Перетащите инструменты из панели слева,<br>чтобы начать работу</div>
+    <div id="surface"></div>
     
     <div id="hud">
-        <span id="zoom-val">100%</span>
-        <span style="color:#ccc">|</span>
-        <span style="font-size: 12px; color: #888">Фон - двигать, колёсико - зум</span>
+        <button class="zoom-btn" onclick="applyZoom(-0.1)">−</button>
+        <span id="zoom-val" style="width: 40px; text-align: center;">100%</span>
+        <button class="zoom-btn" onclick="applyZoom(0.1)">+</button>
+        <span style="color:#ccc; margin: 0 4px;">|</span>
+        <span style="font-size: 12px; color: #888; display: none;" id="hud-hint">Фон - двигать, колёсико - зум</span>
     </div>
 </div>
 
 <script>
+    // --- 1. СОСТОЯНИЕ И УТИЛИТЫ ---
     const state = { scale: 1, panX: 0, panY: 0, isPanning: false, startX: 0, startY: 0, zIndex: 100 };
     let isRestoring = false; 
 
@@ -402,43 +300,52 @@
     const surface = document.getElementById('surface');
     const gridBg = document.getElementById('grid-bg');
     const zoomVal = document.getElementById('zoom-val');
+    const emptyState = document.getElementById('empty-state');
+
+    // Показывать подсказку HUD только на больших экранах (где есть мышка)
+    if (window.matchMedia("(min-width: 768px)").matches) { document.getElementById('hud-hint').style.display = 'inline'; }
 
     state.panX = viewport.clientWidth / 2;
     state.panY = viewport.clientHeight / 2;
     updateView();
 
+    function checkEmptyState() {
+        emptyState.style.opacity = surface.children.length > 0 ? '0' : '1';
+    }
+
+    // Универсальная функция для получения координат мыши и касаний
+    function getPos(e) {
+        if (e.touches && e.touches.length > 0) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        return { x: e.clientX, y: e.clientY };
+    }
+
+    // --- 2. АВТОСОХРАНЕНИЕ ---
     let saveTimeout;
     function scheduleSave() {
         if(isRestoring) return;
         clearTimeout(saveTimeout);
         saveTimeout = setTimeout(saveBoardState, 500);
+        checkEmptyState();
     }
 
     function saveBoardState() {
         const itemsData = [];
         document.querySelectorAll('.board-item').forEach(item => {
             const data = {
-                type: item.dataset.type,
-                val: item.dataset.val,
-                left: item.style.left,
-                top: item.style.top,
+                type: item.dataset.type, val: item.dataset.val, left: item.style.left, top: item.style.top,
                 inputs: Array.from(item.querySelectorAll('.smart-input')).map(i => i.value)
             };
-            
             if (data.type === 'fraction-bar') {
                 const line = item.querySelector('.segment-resize-handle').previousElementSibling;
                 if(line) data.width = line.style.width;
             }
-            
             if (data.type === 'segment') {
                 const scaleInput = item.querySelector('.scale-input');
                 if(scaleInput) data.scale = scaleInput.value;
                 const rows = [];
                 item.querySelectorAll('.seg-row').forEach(row => {
                     const rowInputs = row.querySelectorAll('.smart-input');
-                    if (rowInputs.length >= 2) {
-                        rows.push({ step: rowInputs[0].value, len: rowInputs[1].value });
-                    }
+                    if (rowInputs.length >= 2) rows.push({ step: rowInputs[0].value, len: rowInputs[1].value });
                 });
                 data.rows = rows;
             }
@@ -453,27 +360,17 @@
         isRestoring = true;
         try {
             const parsed = JSON.parse(saved);
-            
             if(parsed.panX !== undefined) state.panX = parsed.panX;
             if(parsed.panY !== undefined) state.panY = parsed.panY;
             if(parsed.scale !== undefined) state.scale = parsed.scale;
             updateView();
-
             parsed.items.forEach(data => {
                 const item = createItem(data.type, data.val, 0, 0, data);
-                item.style.left = data.left;
-                item.style.top = data.top;
-                
+                item.style.left = data.left; item.style.top = data.top;
                 if (data.type !== 'segment' && data.inputs) {
                     const inputs = item.querySelectorAll('.smart-input');
-                    data.inputs.forEach((val, i) => {
-                        if (inputs[i]) {
-                            inputs[i].value = val;
-                            inputs[i].dispatchEvent(new Event('input'));
-                        }
-                    });
+                    data.inputs.forEach((val, i) => { if (inputs[i]) { inputs[i].value = val; inputs[i].dispatchEvent(new Event('input')); } });
                 }
-
                 if (data.type === 'fraction-bar' && data.width) {
                     const line = item.querySelector('.segment-resize-handle').previousElementSibling;
                     if(line) line.style.width = data.width;
@@ -481,71 +378,79 @@
             });
         } catch(e) { console.error('Ошибка загрузки сохранения', e); }
         isRestoring = false;
+        checkEmptyState();
     }
 
     surface.addEventListener('input', scheduleSave);
-    window.addEventListener('mouseup', scheduleSave);
     const observer = new MutationObserver(scheduleSave);
     observer.observe(surface, { childList: true, subtree: true });
 
-    viewport.addEventListener('mousedown', (e) => {
-        if (e.target === viewport || e.target === surface || e.target === gridBg) {
+    // --- 3. ГЛОБАЛЬНЫЕ СОБЫТИЯ (TOUCH + MOUSE) ---
+    function startPan(e) {
+        if (e.target === viewport || e.target === surface || e.target === gridBg || e.target === emptyState) {
             document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
             state.isPanning = true;
-            state.startX = e.clientX - state.panX;
-            state.startY = e.clientY - state.panY;
+            const pos = getPos(e);
+            state.startX = pos.x - state.panX;
+            state.startY = pos.y - state.panY;
             viewport.style.cursor = 'grabbing';
         }
-    });
+    }
 
-    window.addEventListener('mousemove', (e) => {
+    function onMove(e) {
+        const pos = getPos(e);
         if (state.isPanning) {
-            e.preventDefault();
-            state.panX = e.clientX - state.startX;
-            state.panY = e.clientY - state.startY;
+            e.preventDefault(); // Запрещаем скролл страницы при панорамировании
+            state.panX = pos.x - state.startX;
+            state.panY = pos.y - state.startY;
             updateView();
             return;
         }
-
         if (dragState.activeItem) {
             e.preventDefault();
-            const worldPos = screenToWorld(e.clientX, e.clientY);
+            const worldPos = screenToWorld(pos.x, pos.y);
             dragState.activeItem.style.left = (worldPos.x - dragState.offsetX) + 'px';
             dragState.activeItem.style.top = (worldPos.y - dragState.offsetY) + 'px';
         }
-    });
+    }
 
-    window.addEventListener('mouseup', () => {
-        if (state.isPanning) {
-            state.isPanning = false;
-            viewport.style.cursor = 'default';
-        }
+    function onEnd() {
+        if (state.isPanning) { state.isPanning = false; viewport.style.cursor = 'default'; }
         if (dragState.activeItem) {
             snapItem(dragState.activeItem);
             dragState.activeItem.classList.remove('dragging');
             dragState.activeItem = null;
+            scheduleSave();
         }
-    });
+    }
 
+    viewport.addEventListener('mousedown', startPan);
+    viewport.addEventListener('touchstart', startPan, { passive: false });
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('touchmove', onMove, { passive: false });
+    window.addEventListener('mouseup', onEnd);
+    window.addEventListener('touchend', onEnd);
+
+    // Зум колесиком
     viewport.addEventListener('wheel', (e) => {
         e.preventDefault();
         const rect = viewport.getBoundingClientRect();
-        const mouseX = e.clientX - rect.left;
-        const mouseY = e.clientY - rect.top;
+        applyZoom(-e.deltaY * 0.001, e.clientX - rect.left, e.clientY - rect.top);
+    }, { passive: false });
 
-        const worldXBeforeZoom = (mouseX - state.panX) / state.scale;
-        const worldYBeforeZoom = (mouseY - state.panY) / state.scale;
+    function applyZoom(delta, mouseX = null, mouseY = null) {
+        if (mouseX === null) mouseX = viewport.clientWidth / 2;
+        if (mouseY === null) mouseY = viewport.clientHeight / 2;
 
-        const zoomIntensity = 0.001;
-        const delta = -e.deltaY * zoomIntensity;
-        const newScale = Math.min(Math.max(0.2, state.scale + delta), 4);
-        
-        state.scale = newScale;
-        state.panX = mouseX - worldXBeforeZoom * state.scale;
-        state.panY = mouseY - worldYBeforeZoom * state.scale;
+        const worldXBefore = (mouseX - state.panX) / state.scale;
+        const worldYBefore = (mouseY - state.panY) / state.scale;
+
+        state.scale = Math.min(Math.max(0.2, state.scale + delta), 4);
+        state.panX = mouseX - worldXBefore * state.scale;
+        state.panY = mouseY - worldYBefore * state.scale;
         updateView();
         scheduleSave();
-    }, { passive: false });
+    }
 
     function updateView() {
         surface.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.scale})`;
@@ -556,20 +461,15 @@
 
     function resetView() {
         state.scale = 1;
-        state.panX = viewport.clientWidth / 2 - 100;
-        state.panY = viewport.clientHeight / 2 - 100;
+        state.panX = viewport.clientWidth / 2;
+        state.panY = viewport.clientHeight / 2;
         updateView();
         scheduleSave();
     }
 
     function screenToWorld(screenX, screenY) {
         const rect = viewport.getBoundingClientRect();
-        const viewportX = screenX - rect.left;
-        const viewportY = screenY - rect.top;
-        return {
-            x: (viewportX - state.panX) / state.scale,
-            y: (viewportY - state.panY) / state.scale
-        };
+        return { x: (screenX - rect.left - state.panX) / state.scale, y: (screenY - rect.top - state.panY) / state.scale };
     }
 
     function parseInputVal(valStr) {
@@ -577,12 +477,10 @@
         let v = valStr.replace(',', '.');
         if (v.includes('/')) {
             const [n, d] = v.split('/');
-            const num = parseFloat(n);
-            const den = parseFloat(d);
+            const num = parseFloat(n), den = parseFloat(d);
             if (!isNaN(num) && !isNaN(den) && den !== 0) return num / den;
         }
-        const res = parseFloat(v);
-        return (isNaN(res) || res <= 0) ? 1 : res;
+        const res = parseFloat(v); return (isNaN(res) || res <= 0) ? 1 : res;
     }
 
     function updateInputUI(inp, val) {
@@ -590,6 +488,7 @@
         inp.style.width = Math.max(30, (inp.value.length+1)*14) + 'px';
     }
 
+    // --- 4. ЛОГИКА ЭЛЕМЕНТОВ ---
     let dragState = { activeItem: null, offsetX: 0, offsetY: 0 };
 
     function createItem(type, val, worldX, worldY, initData = null) {
@@ -603,396 +502,173 @@
 
         const del = document.createElement('div');
         del.className = 'delete-btn';
-        del.innerHTML = '×';
-        del.onmousedown = (e) => { e.stopPropagation(); item.remove(); };
+        // Иконка SVG для стильного крестика
+        del.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
+        
+        const removeFn = (e) => { e.stopPropagation(); item.remove(); checkEmptyState(); scheduleSave(); };
+        del.addEventListener('mousedown', removeFn);
+        del.addEventListener('touchstart', removeFn, {passive: false});
         item.appendChild(del);
 
         if(type === 'number') {
-            item.classList.add('item-single');
-            item.appendChild(autoInput(''));
+            item.classList.add('item-single'); item.appendChild(autoInput(''));
         } else if (type === 'var') {
-            item.classList.add('item-single');
-            const span = document.createElement('span');
-            span.className = 'operator-text';
-            span.style.fontFamily = "'Cambria Math', serif";
-            span.style.fontStyle = 'italic';
-            span.textContent = val;
-            item.appendChild(span);
+            item.classList.add('item-single'); const span = document.createElement('span');
+            span.className = 'operator-text'; span.style.fontFamily = "'Cambria Math', serif";
+            span.style.fontStyle = 'italic'; span.textContent = val; item.appendChild(span);
         } else if (type === 'op-mul') {
-            item.classList.add('item-single');
-            const span = document.createElement('span');
-            span.className = 'operator-text';
-            span.style.fontSize = '20px';
-            span.style.padding = '0 8px';
-            span.textContent = '×';
-            item.appendChild(span);
+            item.classList.add('item-single'); const span = document.createElement('span');
+            span.className = 'operator-text'; span.style.fontSize = '20px'; span.style.padding = '0 8px';
+            span.textContent = '×'; item.appendChild(span);
         } else if (type === 'fraction') {
-            item.classList.add('item-fraction');
-            item.appendChild(fractionDom());
+            item.classList.add('item-fraction'); item.appendChild(fractionDom());
         } else if (type === 'mixed') {
             item.classList.add('item-fraction');
-            const wrap = document.createElement('div');
-            wrap.className = 'mixed-container';
-            const intPart = document.createElement('div');
-            intPart.style.display = 'flex';
-            intPart.style.alignItems = 'center';
-            intPart.style.height = '100%';
-            intPart.appendChild(autoInput(''));
-            intPart.style.fontSize = '1.2em';
-            wrap.appendChild(intPart);
-            wrap.appendChild(fractionDom());
-            item.appendChild(wrap);
-
+            const wrap = document.createElement('div'); wrap.className = 'mixed-container';
+            const intPart = document.createElement('div'); intPart.style.display = 'flex'; intPart.style.alignItems = 'center'; intPart.style.height = '100%';
+            intPart.appendChild(autoInput('')); intPart.style.fontSize = '1.2em';
+            wrap.appendChild(intPart); wrap.appendChild(fractionDom()); item.appendChild(wrap);
         } else if (type === 'power') {
-            item.classList.add('item-auto');
-            const wrap = document.createElement('div');
-            wrap.style.display = 'flex'; 
-            wrap.style.alignItems = 'center'; 
-            
-            const base = autoInput(''); 
-            base.style.fontSize = '24px';
-            
-            const exp = autoInput(''); 
-            exp.style.fontSize = '14px'; 
-            exp.style.position = 'relative';
-            exp.style.top = '-14px';
-            exp.style.marginLeft = '-10px'; 
-            exp.style.minWidth = '15px'; 
-            exp.placeholder = 'y';
-            
-            wrap.appendChild(base); 
-            wrap.appendChild(exp);
-            item.appendChild(wrap);
-            
+            item.classList.add('item-auto'); const wrap = document.createElement('div'); wrap.style.display = 'flex'; wrap.style.alignItems = 'center'; 
+            const base = autoInput(''); base.style.fontSize = '24px';
+            const exp = autoInput(''); exp.style.fontSize = '14px'; exp.style.position = 'relative'; exp.style.top = '-14px'; exp.style.marginLeft = '-10px'; exp.style.minWidth = '15px'; exp.placeholder = 'y';
+            wrap.appendChild(base); wrap.appendChild(exp); item.appendChild(wrap);
         } else if (type === 'frac-power') {
-            item.classList.add('item-fraction'); 
-            const wrap = document.createElement('div');
-            wrap.style.display = 'flex'; 
-            wrap.style.alignItems = 'center';
-            
+            item.classList.add('item-fraction'); const wrap = document.createElement('div'); wrap.style.display = 'flex'; wrap.style.alignItems = 'center';
             const lParen = document.createElement('span'); lParen.className = 'operator-text'; lParen.textContent = '('; lParen.style.fontSize = '40px'; lParen.style.fontWeight = 'normal';
             const rParen = document.createElement('span'); rParen.className = 'operator-text'; rParen.textContent = ')'; rParen.style.fontSize = '40px'; rParen.style.fontWeight = 'normal';
-            
-            const exp = autoInput(''); 
-            exp.style.fontSize = '14px';
-            exp.style.position = 'relative';
-            exp.style.top = '-26px'; 
-            exp.style.marginLeft = '-4px'; 
-            exp.style.minWidth = '15px';
-            exp.placeholder = 'x';
-
-            wrap.appendChild(lParen);
-            wrap.appendChild(fractionDom());
-            wrap.appendChild(rParen);
-            wrap.appendChild(exp);
-            item.appendChild(wrap);
-
+            const exp = autoInput(''); exp.style.fontSize = '14px'; exp.style.position = 'relative'; exp.style.top = '-26px'; exp.style.marginLeft = '-4px'; exp.style.minWidth = '15px'; exp.placeholder = 'x';
+            wrap.appendChild(lParen); wrap.appendChild(fractionDom()); wrap.appendChild(rParen); wrap.appendChild(exp); item.appendChild(wrap);
         } else if (type === 'sqrt') {
-            item.classList.add('item-auto');
-            const wrap = document.createElement('div');
-            wrap.style.display = 'flex'; wrap.style.alignItems = 'flex-end';
-            
-            const sym = document.createElement('span');
-            sym.textContent = '√';
-            sym.style.fontSize = '34px'; sym.style.lineHeight = '30px'; sym.style.color = '#0f172a'; sym.style.paddingRight = '2px';
-            
-            const inner = document.createElement('div');
-            inner.style.borderTop = '2px solid #0f172a'; inner.style.paddingTop = '2px'; inner.style.marginLeft = '-2px';
-            inner.appendChild(autoInput(''));
-            
-            wrap.appendChild(sym); wrap.appendChild(inner);
-            item.appendChild(wrap);
-
+            item.classList.add('item-auto'); const wrap = document.createElement('div'); wrap.style.display = 'flex'; wrap.style.alignItems = 'flex-end';
+            const sym = document.createElement('span'); sym.textContent = '√'; sym.style.fontSize = '34px'; sym.style.lineHeight = '30px'; sym.style.color = '#0f172a'; sym.style.paddingRight = '2px';
+            const inner = document.createElement('div'); inner.style.borderTop = '2px solid #0f172a'; inner.style.paddingTop = '2px'; inner.style.marginLeft = '-2px';
+            inner.appendChild(autoInput('')); wrap.appendChild(sym); wrap.appendChild(inner); item.appendChild(wrap);
         } else if (type === 'fraction-bar') {
-            item.classList.add('item-single');
-            item.classList.add('item-fraction-bar');
+            item.classList.add('item-single'); item.classList.add('item-fraction-bar');
             let width = 120;
-            const wrapper = document.createElement('div');
-            wrapper.style.display = 'flex';
-            wrapper.style.alignItems = 'center';
-            wrapper.style.height = '100%'; 
-            
-            const line = document.createElement('div');
-            line.style.height = '3px';
-            line.style.backgroundColor = 'var(--text-color)';
-            line.style.width = width + 'px';
-            line.style.borderRadius = '2px';
+            const wrapper = document.createElement('div'); wrapper.style.display = 'flex'; wrapper.style.alignItems = 'center'; wrapper.style.height = '100%'; 
+            const line = document.createElement('div'); line.style.height = '3px'; line.style.backgroundColor = 'var(--text-color)'; line.style.width = width + 'px'; line.style.borderRadius = '2px';
+            const handle = document.createElement('div'); handle.className = 'segment-resize-handle'; handle.innerHTML = '⇹'; handle.style.marginLeft = '12px'; handle.style.marginTop = '0';
 
-            const handle = document.createElement('div');
-            handle.className = 'segment-resize-handle';
-            handle.innerHTML = '⇹';
-            handle.style.marginLeft = '12px';
-            handle.style.marginTop = '0';
-
-            handle.addEventListener('mousedown', (e) => {
-                e.stopPropagation();
-                const startX = e.clientX;
-                const startW = width;
-                const onMouseMove = (ev) => {
-                    const dx = (ev.clientX - startX) / state.scale;
-                    width = Math.max(30, startW + dx);
-                    line.style.width = width + 'px';
+            const startHandleDrag = (e) => {
+                e.stopPropagation(); const startX = getPos(e).x; const startW = width;
+                const onDragMove = (ev) => { const dx = (getPos(ev).x - startX) / state.scale; width = Math.max(30, startW + dx); line.style.width = width + 'px'; };
+                const onDragUp = () => { 
+                    window.removeEventListener('mousemove', onDragMove); window.removeEventListener('touchmove', onDragMove);
+                    window.removeEventListener('mouseup', onDragUp); window.removeEventListener('touchend', onDragUp); scheduleSave(); 
                 };
-                const onMouseUp = () => {
-                    window.removeEventListener('mousemove', onMouseMove);
-                    window.removeEventListener('mouseup', onMouseUp);
-                    scheduleSave();
-                };
-                window.addEventListener('mousemove', onMouseMove);
-                window.addEventListener('mouseup', onMouseUp);
-            });
+                window.addEventListener('mousemove', onDragMove); window.addEventListener('touchmove', onDragMove, {passive: false});
+                window.addEventListener('mouseup', onDragUp); window.addEventListener('touchend', onDragUp);
+            };
+            handle.addEventListener('mousedown', startHandleDrag);
+            handle.addEventListener('touchstart', startHandleDrag, {passive: false});
 
-            wrapper.appendChild(line);
-            wrapper.appendChild(handle);
-            item.appendChild(wrapper);
+            wrapper.appendChild(line); wrapper.appendChild(handle); item.appendChild(wrapper);
 
         } else if (type === 'segment') {
             item.classList.add('item-auto');
-            let isAuto = true;
-            let localUnitPx = 20; 
-            let rowsData = []; 
-
-            const wrapper = document.createElement('div');
-            wrapper.className = 'seg-container';
-
-            const header = document.createElement('div');
-            header.className = 'seg-header';
-
-            const scaleWrap = document.createElement('div');
-            scaleWrap.className = 'scale-wrap';
-            scaleWrap.appendChild(document.createTextNode('1 ед = '));
-            
-            const scaleInput = document.createElement('input');
-            scaleInput.className = 'scale-input';
-            scaleInput.value = '20';
-            scaleWrap.appendChild(scaleInput);
-            scaleWrap.appendChild(document.createTextNode(' px'));
-
-            const autoLabel = document.createElement('label');
-            autoLabel.className = 'auto-scale-label';
-            const autoCb = document.createElement('input');
-            autoCb.type = 'checkbox';
-            autoCb.checked = true;
-            autoLabel.appendChild(autoCb);
-            autoLabel.appendChild(document.createTextNode('Автомасштаб'));
-
-            const leftHeaderGroup = document.createElement('div');
-            leftHeaderGroup.style.display = 'flex';
-            leftHeaderGroup.style.alignItems = 'center';
-            leftHeaderGroup.style.gap = '16px';
-            leftHeaderGroup.appendChild(scaleWrap);
-            leftHeaderGroup.appendChild(autoLabel);
-
-            const addBtn = document.createElement('button');
-            addBtn.className = 'action-btn btn-primary';
-            addBtn.innerHTML = '➕ Отрезок';
-
-            header.appendChild(leftHeaderGroup);
-            header.appendChild(addBtn);
-            wrapper.appendChild(header);
-
-            const rowsContainer = document.createElement('div');
-            rowsContainer.className = 'seg-rows';
-            wrapper.appendChild(rowsContainer);
+            let isAuto = true; let localUnitPx = 20; let rowsData = []; 
+            const wrapper = document.createElement('div'); wrapper.className = 'seg-container';
+            const header = document.createElement('div'); header.className = 'seg-header';
+            const scaleWrap = document.createElement('div'); scaleWrap.className = 'scale-wrap'; scaleWrap.appendChild(document.createTextNode('1 ед = '));
+            const scaleInput = document.createElement('input'); scaleInput.className = 'scale-input'; scaleInput.value = '20'; scaleWrap.appendChild(scaleInput); scaleWrap.appendChild(document.createTextNode(' px'));
+            const autoLabel = document.createElement('label'); autoLabel.className = 'auto-scale-label'; const autoCb = document.createElement('input'); autoCb.type = 'checkbox'; autoCb.checked = true; autoLabel.appendChild(autoCb); autoLabel.appendChild(document.createTextNode('Автомасштаб'));
+            const leftHeaderGroup = document.createElement('div'); leftHeaderGroup.style.display = 'flex'; leftHeaderGroup.style.alignItems = 'center'; leftHeaderGroup.style.gap = '16px'; leftHeaderGroup.appendChild(scaleWrap); leftHeaderGroup.appendChild(autoLabel);
+            const addBtn = document.createElement('button'); addBtn.className = 'action-btn btn-primary'; addBtn.innerHTML = '➕ Отрезок';
+            header.appendChild(leftHeaderGroup); header.appendChild(addBtn); wrapper.appendChild(header);
+            const rowsContainer = document.createElement('div'); rowsContainer.className = 'seg-rows'; wrapper.appendChild(rowsContainer);
 
             const updateContainer = () => {
                 if (isAuto && rowsData.length > 0) {
                     let maxLen = Math.max(...rowsData.map(r => r.step * r.parts));
-                    if (maxLen > 0) {
-                        localUnitPx = Math.min(100, Math.max(0.1, 400 / maxLen));
-                        scaleInput.value = parseFloat(localUnitPx.toFixed(2));
-                    }
+                    if (maxLen > 0) { localUnitPx = Math.min(100, Math.max(0.1, 400 / maxLen)); scaleInput.value = parseFloat(localUnitPx.toFixed(2)); }
                 }
                 rowsData.forEach(r => r.renderGraphics());
             };
 
-            scaleInput.addEventListener('input', (e) => {
-                let val = parseFloat(e.target.value.replace(',', '.'));
-                if (!isNaN(val) && val > 0) {
-                    localUnitPx = val;
-                    isAuto = false;
-                    autoCb.checked = false;
-                    updateContainer(); 
-                }
-            });
-            scaleInput.addEventListener('mousedown', e => e.stopPropagation());
-
-            autoCb.addEventListener('change', (e) => {
-                isAuto = e.target.checked;
-                updateContainer();
-            });
+            scaleInput.addEventListener('input', (e) => { let val = parseFloat(e.target.value.replace(',', '.')); if (!isNaN(val) && val > 0) { localUnitPx = val; isAuto = false; autoCb.checked = false; updateContainer(); } });
+            scaleInput.addEventListener('mousedown', e => e.stopPropagation()); scaleInput.addEventListener('touchstart', e => e.stopPropagation());
+            autoCb.addEventListener('change', (e) => { isAuto = e.target.checked; updateContainer(); });
 
             const addSegment = (defaultStep, defaultParts = 3) => {
                 const rowModel = { step: parseFloat(defaultStep)||1, parts: parseInt(defaultParts)||3, renderGraphics: null };
                 rowsData.push(rowModel);
+                const row = document.createElement('div'); row.className = 'seg-row';
+                const topArea = document.createElement('div'); topArea.className = 'seg-top';
+                const graphics = document.createElement('div'); graphics.className = 'segment-graphics';
+                const handle = document.createElement('div'); handle.className = 'segment-resize-handle'; handle.innerHTML = '⇹';
+                topArea.appendChild(graphics); topArea.appendChild(handle);
+                const bottomArea = document.createElement('div'); bottomArea.className = 'seg-bottom';
+                bottomArea.appendChild(document.createTextNode('Шаг:')); const stepInput = autoInput(rowModel.step.toString()); stepInput.style.fontSize = '16px'; bottomArea.appendChild(stepInput);
+                const divider = document.createElement('span'); divider.textContent = '|'; divider.style.color = '#cbd5e1'; divider.style.margin = '0 6px'; bottomArea.appendChild(divider);
+                bottomArea.appendChild(document.createTextNode('Длина:')); const lenInput = autoInput((rowModel.step * rowModel.parts).toString()); lenInput.style.fontSize = '16px'; bottomArea.appendChild(lenInput);
+                const delRowBtn = document.createElement('button'); delRowBtn.className = 'seg-row-del'; delRowBtn.innerHTML = '🗑 Удалить';
+                delRowBtn.onclick = (e) => { e.stopPropagation(); row.remove(); rowsData = rowsData.filter(r => r !== rowModel); updateContainer(); scheduleSave(); };
+                bottomArea.appendChild(delRowBtn); row.appendChild(topArea); row.appendChild(bottomArea); rowsContainer.appendChild(row);
 
-                const row = document.createElement('div');
-                row.className = 'seg-row';
-
-                const topArea = document.createElement('div');
-                topArea.className = 'seg-top';
-                
-                const graphics = document.createElement('div');
-                graphics.className = 'segment-graphics';
-
-                const handle = document.createElement('div');
-                handle.className = 'segment-resize-handle';
-                handle.innerHTML = '⇹';
-
-                topArea.appendChild(graphics);
-                topArea.appendChild(handle);
-
-                const bottomArea = document.createElement('div');
-                bottomArea.className = 'seg-bottom';
-                
-                bottomArea.appendChild(document.createTextNode('Шаг:'));
-                const stepInput = autoInput(rowModel.step.toString());
-                stepInput.style.fontSize = '16px';
-                bottomArea.appendChild(stepInput);
-
-                const divider = document.createElement('span');
-                divider.textContent = '|';
-                divider.style.color = '#cbd5e1';
-                divider.style.margin = '0 6px';
-                bottomArea.appendChild(divider);
-
-                bottomArea.appendChild(document.createTextNode('Длина:'));
-                const lenInput = autoInput((rowModel.step * rowModel.parts).toString());
-                lenInput.style.fontSize = '16px';
-                bottomArea.appendChild(lenInput);
-
-                const delRowBtn = document.createElement('button');
-                delRowBtn.className = 'seg-row-del';
-                delRowBtn.innerHTML = '🗑 Удалить';
-                delRowBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    row.remove();
-                    rowsData = rowsData.filter(r => r !== rowModel);
-                    updateContainer();
-                    scheduleSave();
-                };
-                bottomArea.appendChild(delRowBtn);
-
-                row.appendChild(topArea);
-                row.appendChild(bottomArea);
-                rowsContainer.appendChild(row);
-
-                stepInput.addEventListener('input', () => {
-                    rowModel.step = parseInputVal(stepInput.value);
-                    updateInputUI(lenInput, rowModel.step * rowModel.parts);
-                    updateContainer();
-                });
-
-                lenInput.addEventListener('input', () => {
-                    let totalLen = parseInputVal(lenInput.value);
-                    rowModel.step = totalLen / rowModel.parts;
-                    updateInputUI(stepInput, rowModel.step);
-                    updateContainer();
-                });
+                stepInput.addEventListener('input', () => { rowModel.step = parseInputVal(stepInput.value); updateInputUI(lenInput, rowModel.step * rowModel.parts); updateContainer(); });
+                lenInput.addEventListener('input', () => { let totalLen = parseInputVal(lenInput.value); rowModel.step = totalLen / rowModel.parts; updateInputUI(stepInput, rowModel.step); updateContainer(); });
 
                 rowModel.renderGraphics = () => {
-                    graphics.innerHTML = '';
-                    const partWidth = Math.max(5, rowModel.step * localUnitPx);
-                    const totalWidth = rowModel.parts * partWidth;
-
+                    graphics.innerHTML = ''; const partWidth = Math.max(5, rowModel.step * localUnitPx); const totalWidth = rowModel.parts * partWidth;
                     graphics.style.width = totalWidth + 'px';
-
-                    const mainLine = document.createElement('div');
-                    mainLine.className = 'segment-main-line';
-                    mainLine.style.width = totalWidth + 'px';
-                    graphics.appendChild(mainLine);
-
+                    const mainLine = document.createElement('div'); mainLine.className = 'segment-main-line'; mainLine.style.width = totalWidth + 'px'; graphics.appendChild(mainLine);
                     for (let i = 0; i <= rowModel.parts; i++) {
-                        const tick = document.createElement('div');
-                        tick.className = 'segment-tick';
-                        tick.style.left = (i * partWidth) + 'px';
-                        graphics.appendChild(tick);
-
-                        const label = document.createElement('div');
-                        label.className = 'segment-label';
-                        label.style.left = (i * partWidth) + 'px';
-                        label.textContent = parseFloat((i * rowModel.step).toFixed(3));
-                        graphics.appendChild(label);
+                        const tick = document.createElement('div'); tick.className = 'segment-tick'; tick.style.left = (i * partWidth) + 'px'; graphics.appendChild(tick);
+                        const label = document.createElement('div'); label.className = 'segment-label'; label.style.left = (i * partWidth) + 'px'; label.textContent = parseFloat((i * rowModel.step).toFixed(3)); graphics.appendChild(label);
                     }
                 };
 
-                handle.addEventListener('mousedown', (e) => {
-                    e.stopPropagation();
-                    const startX = e.clientX;
-                    const startParts = rowModel.parts;
-                    
-                    isAuto = false;
-                    autoCb.checked = false;
-                    
+                const startResize = (e) => {
+                    e.stopPropagation(); const startX = getPos(e).x; const startParts = rowModel.parts; isAuto = false; autoCb.checked = false;
                     const currentPartWidth = Math.max(5, rowModel.step * localUnitPx);
-
-                    const onMouseMove = (ev) => {
-                        const dx = (ev.clientX - startX) / state.scale;
-                        let newParts = startParts + Math.round(dx / currentPartWidth);
-                        newParts = Math.max(1, Math.min(newParts, 150)); 
-                        
-                        if (newParts !== rowModel.parts) {
-                            rowModel.parts = newParts;
-                            updateInputUI(lenInput, rowModel.step * rowModel.parts);
-                            updateContainer();
-                        }
+                    const onMoveHandle = (ev) => {
+                        const dx = (getPos(ev).x - startX) / state.scale;
+                        let newParts = startParts + Math.round(dx / currentPartWidth); newParts = Math.max(1, Math.min(newParts, 150)); 
+                        if (newParts !== rowModel.parts) { rowModel.parts = newParts; updateInputUI(lenInput, rowModel.step * rowModel.parts); updateContainer(); }
                     };
-
-                    const onMouseUp = () => {
-                        window.removeEventListener('mousemove', onMouseMove);
-                        window.removeEventListener('mouseup', onMouseUp);
-                        scheduleSave();
+                    const onUpHandle = () => { 
+                        window.removeEventListener('mousemove', onMoveHandle); window.removeEventListener('touchmove', onMoveHandle);
+                        window.removeEventListener('mouseup', onUpHandle); window.removeEventListener('touchend', onUpHandle); scheduleSave(); 
                     };
+                    window.addEventListener('mousemove', onMoveHandle); window.addEventListener('touchmove', onMoveHandle, {passive: false});
+                    window.addEventListener('mouseup', onUpHandle); window.addEventListener('touchend', onUpHandle);
+                };
+                handle.addEventListener('mousedown', startResize); handle.addEventListener('touchstart', startResize, {passive: false});
 
-                    window.addEventListener('mousemove', onMouseMove);
-                    window.addEventListener('mouseup', onMouseUp);
-                });
-
-                updateContainer();
-                if(!isRestoring) setTimeout(() => stepInput.focus(), 10);
+                updateContainer(); if(!isRestoring) setTimeout(() => stepInput.focus(), 10);
             };
 
-            addBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                addSegment(1);
-            });
-            addBtn.addEventListener('mousedown', e => e.stopPropagation());
+            const blockEvents = e => e.stopPropagation();
+            addBtn.addEventListener('click', (e) => { e.stopPropagation(); addSegment(1); });
+            addBtn.addEventListener('mousedown', blockEvents); addBtn.addEventListener('touchstart', blockEvents, {passive: false});
 
             if (initData && initData.rows) {
-                isAuto = false;
-                autoCb.checked = false;
-                if(initData.scale) {
-                    scaleInput.value = initData.scale;
-                    localUnitPx = parseFloat(initData.scale);
-                }
-                initData.rows.forEach(r => {
-                    const step = parseFloat(r.step) || 1;
-                    const len = parseFloat(r.len) || 3;
-                    const parts = Math.round(len / step) || 3;
-                    addSegment(step, parts);
-                });
-            } else {
-                addSegment(1);
-            }
-            
+                isAuto = false; autoCb.checked = false;
+                if(initData.scale) { scaleInput.value = initData.scale; localUnitPx = parseFloat(initData.scale); }
+                initData.rows.forEach(r => { const step = parseFloat(r.step) || 1; const len = parseFloat(r.len) || 3; addSegment(step, Math.round(len / step) || 3); });
+            } else { addSegment(1); }
             item.appendChild(wrapper);
 
         } else {
-            item.classList.add('item-single');
-            const span = document.createElement('span');
-            span.className = 'operator-text';
-            span.textContent = val;
-            item.appendChild(span);
+            item.classList.add('item-single'); const span = document.createElement('span');
+            span.className = 'operator-text'; span.textContent = val; item.appendChild(span);
         }
 
-        item.addEventListener('mousedown', (e) => {
+        const onDragStart = (e) => {
             if(e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.type === 'checkbox') return;
+            // Проверка для мыши
+            if (e.type === 'mousedown' && e.button !== 0) return; 
+
             document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
             item.classList.add('selected');
-            
             e.stopPropagation();
             startItemDrag(e, item, false);
-        });
+        };
+        
+        item.addEventListener('mousedown', onDragStart);
+        item.addEventListener('touchstart', onDragStart, {passive: false});
 
         surface.appendChild(item);
         
@@ -1001,99 +677,68 @@
             setTimeout(() => firstInput.focus(), 10);
         }
 
+        checkEmptyState();
         return item;
     }
 
     function autoInput(val) {
-        const inp = document.createElement('input');
-        inp.className = 'smart-input';
-        inp.value = val;
-        inp.placeholder = '?';
+        const inp = document.createElement('input'); inp.className = 'smart-input'; inp.value = val; inp.placeholder = '?';
         const resize = () => inp.style.width = Math.max(30, (inp.value.length + 1) * 14) + 'px';
-        inp.addEventListener('input', resize);
-        setTimeout(resize,0);
-        return inp;
+        inp.addEventListener('input', resize); setTimeout(resize,0); return inp;
     }
 
     function fractionDom() {
-        const b = document.createElement('div');
-        b.className = 'fraction-box';
+        const b = document.createElement('div'); b.className = 'fraction-box';
         const n = document.createElement('div'); n.className='numerator'; n.appendChild(autoInput(''));
         const d = document.createElement('div'); d.className='denominator'; d.appendChild(autoInput(''));
-        b.appendChild(n); b.appendChild(d);
-        return b;
+        b.appendChild(n); b.appendChild(d); return b;
     }
 
     document.querySelectorAll('.palette-item').forEach(p => {
-        p.addEventListener('click', (e) => {
+        const addFromPalette = (e) => {
             const rect = viewport.getBoundingClientRect();
-            const centerX = rect.left + rect.width / 2;
-            const centerY = rect.top + rect.height / 2;
-            
-            const worldPos = screenToWorld(centerX, centerY);
-            const offsetX = 30;
-            const offsetY = 20;
-            
-            const item = createItem(p.dataset.type, p.dataset.val, worldPos.x - offsetX, worldPos.y - offsetY);
-            
+            const worldPos = screenToWorld(rect.left + rect.width / 2, rect.top + rect.height / 2);
+            const item = createItem(p.dataset.type, p.dataset.val, worldPos.x - 30, worldPos.y - 20);
             document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
             item.classList.add('selected');
-
             snapItem(item);
             scheduleSave();
-        });
+        };
+        // click отлично срабатывает и на мышке, и на touch-девайсах (как Tap)
+        p.addEventListener('click', addFromPalette);
     });
 
     function startItemDrag(e, item, isNew) {
-        if(e.button !== 0) return;
         dragState.activeItem = item;
         item.classList.add('dragging');
-
-        const worldPos = screenToWorld(e.clientX, e.clientY);
-        const itemLeft = parseFloat(item.style.left);
-        const itemTop = parseFloat(item.style.top);
-
+        const pos = getPos(e);
+        const worldPos = screenToWorld(pos.x, pos.y);
+        
         if (isNew) {
-            dragState.offsetX = item.offsetWidth / 2;
-            dragState.offsetY = item.offsetHeight / 2; 
+            dragState.offsetX = item.offsetWidth / 2; dragState.offsetY = item.offsetHeight / 2; 
         } else {
-            dragState.offsetX = worldPos.x - itemLeft;
-            dragState.offsetY = worldPos.y - itemTop;
+            dragState.offsetX = worldPos.x - parseFloat(item.style.left);
+            dragState.offsetY = worldPos.y - parseFloat(item.style.top);
         }
     }
 
     function snapItem(item) {
-        const grid = 10;
-        const x = parseFloat(item.style.left);
-        const y = parseFloat(item.style.top);
-        item.style.left = (Math.round(x/grid)*grid) + 'px';
-        item.style.top = (Math.round(y/grid)*grid) + 'px';
+        const grid = 10; const x = parseFloat(item.style.left); const y = parseFloat(item.style.top);
+        item.style.left = (Math.round(x/grid)*grid) + 'px'; item.style.top = (Math.round(y/grid)*grid) + 'px';
     }
 
     function clearAll() { 
         if(confirm('Все удалить?')) {
-            document.querySelectorAll('.delete-btn').forEach(btn => {
-                const event = new MouseEvent('mousedown');
-                btn.dispatchEvent(event);
-            });
             surface.innerHTML = ''; 
             localStorage.removeItem('mathBoardData');
+            checkEmptyState();
         }
     }
     
     window.addEventListener('keydown', (e) => {
         if((e.key === 'Delete' || e.key === 'Backspace') && document.activeElement.tagName !== 'INPUT') {
             const s = document.querySelector('.selected');
-            if(s) {
-                const delBtn = s.querySelector('.delete-btn');
-                if(delBtn) {
-                    const event = new MouseEvent('mousedown');
-                    delBtn.dispatchEvent(event);
-                } else {
-                    s.remove();
-                    scheduleSave();
-                }
-            }
+            if(s) { s.remove(); scheduleSave(); checkEmptyState(); }
         }
     });
 
