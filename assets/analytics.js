@@ -155,15 +155,18 @@ document.addEventListener("DOMContentLoaded", function() {
             langPanel.style.pointerEvents = 'auto';
 
             clearTimeout(fadeTimeout);
+            // Удерживаем видимость 1 секунду перед затуханием (или дольше для ПК)
+            const holdTime = isMobile ? 150 : 1000; 
             fadeTimeout = setTimeout(() => {
                 if (homeBtn) homeBtn.style.opacity = '0.12';
                 langPanel.style.opacity = '0.12';
-            }, delayBeforeFade);
+            }, holdTime);
         }
     }
 
     function hideElements() {
         if (window.scrollY >= 50) {
+            clearTimeout(fadeTimeout);
             if (homeBtn) {
                 homeBtn.style.opacity = '0';
                 homeBtn.style.pointerEvents = 'none';
