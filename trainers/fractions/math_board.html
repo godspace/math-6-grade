@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тренажер: Интерактивная доска | Математика 6 класс</title>
+    
     <link rel="icon" href="/math-6-grade/favicon.ico" sizes="any">
     <link rel="icon" type="image/png" sizes="16x16" href="/math-6-grade/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/math-6-grade/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="48x48" href="/math-6-grade/favicon-48x48.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/math-6-grade/apple-touch-icon.png">
     <link rel="manifest" href="/math-6-grade/site.webmanifest">
-    <meta charset="UTF-8">
-    <title>Math Board Pro v9.3</title>
+
     <style>
         :root {
             --bg-color: #f4f6f8;
@@ -35,12 +38,10 @@
             -webkit-user-select: none;
         }
 
-        /* --- САЙДБАР --- */
         #sidebar {
             width: 250px;
             background: var(--sidebar-bg);
             border-right: 1px solid #e2e8f0;
-            /* Увеличенный отступ 74px сверху для внешней кнопки "Меню" */
             padding: 74px 12px 16px 12px; 
             display: flex;
             flex-direction: column;
@@ -123,7 +124,6 @@
         .btn-reset { background: #f1f5f9; color: #475569; margin-top: auto; }
         .btn-reset:hover { background: #e2e8f0; }
 
-        /* --- РАБОЧАЯ ОБЛАСТЬ --- */
         #viewport {
             flex-grow: 1;
             position: relative;
@@ -154,7 +154,6 @@
             z-index: -1;
         }
 
-        /* --- ЭЛЕМЕНТЫ ДОСКИ --- */
         .board-item {
             position: absolute;
             background: transparent; 
@@ -175,9 +174,7 @@
         .board-item.item-fraction { height: 80px; }
         .board-item.item-auto { height: auto; padding: 10px; }
 
-        .board-item:hover {
-            border-color: rgba(203, 213, 225, 0.8); 
-        }
+        .board-item:hover { border-color: rgba(203, 213, 225, 0.8); }
 
         .board-item.dragging {
             background: rgba(255, 255, 255, 0.8);
@@ -195,7 +192,6 @@
             z-index: 999;
         }
 
-        /* Умное скрытие ползунка для дробной черты */
         .item-fraction-bar .segment-resize-handle {
             opacity: 0;
             pointer-events: none;
@@ -272,151 +268,24 @@
         .mixed-container { display: flex; align-items: center; height: 100%; gap: 6px; }
         .operator-text { font-size: 28px; font-weight: bold; color: #334155; padding: 0 4px;}
 
-        /* --- КОНТЕЙНЕР ОТРЕЗКОВ --- */
-        .seg-container {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            padding: 4px;
-            min-width: 350px;
-        }
-
-        .seg-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 2px dashed #e2e8f0;
-            padding-bottom: 12px;
-            font-family: 'Inter', sans-serif;
-            font-size: 14px;
-            color: #475569;
-            gap: 12px;
-        }
-
+        .seg-container { display: flex; flex-direction: column; gap: 16px; padding: 4px; min-width: 350px; }
+        .seg-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 2px dashed #e2e8f0; padding-bottom: 12px; font-family: 'Inter', sans-serif; font-size: 14px; color: #475569; gap: 12px; }
         .scale-wrap { display: flex; align-items: center; gap: 4px; font-weight: 600;}
-        .scale-input {
-            border: none;
-            border-bottom: 2px solid #cbd5e1;
-            font-family: 'Cambria Math', serif;
-            font-size: 16px;
-            width: 45px;
-            text-align: center;
-            color: var(--primary-color);
-            font-weight: bold;
-            outline: none;
-            transition: 0.2s;
-            background: transparent;
-        }
+        .scale-input { border: none; border-bottom: 2px solid #cbd5e1; font-family: 'Cambria Math', serif; font-size: 16px; width: 45px; text-align: center; color: var(--primary-color); font-weight: bold; outline: none; transition: 0.2s; background: transparent; }
         .scale-input:focus { border-bottom-color: var(--primary-color); }
-        
-        .auto-scale-label {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            cursor: pointer;
-            font-size: 13px;
-            color: #64748b;
-            user-select: none;
-        }
+        .auto-scale-label { display: flex; align-items: center; gap: 4px; cursor: pointer; font-size: 13px; color: #64748b; user-select: none; }
         .auto-scale-label input { cursor: pointer; }
-
-        .seg-rows {
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-        }
-
-        .seg-row {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .seg-top {
-            display: flex;
-            align-items: flex-start;
-        }
-
-        .segment-graphics {
-            position: relative;
-            height: 50px;
-        }
-        .segment-main-line {
-            position: absolute;
-            top: 10px; 
-            left: 0;
-            height: 2px;
-            background: var(--text-color);
-            z-index: 1;
-        }
-        .segment-tick {
-            position: absolute;
-            top: 0;
-            width: 2px;
-            height: 22px;
-            background: var(--text-color);
-            transform: translateX(-50%); 
-            z-index: 2;
-        }
-        .segment-label {
-            position: absolute;
-            top: 28px;
-            transform: translateX(-50%);
-            font-size: 16px;
-            font-family: 'Cambria Math', serif;
-            font-weight: 600;
-            color: #334155;
-            white-space: nowrap;
-        }
-        
-        .segment-resize-handle {
-            width: 24px;
-            height: 32px;
-            background: var(--primary-light);
-            border: 2px solid var(--primary-color);
-            border-radius: 6px;
-            cursor: ew-resize;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-left: 14px;
-            margin-top: -5px;
-            color: var(--primary-color);
-            font-weight: bold;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            transition: 0.2s;
-        }
-        .segment-resize-handle:hover {
-            background: var(--primary-color);
-            color: white;
-        }
-
-        .seg-bottom {
-            display: flex;
-            align-items: center;
-            font-family: 'Inter', sans-serif;
-            font-size: 14px;
-            color: #64748b;
-            background: #f8fafc;
-            padding: 4px 12px;
-            border-radius: 6px;
-            border: 1px solid #e2e8f0;
-            width: max-content;
-            gap: 6px;
-        }
-
-        .seg-row-del {
-            background: none;
-            border: none;
-            color: #ef4444;
-            font-size: 12px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-left: 12px;
-            padding: 4px 8px;
-            border-radius: 4px;
-            transition: 0.2s;
-        }
+        .seg-rows { display: flex; flex-direction: column; gap: 24px; }
+        .seg-row { display: flex; flex-direction: column; gap: 8px; }
+        .seg-top { display: flex; align-items: flex-start; }
+        .segment-graphics { position: relative; height: 50px; }
+        .segment-main-line { position: absolute; top: 10px; left: 0; height: 2px; background: var(--text-color); z-index: 1; }
+        .segment-tick { position: absolute; top: 0; width: 2px; height: 22px; background: var(--text-color); transform: translateX(-50%); z-index: 2; }
+        .segment-label { position: absolute; top: 28px; transform: translateX(-50%); font-size: 16px; font-family: 'Cambria Math', serif; font-weight: 600; color: #334155; white-space: nowrap; }
+        .segment-resize-handle { width: 24px; height: 32px; background: var(--primary-light); border: 2px solid var(--primary-color); border-radius: 6px; cursor: ew-resize; display: flex; align-items: center; justify-content: center; margin-left: 14px; margin-top: -5px; color: var(--primary-color); font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.2s; }
+        .segment-resize-handle:hover { background: var(--primary-color); color: white; }
+        .seg-bottom { display: flex; align-items: center; font-family: 'Inter', sans-serif; font-size: 14px; color: #64748b; background: #f8fafc; padding: 4px 12px; border-radius: 6px; border: 1px solid #e2e8f0; width: max-content; gap: 6px; }
+        .seg-row-del { background: none; border: none; color: #ef4444; font-size: 12px; font-weight: bold; cursor: pointer; margin-left: 12px; padding: 4px 8px; border-radius: 4px; transition: 0.2s; }
         .seg-row-del:hover { background: #fee2e2; }
 
         #hud {
@@ -457,6 +326,25 @@
             <div class="palette-item" data-type="mixed">
                 <span style="font-size: 0.8em; margin-right: 4px;">1</span>
                 <div class="preview-fraction"><span>1</span><span>2</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <div class="section-title">Степени и корни</div>
+        <div class="tools-grid">
+            <div class="palette-item" data-type="power">
+                <span style="font-style: italic;">x</span>
+                <span style="font-size: 0.65em; position: relative; top: -8px; left: 1px;">y</span>
+            </div>
+            <div class="palette-item" data-type="frac-power">
+                <span style="font-weight: normal;">(</span>
+                <div class="preview-fraction" style="font-size: 0.6em; margin: 0 2px;"><span>a</span><span>b</span></div>
+                <span style="font-weight: normal;">)</span>
+                <span style="font-size: 0.65em; position: relative; top: -12px;">x</span>
+            </div>
+            <div class="palette-item" data-type="sqrt">
+                <span>√x</span>
             </div>
         </div>
     </div>
@@ -507,15 +395,8 @@
 </div>
 
 <script>
-    const state = {
-        scale: 1,
-        panX: 0,
-        panY: 0,
-        isPanning: false,
-        startX: 0,
-        startY: 0,
-        zIndex: 100
-    };
+    const state = { scale: 1, panX: 0, panY: 0, isPanning: false, startX: 0, startY: 0, zIndex: 100 };
+    let isRestoring = false; 
 
     const viewport = document.getElementById('viewport');
     const surface = document.getElementById('surface');
@@ -526,11 +407,90 @@
     state.panY = viewport.clientHeight / 2;
     updateView();
 
-    // --- 1. PANNING ---
+    let saveTimeout;
+    function scheduleSave() {
+        if(isRestoring) return;
+        clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(saveBoardState, 500);
+    }
+
+    function saveBoardState() {
+        const itemsData = [];
+        document.querySelectorAll('.board-item').forEach(item => {
+            const data = {
+                type: item.dataset.type,
+                val: item.dataset.val,
+                left: item.style.left,
+                top: item.style.top,
+                inputs: Array.from(item.querySelectorAll('.smart-input')).map(i => i.value)
+            };
+            
+            if (data.type === 'fraction-bar') {
+                const line = item.querySelector('.segment-resize-handle').previousElementSibling;
+                if(line) data.width = line.style.width;
+            }
+            
+            if (data.type === 'segment') {
+                const scaleInput = item.querySelector('.scale-input');
+                if(scaleInput) data.scale = scaleInput.value;
+                const rows = [];
+                item.querySelectorAll('.seg-row').forEach(row => {
+                    const rowInputs = row.querySelectorAll('.smart-input');
+                    if (rowInputs.length >= 2) {
+                        rows.push({ step: rowInputs[0].value, len: rowInputs[1].value });
+                    }
+                });
+                data.rows = rows;
+            }
+            itemsData.push(data);
+        });
+        localStorage.setItem('mathBoardData', JSON.stringify({ items: itemsData, panX: state.panX, panY: state.panY, scale: state.scale }));
+    }
+
+    function loadBoardState() {
+        const saved = localStorage.getItem('mathBoardData');
+        if(!saved) return;
+        isRestoring = true;
+        try {
+            const parsed = JSON.parse(saved);
+            
+            if(parsed.panX !== undefined) state.panX = parsed.panX;
+            if(parsed.panY !== undefined) state.panY = parsed.panY;
+            if(parsed.scale !== undefined) state.scale = parsed.scale;
+            updateView();
+
+            parsed.items.forEach(data => {
+                const item = createItem(data.type, data.val, 0, 0, data);
+                item.style.left = data.left;
+                item.style.top = data.top;
+                
+                if (data.type !== 'segment' && data.inputs) {
+                    const inputs = item.querySelectorAll('.smart-input');
+                    data.inputs.forEach((val, i) => {
+                        if (inputs[i]) {
+                            inputs[i].value = val;
+                            inputs[i].dispatchEvent(new Event('input'));
+                        }
+                    });
+                }
+
+                if (data.type === 'fraction-bar' && data.width) {
+                    const line = item.querySelector('.segment-resize-handle').previousElementSibling;
+                    if(line) line.style.width = data.width;
+                }
+            });
+        } catch(e) { console.error('Ошибка загрузки сохранения', e); }
+        isRestoring = false;
+    }
+
+    surface.addEventListener('input', scheduleSave);
+    window.addEventListener('mouseup', scheduleSave);
+    const observer = new MutationObserver(scheduleSave);
+    observer.observe(surface, { childList: true, subtree: true });
+
     viewport.addEventListener('mousedown', (e) => {
         if (e.target === viewport || e.target === surface || e.target === gridBg) {
             document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
-
             state.isPanning = true;
             state.startX = e.clientX - state.panX;
             state.startY = e.clientY - state.panY;
@@ -567,10 +527,8 @@
         }
     });
 
-    // --- 2. ZOOM ---
     viewport.addEventListener('wheel', (e) => {
         e.preventDefault();
-        
         const rect = viewport.getBoundingClientRect();
         const mouseX = e.clientX - rect.left;
         const mouseY = e.clientY - rect.top;
@@ -583,11 +541,10 @@
         const newScale = Math.min(Math.max(0.2, state.scale + delta), 4);
         
         state.scale = newScale;
-
         state.panX = mouseX - worldXBeforeZoom * state.scale;
         state.panY = mouseY - worldYBeforeZoom * state.scale;
-        
         updateView();
+        scheduleSave();
     }, { passive: false });
 
     function updateView() {
@@ -602,9 +559,9 @@
         state.panX = viewport.clientWidth / 2 - 100;
         state.panY = viewport.clientHeight / 2 - 100;
         updateView();
+        scheduleSave();
     }
 
-    // --- 3. MATH HELPERS ---
     function screenToWorld(screenX, screenY) {
         const rect = viewport.getBoundingClientRect();
         const viewportX = screenX - rect.left;
@@ -633,12 +590,13 @@
         inp.style.width = Math.max(30, (inp.value.length+1)*14) + 'px';
     }
 
-    // --- 4. ITEM LOGIC ---
     let dragState = { activeItem: null, offsetX: 0, offsetY: 0 };
 
-    function createItem(type, val, worldX, worldY) {
+    function createItem(type, val, worldX, worldY, initData = null) {
         const item = document.createElement('div');
         item.className = 'board-item';
+        item.dataset.type = type;
+        if(val !== undefined && val !== null) item.dataset.val = val;
         item.style.zIndex = ++state.zIndex;
         item.style.left = worldX + 'px';
         item.style.top = worldY + 'px';
@@ -684,6 +642,67 @@
             wrap.appendChild(intPart);
             wrap.appendChild(fractionDom());
             item.appendChild(wrap);
+
+        } else if (type === 'power') {
+            item.classList.add('item-auto');
+            const wrap = document.createElement('div');
+            wrap.style.display = 'flex'; 
+            wrap.style.alignItems = 'center'; 
+            
+            const base = autoInput(''); 
+            base.style.fontSize = '24px';
+            
+            const exp = autoInput(''); 
+            exp.style.fontSize = '14px'; 
+            exp.style.position = 'relative';
+            exp.style.top = '-14px';
+            exp.style.marginLeft = '-10px'; 
+            exp.style.minWidth = '15px'; 
+            exp.placeholder = 'y';
+            
+            wrap.appendChild(base); 
+            wrap.appendChild(exp);
+            item.appendChild(wrap);
+            
+        } else if (type === 'frac-power') {
+            item.classList.add('item-fraction'); 
+            const wrap = document.createElement('div');
+            wrap.style.display = 'flex'; 
+            wrap.style.alignItems = 'center';
+            
+            const lParen = document.createElement('span'); lParen.className = 'operator-text'; lParen.textContent = '('; lParen.style.fontSize = '40px'; lParen.style.fontWeight = 'normal';
+            const rParen = document.createElement('span'); rParen.className = 'operator-text'; rParen.textContent = ')'; rParen.style.fontSize = '40px'; rParen.style.fontWeight = 'normal';
+            
+            const exp = autoInput(''); 
+            exp.style.fontSize = '14px';
+            exp.style.position = 'relative';
+            exp.style.top = '-26px'; 
+            exp.style.marginLeft = '-4px'; 
+            exp.style.minWidth = '15px';
+            exp.placeholder = 'x';
+
+            wrap.appendChild(lParen);
+            wrap.appendChild(fractionDom());
+            wrap.appendChild(rParen);
+            wrap.appendChild(exp);
+            item.appendChild(wrap);
+
+        } else if (type === 'sqrt') {
+            item.classList.add('item-auto');
+            const wrap = document.createElement('div');
+            wrap.style.display = 'flex'; wrap.style.alignItems = 'flex-end';
+            
+            const sym = document.createElement('span');
+            sym.textContent = '√';
+            sym.style.fontSize = '34px'; sym.style.lineHeight = '30px'; sym.style.color = '#0f172a'; sym.style.paddingRight = '2px';
+            
+            const inner = document.createElement('div');
+            inner.style.borderTop = '2px solid #0f172a'; inner.style.paddingTop = '2px'; inner.style.marginLeft = '-2px';
+            inner.appendChild(autoInput(''));
+            
+            wrap.appendChild(sym); wrap.appendChild(inner);
+            item.appendChild(wrap);
+
         } else if (type === 'fraction-bar') {
             item.classList.add('item-single');
             item.classList.add('item-fraction-bar');
@@ -717,6 +736,7 @@
                 const onMouseUp = () => {
                     window.removeEventListener('mousemove', onMouseMove);
                     window.removeEventListener('mouseup', onMouseUp);
+                    scheduleSave();
                 };
                 window.addEventListener('mousemove', onMouseMove);
                 window.addEventListener('mouseup', onMouseUp);
@@ -802,8 +822,8 @@
                 updateContainer();
             });
 
-            const addSegment = (defaultStep) => {
-                const rowModel = { step: defaultStep, parts: 3, renderGraphics: null };
+            const addSegment = (defaultStep, defaultParts = 3) => {
+                const rowModel = { step: parseFloat(defaultStep)||1, parts: parseInt(defaultParts)||3, renderGraphics: null };
                 rowsData.push(rowModel);
 
                 const row = document.createElement('div');
@@ -849,6 +869,7 @@
                     row.remove();
                     rowsData = rowsData.filter(r => r !== rowModel);
                     updateContainer();
+                    scheduleSave();
                 };
                 bottomArea.appendChild(delRowBtn);
 
@@ -871,7 +892,6 @@
 
                 rowModel.renderGraphics = () => {
                     graphics.innerHTML = '';
-                    
                     const partWidth = Math.max(5, rowModel.step * localUnitPx);
                     const totalWidth = rowModel.parts * partWidth;
 
@@ -921,6 +941,7 @@
                     const onMouseUp = () => {
                         window.removeEventListener('mousemove', onMouseMove);
                         window.removeEventListener('mouseup', onMouseUp);
+                        scheduleSave();
                     };
 
                     window.addEventListener('mousemove', onMouseMove);
@@ -928,7 +949,7 @@
                 });
 
                 updateContainer();
-                setTimeout(() => stepInput.focus(), 10);
+                if(!isRestoring) setTimeout(() => stepInput.focus(), 10);
             };
 
             addBtn.addEventListener('click', (e) => {
@@ -937,7 +958,23 @@
             });
             addBtn.addEventListener('mousedown', e => e.stopPropagation());
 
-            addSegment(1);
+            if (initData && initData.rows) {
+                isAuto = false;
+                autoCb.checked = false;
+                if(initData.scale) {
+                    scaleInput.value = initData.scale;
+                    localUnitPx = parseFloat(initData.scale);
+                }
+                initData.rows.forEach(r => {
+                    const step = parseFloat(r.step) || 1;
+                    const len = parseFloat(r.len) || 3;
+                    const parts = Math.round(len / step) || 3;
+                    addSegment(step, parts);
+                });
+            } else {
+                addSegment(1);
+            }
+            
             item.appendChild(wrapper);
 
         } else {
@@ -960,7 +997,7 @@
         surface.appendChild(item);
         
         const firstInput = item.querySelector('input');
-        if (firstInput && type !== 'segment' && type !== 'fraction-bar') {
+        if (firstInput && type !== 'segment' && type !== 'fraction-bar' && !isRestoring) {
             setTimeout(() => firstInput.focus(), 10);
         }
 
@@ -994,7 +1031,6 @@
             const centerY = rect.top + rect.height / 2;
             
             const worldPos = screenToWorld(centerX, centerY);
-            
             const offsetX = 30;
             const offsetY = 20;
             
@@ -1004,6 +1040,7 @@
             item.classList.add('selected');
 
             snapItem(item);
+            scheduleSave();
         });
     });
 
@@ -1040,6 +1077,7 @@
                 btn.dispatchEvent(event);
             });
             surface.innerHTML = ''; 
+            localStorage.removeItem('mathBoardData');
         }
     }
     
@@ -1053,10 +1091,13 @@
                     delBtn.dispatchEvent(event);
                 } else {
                     s.remove();
+                    scheduleSave();
                 }
             }
         }
     });
+
+    document.addEventListener('DOMContentLoaded', loadBoardState);
 
 </script>
 </body>
