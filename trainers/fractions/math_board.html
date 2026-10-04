@@ -39,28 +39,41 @@
             touch-action: none; 
         }
 
-        /* --- Кнопка меню (гамбургер) --- */
+        /* --- Кнопка шторки (по центру слева) --- */
         #sidebar-toggle {
             display: none;
             position: fixed;
-            top: 16px;
-            left: 16px;
-            width: 44px;
-            height: 44px;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+            width: 32px;
+            height: 64px;
             background: #fff;
             border: 1px solid #cbd5e1;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow-soft);
+            border-left: none; /* Убираем левую границу, чтобы сливалась с краем */
+            border-radius: 0 16px 16px 0; /* Закругляем только правые углы */
+            box-shadow: 4px 0 12px rgba(0,0,0,0.1);
             z-index: 600;
             cursor: pointer;
             align-items: center;
             justify-content: center;
-            color: var(--text-color);
-            transition: background 0.2s;
+            color: var(--primary-color);
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.2s;
         }
-        #sidebar-toggle:hover { background: #f8fafc; }
+        #sidebar-toggle:hover { background: var(--primary-light); }
+        
+        #sidebar-toggle.open {
+            left: 250px; /* Сдвигаем вместе с сайдбаром */
+        }
+        
+        #sidebar-toggle svg {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        #sidebar-toggle.open svg {
+            transform: rotate(180deg); /* Переворачиваем стрелочку */
+        }
 
-        /* --- Затемнение фона при открытом сайдбаре на мобильных --- */
         #sidebar-overlay {
             display: none;
             position: fixed;
@@ -76,7 +89,8 @@
             width: 250px;
             background: var(--sidebar-bg);
             border-right: 1px solid #e2e8f0;
-            padding: 74px 12px 16px 12px; 
+            /* Отступ сверху уменьшен, так как гамбургера там больше нет */
+            padding: 24px 12px 16px 12px; 
             display: flex;
             flex-direction: column;
             gap: 16px;
@@ -244,11 +258,9 @@
 </head>
 <body>
 
-<button id="sidebar-toggle" aria-label="Открыть меню">
+<button id="sidebar-toggle" aria-label="Открыть инструменты">
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="3" y1="12" x2="21" y2="12"></line>
-        <line x1="3" y1="6" x2="21" y2="6"></line>
-        <line x1="3" y1="18" x2="21" y2="18"></line>
+        <polyline points="9 18 15 12 9 6"></polyline>
     </svg>
 </button>
 
@@ -366,9 +378,11 @@
         emptyState.style.opacity = surface.children.length > 0 ? '0' : '1';
     }
 
-    // Управление мобильным сайдбаром
+    // Управление мобильной шторкой
     function toggleSidebar() {
         const isOpen = sidebar.classList.toggle('open');
+        sidebarToggle.classList.toggle('open', isOpen); // Добавляем класс кнопке для сдвига и поворота стрелки
+        
         if (isOpen) {
             sidebarOverlay.classList.add('visible');
         } else {
