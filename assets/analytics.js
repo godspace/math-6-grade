@@ -143,7 +143,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // 5. Умное управление видимостью при скролле и бездействии
     let fadeTimeout;
-    const delayBeforeFade = isMobile ? 2000 : 2500;
+    const delayBeforeFade = isMobile ? 1000 : 2500;
 
     function showElements() {
         if (window.scrollY < 50) {
@@ -156,7 +156,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
             clearTimeout(fadeTimeout);
             // Удерживаем видимость 1 секунду перед затуханием (или дольше для ПК)
-            const holdTime = isMobile ? 150 : 1000; 
+            const holdTime = isMobile ? 1000 : 1000; 
             fadeTimeout = setTimeout(() => {
                 if (homeBtn) homeBtn.style.opacity = '0.12';
                 langPanel.style.opacity = '0.12';
