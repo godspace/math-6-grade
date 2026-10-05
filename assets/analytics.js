@@ -143,7 +143,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // 5. Умное управление видимостью при скролле и бездействии
     let fadeTimeout;
-    const delayBeforeFade = isMobile ? 2500 : 2500;
+    const delayBeforeFade = isMobile ? 1000 : 2500;
 
     function showElements() {
         if (window.scrollY < 50) {
@@ -155,7 +155,6 @@ document.addEventListener("DOMContentLoaded", function() {
             langPanel.style.pointerEvents = 'auto';
 
             clearTimeout(fadeTimeout);
-            // Удерживаем видимость 1 секунду перед затуханием (или дольше для ПК)
             const holdTime = isMobile ? 1000 : 1000; 
             fadeTimeout = setTimeout(() => {
                 if (homeBtn) homeBtn.style.opacity = '0.12';
@@ -215,4 +214,25 @@ document.addEventListener("DOMContentLoaded", function() {
     window.addEventListener('touchend', showElements, { passive: true });
 
     showElements();
+
+    // 6. Cookie-баннер для соблюдения оферты и сбора согласий
+    if (!localStorage.getItem('cookieConsentAccepted')) {
+        const cookieBanner = document.createElement('div');
+        cookieBanner.style.cssText = 'position:fixed; bottom:0; left:0; width:100%; background:rgba(30, 30, 30, 0.95); color:#fff; padding:15px 20px; box-sizing:border-box; z-index:10000; display:flex; justify-content:space-between; align-items:center; font-family:"Segoe UI", sans-serif; font-size:14px; backdrop-filter:blur(5px); flex-wrap:wrap; gap:10px; transition: opacity 0.3s ease;';
+        
+        cookieBanner.innerHTML = `
+            <div style="flex: 1; min-width: 250px;">
+                Мы используем файлы cookie (в том числе Яндекс.Метрику) для анализа статистики и улучшения работы тренажёров. Продолжая использовать сайт, вы соглашаетесь с нашей <a href="/math-6-grade/privacy.html" style="color:#4DA8DA; text-decoration:underline;">Политикой конфиденциальности</a>.
+            </div>
+            <button id="accept-cookie-btn" style="background:#4DA8DA; color:#fff; border:none; padding:8px 20px; border-radius:20px; cursor:pointer; font-weight:bold; transition:0.2s;">Понятно</button>
+        `;
+        
+        document.body.appendChild(cookieBanner);
+
+        document.getElementById('accept-cookie-btn').onclick = function() {
+            localStorage.setItem('cookieConsentAccepted', 'true');
+            cookieBanner.style.opacity = '0';
+            setTimeout(() => cookieBanner.remove(), 300);
+        };
+    }
 });
