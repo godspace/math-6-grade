@@ -10,6 +10,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Тренажер сравнения дробей</title>
+    <!-- Подключаем глобальный скрипт -->
+    <script src="../../assets/analytics.js" defer></script>
     <style>
         * {
             box-sizing: border-box;
@@ -480,7 +482,6 @@
             -moz-appearance: textfield;
         }
     </style>
-<script src="../../assets/analytics.js"></script>
 </head>
 <body>
     <div class="container">
@@ -672,6 +673,8 @@
         
         // Генерация случайного задания
         function generateTask() {
+            if (window.RewardSystem) window.RewardSystem.resetErrors();
+            
             let denominator1, denominator2;
             let commonDenominator;
             
@@ -869,6 +872,14 @@
             document.getElementById('feedbackMessage').textContent = getSuccessMessage();
             document.getElementById('feedbackMessage').style.color = '#27ae60';
             document.getElementById('feedbackEmoji').textContent = randomEmoji;
+            
+            if (stats.streak === 3 || stats.streak === 6) {
+                if (window.RewardSystem) {
+                    setTimeout(() => {
+                        window.RewardSystem.showWin(`Серия побед: ${stats.streak}! Сравнение дробей`, "fraction_comparison");
+                    }, 1500);
+                }
+            }
         }
         
         // Обработка неправильного ответа
@@ -881,6 +892,10 @@
             document.getElementById('feedbackMessage').textContent = 'Попробуйте следующее задание!';
             document.getElementById('feedbackMessage').style.color = '#e74c3c';
             document.getElementById('feedbackEmoji').textContent = '💡';
+            
+            if (window.RewardSystem) {
+                window.RewardSystem.registerError("fraction_comparison");
+            }
         }
         
         // Показать решение с диаграммами
