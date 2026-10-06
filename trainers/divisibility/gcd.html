@@ -11,6 +11,8 @@
 <link rel="apple-touch-icon" sizes="180x180" href="/math-6-grade/apple-touch-icon.png">
 <link rel="manifest" href="/math-6-grade/site.webmanifest">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+<!-- Подключаем глобальный скрипт -->
+<script src="../../assets/analytics.js" defer></script>
 <style>
   :root {
     --primary: #6C5CE7;
@@ -282,7 +284,6 @@
     pointer-events: none; z-index: 100;
   }
 </style>
-<script src="../../assets/analytics.js"></script>
 </head>
 <body>
 
@@ -378,6 +379,8 @@
   }
 
   function initGame() {
+    if (window.RewardSystem) window.RewardSystem.resetErrors();
+
     currentStage = 1;
     currentSelection = { value: null, items: [] };
     
@@ -514,6 +517,8 @@
         return;
     }
 
+    if (window.RewardSystem) window.RewardSystem.resetErrors();
+
     factorsArr[r][c].value = val;
     document.getElementById('message').innerText = ''; 
     document.getElementById('message').style.background = 'transparent';
@@ -538,6 +543,8 @@
       msg.innerText = text;
       msg.style.color = 'var(--danger)';
       msg.style.background = 'rgba(255, 118, 117, 0.1)';
+      
+      if (window.RewardSystem) window.RewardSystem.registerError("gcd");
   }
 
   function checkStage1Progress() {
@@ -627,6 +634,8 @@
     let msg = document.getElementById('message');
     
     if (inputVal === expectedGCD) {
+      if (window.RewardSystem) window.RewardSystem.resetErrors();
+
       msg.innerHTML = '🏆 <b>Отлично!</b> НОД = ' + expectedGCD + '. Теперь давай его проверим!';
       msg.style.color = 'var(--success)';
       msg.style.background = 'rgba(0, 184, 148, 0.1)';
@@ -690,6 +699,8 @@
       let expected = currentSet[idx] / expectedGCD;
       
       if(val === expected) {
+          if (window.RewardSystem) window.RewardSystem.resetErrors();
+
           inpEl.disabled = true;
           inpEl.style.borderColor = 'var(--success)';
           inpEl.style.color = 'var(--success)';
@@ -722,6 +733,13 @@
       document.getElementById('restart-btn').classList.remove('hidden');
       vibrate([100, 50, 100, 50, 200]); 
       fireConfetti();
+
+      // Вызываем Лутбокс
+      if (window.RewardSystem) {
+          setTimeout(() => {
+              window.RewardSystem.showWin("Нахождение НОД", "gcd");
+          }, 1500);
+      }
   }
 
   function fireConfetti() {
