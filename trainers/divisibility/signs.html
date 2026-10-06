@@ -1,16 +1,52 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- ─── SEO-БЛОК ─── -->
+    <title>Игра-тренажёр: Признаки делимости | Математика 6 класс</title>
+    <meta name="description" content="Динамичная мини-игра для 6 класса. Учи признаки делимости на 2, 3, 4, 5, 6, 9 и 10. Тренируй устный счет, набирай комбо и проходи миссии на скорость.">
+    <meta name="keywords" content="признаки делимости, математика 6 класс игра, устный счет тренажер, делимость на 3 и 9, математические игры для детей">
+    <meta name="author" content="Козлов Сергей Владимирович">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://godspace.github.io/math-6-grade/trainers/divisibility/signs.html">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Кибер-сканер: Признаки делимости (6 класс)">
+    <meta property="og:description" content="Уничтожай числа, которые делятся на заданный делитель! Набирай комбо и пройди все 4 уровня сложности.">
+    <meta property="og:url" content="https://godspace.github.io/math-6-grade/trainers/divisibility/signs.html">
+    <meta property="og:site_name" content="Математика 6 класс">
+
+    <!-- JSON-LD -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "LearningResource",
+        "name": "Кибер-сканер: Признаки делимости",
+        "description": "Аркадный тренажёр на скорость и реакцию для закрепления правил (признаков) делимости натуральных чисел.",
+        "educationalLevel": "6 класс",
+        "learningResourceType": "Обучающая игра",
+        "inLanguage": "ru",
+        "isAccessibleForFree": true,
+        "teaches": ["Признак делимости на 2", "Признак делимости на 3", "Признак делимости на 5", "Признаки делимости на 9 и 10", "Устный счет"],
+        "url": "https://godspace.github.io/math-6-grade/trainers/divisibility/signs.html"
+    }
+    </script>
+    <!-- ─── КОНЕЦ SEO-БЛОКА ─── -->
+
+    <!-- Favicons -->
     <link rel="icon" href="/math-6-grade/favicon.ico" sizes="any">
     <link rel="icon" type="image/png" sizes="16x16" href="/math-6-grade/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/math-6-grade/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="48x48" href="/math-6-grade/favicon-48x48.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/math-6-grade/apple-touch-icon.png">
     <link rel="manifest" href="/math-6-grade/site.webmanifest">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Тренажер: Признаки делимости</title>
+
+    <!-- Глобальный скрипт с аналитикой и лутбоксами -->
     <script src="../../assets/analytics.js" defer></script>
+    
     <style>
         :root {
             --bg-base: #0b0f19;
@@ -379,6 +415,7 @@
         const victoryOverlay = document.getElementById('victory-overlay');
 
         function initGame() {
+            if (window.RewardSystem) window.RewardSystem.resetErrors();
             currentMissionIdx = 0;
             currentRound = 0;
             streak = 1;
@@ -439,18 +476,14 @@
             let num;
             let attempts = 0;
             do {
-                // Генерируем базу в зависимости от сложности
-                // Для 4 и 6 числа лучше делать побольше (трехзначные), для 2 и 5 можно двузначные
                 let base = Math.floor(Math.random() * 900) + 10; 
                 if (wantCorrect) {
-                    // Принудительно делаем кратным
                     num = base * divisor;
-                    // Ограничиваем сверху, чтобы не было слишком огромных чисел
                     if (num > 999) num = num % 1000; 
                     if (num % divisor !== 0) num += (divisor - (num % divisor));
                 } else {
                     num = base;
-                    if (checkers[divisor](num)) num += 1; // Ломаем кратность
+                    if (checkers[divisor](num)) num += 1; 
                 }
                 attempts++;
             } while (usedNumbers.has(num) && attempts < 50);
@@ -463,40 +496,30 @@
             const usedNumbers = new Set();
             let numbers = [];
             
-            // Определяем количество правильных карточек (от 2 до 3)
             correctCardsRemaining = Math.floor(Math.random() * 2) + 2;
             const totalCards = 6;
             const incorrectCount = totalCards - correctCardsRemaining;
 
-            // Генерируем правильные
             for(let i=0; i<correctCardsRemaining; i++) {
                 const num = generateNumber(divisor, true, usedNumbers);
                 usedNumbers.add(num);
                 numbers.push({ val: num, isCorrect: true });
             }
 
-            // Генерируем неправильные (пытаемся сделать их "похожими" для путаницы)
             for(let i=0; i<incorrectCount; i++) {
                 const num = generateNumber(divisor, false, usedNumbers);
                 usedNumbers.add(num);
                 numbers.push({ val: num, isCorrect: false });
             }
 
-            // Перемешиваем
             numbers.sort(() => Math.random() - 0.5);
 
-            // Рендерим
             numbers.forEach((item, index) => {
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.textContent = item.val;
-                
-                // Анимация появления каскадом
                 card.style.animation = `fadeIn 0.3s ease ${index * 0.05}s both`;
-
-                // Обработчик тапа (Fast click)
                 card.addEventListener('pointerdown', (e) => handleTap(e, card, item));
-                
                 grid.appendChild(card);
             });
         }
@@ -512,6 +535,18 @@
                 streak++;
                 updateStreakUI();
                 
+                // Интеграция: сброс ошибок при правильном ответе
+                if (window.RewardSystem) window.RewardSystem.resetErrors();
+                
+                // Интеграция: Награда за большое комбо (10 или 20 правильных подряд)
+                if (streak === 10 || streak === 20) {
+                    if (window.RewardSystem) {
+                        setTimeout(() => {
+                            window.RewardSystem.showWin(`Мега-комбо: x${streak}! Кибер-сканер`, "divisibility_signs");
+                        }, 1000);
+                    }
+                }
+                
                 correctCardsRemaining--;
                 if (correctCardsRemaining === 0) {
                     completeRound();
@@ -524,8 +559,8 @@
                 streak = 1; // Сброс комбо
                 updateStreakUI();
                 
-                // Снимаем класс ошибки через полсекунды, чтобы можно было тапнуть снова (если случайно задел)
-                // Но лучше оставить красным как пометку "Сюда не жми"
+                // Интеграция: Регистрация ошибки
+                if (window.RewardSystem) window.RewardSystem.registerError("divisibility_signs");
             }
         }
 
@@ -545,11 +580,18 @@
                     if (currentMissionIdx >= missions.length) {
                         // Победа в игре!
                         victoryOverlay.classList.add('active');
+                        
+                        // Интеграция: Награда за полное прохождение
+                        if (window.RewardSystem) {
+                            setTimeout(() => {
+                                window.RewardSystem.showWin("Система взломана! Признаки делимости", "divisibility_signs");
+                            }, 1500);
+                        }
                         return;
                     }
                 }
                 startRound();
-            }, 600); // Пауза, чтобы ребенок увидел последнюю зеленую карточку
+            }, 600); 
         }
 
         // Подсказка
