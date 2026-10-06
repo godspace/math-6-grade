@@ -104,6 +104,46 @@
             border-left: 8px solid var(--accent);
         }
 
+        .card-dock {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f1f2f6;
+        }
+
+        .card-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: white;
+            border: 2px solid #dfe6e9;
+            border-bottom-width: 5px;
+            color: #2d3436;
+            padding: 8px 18px;
+            border-radius: 12px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: grab;
+            transition: all 0.1s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-width: 30px;
+        }
+
+        .card:active {
+            cursor: grabbing;
+            transform: translateY(3px);
+            border-bottom-width: 2px;
+        }
+
+        .card.variable { background: #a29bfe; color: white; border-color: #6c5ce7; }
+        .card.operator { background: #ffeaa7; color: #d35400; border-color: #fdcb6e; }
+        .card.number { color: var(--primary); border-color: var(--primary); }
+
         .drop-zone-container { margin-bottom: 25px; }
 
         .label {
@@ -157,46 +197,6 @@
             outline: none;
         }
         .solve-input:focus { border-color: var(--secondary); background: white; }
-
-        .card-dock {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 2px solid #f1f2f6;
-        }
-
-        .card-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .card {
-            background: white;
-            border: 2px solid #dfe6e9;
-            border-bottom-width: 5px;
-            color: #2d3436;
-            padding: 8px 18px;
-            border-radius: 12px;
-            font-size: 1.3rem;
-            font-weight: bold;
-            cursor: grab;
-            transition: all 0.1s;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-width: 30px;
-        }
-
-        .card:active {
-            cursor: grabbing;
-            transform: translateY(3px);
-            border-bottom-width: 2px;
-        }
-
-        .card.variable { background: #a29bfe; color: white; border-color: #6c5ce7; }
-        .card.operator { background: #ffeaa7; color: #d35400; border-color: #fdcb6e; }
-        .card.number { color: var(--primary); border-color: var(--primary); }
 
         .actions {
             display: flex;
@@ -278,17 +278,6 @@
     <div class="game-board" id="gameBoard">
         <div class="task-card" id="problemText">Загрузка...</div>
 
-        <div class="drop-zone-container">
-            <span class="label">1. Составь уравнение (перетащи карточки):</span>
-            <div class="equation-builder" id="dropZone"></div>
-        </div>
-
-        <div class="solve-area">
-            <span class="label" style="margin:0; font-size: 1rem; margin-right: 15px;">2. Чему равен x?</span>
-            <span style="font-size: 1.5rem; font-weight: bold; color: #2d3436;">x = </span>
-            <input type="number" class="solve-input" id="solutionInput" placeholder="?" step="0.1">
-        </div>
-
         <div class="card-dock">
             <span class="label">Числа из задачи:</span>
             <div class="card-group" id="problemCards"></div>
@@ -304,6 +293,17 @@
                 <div class="card operator" draggable="true" data-val=")">)</div>
                 <div class="card variable" draggable="true" data-val="x">x</div>
             </div>
+        </div>
+
+        <div class="drop-zone-container">
+            <span class="label">1. Составь уравнение (перетащи карточки):</span>
+            <div class="equation-builder" id="dropZone"></div>
+        </div>
+
+        <div class="solve-area">
+            <span class="label" style="margin:0; font-size: 1rem; margin-right: 15px;">2. Чему равен x?</span>
+            <span style="font-size: 1.5rem; font-weight: bold; color: #2d3436;">x = </span>
+            <input type="number" class="solve-input" id="solutionInput" placeholder="?" step="0.1">
         </div>
 
         <div class="actions">
@@ -325,35 +325,32 @@
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
-    // --- ЛИНЕЙНЫЙ СПИСОК УРОВНЕЙ (Каждый тип задачи ровно 1 раз) ---
-    // Всего 20 уникальных задач по нарастающей сложности
-    
     const LEVEL_SCENARIOS = [
         /* === РАЗДЕЛ 1: РАЗМИНКА (4 задачи) === */
         {
             type: "warmup", label: "Разминка (1 действие)", color: "#00b894",
-            gen: () => { // 1. Сложение (x + a = b)
+            gen: () => { 
                 const x = getRandomInt(10, 50); const a = getRandomInt(10, 30);
                 return { text: `Задумали число, прибавили ${a} и получили ${x+a}. Какое число задумали?`, solveX: x };
             }
         },
         {
             type: "warmup", label: "Разминка (1 действие)", color: "#00b894",
-            gen: () => { // 2. Вычитание (x - a = b)
+            gen: () => { 
                 const a = getRandomInt(10, 20); const b = getRandomInt(15, 30);
                 return { text: `Из неизвестного числа вычли ${a} и получили ${b}. Найди это число.`, solveX: a+b };
             }
         },
         {
             type: "warmup", label: "Разминка (1 действие)", color: "#00b894",
-            gen: () => { // 3. Площадь (a * x = S)
+            gen: () => { 
                 const x = getRandomInt(5, 12); const a = getRandomInt(4, 9);
                 return { text: `Площадь прямоугольника ${x*a} см², одна сторона ${a} см. Найди другую (x).`, solveX: x };
             }
         },
         {
             type: "warmup", label: "Разминка (1 действие)", color: "#00b894",
-            gen: () => { // 4. Деление (x / a = b)
+            gen: () => { 
                 const a = getRandomInt(3, 8); const b = getRandomInt(5, 12);
                 return { text: `Число x уменьшили в ${a} раз и получили ${b}. Чему равен x?`, solveX: a*b };
             }
@@ -362,14 +359,14 @@
         /* === РАЗДЕЛ 2: БАЗА (4 задачи) === */
         {
             type: "grade3", label: "Основы моделирования", color: "#fdcb6e",
-            gen: () => { // 5. Периметр треугольника (2x + b = P)
+            gen: () => { 
                 const x = getRandomInt(10, 20); const b = getRandomInt(5, 15);
                 return { text: `Периметр равнобедренного треугольника ${2*x+b} см, основание ${b} см. Найди боковую сторону (x).`, solveX: x };
             }
         },
         {
             type: "grade3", label: "Основы моделирования", color: "#fdcb6e",
-            gen: () => { // 6. Магазин и сдача (Money - n*p = Change) => x - cost = change
+            gen: () => { 
                 const price = getRandomInt(20, 40); const count = 3; const total = price * count;
                 const money = total + getRandomInt(10, 50);
                 return { text: `Даша купила ${count} ручки по ${price} р. Сдача составила ${money - total} р. Сколько денег (x) было у Даши?`, solveX: money };
@@ -377,14 +374,14 @@
         },
         {
             type: "grade3", label: "Основы моделирования", color: "#fdcb6e",
-            gen: () => { // 7. Линейная функция (ax + b = c)
+            gen: () => { 
                 const x = getRandomInt(5, 15); const a = getRandomInt(3, 6); const b = getRandomInt(10, 30);
                 return { text: `Я задумал число, умножил его на ${a}, прибавил ${b} и получил ${x*a+b}. Какое число я задумал?`, solveX: x };
             }
         },
         {
             type: "grade3", label: "Основы моделирования", color: "#fdcb6e",
-            gen: () => { // 8. Сумма частей (x + 4x = S)
+            gen: () => { 
                 const x = getRandomInt(5, 12); 
                 return { text: `В первом ящике яблок в 4 раза больше, чем во втором (x). Всего в двух ящиках ${x + 4*x} кг. Сколько во втором?`, solveX: x };
             }
@@ -393,28 +390,28 @@
         /* === РАЗДЕЛ 3: ДВИЖЕНИЕ И ИЗМЕНЕНИЯ (4 задачи) === */
         {
             type: "grade4", label: "Движение и процессы", color: "#0984e3",
-            gen: () => { // 9. Встречное движение (v1+v2)*t = S
+            gen: () => { 
                 const v1 = 60; const v2 = 80; const t = getRandomInt(2, 5);
                 return { text: `Машины выехали навстречу (60 км/ч и 80 км/ч). Расстояние ${(v1+v2)*t} км. Через сколько часов (x) они встретятся?`, solveX: t };
             }
         },
         {
             type: "grade4", label: "Движение и процессы", color: "#0984e3",
-            gen: () => { // 10. Движение по реке (v_lod + x)*t = S
+            gen: () => { 
                 const vBoat = 15; const vRiver = getRandomInt(2, 4); const t = 3;
                 return { text: `Катер плыл по течению ${t} ч. Скорость катера ${vBoat} км/ч, путь ${(vBoat+vRiver)*t} км. Найди скорость течения (x).`, solveX: vRiver };
             }
         },
         {
             type: "grade4", label: "Движение и процессы", color: "#0984e3",
-            gen: () => { // 11. Было/Стало (x - a + b = c)
+            gen: () => { 
                 const init = getRandomInt(50, 90); const sold = 20; const add = 15;
                 return { text: `На складе было x тонн. Увезли ${sold}, привезли ${add}. Стало ${init - sold + add}. Сколько было?`, solveX: init };
             }
         },
         {
             type: "grade4", label: "Движение и процессы", color: "#0984e3",
-            gen: () => { // 12. Разность кратных (5x - x = Diff)
+            gen: () => { 
                 const x = getRandomInt(10, 20);
                 return { text: `Папа тяжелее сына (x) в 5 раз. Разница в весе ${5*x - x} кг. Сколько весит сын?`, solveX: x };
             }
@@ -423,28 +420,28 @@
         /* === РАЗДЕЛ 4: СЛОЖНАЯ СТРУКТУРА (4 задачи) === */
         {
             type: "grade5", label: "Сложные конструкции", color: "#d63031",
-            gen: () => { // 13. Скобки как множитель (x+a)*m = c
+            gen: () => { 
                 const x = getRandomInt(5, 15); const a = 10; const m = 4;
                 return { text: `Задуманное число увеличили на ${a}, результат умножили на ${m} и получили ${(x+a)*m}. Найти число.`, solveX: x };
             }
         },
         {
             type: "grade5", label: "Сложные конструкции", color: "#d63031",
-            gen: () => { // 14. Неизвестный делитель A / (B - x) = C
+            gen: () => { 
                 const x = getRandomInt(2, 8); const b = x + 5; const c = 4;
                 return { text: `Если 100 разделить на разность (${b} - x), то получится ${(100/(b-x)).toFixed(0)}. Чему равен x? (Ответ целый)`, solveX: x };
             }
         },
         {
             type: "grade5", label: "Сложные конструкции", color: "#d63031",
-            gen: () => { // 15. Периметр прямоугольника 2(a+x)=P
+            gen: () => { 
                 const a = getRandomInt(10, 20); const b = getRandomInt(10, 20);
                 return { text: `Периметр участка ${2*(a+b)} м, ширина ${a} м. Найди длину (x).`, solveX: b };
             }
         },
         {
             type: "grade5", label: "Сложные конструкции", color: "#d63031",
-            gen: () => { // 16. Распределительный закон 3(x+2) = val
+            gen: () => { 
                 const x = 10; const val = 3*(x+2);
                 return { text: `Реши уравнение: 3 * (x + 2) = ${val}`, solveX: x };
             }
@@ -453,35 +450,34 @@
         /* === РАЗДЕЛ 5: ПРОФИ (4 задачи) === */
         {
             type: "profi", label: "Профи (6 класс)", color: "#6c5ce7",
-            gen: () => { // 17. Весы (перенос) 3x - 10 = x + 10
-                const x = 10; const diff = 5; // 3x - 5 = x + 15 (при x=10 -> 25=25)
+            gen: () => { 
+                const x = 10; const diff = 5; 
                 return { text: `На первой полке книг в 3 раза больше (3*x). Если с неё убрать ${diff}, а на вторую (x) добавить 15, станет поровну. Найди x.`, solveX: x };
             }
         },
         {
             type: "profi", label: "Профи (6 класс)", color: "#6c5ce7",
-            gen: () => { // 18. Десятичные дроби 0.5x = 10
+            gen: () => { 
                 const x = 20;
                 return { text: `Половина числа (0.5 * x) равна 10. Чему равно само число?`, solveX: x };
             }
         },
         {
             type: "profi", label: "Профи (6 класс)", color: "#6c5ce7",
-            gen: () => { // 19. Проценты (повышение) x + 0.2x = 1.2x
+            gen: () => { 
                 const x = 100;
                 return { text: `Товар стоил x. Подорожал на 20% (стал 1.2 * x) и теперь стоит 120. Найди старую цену.`, solveX: x };
             }
         },
         {
             type: "profi", label: "Профи (6 класс)", color: "#6c5ce7",
-            gen: () => { // 20. Уравнение с двух сторон 5x - 20 = 3x
-                const x = 10; // 50 - 20 = 30
+            gen: () => { 
+                const x = 10; 
                 return { text: `Реши уравнение: 5 * x - 20 = 3 * x`, solveX: x };
             }
         }
     ];
 
-    // --- ИГРОВАЯ ЛОГИКА ---
     let currentLevel = 0;
     let currentProblemData = null;
     let isLevelSolved = false;
@@ -513,6 +509,7 @@
     }
 
     function initLevel(levelIndex) {
+        if (window.RewardSystem) window.RewardSystem.resetErrors();
         currentLevel = levelIndex;
         isLevelSolved = false;
 
@@ -523,7 +520,6 @@
         
         const scenario = LEVEL_SCENARIOS[currentLevel];
         
-        // UI Обновление
         const badge = document.getElementById('levelIndicator');
         badge.textContent = `Уровень ${currentLevel + 1} из ${LEVEL_SCENARIOS.length}`;
         badge.style.background = scenario.color;
@@ -537,13 +533,10 @@
         
         resetCurrentLevel();
 
-        // Генерация задачи
         currentProblemData = scenario.gen();
 
-        // Форматирование текста
         document.getElementById('problemText').innerHTML = currentProblemData.text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
 
-        // Карточки
         const cardsContainer = document.getElementById('problemCards');
         cardsContainer.innerHTML = '';
         const numbers = currentProblemData.text.match(/\d+([.,]\d+)?/g);
@@ -582,6 +575,7 @@
             gameBoard.classList.remove('shake');
             void gameBoard.offsetWidth;
             gameBoard.classList.add('shake');
+            if (window.RewardSystem) window.RewardSystem.registerError("equations_constructor");
         };
 
         if (inputVal === '') { alert("Введи ответ для x!"); triggerShake(); return; }
@@ -637,6 +631,15 @@
         document.getElementById('praiseText').textContent = praises[Math.floor(Math.random() * praises.length)];
         document.getElementById('feedbackOverlay').classList.add('visible');
         startConfetti();
+        
+        if (window.RewardSystem) {
+            window.RewardSystem.resetErrors();
+            if ((currentLevel + 1) % 4 === 0) { 
+                setTimeout(() => {
+                    window.RewardSystem.showWin("Конструктор уравнений", "equations_constructor");
+                }, 1500);
+            }
+        }
     }
 
     function nextLevel() {
@@ -722,5 +725,4 @@
     }
 </script>
 </body>
-
 </html>
