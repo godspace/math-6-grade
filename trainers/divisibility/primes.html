@@ -10,6 +10,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Тренажер: Разложение на простые множители</title>
+    <!-- Глобальный скрипт с аналитикой и системой наград -->
     <script src="../../assets/analytics.js" defer></script>
     <style>
         :root {
@@ -62,7 +63,8 @@
         }
 
         .level-badge {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
             background: rgba(139, 92, 246, 0.2);
             color: #c4b5fd;
             padding: 6px 16px;
@@ -73,6 +75,27 @@
             margin-top: 10px;
             box-shadow: 0 0 10px rgba(139, 92, 246, 0.2);
         }
+
+        /* Динамическая иконка-достижение (Favicon) */
+        .achievement-icon {
+            display: inline-block;
+            width: 22px; 
+            height: 22px;
+            background-image: url('/math-6-grade/favicon.ico');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            margin-right: 8px;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* 6 уровней эволюции геймпада */
+        .skin-0 { filter: grayscale(100%) opacity(0.6); } /* Разминка - Серый */
+        .skin-1 { filter: hue-rotate(90deg) drop-shadow(0 0 5px var(--success)); } /* Зеленый */
+        .skin-2 { filter: hue-rotate(180deg) drop-shadow(0 0 5px var(--primary)); } /* Синий */
+        .skin-3 { filter: hue-rotate(270deg) drop-shadow(0 0 5px #a855f7); } /* Фиолетовый */
+        .skin-4 { filter: hue-rotate(320deg) drop-shadow(0 0 8px #ef4444); } /* Красный */
+        .skin-5 { filter: sepia(1) saturate(5) hue-rotate(10deg) drop-shadow(0 0 15px gold); transform: scale(1.2); } /* Золотой Босс */
 
         /* Игровое поле */
         .game-board {
@@ -409,7 +432,10 @@
 
     <header>
         <h1>Разложение на множители</h1>
-        <div class="level-badge" id="level-indicator">Разминка</div>
+        <div class="level-badge">
+            <span class="achievement-icon skin-0" id="rank-icon"></span>
+            <span id="level-indicator-text">Разминка</span>
+        </div>
     </header>
 
     <div class="game-board" id="game-board">
@@ -476,7 +502,6 @@
         const hintText = document.getElementById('hint-text');
         const nextBtnContainer = document.getElementById('next-btn-container');
         const tracker = document.getElementById('progress-tracker');
-        const levelBadge = document.getElementById('level-indicator');
 
         // Quiz elements
         const quizOverlay = document.getElementById('quiz-overlay');
@@ -506,11 +531,11 @@
         }
 
         function updateLevelUI() {
-            levelBadge.textContent = levels[currentLevelIdx].name;
+            document.getElementById('level-indicator-text').textContent = levels[currentLevelIdx].name;
+            document.getElementById('rank-icon').className = 'achievement-icon skin-' + currentLevelIdx;
             renderInventory();
         }
 
-        // Вспомогательная функция генерации кандидата
         function generateCandidate(level) {
             let num = 1;
             const factorsCount = level.factorsCount[Math.floor(Math.random() * level.factorsCount.length)];
@@ -528,18 +553,18 @@
         }
 
         function generateNewNumber() {
+            if (window.RewardSystem) window.RewardSystem.resetErrors();
+            
             const level = levels[currentLevelIdx];
             let num;
             let attempts = 0;
-            const MAX_ATTEMPTS = 100; // Алгоритмическая страховка от бесконечного цикла
+            const MAX_ATTEMPTS = 100;
 
-            // Rejection Sampling: генерируем пока число не подойдет под условия или мы не исчерпаем попытки
             do {
                 num = generateCandidate(level);
                 attempts++;
                 
                 if (attempts > MAX_ATTEMPTS) {
-                    // Если уникальные комбинации закончились, очищаем историю уровня
                     usedNumbersForLevel.clear();
                     attempts = 0;
                 }
@@ -550,7 +575,6 @@
                 usedNumbersForLevel.has(num)
             );
 
-            // Сохраняем сгенерированное уникальное число
             usedNumbersForLevel.add(num);
 
             currentTarget = num;
@@ -738,6 +762,8 @@
         }
 
         function applyDivision() {
+            if (window.RewardSystem) window.RewardSystem.resetErrors();
+
             const targetEl = document.getElementById('active-target-el');
             
             currentTarget = currentTarget / pendingPrime;
@@ -770,6 +796,8 @@
             currentTarget = originalTarget;
             activeFactors = [];
             isRoundOver = false;
+
+            if (window.RewardSystem) window.RewardSystem.registerError('primes');
 
             gameBoard.classList.add('anim-error');
             setTimeout(() => gameBoard.classList.remove('anim-error'), 500);
@@ -835,6 +863,14 @@
             nextBtnContainer.style.display = 'block';
 
             fireConfetti();
+
+            if (winsInLevel >= levels[currentLevelIdx].requiredWins) {
+                setTimeout(() => {
+                    if (window.RewardSystem) {
+                        window.RewardSystem.showWin("Разложение на множители", "primes");
+                    }
+                }, 1500);
+            }
         }
 
         function startNextRound() {
@@ -842,7 +878,7 @@
                 if (currentLevelIdx < levels.length - 1) {
                     currentLevelIdx++;
                     winsInLevel = 0;
-                    usedNumbersForLevel.clear(); // Очищаем историю при переходе на новый уровень
+                    usedNumbersForLevel.clear(); 
                     updateLevelUI();
                 } else {
                     winsInLevel = 0; 
