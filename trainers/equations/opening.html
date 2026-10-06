@@ -285,6 +285,7 @@
 
 <div class="toast hidden" id="onboardToast">👆 Возьми круг-множитель и перетащи его на карточку со скобками!</div>
 
+<script src="../../assets/analytics.js"></script>
 <script>
 /* ═══════════ СОСТОЯНИЕ ═══════════ */
 const TOTAL_LEVELS = 7;
@@ -379,7 +380,6 @@ function gen() {
 
 /* ═══════════ ФОРМАТИРОВАНИЕ ═══════════ */
 const minus = s => String(s).replace(/-/g, '−');
-/* приведение ввода к числу: принимает и дефис, и юникод-минус, и запятую */
 function parseNum(raw) { return parseFloat(String(raw).trim().replace('−', '-').replace(',', '.')); }
 function xLabel(v) { const a = Math.abs(v); return (a === 1 ? 'x' : a + 'x'); }
 function absLabel(card) { return card.type === 'x' ? xLabel(card.value) : String(Math.abs(card.value)); }
@@ -517,7 +517,7 @@ function doOpening() {
     $('onboardToast').classList.add('hidden');
     localStorage.setItem('op_onboard', '1');
 
-    const circle = $('multCircle'), br = $('bracketCard');
+    const circle = $('multCircle'), br =$('bracketCard');
     if (!circle || !br) { busy = false; return; }
     circle.classList.add('spent');
     circle.draggable = false;
@@ -543,8 +543,7 @@ function doOpening() {
                        `<span class="inrow"><input class="prod-in" id="prod1" type="number" step="any" placeholder="?"><span class="xsuf">x</span></span>`;
         t2.innerHTML = `<span class="prompt${neg ? ' neg' : ''}">${prod2Str}</span>` +
                        `<span class="inrow"><input class="prod-in" id="prod2" type="number" step="any" placeholder="?"></span>`;
-        $('prod1').addEventListener('input', validateProducts);
-        $('prod2').addEventListener('input', validateProducts);
+        $('prod1').addEventListener('input', validateProducts);$('prod2').addEventListener('input', validateProducts);
         msg('Посчитай оба произведения ВМЕСТЕ со знаком и впиши их в окошки.', 'ok');
         setTimeout(() => { const p = $('prod1'); if (p) p.focus(); }, 120);
         busy = false;
@@ -553,7 +552,7 @@ function doOpening() {
 
 function validateProducts() {
     if (productsSolved) return;
-    const i1 = $('prod1'), i2 = $('prod2');
+    const i1 = $('prod1'), i2 =$('prod2');
     if (!i1 || !i2) return;
     const r1 = i1.value.trim(), r2 = i2.value.trim();
     const v1 = parseNum(r1), v2 = parseNum(r2);
@@ -567,6 +566,7 @@ function validateProducts() {
 
     if (!e1 && !e2 && (v1 !== c1 || v2 !== c2)) {
         msg(`Пока не то. Вспомни знаки умножения: ${minus(String(eq.a))}·${eq.b === 1 ? '' : eq.b}x и ${minus(`${eq.a}·${eq.c < 0 ? '(' + eq.c + ')' : eq.c}`)}.`, 'err');
+        if (window.RewardSystem) window.RewardSystem.registerError("opening");
     }
 
     if (v1 === c1 && v2 === c2) {
@@ -708,6 +708,7 @@ function validateMerge(side) {
 
     if (!isEmpty && v !== correct) {
         msg(`Пока не то: ${cardText(a, true).trim()} ${signOf(b.value)} ${absLabel(b)} = ? ${a.type === 'x' ? 'Сложи коэффициенты при x.' : 'Сложи числа.'} Не забудь про знак!`, 'err');
+        if (window.RewardSystem) window.RewardSystem.registerError("opening");
     }
 
     if (v === correct) {
@@ -728,7 +729,7 @@ function maybeFinishStep3() {
         if (step !== 3) return;
         setStep(4); renderAll();
         $('answerArea').classList.remove('hidden');
-        attempts = 0; $('answerInput').value = ''; $('answerInput').disabled = false;
+        attempts = 0; $('answerInput').value = '';$('answerInput').disabled = false;
         msg('Найди x: раздели число справа на коэффициент при x и введи ответ со знаком.', 'ok');
     }, 900);
 }
@@ -744,11 +745,20 @@ $('checkBtn').addEventListener('click', () => {
         $('nextBtn').classList.remove('hidden');
         confetti();
         if (window.trackGoal) trackGoal('task_solved', { trainer: 'opening', level: level });
+        
+        if (window.RewardSystem) {
+            window.RewardSystem.resetErrors();
+            setTimeout(() => {
+                window.RewardSystem.showWin("Раскрытие скобок", "opening");
+            }, 1500);
+        }
     } else {
         attempts++;
         let text = `Пока нет. Чтобы найти x, раздели ${minus(eq.m)} на ${minus(eq.k)}. Проверь знак ответа!`;
         if (attempts >= 3) text += ` Подсказка: x = ${minus(eq.m)} ÷ ${minus(eq.k)}.`;
         msg(text, 'err');
+        
+        if (window.RewardSystem) window.RewardSystem.registerError("opening");
     }
 });
 
@@ -784,6 +794,8 @@ $('hintBtn').addEventListener('click', () => {
 
 /* ═══════════ УРОВНИ ═══════════ */
 function startLevel() {
+    if (window.RewardSystem) window.RewardSystem.resetErrors();
+    
     eq = gen();
     leftCards = [];
     rightCards = [ { type: 'num', value: eq.d, id: uid() },
@@ -793,8 +805,7 @@ function startLevel() {
     pendingMerges = { left: null, right: null };
     board.classList.remove('opened');
     $('levelBadge').textContent = `Уровень ${level} из ${TOTAL_LEVELS}`;
-    $('answerArea').classList.add('hidden');
-    $('nextBtn').classList.add('hidden');
+    $('answerArea').classList.add('hidden');$('nextBtn').classList.add('hidden');
     msg(LEVEL_THEMES[level] || '', 'ok');
     setStep(1);
     renderAll();
@@ -808,8 +819,7 @@ $('nextBtn').addEventListener('click', () => {
         if (window.trackGoal) trackGoal('course_finished', { trainer: 'opening' });
     } else startLevel();
 });
-$('resetBtn').addEventListener('click', startLevel);
-$('restartBtn').addEventListener('click', () => {
+$('resetBtn').addEventListener('click', startLevel);$('restartBtn').addEventListener('click', () => {
     level = 1; $('finishOverlay').classList.add('hidden'); startLevel();
 });
 
@@ -828,6 +838,5 @@ function confetti() {
 
 startLevel();
 </script>
-<script src="../../assets/analytics.js"></script>
 </body>
 </html>
