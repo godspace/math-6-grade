@@ -1,17 +1,52 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- ─── SEO-БЛОК ─── -->
+    <title>Тренажёр: Сравнение дробей и приведение к общему знаменателю | 6 класс</title>
+    <meta name="description" content="Интерактивный онлайн-тренажёр по математике для 6 класса. Учимся находить общий знаменатель, дополнительные множители и сравнивать обыкновенные дроби. Бесплатно и без регистрации.">
+    <meta name="keywords" content="сравнение дробей тренажер, общий знаменатель 6 класс, приведение дробей к общему знаменателю, онлайн тренажер по математике 6 класс дроби, дополнительные множители">
+    <meta name="author" content="Козлов Сергей Владимирович">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://godspace.github.io/math-6-grade/trainers/fractions/comparison.html">
+
+    <!-- Open Graph (для красивых репостов в ВК, Telegram и т.д.) -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Тренажёр: Сравнение обыкновенных дробей (6 класс)">
+    <meta property="og:description" content="Пошаговый тренажёр. Найди общий знаменатель, умножь числители и выбери знак: больше, меньше или равно.">
+    <meta property="og:url" content="https://godspace.github.io/math-6-grade/trainers/fractions/comparison.html">
+    <meta property="og:site_name" content="Математика 6 класс">
+
+    <!-- JSON-LD: Микроразметка для поисковиков -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "LearningResource",
+        "name": "Тренажёр сравнения дробей",
+        "description": "Интерактивная практика по приведению обыкновенных дробей к общему знаменателю и их сравнению.",
+        "educationalLevel": "6 класс",
+        "learningResourceType": "Интерактивный тренажёр",
+        "inLanguage": "ru",
+        "isAccessibleForFree": true,
+        "teaches": ["Сравнение обыкновенных дробей", "Нахождение наименьшего общего знаменателя (НОК)", "Дополнительные множители"],
+        "url": "https://godspace.github.io/math-6-grade/trainers/fractions/comparison.html"
+    }
+    </script>
+    <!-- ─── КОНЕЦ SEO-БЛОКА ─── -->
+
+    <!-- Favicons -->
     <link rel="icon" href="/math-6-grade/favicon.ico" sizes="any">
     <link rel="icon" type="image/png" sizes="16x16" href="/math-6-grade/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/math-6-grade/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="48x48" href="/math-6-grade/favicon-48x48.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/math-6-grade/apple-touch-icon.png">
     <link rel="manifest" href="/math-6-grade/site.webmanifest">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Тренажер сравнения дробей</title>
+
     <!-- Подключаем глобальный скрипт -->
     <script src="../../assets/analytics.js" defer></script>
+    
     <style>
         * {
             box-sizing: border-box;
@@ -336,79 +371,6 @@
             60% {transform: translateY(-6px);}
         }
         
-        .charts-container {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-top: 20px;
-        }
-        
-        .chart-group {
-            margin-bottom: 10px;
-        }
-        
-        .chart-wrapper {
-            margin-bottom: 5px;
-        }
-        
-        .chart-label {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-            font-size: 0.95rem;
-        }
-        
-        .fraction-text {
-            font-size: 16px;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        
-        .common-fraction-text {
-            font-size: 16px;
-            font-weight: bold;
-            color: #9b59b6;
-        }
-        
-        .chart {
-            display: flex;
-            height: 40px;
-            border: 2px solid #2c3e50;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .segment {
-            flex: 1;
-            position: relative;
-            transition: all 0.3s ease;
-        }
-        
-        /* Четкие разделители между сегментами */
-        .segment:not(:last-child)::after {
-            content: '';
-            position: absolute;
-            right: 0;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background-color: #2c3e50;
-            z-index: 2;
-        }
-        
-        .fraction-1 .filled {
-            background: linear-gradient(to right, #3498db, #2980b9);
-        }
-        
-        .fraction-2 .filled {
-            background: linear-gradient(to right, #e74c3c, #c0392b);
-        }
-        
-        .empty {
-            background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
-        }
-        
         .common-denominator-section {
             margin-top: 15px;
             padding: 10px;
@@ -583,43 +545,6 @@
                 <h3>Общий знаменатель: <span id="commonDenominatorValue">15</span></h3>
             </div>
             <div class="correct-comparison" id="correctComparisonText"></div>
-            <div class="charts-container">
-                <div class="chart-group">
-                    <div class="chart-wrapper fraction-1">
-                        <div class="chart-label">
-                            <span>Дробь 1:</span>
-                            <span class="fraction-text" id="fractionText1">3/5</span>
-                        </div>
-                        <div class="chart" id="chart1"></div>
-                    </div>
-                    
-                    <div class="chart-wrapper fraction-1">
-                        <div class="chart-label">
-                            <span>С общим знаменателем:</span>
-                            <span class="common-fraction-text" id="commonFractionText1">9/15</span>
-                        </div>
-                        <div class="chart" id="commonChart1"></div>
-                    </div>
-                </div>
-                
-                <div class="chart-group">
-                    <div class="chart-wrapper fraction-2">
-                        <div class="chart-label">
-                            <span>Дробь 2:</span>
-                            <span class="fraction-text" id="fractionText2">2/3</span>
-                        </div>
-                        <div class="chart" id="chart2"></div>
-                    </div>
-                    
-                    <div class="chart-wrapper fraction-2">
-                        <div class="chart-label">
-                            <span>С общим знаменателем:</span>
-                            <span class="common-fraction-text" id="commonFractionText2">10/15</span>
-                        </div>
-                        <div class="chart" id="commonChart2"></div>
-                    </div>
-                </div>
-            </div>
         </div>
         
         <div class="progress-container">
@@ -673,7 +598,8 @@
         
         // Генерация случайного задания
         function generateTask() {
-            if (window.RewardSystem) window.RewardSystem.resetErrors();
+            // Интеграция с системой наград: сброс ошибок при старте задания НЕ нужен, 
+            // так как ошибки обнуляются при правильном ответе. Оставляем как есть.
             
             let denominator1, denominator2;
             let commonDenominator;
@@ -847,7 +773,7 @@
                 handleIncorrectAnswer();
             }
             
-            // Показываем решение с диаграммами
+            // Показываем решение
             showSolution();
             
             // После проверки показываем кнопку "Следующее задание"
@@ -873,6 +799,9 @@
             document.getElementById('feedbackMessage').style.color = '#27ae60';
             document.getElementById('feedbackEmoji').textContent = randomEmoji;
             
+            // Интеграция с системой наград: сброс ошибок при правильном ответе
+            if (window.RewardSystem) window.RewardSystem.resetErrors();
+            
             if (stats.streak === 3 || stats.streak === 6) {
                 if (window.RewardSystem) {
                     setTimeout(() => {
@@ -893,18 +822,15 @@
             document.getElementById('feedbackMessage').style.color = '#e74c3c';
             document.getElementById('feedbackEmoji').textContent = '💡';
             
+            // Интеграция с системой наград: регистрация ошибки
             if (window.RewardSystem) {
                 window.RewardSystem.registerError("fraction_comparison");
             }
         }
         
-        // Показать решение с диаграммами
+        // Показать решение без диаграмм
         function showSolution() {
             const {
-                numerator1,
-                denominator1,
-                numerator2,
-                denominator2,
                 commonDenominator,
                 multiplier1,
                 multiplier2,
@@ -914,18 +840,7 @@
                 result2Denominator
             } = currentTask;
             
-            // Обновление текстового представления дробей
-            document.getElementById('fractionText1').textContent = `${numerator1}/${denominator1}`;
-            document.getElementById('fractionText2').textContent = `${numerator2}/${denominator2}`;
-            document.getElementById('commonFractionText1').textContent = `${result1Numerator}/${result1Denominator}`;
-            document.getElementById('commonFractionText2').textContent = `${result2Numerator}/${result2Denominator}`;
             document.getElementById('commonDenominatorValue').textContent = commonDenominator;
-            
-            // Отрисовка диаграмм
-            drawFractionChart(numerator1, denominator1, 'chart1');
-            drawFractionChart(numerator2, denominator2, 'chart2');
-            drawFractionChart(result1Numerator, result1Denominator, 'commonChart1');
-            drawFractionChart(result2Numerator, result2Denominator, 'commonChart2');
             
             // Заполняем правильные значения в полях ввода для наглядности
             document.getElementById('multiplier1Numerator').value = multiplier1;
@@ -936,22 +851,6 @@
             document.getElementById('result1Denominator').value = result1Denominator;
             document.getElementById('result2Numerator').value = result2Numerator;
             document.getElementById('result2Denominator').value = result2Denominator;
-        }
-        
-        // Отрисовка диаграммы
-        function drawFractionChart(numerator, denominator, chartId) {
-            const chart = document.getElementById(chartId);
-            
-            // Очистка предыдущей диаграммы
-            chart.innerHTML = '';
-            
-            // Создание сегментов
-            for (let i = 0; i < denominator; i++) {
-                const segment = document.createElement('div');
-                segment.className = `segment ${i < numerator ? 'filled' : 'empty'}`;
-                segment.title = `${i + 1}/${denominator}`;
-                chart.appendChild(segment);
-            }
         }
         
         // Обновление статистики
