@@ -1,16 +1,50 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- ─── SEO-БЛОК ─── -->
+    <title>Тренажёр: Задачи на составление уравнений (5, 6, 7 класс)</title>
+    <meta name="description" content="Учимся решать задачи с помощью уравнений. Интерактивный конструктор уравнений для 5-7 классов: введи неизвестное, составь уравнение по тексту и найди ответ.">
+    <meta name="keywords" content="задачи на составление уравнений 6 класс, задачи на составление уравнений 5 класс, задачи на составление уравнений 7 класс алгебра, задачи по математике 6 класс на составление уравнений, решение задач с помощью уравнений тренажер">
+    <meta name="author" content="Козлов Сергей Владимирович">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://godspace.github.io/math-6-grade/trainers/equations/equations_construct.html">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Конструктор уравнений: Текстовые задачи (5-7 класс)">
+    <meta property="og:description" content="Интерактивная рабочая тетрадь из 6 листов. Пройди все этапы математического моделирования: от введения переменной x до финального ответа.">
+    <meta property="og:url" content="https://godspace.github.io/math-6-grade/trainers/equations/equations_construct.html">
+    <meta property="og:site_name" content="Математика 6 класс">
+
+    <!-- JSON-LD: Микроразметка -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "LearningResource",
+        "name": "Интерактивный конструктор уравнений по текстовым задачам",
+        "description": "Рабочая тетрадь-тренажёр, в которой ученик пошагово конструирует математическую модель на основе условия 6 типов текстовых задач: на части, на движение, на стоимость, на равенство и на геометрию.",
+        "educationalLevel": ["5 класс", "6 класс", "7 класс"],
+        "learningResourceType": "Интерактивный тренажёр",
+        "inLanguage": "ru",
+        "isAccessibleForFree": true,
+        "teaches": ["Задачи на составление уравнений", "Задачи на движение", "Математическое моделирование", "Текстовые задачи", "Решение линейных уравнений"],
+        "url": "https://godspace.github.io/math-6-grade/trainers/equations/equations_construct.html"
+    }
+    </script>
+    <!-- ─── КОНЕЦ SEO-БЛОКА ─── -->
+
     <link rel="icon" href="/math-6-grade/favicon.ico" sizes="any">
     <link rel="icon" type="image/png" sizes="16x16" href="/math-6-grade/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/math-6-grade/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="48x48" href="/math-6-grade/favicon-48x48.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/math-6-grade/apple-touch-icon.png">
     <link rel="manifest" href="/math-6-grade/site.webmanifest">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Тренажёр: Решение уравнений (6 класс)</title>
+    
     <script src="../../assets/analytics.js" defer></script>
+    
     <style>
         :root {
             --bg-base: #0f172a;
@@ -988,7 +1022,6 @@
         updateProgress();
     }
 
-    // --- Универсальный Drag & Drop ---
     function allowDrop(e) {
         e.preventDefault();
         e.currentTarget.classList.add('drag-over');
@@ -1020,7 +1053,6 @@
         if (variable) selectVar(taskId, variable);
     }
     
-    // Специальная функция для ловли ошибок на чертеже в Задаче 4
     function wrongVarDrop(e, msg) {
         e.preventDefault();
         e.currentTarget.classList.remove('drag-over');
@@ -1045,6 +1077,9 @@
     }
 
     function selectVar(taskId, variable) {
+        // Интеграция с RewardSystem: сбрасываем ошибки при начале новой задачи
+        if (window.RewardSystem) window.RewardSystem.resetErrors();
+
         userVars[taskId] = variable;
         
         const dropzone = document.getElementById(`drop-task${taskId}`);
@@ -1080,7 +1115,6 @@
         }
     }
 
-    // Сохраняем математические знаки, унифицируем умножение и минус
     function cleanStr(str) {
         const map = {'х':'x', 'у':'y', 'а':'a', 'с':'c', 'е':'e', 'п':'n', 'н':'n', 'з':'z', 'р':'p', 'в':'b'};
         let s = str.trim().toLowerCase().replace(/[хуасепнзрв]/g, m => map[m]).replace(/\s+/g, '');
@@ -1110,14 +1144,12 @@
             
             let actual = cleanStr(rawActual);
             
-            // Если ожидаемый ответ не содержит знака умножения, а ученик его ввёл в input, прощаем
             if (!expected.includes('*') && inp.tagName.toLowerCase() === 'input') {
                 actual = actual.replace(/\*/g, '');
             }
 
             let isCorrect = (actual === expected);
             
-            // Проверка перестановки (a+b = b+a)
             if (!isCorrect && expected.includes('+')) {
                 let parts = expected.split('+');
                 if (parts.length === 2 && actual === parts[1] + '+' + parts[0]) {
@@ -1137,6 +1169,9 @@
         });
 
         if (allCorrect) {
+            // Интеграция с RewardSystem: сброс ошибок при правильном шаге
+            if (window.RewardSystem) window.RewardSystem.resetErrors();
+
             btn.style.display = 'none';
             const msg = step.querySelector('.success-msg');
             if(msg) msg.style.display = 'inline-flex';
@@ -1153,6 +1188,9 @@
                 if (finalBox) finalBox.style.display = 'block';
                 updateProgress(true);
             }
+        } else {
+            // Интеграция с RewardSystem: регистрация ошибки
+            if (window.RewardSystem) window.RewardSystem.registerError("equations_construct");
         }
     }
 
@@ -1163,6 +1201,13 @@
             document.getElementById(`task${currentTask}`).classList.add('active');
             updateProgress();
             window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            // Выдаем лутбокс каждую вторую задачу
+            if (currentTask % 2 !== 0 && window.RewardSystem) {
+                 setTimeout(() => {
+                     window.RewardSystem.showWin(`Задача ${currentTask-1} пройдена!`, "equations_construct");
+                 }, 500);
+            }
         }
     }
 
@@ -1171,6 +1216,13 @@
         document.getElementById('completion-screen').style.display = 'block';
         updateProgress(true);
         window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        // Выдаем финальный лутбокс
+        if (window.RewardSystem) {
+             setTimeout(() => {
+                 window.RewardSystem.showWin("Все задачи решены!", "equations_construct");
+             }, 1000);
+        }
     }
 
     document.addEventListener('keydown', function(e) {
