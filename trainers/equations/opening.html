@@ -1,33 +1,31 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <link rel="icon" href="/math-6-grade/favicon.ico" sizes="any">
-    <link rel="icon" type="image/png" sizes="16x16" href="/math-6-grade/favicon-16x16.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/math-6-grade/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="48x48" href="/math-6-grade/favicon-48x48.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="/math-6-grade/apple-touch-icon.png">
-    <link rel="manifest" href="/math-6-grade/site.webmanifest">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Раскрытие скобок и решение уравнений 6 класс | Онлайн-тренажёр</title>
-    <meta name="description" content="Интерактивный тренажёр: раскрытие скобок перетаскиванием, перенос слагаемых со сменой знака, приведение подобных и решение полученного уравнения. 7 уровней сложности: от положительных чисел до отрицательного множителя. Бесплатно, 6 класс.">
-    <meta name="keywords" content="раскрытие скобок тренажер, решение уравнений 6 класс, генератор уравнений, перенос слагаемых, приведение подобных слагаемых, уравнения с отрицательными числами тренажер">
+    <!-- ─── SEO-БЛОК ─── -->
+    <title>Тренажёр: Раскрытие скобок и решение уравнений | Математика 6 класс</title>
+    <meta name="description" content="Пошаговый интерактивный онлайн-тренажёр по математике для 6 класса. Учимся раскрывать скобки, переносить слагаемые, приводить подобные и решать линейные уравнения. 7 уровней сложности.">
+    <meta name="keywords" content="раскрытие скобок тренажер, решение уравнений 6 класс, генератор уравнений, перенос слагаемых, приведение подобных слагаемых, уравнения с отрицательными числами тренажер, математика онлайн">
+    <meta name="author" content="Козлов Сергей Владимирович">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://godspace.github.io/math-6-grade/trainers/equations/opening.html">
 
+    <!-- Open Graph (для красивых репостов) -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="Раскрытие скобок и решение уравнений 6 класс — тренажёр">
-    <meta property="og:description" content="4 шага: скобки → перенос → приведение → ответ. 7 уровней: от положительных чисел до отрицательного множителя.">
+    <meta property="og:title" content="Тренажёр: Раскрытие скобок и уравнения (6 класс)">
+    <meta property="og:description" content="Интерактивная практика в 4 шага: раскрой скобки, перенеси слагаемые с x в одну сторону, приведи подобные и найди ответ.">
     <meta property="og:url" content="https://godspace.github.io/math-6-grade/trainers/equations/opening.html">
     <meta property="og:site_name" content="Математика 6 класс">
 
+    <!-- JSON-LD: Микроразметка -->
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
         "@type": "LearningResource",
         "name": "Раскрытие скобок и решение уравнений — тренажёр",
-        "description": "Пошаговый тренажёр решения уравнений: раскрытие скобок, перенос слагаемых, приведение подобных, нахождение x. 7 уровней сложности, включая отрицательный множитель перед скобкой. Для 6 класса.",
+        "description": "Пошаговый тренажёр решения линейных уравнений: раскрытие скобок (распределительный закон), перенос слагаемых, приведение подобных, нахождение x. 7 уровней сложности, включая работу с отрицательными множителями.",
         "educationalLevel": "6 класс",
         "learningResourceType": "Интерактивный тренажёр",
         "inLanguage": "ru",
@@ -36,6 +34,18 @@
         "url": "https://godspace.github.io/math-6-grade/trainers/equations/opening.html"
     }
     </script>
+    <!-- ─── КОНЕЦ SEO-БЛОКА ─── -->
+
+    <!-- Favicons -->
+    <link rel="icon" href="/math-6-grade/favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="16x16" href="/math-6-grade/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/math-6-grade/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="48x48" href="/math-6-grade/favicon-48x48.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/math-6-grade/apple-touch-icon.png">
+    <link rel="manifest" href="/math-6-grade/site.webmanifest">
+
+    <!-- Глобальный скрипт с аналитикой и лутбоксами -->
+    <script src="../../assets/analytics.js" defer></script>
 
     <style>
         * { box-sizing: border-box; }
@@ -155,7 +165,7 @@
         .bracket .bterm.calc { animation: flipCard .45s ease; }
         .xsuf { margin-left: 2px; }
 
-        /* ── Числовые поля (без спиннеров, минус с клавиатуры) ── */
+        /* ── Числовые поля ── */
         .bracket .prod-in, .merge-in, .answer-x {
             padding: 4px 6px; font: inherit; font-weight: 800; text-align: center;
             border: 2px solid #b9c6d8; border-radius: 8px; color: #2c3e50;
@@ -285,7 +295,6 @@
 
 <div class="toast hidden" id="onboardToast">👆 Возьми круг-множитель и перетащи его на карточку со скобками!</div>
 
-<script src="../../assets/analytics.js"></script>
 <script>
 /* ═══════════ СОСТОЯНИЕ ═══════════ */
 const TOTAL_LEVELS = 7;
@@ -566,6 +575,7 @@ function validateProducts() {
 
     if (!e1 && !e2 && (v1 !== c1 || v2 !== c2)) {
         msg(`Пока не то. Вспомни знаки умножения: ${minus(String(eq.a))}·${eq.b === 1 ? '' : eq.b}x и ${minus(`${eq.a}·${eq.c < 0 ? '(' + eq.c + ')' : eq.c}`)}.`, 'err');
+        
         if (window.RewardSystem) window.RewardSystem.registerError("opening");
     }
 
@@ -708,6 +718,7 @@ function validateMerge(side) {
 
     if (!isEmpty && v !== correct) {
         msg(`Пока не то: ${cardText(a, true).trim()} ${signOf(b.value)} ${absLabel(b)} = ? ${a.type === 'x' ? 'Сложи коэффициенты при x.' : 'Сложи числа.'} Не забудь про знак!`, 'err');
+        
         if (window.RewardSystem) window.RewardSystem.registerError("opening");
     }
 
