@@ -3,7 +3,39 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Тренажер: Нахождение НОК | Математика 6 класс</title>
+
+<!-- ─── SEO-БЛОК ─── -->
+<title>Тренажёр: Нахождение НОК | Математика 6 класс</title>
+<meta name="description" content="Интерактивный тренажёр по математике для 6 класса: учимся находить Наименьшее Общее Кратное (НОК). Пошаговое разложение на простые множители и проверка.">
+<meta name="keywords" content="нахождение НОК тренажер, наименьшее общее кратное 6 класс, математика 6 класс НОК, простые множители тренажер онлайн, как найти НОК">
+<meta name="author" content="Козлов Сергей Владимирович">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://godspace.github.io/math-6-grade/trainers/divisibility/lcm.html">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Тренажёр: Наименьшее Общее Кратное (6 класс)">
+<meta property="og:description" content="Пошаговый тренажёр: разложи числа на простые множители, выбери базу, добавь недостающие множители и вычисли НОК.">
+<meta property="og:url" content="https://godspace.github.io/math-6-grade/trainers/divisibility/lcm.html">
+<meta property="og:site_name" content="Математика 6 класс">
+
+<!-- JSON-LD -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "LearningResource",
+    "name": "Тренажёр по нахождению НОК",
+    "description": "Пошаговый интерактивный тренажёр для нахождения Наименьшего Общего Кратного (НОК) нескольких чисел через метод разложения на простые множители.",
+    "educationalLevel": "6 класс",
+    "learningResourceType": "Интерактивный тренажёр",
+    "inLanguage": "ru",
+    "isAccessibleForFree": true,
+    "teaches": ["Нахождение НОК", "Разложение числа на простые множители", "Приведение дробей к общему знаменателю"],
+    "url": "https://godspace.github.io/math-6-grade/trainers/divisibility/lcm.html"
+}
+</script>
+<!-- ─── КОНЕЦ SEO-БЛОКА ─── -->
+
 <link rel="icon" href="/math-6-grade/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="16x16" href="/math-6-grade/favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="/math-6-grade/favicon-32x32.png">
@@ -11,9 +43,13 @@
 <link rel="apple-touch-icon" sizes="180x180" href="/math-6-grade/apple-touch-icon.png">
 <link rel="manifest" href="/math-6-grade/site.webmanifest">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+
+<!-- Подключаем глобальный скрипт -->
+<script src="../../assets/analytics.js" defer></script>
+
 <style>
   :root {
-    --primary: #8E44AD; /* Фиолетовый для НОК (чтобы отличать от НОД) */
+    --primary: #8E44AD; 
     --primary-hover: #9B59B6;
     --success: #00B894;
     --warning: #FDCB6E;
@@ -49,7 +85,6 @@
     overflow: hidden;
   }
 
-  /* Мнемонический заголовок НОК */
   .mnemonic-container {
     display: flex;
     justify-content: center;
@@ -85,7 +120,6 @@
   .mnem-word:nth-child(2) .mnem-letter { color: var(--warning); }
   .mnem-word:nth-child(3) .mnem-letter { color: var(--success); }
 
-  /* Инструкции */
   #instructions {
     color: var(--primary);
     font-size: 19px;
@@ -122,7 +156,6 @@
     min-height: 55px;
   }
 
-  /* Метки с числами */
   .label {
     font-weight: 900;
     color: var(--text-main);
@@ -157,7 +190,6 @@
     border-color: var(--primary);
   }
 
-  /* Дизайн множителей */
   .factor {
     padding: 8px 18px;
     background: #DFE6E9;
@@ -198,7 +230,6 @@
 
   .sign { color: var(--text-muted); font-size: 20px; font-weight: 800; }
   
-  /* Пазл-слоты */
   input[type="number"].slot-input {
     font-family: 'Nunito', sans-serif;
     font-size: 20px;
@@ -300,7 +331,6 @@
     pointer-events: none; z-index: 100;
   }
 </style>
-<script src="../../assets/analytics.js"></script>
 </head>
 <body>
 
@@ -328,7 +358,6 @@
     </div>
   </div>
 
-  <!-- Блок проверки -->
   <div id="verification-area" class="lcm-area hidden" style="border-color: var(--warning); background: rgba(253, 203, 110, 0.1);">
     <div class="lcm-title" style="color: #d35400;">Проверка (Раздели НОК на каждое число):</div>
     <div id="verification-board"></div>
@@ -402,6 +431,8 @@
   }
 
   function initGame() {
+    if (window.RewardSystem) window.RewardSystem.resetErrors();
+
     currentStage = 1;
     baseIndex = -1;
     addedFactors = [];
@@ -424,7 +455,6 @@
     setInstruction('Шаг 1. 🎯 Заполни пустые слоты простыми множителями', 1);
 
     currentSet = sets[Math.floor(Math.random() * sets.length)];
-    // Перемешиваем, чтобы наибольшее число не всегда было последним
     currentSet.sort(() => Math.random() - 0.5);
     
     targetFactors = currentSet.map(n => getPrimeFactors(n));
@@ -530,6 +560,8 @@
         return;
     }
 
+    if (window.RewardSystem) window.RewardSystem.resetErrors();
+
     factorsArr[r][c].value = val;
     factorsArr[r][c].state = 'normal';
     document.getElementById('message').innerText = ''; 
@@ -557,6 +589,8 @@
       msg.innerText = text;
       msg.style.color = 'var(--danger)';
       msg.style.background = 'rgba(255, 118, 117, 0.1)';
+
+      if (window.RewardSystem) window.RewardSystem.registerError("lcm");
   }
 
   function checkStage1Progress() {
@@ -587,7 +621,6 @@
     
     document.getElementById('lcm-area').classList.remove('hidden');
     
-    // Пересчитываем недостающие множители
     let isMissingAny = recalcCoverage();
     updateLCMArea();
     render();
@@ -599,7 +632,6 @@
     }
   }
 
-  // Умный алгоритм вычисления недостающих множителей "на лету"
   function recalcCoverage() {
       let currentAssembly = [];
       factorsArr[baseIndex].forEach(f => currentAssembly.push(f.value));
@@ -621,10 +653,10 @@
                   if (idx > -1) {
                       pool.splice(idx, 1);
                       f.isNeeded = false; 
-                      f.state = 'normal'; // Покрыт Базой
+                      f.state = 'normal';
                   } else {
                       f.isNeeded = true;  
-                      f.state = 'clickable'; // Доступен для клика
+                      f.state = 'clickable';
                       anyNeeded = true;
                   }
               }
@@ -687,6 +719,8 @@
     let msg = document.getElementById('message');
     
     if (inputVal === expectedLCM) {
+      if (window.RewardSystem) window.RewardSystem.resetErrors();
+
       msg.innerHTML = '🏆 <b>Отлично!</b> НОК = ' + expectedLCM + '. Теперь давай его проверим!';
       msg.style.color = 'var(--success)';
       msg.style.background = 'rgba(0, 184, 148, 0.1)';
@@ -750,6 +784,8 @@
       let expected = expectedLCM / currentSet[idx];
       
       if(val === expected) {
+          if (window.RewardSystem) window.RewardSystem.resetErrors();
+
           inpEl.disabled = true;
           inpEl.style.borderColor = 'var(--success)';
           inpEl.style.color = 'var(--success)';
@@ -781,6 +817,13 @@
       document.getElementById('restart-btn').classList.remove('hidden');
       vibrate([100, 50, 100, 50, 200]); 
       fireConfetti();
+
+      // Вызов лутбокса
+      if (window.RewardSystem) {
+          setTimeout(() => {
+              window.RewardSystem.showWin("Нахождение НОК", "lcm");
+          }, 1500);
+      }
   }
 
   function fireConfetti() {
