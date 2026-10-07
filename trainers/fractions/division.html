@@ -1,16 +1,52 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- ─── SEO-БЛОК ─── -->
+    <title>Тренажёр и калькулятор: Деление дробей | 5-6 класс</title>
+    <meta name="description" content="Интерактивный онлайн тренажёр и калькулятор дробей. Узнай, как решать деление дробей: переворот делителя, сокращение множителей и пошаговое вычисление.">
+    <meta name="keywords" content="деление дробей, деление дробей 5 класс, деление дробей с разными знаменателями, деление дробей калькулятор, калькулятор дробей онлайн, умножение и деление дробей, математика">
+    <meta name="author" content="Козлов Сергей Владимирович">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://godspace.github.io/math-6-grade/trainers/fractions/division.html">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Мастер Дробей: Деление и Сокращение (5-6 класс)">
+    <meta property="og:description" content="Замени деление умножением, переверни дробь и сократи! Наглядный тренажёр для отработки главного правила деления дробей.">
+    <meta property="og:url" content="https://godspace.github.io/math-6-grade/trainers/fractions/division.html">
+    <meta property="og:site_name" content="Математика 6 класс">
+
+    <!-- JSON-LD -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "LearningResource",
+        "name": "Тренажёр: Деление дробей",
+        "description": "Пошаговая интерактивная практика по делению обыкновенных дробей: замена деления умножением на обратную дробь, разложение на множители и сокращение.",
+        "educationalLevel": ["5 класс", "6 класс"],
+        "learningResourceType": "Интерактивный тренажёр",
+        "inLanguage": "ru",
+        "isAccessibleForFree": true,
+        "teaches": ["Деление дробей", "Умножение и деление дробей", "Сокращение дробей", "Обратная дробь"],
+        "url": "https://godspace.github.io/math-6-grade/trainers/fractions/division.html"
+    }
+    </script>
+    <!-- ─── КОНЕЦ SEO-БЛОКА ─── -->
+
     <link rel="icon" href="/math-6-grade/favicon.ico" sizes="any">
     <link rel="icon" type="image/png" sizes="16x16" href="/math-6-grade/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/math-6-grade/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="48x48" href="/math-6-grade/favicon-48x48.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/math-6-grade/apple-touch-icon.png">
     <link rel="manifest" href="/math-6-grade/site.webmanifest">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Математика: Деление Дробей</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Глобальный скрипт с аналитикой и лутбоксами -->
+    <script src="../../assets/analytics.js" defer></script>
+    
     <style>
         :root {
             /* Палитра "Умная Школа" */
@@ -314,7 +350,6 @@
         @keyframes bounce { 0%, 100% {transform: translateY(0);} 50% {transform: translateY(-20px);} }
 
     </style>
-<script src="../../assets/analytics.js"></script>
 </head>
 <body>
 
@@ -410,10 +445,6 @@
 </div>
 
 <script>
-    /**
-     * КОНФИГУРАЦИЯ И ЛОГИКА
-     * (Полностью сохранена логика, улучшен рендер)
-     */
     
     const LEVELS = {
         1: { name: "Уровень 1", desc: "Деление Целого на Дробь", type: "whole_div_frac", tasks: 3 },
@@ -425,14 +456,12 @@
 
     let state = {
         lvl: 1,
-        currentTaskIndex: 0, // внутри уровня
+        currentTaskIndex: 0, 
         score: 0,
         task: null,
         isChecked: false
     };
 
-    // --- ГЕНЕРАТОР МАТЕМАТИКИ ---
-    
     function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
     function gcd(a, b) { return b==0 ? a : gcd(b, a%b); }
     
@@ -448,24 +477,22 @@
     }
 
     function generateTask() {
+        // Интеграция с RewardSystem: сброс ошибок при старте задания
+        if (window.RewardSystem) window.RewardSystem.resetErrors();
+
         const type = LEVELS[state.lvl].type;
-        // Генерируем "обратную" задачу (умножение), чтобы ответы были красивые
         let n1, d1, n2, d2;
 
         if (type === "whole_div_frac") {
-            // W : (N/D) -> W/1 * D/N
             n1 = rand(2, 6); d1 = 1;
-            // Чтобы сокращалось: n1 и n2 (в делении это будет знаменатель) должны иметь общий делитель
             let common = 2;
             n2 = rand(1, 4); d2 = rand(2, 5) * common;
             n1 = n1 * common; 
         } else if (type === "frac_div_whole") {
-            // (N/D) : W -> N/D * 1/W
             let W = rand(2, 5);
             n2 = 1; d2 = W;
             n1 = W * rand(1, 3); d1 = rand(2, 8);
         } else {
-            // Дробь на дробь
             let common = rand(2, 4);
             n1 = rand(1, 5) * (state.lvl > 3 ? common : 1);
             d1 = rand(2, 8);
@@ -473,26 +500,21 @@
             d2 = rand(2, 8) * (state.lvl > 3 ? common : 1);
         }
 
-        // Задача: (n1/d1) : (d2/n2)
-        // Решение: (n1/d1) * (n2/d2)
-        
         let t = {
             problem: {
                 left: { n: n1, d: d1, isWhole: d1===1 },
-                right: { n: d2, d: n2, isWhole: n2===1 } // Делитель до переворота
+                right: { n: d2, d: n2, isWhole: n2===1 } 
             },
-            mult: { n1, d1, n2, d2 }, // После переворота
+            mult: { n1, d1, n2, d2 }, 
             factors: {
                 nums: [...getFactors(n1), ...getFactors(n2)].filter(x=>x>1).sort((a,b)=>a-b),
                 dens: [...getFactors(d1), ...getFactors(d2)].filter(x=>x>1).sort((a,b)=>a-b)
             }
         };
 
-        // Если factors пусты (были единицы), вернем [1]
         if(t.factors.nums.length===0) t.factors.nums=[1];
         if(t.factors.dens.length===0) t.factors.dens=[1];
 
-        // Ответ
         let fn = n1*n2, fd = d1*d2;
         let common = gcd(fn, fd);
         t.result = { n: fn/common, d: fd/common };
@@ -502,17 +524,13 @@
         render();
     }
 
-    // --- РЕНДЕРИНГ ---
-
     function render() {
         const t = state.task;
         
-        // 1. Обновление шапки
         document.getElementById('levelName').textContent = LEVELS[state.lvl].name;
         document.getElementById('levelDesc').textContent = LEVELS[state.lvl].desc;
         document.getElementById('scoreVal').textContent = state.score;
 
-        // Прогресс бар
         for(let i=1; i<=5; i++) {
             let el = document.getElementById('p'+i);
             el.className = 'pill';
@@ -520,25 +538,19 @@
             if(i === state.lvl) el.classList.add('active');
         }
 
-        // 2. Условие (Problem Display)
         const pDisp = document.getElementById('problemDisplay');
         pDisp.innerHTML = '';
         
-        // Левое число
         pDisp.innerHTML += renderFractionHTML(t.problem.left);
         pDisp.innerHTML += `<div class="operator-icon">:</div>`;
-        // Правое число
         pDisp.innerHTML += renderFractionHTML(t.problem.right);
         pDisp.innerHTML += `<div class="operator-icon">=</div>`;
 
-        // 3. Очистка полей ввода
         clearInputs();
 
-        // 4. Генерация полей для множителей
         genFactorInputs('numFactorsRow', t.factors.nums.length);
         genFactorInputs('denFactorsRow', t.factors.dens.length);
 
-        // Сброс кнопки
         const btn = document.getElementById('actionBtn');
         btn.innerHTML = '<span>Проверить</span>';
         btn.className = 'btn-main';
@@ -584,10 +596,7 @@
         }
     }
 
-    // --- ЖИВОЕ СОКРАЩЕНИЕ ---
-
     function updateLiveCancel() {
-        // Очистка стилей
         document.querySelectorAll('.factor-input').forEach(el => {
             el.classList.remove('live-cancelled', 'pair-0', 'pair-1', 'pair-2');
         });
@@ -616,27 +625,22 @@
         });
     }
 
-    // --- ПРОВЕРКА ---
-
     function checkAnswer() {
         const t = state.task;
         let isError = false;
 
-        // 1. Проверка Умножения (переворот)
         const v_n1 = parseInt(document.getElementById('in_n1').value);
         const v_d1 = parseInt(document.getElementById('in_d1').value);
-        const v_n2 = parseInt(document.getElementById('in_n2').value); // Перевернутый числитель
-        const v_d2 = parseInt(document.getElementById('in_d2').value); // Перевернутый знам
+        const v_n2 = parseInt(document.getElementById('in_n2').value); 
+        const v_d2 = parseInt(document.getElementById('in_d2').value); 
 
         validateInput('in_n1', v_n1 === t.mult.n1);
         validateInput('in_d1', v_d1 === t.mult.d1);
-        // Главная проверка - перевернули ли?
         validateInput('in_n2', v_n2 === t.mult.n2); 
         validateInput('in_d2', v_d2 === t.mult.d2);
 
         if(v_n1 !== t.mult.n1 || v_d1 !== t.mult.d1 || v_n2 !== t.mult.n2 || v_d2 !== t.mult.d2) isError = true;
 
-        // 2. Проверка Множителей
         const userNums = getVals('#numFactorsRow input');
         const userDens = getVals('#denFactorsRow input');
         const expNums = t.factors.nums.join(',');
@@ -650,7 +654,6 @@
 
         if(!numRowValid || !denRowValid) isError = true;
 
-        // 3. Ответ
         const r_n = parseInt(document.getElementById('res_n').value);
         const r_d = parseInt(document.getElementById('res_d').value);
         
@@ -659,13 +662,16 @@
 
         if(r_n !== t.result.n || r_d !== t.result.d) isError = true;
 
-        // Итог
         const fb = document.getElementById('feedback');
         fb.style.opacity = '1';
 
         if(isError) {
             fb.textContent = "Есть ошибки! Проверь красные поля.";
             fb.style.color = "var(--accent)";
+            
+            // Интеграция: регистрация ошибки в системе
+            if (window.RewardSystem) window.RewardSystem.registerError("fraction_division");
+            
         } else {
             fb.textContent = "Отлично! Всё верно!";
             fb.style.color = "var(--success)";
@@ -675,7 +681,11 @@
             // Блокируем инпуты
             document.querySelectorAll('input').forEach(i => i.disabled = true);
 
-            // Меняем кнопку
+            // Интеграция: Выдача лутбокса за уровень
+            if (window.RewardSystem && state.currentTaskIndex >= LEVELS[state.lvl].tasks) {
+                setTimeout(() => window.RewardSystem.showWin(`Уровень ${state.lvl} пройден! Деление дробей`, "fraction_division"), 1000);
+            }
+
             const btn = document.getElementById('actionBtn');
             btn.innerHTML = '<span>Дальше ➡</span>';
             btn.className = 'btn-main btn-success';
@@ -687,6 +697,10 @@
         if(state.currentTaskIndex >= LEVELS[state.lvl].tasks) {
             if(state.lvl >= 5) {
                 document.getElementById('victoryScreen').style.display = 'flex';
+                // Интеграция: финальный лутбокс
+                if (window.RewardSystem) {
+                    setTimeout(() => window.RewardSystem.showWin("Сертификат Мастера получен!", "fraction_division"), 1500);
+                }
                 return;
             }
             state.lvl++;
@@ -695,7 +709,6 @@
         generateTask();
     }
 
-    // Хелперы валидации
     function validateInput(id, isValid) {
         const el = document.getElementById(id);
         if(isValid) {
@@ -717,14 +730,12 @@
     function styleFactors(rowId, isValid) {
         document.querySelectorAll(`#${rowId} input`).forEach(el => {
             if(!isValid) el.classList.add('error');
-            else el.classList.remove('error'); // не добавляем valid чтобы не сбивать цвет сокращения
+            else el.classList.remove('error'); 
         });
     }
 
-    // Старт
     generateTask();
 
 </script>
 </body>
-
 </html>
