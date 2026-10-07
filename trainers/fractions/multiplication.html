@@ -1,15 +1,49 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- ─── SEO-БЛОК ─── -->
+    <title>Тренажёр и калькулятор: Умножение дробей | Как умножать дроби (5-6 класс)</title>
+    <meta name="description" content="Умный тренажёр и калькулятор дробей онлайн. Узнай, как умножать дроби: пошаговое разложение на простые множители, наглядное сокращение и вычисление ответа.">
+    <meta name="keywords" content="умножение дробей, как умножать дроби, умножение дробей 5 класс, умножение дробей с разными знаменателями, калькулятор дробей онлайн, умножение смешанных дробей, умножение и деление дробей, математика">
+    <meta name="author" content="Козлов Сергей Владимирович">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://godspace.github.io/math-6-grade/trainers/fractions/multiplication.html">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Мастер Дробей: Умножение и Сокращение (5-6 класс)">
+    <meta property="og:description" content="Раскладывай числители и знаменатели на множители. Смотри, как они 'сгорают' при сокращении! Увлекательный тренажёр умножения дробей.">
+    <meta property="og:url" content="https://godspace.github.io/math-6-grade/trainers/fractions/multiplication.html">
+    <meta property="og:site_name" content="Математика 6 класс">
+
+    <!-- JSON-LD -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "LearningResource",
+        "name": "Тренажёр: Умножение и сокращение дробей",
+        "description": "Интерактивная практика по умножению обыкновенных дробей через разложение на простые множители и их наглядное сокращение.",
+        "educationalLevel": ["5 класс", "6 класс"],
+        "learningResourceType": "Интерактивный тренажёр",
+        "inLanguage": "ru",
+        "isAccessibleForFree": true,
+        "teaches": ["Умножение дробей", "Сокращение дробей", "Как умножать дроби", "Простые множители"],
+        "url": "https://godspace.github.io/math-6-grade/trainers/fractions/multiplication.html"
+    }
+    </script>
+    <!-- ─── КОНЕЦ SEO-БЛОКА ─── -->
+
     <link rel="icon" href="/math-6-grade/favicon.ico" sizes="any">
     <link rel="icon" type="image/png" sizes="16x16" href="/math-6-grade/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/math-6-grade/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="48x48" href="/math-6-grade/favicon-48x48.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/math-6-grade/apple-touch-icon.png">
     <link rel="manifest" href="/math-6-grade/site.webmanifest">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мастер Дробей: Живое Сокращение</title>
+    
+    <script src="../../assets/analytics.js" defer></script>
     <style>
         :root {
             --primary: #4361ee;
@@ -37,7 +71,7 @@
             border-radius: 24px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.15);
             width: 100%;
-            max-width: 1000px;
+            max-width: 1050px;
             padding: 40px;
             position: relative;
             overflow: hidden;
@@ -50,6 +84,8 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
         .level-badges {
@@ -86,13 +122,66 @@
         h1 { margin: 0; color: #2d3436; font-size: 1.8rem; }
         .subtitle { color: #636e72; margin-top: 5px; }
 
+        /* ИНСТРУКЦИИ ДЛЯ ДЕТЕЙ */
+        .kids-guide {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 35px;
+            width: 100%;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .guide-step {
+            background: rgba(67, 97, 238, 0.05);
+            border: 2px dashed rgba(67, 97, 238, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            max-width: 290px;
+            font-size: 0.95rem;
+            color: #4b5563;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            transition: transform 0.2s;
+        }
+
+        .guide-step:hover { transform: translateY(-3px); }
+        
+        .guide-step.step-1 { border-color: var(--warning); background: rgba(255, 159, 28, 0.05); }
+        .guide-step.step-2 { border-color: var(--primary); background: rgba(67, 97, 238, 0.05); }
+        .guide-step.step-3 { border-color: var(--success); background: rgba(46, 196, 182, 0.05); }
+        
+        .step-num {
+            width: 35px; height: 35px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; color: white; flex-shrink: 0; font-size: 1.1rem;
+        }
+        
+        .step-1 .step-num { background: var(--warning); }
+        .step-2 .step-num { background: var(--primary); }
+        .step-3 .step-num { background: var(--success); }
+
+        .area-label {
+            font-size: 0.85rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            font-weight: bold;
+            text-align: center;
+            width: 100%;
+        }
+
         /* Рабочая область */
         .work-area {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 30px;
-            min-height: 300px;
+            min-height: 250px;
         }
 
         .fraction-row {
@@ -103,6 +192,7 @@
             font-weight: bold;
             flex-wrap: wrap;
             justify-content: center;
+            width: 100%;
         }
 
         .fraction {
@@ -115,12 +205,18 @@
         .frac-num, .frac-den { padding: 5px; }
         .frac-line { width: 100%; height: 4px; background: #333; border-radius: 2px; }
         
-        .operator { font-size: 2.5rem; color: var(--primary); }
+        .operator { font-size: 2.5rem; color: var(--primary); margin-top: 15px; }
 
         /* Область разложения */
+        .factorization-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
         .factorization-area {
             background: #fff;
-            padding: 25px;
+            padding: 20px 25px;
             border-radius: 16px;
             border: 2px dashed #ccc;
             display: flex;
@@ -129,6 +225,7 @@
             gap: 15px;
             transition: border-color 0.3s;
             box-shadow: inset 0 0 20px rgba(0,0,0,0.03);
+            position: relative;
         }
 
         .factors-container {
@@ -162,24 +259,20 @@
         }
 
         /* --- СТИЛИ ДЛЯ ЖИВОГО СОКРАЩЕНИЯ --- */
-        
-        /* Базовый стиль для сокращенной пары */
         .factor-input.live-cancelled {
-            text-decoration: line-through; /* Зачеркивание */
-            color: #aaa;                   /* Серый цвет текста (игнор) */
-            border-color: transparent;     /* Убираем акцент с рамки */
+            text-decoration: line-through; 
+            color: #aaa;                   
+            border-color: transparent;     
             opacity: 0.8;
-            transform: scale(0.95);        /* Чуть уменьшаем */
+            transform: scale(0.95);        
         }
 
-        /* Цвета пар (очень бледные, чтобы не отвлекать, но различать) */
-        .pair-color-0 { background-color: #f2f2f2; } /* Просто серый */
-        .pair-color-1 { background-color: #e3f2fd; } /* Бледно-голубой */
-        .pair-color-2 { background-color: #fce4ec; } /* Бледно-розовый */
-        .pair-color-3 { background-color: #e8f5e9; } /* Бледно-зеленый */
-        .pair-color-4 { background-color: #fff3e0; } /* Бледно-оранжевый */
+        .pair-color-0 { background-color: #f2f2f2; } 
+        .pair-color-1 { background-color: #e3f2fd; } 
+        .pair-color-2 { background-color: #fce4ec; } 
+        .pair-color-3 { background-color: #e8f5e9; } 
+        .pair-color-4 { background-color: #fff3e0; } 
 
-        /* Статусы проверки (финальные) */
         .factor-input.correct { border-color: var(--success) !important; color: var(--success) !important; background: #fff !important; text-decoration: none; opacity: 1; transform: scale(1); }
         .factor-input.wrong { border-color: var(--danger) !important; background: #ffebeb !important; animation: shake 0.4s; }
 
@@ -192,12 +285,18 @@
         }
 
         /* Финальный ответ */
+        .final-answer-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
         .final-answer {
             display: flex;
             align-items: center;
             gap: 10px;
             background: #fff;
-            padding: 15px;
+            padding: 15px 25px;
             border-radius: 16px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             border: 1px solid #eee;
@@ -252,8 +351,14 @@
         
         canvas { position: absolute; top: 0; left: 0; pointer-events: none; }
 
+        @media (max-width: 768px) {
+            .kids-guide { flex-direction: column; align-items: center; }
+            .guide-step { max-width: 100%; width: 100%; }
+            .fraction-row { flex-direction: column; }
+            .operator { transform: rotate(90deg); margin: 0; }
+        }
+
     </style>
-<script src="../../assets/analytics.js"></script>
 </head>
 <body>
 
@@ -275,34 +380,62 @@
         </div>
     </div>
 
+    <!-- Инструкции для ребёнка -->
+    <div class="kids-guide">
+        <div class="guide-step step-1">
+            <div class="step-num">1</div>
+            <div>Разложи числители (верх) и знаменатели (низ) на <b>простые множители</b> и впиши их в окошки.</div>
+        </div>
+        <div class="guide-step step-2">
+            <div class="step-num">2</div>
+            <div>Смотри магию! Одинаковые цифры сверху и снизу <b>сократятся (зачеркнутся) сами</b>.</div>
+        </div>
+        <div class="guide-step step-3">
+            <div class="step-num">3</div>
+            <div>Перемножь то, что осталось, и запиши <b>финальный ответ</b> в конце.</div>
+        </div>
+    </div>
+
     <div class="work-area">
         <div class="fraction-row">
-            <div class="fraction">
-                <div class="frac-num" id="n1">?</div>
-                <div class="frac-line"></div>
-                <div class="frac-den" id="d1">?</div>
+            <!-- Исходные дроби -->
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <div class="fraction">
+                    <div class="frac-num" id="n1">?</div>
+                    <div class="frac-line"></div>
+                    <div class="frac-den" id="d1">?</div>
+                </div>
+                <div class="operator">×</div>
+                <div class="fraction">
+                    <div class="frac-num" id="n2">?</div>
+                    <div class="frac-line"></div>
+                    <div class="frac-den" id="d2">?</div>
+                </div>
             </div>
-            <div class="operator">×</div>
-            <div class="fraction">
-                <div class="frac-num" id="n2">?</div>
-                <div class="frac-line"></div>
-                <div class="frac-den" id="d2">?</div>
-            </div>
+            
             <div class="operator">=</div>
             
-            <div class="factorization-area" id="factorArea">
-                <div class="factors-container" id="numFactorsInputs"></div>
-                <div class="big-fraction-line"></div>
-                <div class="factors-container" id="denFactorsInputs"></div>
+            <!-- Зона разложения -->
+            <div class="factorization-wrapper">
+                <div class="area-label">Зона разложения на множители:</div>
+                <div class="factorization-area" id="factorArea">
+                    <div class="factors-container" id="numFactorsInputs"></div>
+                    <div class="big-fraction-line"></div>
+                    <div class="factors-container" id="denFactorsInputs"></div>
+                </div>
             </div>
 
             <div class="operator">=</div>
 
-            <div class="final-answer">
-                <div class="fraction">
-                    <input type="number" class="factor-input" id="finalNum" placeholder="?">
-                    <div class="frac-line"></div>
-                    <input type="number" class="factor-input" id="finalDen" placeholder="?">
+            <!-- Финальный ответ -->
+            <div class="final-answer-wrapper">
+                <div class="area-label">Итоговая дробь:</div>
+                <div class="final-answer">
+                    <div class="fraction">
+                        <input type="number" class="factor-input" id="finalNum" placeholder="?">
+                        <div class="frac-line"></div>
+                        <input type="number" class="factor-input" id="finalDen" placeholder="?">
+                    </div>
                 </div>
             </div>
         </div>
@@ -321,8 +454,8 @@
         <div class="cert-title">СЕРТИФИКАТ МАСТЕРА</div>
         <h2>Курс "Умножение и сокращение дробей" пройден!</h2>
         <div class="cert-stats">
-            <div>Верных решений: <span id="finalScore" style="color:var(--success)">0</span></div>
-            <div>Ошибок: <span id="finalErrors" style="color:var(--danger)">0</span></div>
+            <div>Верных решений: <span id="finalScore" style="color:var(--success); font-weight: bold; font-size: 1.5rem;">0</span></div>
+            <div>Ошибок: <span id="finalErrors" style="color:var(--danger); font-weight: bold; font-size: 1.5rem;">0</span></div>
         </div>
         <br>
         <button class="btn" onclick="location.reload()">Начать заново</button>
@@ -368,6 +501,9 @@ function primeFactors(n) {
 }
 
 function generateTask() {
+    // Интеграция с RewardSystem: сброс ошибок при старте задания
+    if (window.RewardSystem) window.RewardSystem.resetErrors();
+
     const config = LEVELS[state.level];
     let ansNum, ansDen;
     do {
@@ -449,13 +585,16 @@ function createInputs(containerId, count) {
         const input = document.createElement('input');
         input.type = 'number';
         input.className = 'factor-input';
-        // Добавляем слушатель события для "Живого сокращения"
+        
+        // Слушатель события для "Живого сокращения"
         input.addEventListener('input', updateLiveCancellation);
         
         if (i < inputsCount - 1) {
              const span = document.createElement('span');
              span.textContent = '×';
              span.style.color = '#777';
+             span.style.fontSize = '1.5rem';
+             span.style.margin = '0 5px';
              container.appendChild(input);
              container.appendChild(span);
         } else {
@@ -469,41 +608,36 @@ function createInputs(containerId, count) {
  * Срабатывает при каждом нажатии клавиши
  */
 function updateLiveCancellation() {
-    // 1. Получаем все инпуты
     const nInputs = Array.from(document.querySelectorAll('#numFactorsInputs .factor-input'));
     const dInputs = Array.from(document.querySelectorAll('#denFactorsInputs .factor-input'));
 
-    // 2. Сбрасываем стили перед пересчетом
+    // Сбрасываем стили перед пересчетом
     [...nInputs, ...dInputs].forEach(inp => {
         inp.classList.remove('live-cancelled', 'pair-color-0', 'pair-color-1', 'pair-color-2', 'pair-color-3', 'pair-color-4');
-        inp.style.backgroundColor = ''; // сброс
     });
 
-    // 3. Ищем пары
-    let colorIndex = 0; // Для выбора цвета пары
-    const dTakenIndices = new Set(); // Чтобы не сокращать одно число с двумя разными
+    let colorIndex = 0; 
+    const dTakenIndices = new Set(); 
 
     nInputs.forEach(nInp => {
         const nVal = parseInt(nInp.value);
         if (isNaN(nVal)) return;
 
-        // Ищем пару в знаменателе
         for (let i = 0; i < dInputs.length; i++) {
-            if (dTakenIndices.has(i)) continue; // Этот знаменатель уже сокращен
+            if (dTakenIndices.has(i)) continue; 
 
             const dVal = parseInt(dInputs[i].value);
             if (nVal === dVal) {
                 // ПАРА НАЙДЕНА!
                 dTakenIndices.add(i);
                 
-                // Применяем стили "Зачеркнуто" и цвет пары
                 const colorClass = `pair-color-${colorIndex % 5}`;
                 
                 nInp.classList.add('live-cancelled', colorClass);
                 dInputs[i].classList.add('live-cancelled', colorClass);
                 
                 colorIndex++;
-                break; // Выходим из цикла по знаменателю, пара найдена
+                break;
             }
         }
     });
@@ -525,18 +659,14 @@ function checkAnswer() {
     const numOk = JSON.stringify(userNumVals) === JSON.stringify(t.expectedNumFactors);
     const denOk = JSON.stringify(userDenVals) === JSON.stringify(t.expectedDenFactors);
 
-    // При проверке, если все верно, убираем "зачеркивание" и показываем чистый зеленый (опционально), 
-    // но в данном случае лучше оставить зачеркивание, чтобы учитель видел логику, 
-    // но добавить зеленую рамку успеха.
-    // Однако по логике, если ответ верный, то инпуты закрашиваются в "success"
+    // Удаляем предыдущие отметки об ошибках
+    userNumInputs.forEach(inp => inp.classList.remove('wrong'));
+    userDenInputs.forEach(inp => inp.classList.remove('wrong'));
     
     if(!numOk || !denOk) {
-        userNumInputs.forEach(inp => inp.classList.add('wrong'));
-        userDenInputs.forEach(inp => inp.classList.add('wrong'));
+        if (!numOk) userNumInputs.forEach(inp => { void inp.offsetWidth; inp.classList.add('wrong'); });
+        if (!denOk) userDenInputs.forEach(inp => { void inp.offsetWidth; inp.classList.add('wrong'); });
         allCorrect = false;
-    } else {
-        // Если множители верны, мы НЕ сбрасываем зачеркивание, чтобы было видно красоту решения.
-        // Просто добавим класс успеха, который переопределит рамку.
     }
 
     const uFinalNum = parseInt(document.getElementById('finalNum').value);
@@ -544,18 +674,39 @@ function checkAnswer() {
     const finalNumEl = document.getElementById('finalNum');
     const finalDenEl = document.getElementById('finalDen');
 
-    if (uFinalNum === t.finalNum) finalNumEl.classList.add('correct');
-    else { finalNumEl.classList.add('wrong'); allCorrect = false; }
+    finalNumEl.classList.remove('correct', 'wrong');
+    finalDenEl.classList.remove('correct', 'wrong');
 
-    if (uFinalDen === t.finalDen) finalDenEl.classList.add('correct');
-    else { finalDenEl.classList.add('wrong'); allCorrect = false; }
+    if (uFinalNum === t.finalNum) {
+        finalNumEl.classList.add('correct');
+    } else { 
+        void finalNumEl.offsetWidth;
+        finalNumEl.classList.add('wrong'); 
+        allCorrect = false; 
+    }
+
+    if (uFinalDen === t.finalDen) {
+        finalDenEl.classList.add('correct');
+    } else { 
+        void finalDenEl.offsetWidth;
+        finalDenEl.classList.add('wrong'); 
+        allCorrect = false; 
+    }
 
     if (allCorrect) {
-        setFeedback("Верно! Молодец! 🌟", "success");
+        setFeedback("Верно! Великолепная работа! 🌟", "success");
         state.score++;
         state.tasksCompletedInLevel++;
         document.getElementById('score').textContent = state.score;
         document.getElementById('checkBtn').style.display = 'none';
+        
+        // Интеграция: Выдача лутбокса за уровень
+        if (window.RewardSystem) {
+            window.RewardSystem.resetErrors();
+            if (state.tasksCompletedInLevel >= state.tasksToAdvance) {
+                setTimeout(() => window.RewardSystem.showWin(`Уровень ${state.level} пройден!`, "fraction_multiplication"), 1000);
+            }
+        }
         
         if(state.tasksCompletedInLevel >= state.tasksToAdvance) {
             document.getElementById('nextBtn').textContent = state.level < 5 ? "Следующий уровень! 🆙" : "Получить сертификат! 🏆";
@@ -565,9 +716,12 @@ function checkAnswer() {
         document.getElementById('nextBtn').style.display = 'inline-block';
         
     } else {
-        setFeedback("Есть ошибки. Проверь вычисления.", "error");
+        setFeedback("Есть ошибки в подсвеченных полях. Проверь вычисления!", "error");
         state.errors++;
         document.getElementById('errors').textContent = state.errors;
+        
+        // Интеграция: Регистрация ошибки
+        if (window.RewardSystem) window.RewardSystem.registerError("fraction_multiplication");
     }
 }
 
@@ -595,6 +749,10 @@ function showVictory() {
     document.getElementById('finalScore').textContent = state.score;
     document.getElementById('finalErrors').textContent = state.errors;
     startConfetti();
+    
+    if (window.RewardSystem) {
+        setTimeout(() => window.RewardSystem.showWin("Сертификат Мастера Дробей получен!", "fraction_multiplication"), 1500);
+    }
 }
 
 function startConfetti() {
