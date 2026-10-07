@@ -1,17 +1,53 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- ─── SEO-БЛОК ─── -->
+    <title>Тренажёр и калькулятор: Смешанные дроби | Решение шаг за шагом (6 класс)</title>
+    <meta name="description" content="Узнай, как решать смешанные дроби. Интерактивный калькулятор-тренажёр: сложение и вычитание смешанных чисел, перевод неправильной дроби в смешанную и наоборот.">
+    <meta name="keywords" content="смешанные дроби, как решать смешанные дроби, калькулятор смешанных дробей, как перевести смешанную дробь в неправильную, как перевести смешанную дробь в обыкновенную, как перевести неправильную дробь в смешанную, как из неправильной дроби сделать смешанную">
+    <meta name="author" content="Козлов Сергей Владимирович">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://godspace.github.io/math-6-grade/trainers/fractions/mixed.html">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Тренажёр: Решение смешанных дробей (6 класс)">
+    <meta property="og:description" content="Как решать примеры со смешанными дробями? Пошаговая практика: находим общий знаменатель, занимаем единицу, складываем и вычитаем.">
+    <meta property="og:url" content="https://godspace.github.io/math-6-grade/trainers/fractions/mixed.html">
+    <meta property="og:site_name" content="Математика 6 класс">
+
+    <!-- JSON-LD -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "LearningResource",
+        "name": "Тренажёр: Операции со смешанными дробями",
+        "description": "Пошаговый интерактивный тренажёр-калькулятор по сложению и вычитанию смешанных чисел, включающий алгоритмы перевода и заема единицы.",
+        "educationalLevel": "6 класс",
+        "learningResourceType": "Интерактивный тренажёр",
+        "inLanguage": "ru",
+        "isAccessibleForFree": true,
+        "teaches": ["Сложение и вычитание смешанных чисел", "Как решать смешанные дроби", "Перевод в неправильную дробь"],
+        "url": "https://godspace.github.io/math-6-grade/trainers/fractions/mixed.html"
+    }
+    </script>
+    <!-- ─── КОНЕЦ SEO-БЛОКА ─── -->
+
     <link rel="icon" href="/math-6-grade/favicon.ico" sizes="any">
     <link rel="icon" type="image/png" sizes="16x16" href="/math-6-grade/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/math-6-grade/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="48x48" href="/math-6-grade/favicon-48x48.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/math-6-grade/apple-touch-icon.png">
     <link rel="manifest" href="/math-6-grade/site.webmanifest">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Тренажёр: Смешанные Дроби (Пошаговый)</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Глобальный скрипт с аналитикой и лутбоксами -->
+    <script src="../../assets/analytics.js" defer></script>
     <style>
         body {
             font-family: 'Nunito', sans-serif;
@@ -154,11 +190,9 @@
             to { opacity: 1; transform: translateY(0); }
         }
     </style>
-<script src="../../assets/analytics.js"></script>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center p-2 sm:p-4">
 
-    <!-- Заголовок и счетчик -->
     <div class="w-full max-w-3xl mb-4 flex justify-between items-center bg-white p-4 rounded-xl shadow-md">
         <div>
             <h1 class="text-xl sm:text-2xl font-bold text-indigo-600">Дроби: Шаг за шагом</h1>
@@ -170,10 +204,8 @@
         </div>
     </div>
 
-    <!-- Основная область -->
     <div class="w-full max-w-3xl bg-white rounded-2xl shadow-xl overflow-hidden relative min-h-[400px]">
         
-        <!-- Верхняя панель: Исходное задание -->
         <div class="bg-gray-50 p-6 border-b border-gray-100 text-center">
             <div id="problem-title" class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">Загрузка...</div>
             <div id="main-problem-display" class="text-3xl sm:text-4xl text-gray-800 font-bold flex justify-center items-center gap-4">
@@ -181,12 +213,10 @@
             </div>
         </div>
 
-        <!-- Контейнер шагов -->
         <div id="steps-area" class="p-4 sm:p-8 space-y-6">
             <!-- Шаги будут генерироваться здесь -->
         </div>
 
-        <!-- Панель сообщений и кнопок -->
         <div class="p-6 bg-gray-50 border-t border-gray-100">
             <div id="feedback" class="hidden mb-4 text-center font-medium"></div>
             
@@ -202,21 +232,17 @@
     </div>
 
     <script>
-        // --- Глобальное состояние ---
         let currentProblem = null;
         let currentStepIndex = 0;
         let score = 0;
 
-        // --- Утилиты ---
         const getRandomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
         const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
         const lcm = (a, b) => (a * b) / gcd(a, b);
 
-        // --- Рендеринг дробей ---
         function renderFractionHTML(w, n, d, inputs = false, inputIds = {}) {
             let html = '<div class="inline-flex items-center">';
             
-            // Целая часть
             if (inputs) {
                 if (inputIds.w && inputIds.w !== 'ignore') {
                     html += `<input type="number" id="${inputIds.w}" class="input-mini input-whole-mini border-gray-300 focus:border-indigo-500" placeholder="?">`;
@@ -225,7 +251,6 @@
                  html += `<span class="whole">${w}</span>`;
             }
 
-            // Дробная часть
             if (inputs || n !== 0) {
                 html += `<div class="fraction">`;
                 if (inputs) {
@@ -255,8 +280,10 @@
             if(btmEl) btmEl.innerText = displayVal;
         };
 
-        // --- Генератор задач ---
         function generateProblem() {
+            // Интеграция с RewardSystem: сброс ошибок при старте задания
+            if (window.RewardSystem) window.RewardSystem.resetErrors();
+
             currentStepIndex = 0;
             document.getElementById('steps-area').innerHTML = '';
             document.getElementById('check-btn').classList.remove('hidden');
@@ -266,7 +293,7 @@
             const type = getRandomInt(0, 3);
             let p = { steps: [], type: type };
 
-            if (type === 0) { // Сложение
+            if (type === 0) { 
                 p.title = "Сложение: Разные знаменатели";
                 p.operator = '+';
                 p.d1 = [2,3,4][getRandomInt(0,2)];
@@ -308,7 +335,7 @@
                     }
                 });
 
-            } else if (type === 1) { // Вычитание с заемом
+            } else if (type === 1) { 
                 p.title = "Вычитание: Занимаем единицу";
                 p.operator = '-';
                 p.d1 = getRandomInt(3, 8); p.d2 = p.d1;
@@ -336,7 +363,7 @@
                     }
                 });
 
-            } else if (type === 2) { // Вычитание из целого
+            } else if (type === 2) { 
                 p.title = "Вычитание из целого числа";
                 p.operator = '-';
                 p.w1 = getRandomInt(4, 8); p.n1 = 0; p.d1 = 1;
@@ -363,7 +390,7 @@
                     }
                 });
 
-            } else { // Сложное вычитание
+            } else { 
                 p.title = "Сложное вычитание (Мастер)";
                 p.operator = '-';
                 
@@ -438,7 +465,6 @@
             renderStep(0);
         }
 
-        // --- Рендеринг шага ---
         function renderStep(index) {
             const step = currentProblem.steps[index];
             const container = document.getElementById('steps-area');
@@ -529,10 +555,9 @@
             }, 100);
         }
 
-        // --- Проверка шага ---
         function checkCurrentStep() {
             const step = currentProblem.steps[currentStepIndex];
-            const idx = currentStepIndex; // Короткий алиас для ID
+            const idx = currentStepIndex; 
             const feedbackEl = document.getElementById('feedback');
             let isCorrect = false;
             let msg = "";
@@ -607,6 +632,9 @@
             }
 
             if (isCorrect) {
+                // Интеграция с RewardSystem: сброс ошибок при правильном шаге
+                if (window.RewardSystem) window.RewardSystem.resetErrors();
+
                 const currentDiv = document.getElementById(`step-${currentStepIndex}`);
                 currentDiv.classList.remove('step-active');
                 currentDiv.classList.add('step-completed');
@@ -630,10 +658,18 @@
                     document.getElementById('next-btn').classList.remove('hidden');
                     feedbackEl.innerHTML = `<span class="text-green-600 text-lg">Молодец! Всё верно.</span>`;
                     feedbackEl.classList.remove('hidden');
+                    
+                    // Интеграция с RewardSystem: выдача лутбокса (каждые 3 примера)
+                    if (window.RewardSystem && score % 3 === 0) {
+                        setTimeout(() => window.RewardSystem.showWin(`Решено примеров: ${score}! Смешанные дроби`, "fraction_mixed"), 1000);
+                    }
                 }
             } else {
                 feedbackEl.innerHTML = `<span class="text-red-500">${msg}</span>`;
                 feedbackEl.classList.remove('hidden');
+                
+                // Интеграция с RewardSystem: регистрация ошибки (спасательный круг)
+                if (window.RewardSystem) window.RewardSystem.registerError("fraction_mixed");
             }
         }
 
