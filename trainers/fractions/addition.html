@@ -1,15 +1,50 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- ─── SEO-БЛОК ─── -->
+    <title>Тренажёр и калькулятор: Сложение дробей с разными знаменателями | 5-6 класс</title>
+    <meta name="description" content="Пошаговый тренажёр и калькулятор дробей онлайн. Учимся складывать дроби с разными знаменателями: приведение к общему знаменателю, сложение и сокращение с подробным решением.">
+    <meta name="keywords" content="сложение дробей, сложение дробей с разными знаменателями, сложение и вычитание дробей с разными знаменателями 5 класс тренажер, калькулятор дробей, решение дробей, как складывать дроби с разными знаменателями 5 класс">
+    <meta name="author" content="Козлов Сергей Владимирович">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://godspace.github.io/math-6-grade/trainers/fractions/addition.html">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Тренажёр: Сложение дробей с разными знаменателями (5-6 класс)">
+    <meta property="og:description" content="Понятная практика: введи дополнительные множители, найди общий знаменатель и сложи дроби. Подробное визуальное решение каждого примера!">
+    <meta property="og:url" content="https://godspace.github.io/math-6-grade/trainers/fractions/addition.html">
+    <meta property="og:site_name" content="Математика 6 класс">
+
+    <!-- JSON-LD -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "LearningResource",
+        "name": "Тренажёр-калькулятор сложения дробей",
+        "description": "Интерактивная практика по сложению обыкновенных дробей с разными знаменателями, включая приведение к общему знаменателю и сокращение ответа.",
+        "educationalLevel": ["5 класс", "6 класс"],
+        "learningResourceType": "Интерактивный тренажёр",
+        "inLanguage": "ru",
+        "isAccessibleForFree": true,
+        "teaches": ["Сложение дробей с разными знаменателями", "Приведение дробей к общему знаменателю", "Сокращение дробей"],
+        "url": "https://godspace.github.io/math-6-grade/trainers/fractions/addition.html"
+    }
+    </script>
+    <!-- ─── КОНЕЦ SEO-БЛОКА ─── -->
+
     <link rel="icon" href="/math-6-grade/favicon.ico" sizes="any">
     <link rel="icon" type="image/png" sizes="16x16" href="/math-6-grade/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/math-6-grade/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="48x48" href="/math-6-grade/favicon-48x48.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/math-6-grade/apple-touch-icon.png">
     <link rel="manifest" href="/math-6-grade/site.webmanifest">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Тренажер сложения дробей</title>
+    
+    <!-- Глобальный скрипт с аналитикой и лутбоксами -->
+    <script src="../../assets/analytics.js" defer></script>
     <style>
         * {
             box-sizing: border-box;
@@ -422,6 +457,14 @@
             display: none;
         }
         
+        .correct-comparison {
+            color: #27ae60;
+            font-weight: bold;
+            text-align: center;
+            margin: 15px 0;
+            font-size: 18px;
+        }
+        
         .multiplier-explanation, .simplified-explanation {
             text-align: center;
             margin: 15px 0;
@@ -441,7 +484,6 @@
             -moz-appearance: textfield;
         }
     </style>
-<script src="../../assets/analytics.js"></script>
 </head>
 <body>
     <div class="container">
@@ -623,7 +665,6 @@
     </div>
 
     <script>
-        // Статистика ученика
         const stats = {
             correct: 0,
             incorrect: 0,
@@ -632,7 +673,6 @@
             total: 0
         };
         
-        // Текущее задание
         let currentTask = {
             numerator1: 0,
             denominator1: 0,
@@ -652,24 +692,20 @@
             canBeSimplified: false
         };
         
-        // Эмодзи для обратной связи
         const emojis = {
             success: ['🏆', '🎉', '⭐', '👑', '💪'],
             encouragement: ['💪', '🔥', '🚀', '👍', '😊'],
             failure: ['😔', '🤔', '💡', '📚', '🔍']
         };
         
-        // Функция для вычисления НОД (наибольшего общего делителя)
         function gcd(a, b) {
             return b ? gcd(b, a % b) : a;
         }
         
-        // Функция для вычисления НОК (наименьшего общего кратного)
         function lcm(a, b) {
             return Math.abs(a * b) / gcd(a, b);
         }
         
-        // Функция для сокращения дроби
         function simplifyFraction(numerator, denominator) {
             const divisor = gcd(numerator, denominator);
             return {
@@ -679,70 +715,53 @@
             };
         }
         
-        // Генерация случайного задания
         function generateTask() {
+            if (window.RewardSystem) window.RewardSystem.resetErrors();
+
             let denominator1, denominator2;
             let commonDenominator;
             
-            // Генерируем разные знаменатели с НОК <= 100
             do {
-                denominator1 = Math.floor(Math.random() * 10) + 2; // от 2 до 11
-                denominator2 = Math.floor(Math.random() * 10) + 2; // от 2 до 11
-                // Убедимся, что знаменатели разные
+                denominator1 = Math.floor(Math.random() * 10) + 2; 
+                denominator2 = Math.floor(Math.random() * 10) + 2; 
                 if (denominator1 === denominator2) {
                     denominator2 = Math.floor(Math.random() * 10) + 2;
                 }
                 commonDenominator = lcm(denominator1, denominator2);
             } while (commonDenominator > 100 || denominator1 === denominator2);
             
-            // Генерируем числители
             const numerator1 = Math.floor(Math.random() * (denominator1 - 1)) + 1;
             const numerator2 = Math.floor(Math.random() * (denominator2 - 1)) + 1;
             
-            // Вычисляем множители
             const multiplier1 = commonDenominator / denominator1;
             const multiplier2 = commonDenominator / denominator2;
             
-            // Вычисляем результаты умножения
             const result1Numerator = numerator1 * multiplier1;
             const result1Denominator = denominator1 * multiplier1;
             const result2Numerator = numerator2 * multiplier2;
             const result2Denominator = denominator2 * multiplier2;
             
-            // Вычисляем сумму
             const sumNumerator = result1Numerator + result2Numerator;
             const sumDenominator = commonDenominator;
             
-            // Сокращаем дробь
             const simplified = simplifyFraction(sumNumerator, sumDenominator);
             
-            // Сохраняем задание
             currentTask = {
-                numerator1,
-                denominator1,
-                numerator2,
-                denominator2,
-                commonDenominator,
-                multiplier1,
-                multiplier2,
-                result1Numerator,
-                result1Denominator,
-                result2Numerator,
-                result2Denominator,
-                sumNumerator,
-                sumDenominator,
+                numerator1, denominator1, numerator2, denominator2,
+                commonDenominator, multiplier1, multiplier2,
+                result1Numerator, result1Denominator,
+                result2Numerator, result2Denominator,
+                sumNumerator, sumDenominator,
                 simplifiedNumerator: simplified.numerator,
                 simplifiedDenominator: simplified.denominator,
                 canBeSimplified: simplified.canBeSimplified
             };
             
-            // Обновляем отображение задания
             document.getElementById('taskNumerator1').textContent = numerator1;
             document.getElementById('taskDenominator1').textContent = denominator1;
             document.getElementById('taskNumerator2').textContent = numerator2;
             document.getElementById('taskDenominator2').textContent = denominator2;
             
-            // Сбрасываем интерфейс
             document.getElementById('multiplier1Numerator').value = '';
             document.getElementById('multiplier1Denominator').value = '';
             document.getElementById('multiplier2Numerator').value = '';
@@ -756,7 +775,6 @@
             document.getElementById('simplifiedNumerator').value = '';
             document.getElementById('simplifiedDenominator').value = '';
             
-            // Показываем или скрываем блок для сокращенной дроби
             if (currentTask.canBeSimplified) {
                 document.getElementById('simplifiedSection').style.display = 'flex';
                 document.getElementById('simplifiedEquals').style.display = 'block';
@@ -773,13 +791,11 @@
             document.getElementById('checkButton').style.display = 'block';
             document.getElementById('nextButton').style.display = 'none';
             
-            // Показываем поля ввода, скрываем решение
             document.getElementById('solutionContainer').style.display = 'none';
             document.querySelector('.task-title').classList.remove('hidden');
             document.querySelector('.multiplier-explanation').classList.remove('hidden');
         }
         
-        // Проверка ответа
         function checkAnswer() {
             const userMultiplier1Numerator = parseInt(document.getElementById('multiplier1Numerator').value);
             const userMultiplier1Denominator = parseInt(document.getElementById('multiplier1Denominator').value);
@@ -807,23 +823,19 @@
                 return;
             }
             
-            // Проверяем множители
             const isMultiplier1Correct = userMultiplier1Numerator === currentTask.multiplier1 && 
                                         userMultiplier1Denominator === currentTask.multiplier1;
             const isMultiplier2Correct = userMultiplier2Numerator === currentTask.multiplier2 && 
                                         userMultiplier2Denominator === currentTask.multiplier2;
             
-            // Проверяем результаты умножения
             const isResult1Correct = userResult1Numerator === currentTask.result1Numerator && 
                                     userResult1Denominator === currentTask.result1Denominator;
             const isResult2Correct = userResult2Numerator === currentTask.result2Numerator && 
                                     userResult2Denominator === currentTask.result2Denominator;
             
-            // Проверяем сумму
             const isSumCorrect = userSumNumerator === currentTask.sumNumerator && 
                                 userSumDenominator === currentTask.sumDenominator;
             
-            // Проверяем сокращенную дробь, если она есть
             let isSimplifiedCorrect = true;
             if (currentTask.canBeSimplified) {
                 if (isNaN(userSimplifiedNumerator) || isNaN(userSimplifiedDenominator)) {
@@ -834,34 +846,27 @@
                 isSimplifiedCorrect = userSimplifiedNumerator === currentTask.simplifiedNumerator && 
                                      userSimplifiedDenominator === currentTask.simplifiedDenominator;
             } else {
-                // Если дробь нельзя сократить, но пользователь что-то ввел, это ошибка
                 if (!isNaN(userSimplifiedNumerator) || !isNaN(userSimplifiedDenominator)) {
                     isSimplifiedCorrect = false;
                 }
             }
             
-            // Скрываем поля ввода и показываем решение
             document.querySelector('.task-title').classList.add('hidden');
             document.querySelector('.multiplier-explanation').classList.add('hidden');
             document.getElementById('solutionContainer').style.display = 'block';
             
             if (isMultiplier1Correct && isMultiplier2Correct && isResult1Correct && isResult2Correct && isSumCorrect && isSimplifiedCorrect) {
-                // Правильный ответ
                 handleCorrectAnswer();
             } else {
-                // Неправильный ответ
                 handleIncorrectAnswer();
             }
             
-            // Показываем решение с диаграммами
             showSolution();
             
-            // После проверки показываем кнопку "Следующее задание"
             document.getElementById('checkButton').style.display = 'none';
             document.getElementById('nextButton').style.display = 'block';
         }
         
-        // Обработка правильного ответа
         function handleCorrectAnswer() {
             stats.correct++;
             stats.streak++;
@@ -873,14 +878,22 @@
             
             updateStats();
             
-            // Случайный эмодзи для успеха
             const randomEmoji = emojis.success[Math.floor(Math.random() * emojis.success.length)];
             document.getElementById('feedbackMessage').textContent = getSuccessMessage();
             document.getElementById('feedbackMessage').style.color = '#27ae60';
             document.getElementById('feedbackEmoji').textContent = randomEmoji;
+
+            if (window.RewardSystem) window.RewardSystem.resetErrors();
+
+            if (stats.streak === 3 || stats.streak === 6) {
+                if (window.RewardSystem) {
+                    setTimeout(() => {
+                        window.RewardSystem.showWin(`Серия побед: ${stats.streak}! Сложение дробей`, "fraction_addition");
+                    }, 1500);
+                }
+            }
         }
         
-        // Обработка неправильного ответа
         function handleIncorrectAnswer() {
             stats.incorrect++;
             stats.streak = 0;
@@ -890,30 +903,20 @@
             document.getElementById('feedbackMessage').textContent = 'Попробуйте следующее задание!';
             document.getElementById('feedbackMessage').style.color = '#e74c3c';
             document.getElementById('feedbackEmoji').textContent = '💡';
+
+            if (window.RewardSystem) {
+                window.RewardSystem.registerError("fraction_addition");
+            }
         }
         
-        // Показать решение с диаграммами
         function showSolution() {
             const {
-                numerator1,
-                denominator1,
-                numerator2,
-                denominator2,
-                commonDenominator,
-                multiplier1,
-                multiplier2,
-                result1Numerator,
-                result1Denominator,
-                result2Numerator,
-                result2Denominator,
-                sumNumerator,
-                sumDenominator,
-                simplifiedNumerator,
-                simplifiedDenominator,
-                canBeSimplified
+                numerator1, denominator1, numerator2, denominator2,
+                commonDenominator, multiplier1, multiplier2,
+                result1Numerator, result1Denominator, result2Numerator, result2Denominator,
+                sumNumerator, sumDenominator, simplifiedNumerator, simplifiedDenominator, canBeSimplified
             } = currentTask;
             
-            // Обновление текстового представления дробей
             document.getElementById('fractionText1').textContent = `${numerator1}/${denominator1}`;
             document.getElementById('fractionText2').textContent = `${numerator2}/${denominator2}`;
             document.getElementById('commonFractionText1').textContent = `${result1Numerator}/${result1Denominator}`;
@@ -922,7 +925,6 @@
             document.getElementById('sumFractionText').textContent = `Результат: ${sumNumerator}/${sumDenominator}`;
             document.getElementById('sumFractionResult').textContent = `${sumNumerator}/${sumDenominator}`;
             
-            // Показываем или скрываем блок с сокращенной дробью
             if (canBeSimplified) {
                 document.getElementById('simplifiedSolutionSection').style.display = 'block';
                 document.getElementById('simplifiedFractionValue').textContent = `${simplifiedNumerator}/${simplifiedDenominator}`;
@@ -933,7 +935,6 @@
                 document.getElementById('simplifiedChartGroup').style.display = 'none';
             }
             
-            // Отрисовка диаграмм
             drawFractionChart(numerator1, denominator1, 'chart1');
             drawFractionChart(numerator2, denominator2, 'chart2');
             drawFractionChart(result1Numerator, result1Denominator, 'commonChart1');
@@ -944,7 +945,6 @@
                 drawFractionChart(simplifiedNumerator, simplifiedDenominator, 'simplifiedChart');
             }
             
-            // Заполняем правильные значения в полях ввода для наглядности
             document.getElementById('multiplier1Numerator').value = multiplier1;
             document.getElementById('multiplier1Denominator').value = multiplier1;
             document.getElementById('multiplier2Numerator').value = multiplier2;
@@ -962,14 +962,9 @@
             }
         }
         
-        // Отрисовка диаграммы
         function drawFractionChart(numerator, denominator, chartId) {
             const chart = document.getElementById(chartId);
-            
-            // Очистка предыдущей диаграммы
             chart.innerHTML = '';
-            
-            // Создание сегментов
             for (let i = 0; i < denominator; i++) {
                 const segment = document.createElement('div');
                 segment.className = `segment ${i < numerator ? 'filled' : 'empty'}`;
@@ -978,7 +973,6 @@
             }
         }
         
-        // Обновление статистики
         function updateStats() {
             document.getElementById('correctCount').textContent = stats.correct;
             document.getElementById('incorrectCount').textContent = stats.incorrect;
@@ -987,38 +981,26 @@
             const successRate = stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0;
             document.getElementById('successRate').textContent = `${successRate}%`;
             
-            // Обновление прогресс-бара
             document.getElementById('progressBar').style.width = `${successRate}%`;
-            
-            // Обновление уровня
             updateLevelIndicator(successRate);
         }
         
-        // Обновление индикатора уровня
         function updateLevelIndicator(successRate) {
             let level, levelText;
-            
             if (successRate >= 90) {
-                level = 'Эксперт';
                 levelText = 'Эксперт';
             } else if (successRate >= 75) {
-                level = 'Продвинутый';
                 levelText = 'Продвинутый';
             } else if (successRate >= 60) {
-                level = 'Средний';
                 levelText = 'Средний';
             } else if (successRate >= 40) {
-                level = 'Начинающий';
                 levelText = 'Начинающий';
             } else {
-                level = 'Новичок';
                 levelText = 'Новичок';
             }
-            
             document.getElementById('levelIndicator').textContent = `Уровень: ${levelText}`;
         }
         
-        // Получить сообщение об успехе в зависимости от серии
         function getSuccessMessage() {
             if (stats.streak === 1) {
                 return 'Правильно! Отличное начало!';
@@ -1039,29 +1021,25 @@
             }
         }
         
-        // Инициализация приложения
         function initApp() {
-            // Генерация первого задания
             generateTask();
             
-            // Обработчик для кнопки "Проверить"
             document.getElementById('checkButton').addEventListener('click', checkAnswer);
-            
-            // Обработчик для кнопки "Следующее задание"
             document.getElementById('nextButton').addEventListener('click', generateTask);
             
-            // Обработчики для полей ввода (Enter)
             document.addEventListener('keyup', function(event) {
                 if (event.key === 'Enter') {
-                    checkAnswer();
+                    if (document.getElementById('checkButton').style.display !== 'none') {
+                        checkAnswer();
+                    } else if (document.getElementById('nextButton').style.display !== 'none') {
+                        generateTask();
+                    }
                 }
             });
             
-            // Инициализация статистики
             updateStats();
         }
         
-        // Запуск приложения
         window.onload = initApp;
     </script>
 </body>
