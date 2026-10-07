@@ -15,7 +15,7 @@
     <!-- Open Graph -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="Тренажёр: Сложение дробей с разными знаменателями (5-6 класс)">
-    <meta property="og:description" content="Понятная практика: введи дополнительные множители, найди общий знаменатель и сложи дроби. Подробное визуальное решение каждого примера!">
+    <meta property="og:description" content="Понятная практика: введи дополнительные множители, найди общий знаменатель и сложи дроби. Подробная проверка каждого шага!">
     <meta property="og:url" content="https://godspace.github.io/math-6-grade/trainers/fractions/addition.html">
     <meta property="og:site_name" content="Математика 6 класс">
 
@@ -121,7 +121,7 @@
         
         .task-container {
             background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
-            padding: 20px;
+            padding: 20px 30px 40px;
             border-radius: 12px;
             margin-bottom: 25px;
             text-align: center;
@@ -132,7 +132,7 @@
             font-size: 18px;
             font-weight: bold;
             color: #2c3e50;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
         
         .equation-container {
@@ -165,6 +165,7 @@
             font-size: 32px;
             font-weight: bold;
             color: #2c3e50;
+            min-width: 35px;
         }
         
         .fraction-line {
@@ -186,6 +187,7 @@
             font-weight: 700;
             transition: all 0.3s;
             background: #f8f9fa;
+            color: #2c3e50;
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
         }
         
@@ -194,6 +196,26 @@
             border-color: #3498db;
             background: white;
             box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        /* Стили для проверки ответа */
+        .correct-input {
+            border-color: #27ae60 !important;
+            background-color: #eafaf0 !important;
+            color: #27ae60 !important;
+        }
+        
+        .wrong-input {
+            border-color: #e74c3c !important;
+            background-color: #fceceb !important;
+            color: #e74c3c !important;
+            animation: shake 0.4s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
         }
         
         .multiplier-sign, .equals-sign, .plus-sign {
@@ -226,12 +248,16 @@
             margin: 5px 0;
             border-radius: 2px;
         }
+
+        .simplified-line {
+            background: linear-gradient(to right, #e67e22, #d35400);
+        }
         
         .controls {
             display: flex;
             justify-content: center;
             gap: 15px;
-            margin: 20px 0;
+            margin: 20px 0 0;
         }
         
         button {
@@ -258,24 +284,6 @@
         .next-btn {
             background: linear-gradient(to right, #3498db, #2980b9);
             color: white;
-        }
-        
-        .solution-container {
-            margin-top: 20px;
-            padding: 20px;
-            background: linear-gradient(to bottom, #fef9e7, #fef5e7);
-            border-radius: 12px;
-            border-left: 5px solid #f39c12;
-            display: none;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        }
-        
-        .solution-title {
-            color: #f39c12;
-            font-weight: bold;
-            margin-bottom: 15px;
-            text-align: center;
-            font-size: 18px;
         }
         
         .feedback-container {
@@ -309,124 +317,6 @@
             60% {transform: translateY(-6px);}
         }
         
-        .charts-container {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-top: 20px;
-        }
-        
-        .chart-group {
-            margin-bottom: 10px;
-        }
-        
-        .chart-wrapper {
-            margin-bottom: 5px;
-        }
-        
-        .chart-label {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-            font-size: 0.95rem;
-        }
-        
-        .fraction-text {
-            font-size: 16px;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        
-        .common-fraction-text {
-            font-size: 16px;
-            font-weight: bold;
-            color: #9b59b6;
-        }
-        
-        .sum-fraction-text {
-            font-size: 16px;
-            font-weight: bold;
-            color: #27ae60;
-        }
-        
-        .simplified-fraction-text {
-            font-size: 16px;
-            font-weight: bold;
-            color: #e67e22;
-        }
-        
-        .chart {
-            display: flex;
-            height: 40px;
-            border: 2px solid #2c3e50;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .segment {
-            flex: 1;
-            position: relative;
-            transition: all 0.3s ease;
-        }
-        
-        /* Четкие разделители между сегментами */
-        .segment:not(:last-child)::after {
-            content: '';
-            position: absolute;
-            right: 0;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background-color: #2c3e50;
-            z-index: 2;
-        }
-        
-        .fraction-1 .filled {
-            background: linear-gradient(to right, #3498db, #2980b9);
-        }
-        
-        .fraction-2 .filled {
-            background: linear-gradient(to right, #e74c3c, #c0392b);
-        }
-        
-        .sum-fraction .filled {
-            background: linear-gradient(to right, #2ecc71, #27ae60);
-        }
-        
-        .simplified-fraction .filled {
-            background: linear-gradient(to right, #e67e22, #d35400);
-        }
-        
-        .empty {
-            background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
-        }
-        
-        .common-denominator-section, .simplified-section-solution {
-            margin-top: 15px;
-            padding: 10px;
-            background: white;
-            border-radius: 8px;
-            border-left: 4px solid #9b59b6;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-        
-        .simplified-section-solution {
-            border-left: 4px solid #e67e22;
-            margin-top: 10px;
-        }
-        
-        .common-denominator-section h3, .simplified-section-solution h3 {
-            color: #9b59b6;
-            margin: 0;
-            font-size: 1rem;
-        }
-        
-        .simplified-section-solution h3 {
-            color: #e67e22;
-        }
-        
         .progress-container {
             width: 100%;
             height: 12px;
@@ -455,14 +345,6 @@
         
         .hidden {
             display: none;
-        }
-        
-        .correct-comparison {
-            color: #27ae60;
-            font-weight: bold;
-            text-align: center;
-            margin: 15px 0;
-            font-size: 18px;
         }
         
         .multiplier-explanation, .simplified-explanation {
@@ -509,7 +391,7 @@
         </div>
         
         <div class="task-container">
-            <div class="task-title">Сложите дроби, приведя их к общему знаменателю:</div>
+            <div class="task-title" id="taskTitle">Сложите дроби, приведя их к общему знаменателю:</div>
             
             <div class="equation-container">
                 <div class="fraction">
@@ -571,90 +453,22 @@
                 </div>
             </div>
             
-            <div class="multiplier-explanation">
-                Введите дополнительные множители и результаты умножения для приведения дробей к общему знаменателю, затем введите результат сложения
+            <div class="multiplier-explanation" id="multiplierExplanation">
+                Введите дополнительные множители и результаты умножения, а затем саму сумму.
             </div>
             
             <div class="simplified-explanation" id="simplifiedExplanation" style="display: none;">
-                Если дробь можно сократить, введите сокращенную дробь
+                Результат можно сократить! Введите финальную несократимую дробь.
             </div>
             
             <div class="feedback-container" id="feedbackContainer">
-                <div class="feedback-message" id="feedbackMessage">Введите ответ и нажмите "Проверить"</div>
+                <div class="feedback-message" id="feedbackMessage">Заполните поля и нажмите "Проверить"</div>
                 <div class="emoji" id="feedbackEmoji"></div>
             </div>
             
             <div class="controls">
                 <button class="check-btn" id="checkButton">Проверить</button>
                 <button class="next-btn" id="nextButton" style="display: none;">Следующее задание</button>
-            </div>
-        </div>
-        
-        <div class="solution-container" id="solutionContainer">
-            <div class="solution-title">Решение:</div>
-            <div class="common-denominator-section">
-                <h3>Общий знаменатель: <span id="commonDenominatorValue">15</span></h3>
-            </div>
-            <div class="sum-fraction-text" id="sumFractionText"></div>
-            <div class="simplified-section-solution" id="simplifiedSolutionSection" style="display: none;">
-                <h3>Сокращенная дробь: <span id="simplifiedFractionValue"></span></h3>
-            </div>
-            <div class="charts-container">
-                <div class="chart-group">
-                    <div class="chart-wrapper fraction-1">
-                        <div class="chart-label">
-                            <span>Дробь 1:</span>
-                            <span class="fraction-text" id="fractionText1">3/5</span>
-                        </div>
-                        <div class="chart" id="chart1"></div>
-                    </div>
-                    
-                    <div class="chart-wrapper fraction-1">
-                        <div class="chart-label">
-                            <span>С общим знаменателем:</span>
-                            <span class="common-fraction-text" id="commonFractionText1">9/15</span>
-                        </div>
-                        <div class="chart" id="commonChart1"></div>
-                    </div>
-                </div>
-                
-                <div class="chart-group">
-                    <div class="chart-wrapper fraction-2">
-                        <div class="chart-label">
-                            <span>Дробь 2:</span>
-                            <span class="fraction-text" id="fractionText2">2/3</span>
-                        </div>
-                        <div class="chart" id="chart2"></div>
-                    </div>
-                    
-                    <div class="chart-wrapper fraction-2">
-                        <div class="chart-label">
-                            <span>С общим знаменателем:</span>
-                            <span class="common-fraction-text" id="commonFractionText2">10/15</span>
-                        </div>
-                        <div class="chart" id="commonChart2"></div>
-                    </div>
-                </div>
-                
-                <div class="chart-group">
-                    <div class="chart-wrapper sum-fraction">
-                        <div class="chart-label">
-                            <span>Сумма:</span>
-                            <span class="sum-fraction-text" id="sumFractionResult">19/15</span>
-                        </div>
-                        <div class="chart" id="sumChart"></div>
-                    </div>
-                </div>
-
-                <div class="chart-group" id="simplifiedChartGroup" style="display: none;">
-                    <div class="chart-wrapper simplified-fraction">
-                        <div class="chart-label">
-                            <span>Сокращенная дробь:</span>
-                            <span class="simplified-fraction-text" id="simplifiedFractionResult"></span>
-                        </div>
-                        <div class="chart" id="simplifiedChart"></div>
-                    </div>
-                </div>
             </div>
         </div>
         
@@ -762,18 +576,13 @@
             document.getElementById('taskNumerator2').textContent = numerator2;
             document.getElementById('taskDenominator2').textContent = denominator2;
             
-            document.getElementById('multiplier1Numerator').value = '';
-            document.getElementById('multiplier1Denominator').value = '';
-            document.getElementById('multiplier2Numerator').value = '';
-            document.getElementById('multiplier2Denominator').value = '';
-            document.getElementById('result1Numerator').value = '';
-            document.getElementById('result1Denominator').value = '';
-            document.getElementById('result2Numerator').value = '';
-            document.getElementById('result2Denominator').value = '';
-            document.getElementById('sumNumerator').value = '';
-            document.getElementById('sumDenominator').value = '';
-            document.getElementById('simplifiedNumerator').value = '';
-            document.getElementById('simplifiedDenominator').value = '';
+            // Очищаем и разблокируем все инпуты
+            const allInputs = document.querySelectorAll('input[type="number"]');
+            allInputs.forEach(input => {
+                input.value = '';
+                input.readOnly = false;
+                input.classList.remove('correct-input', 'wrong-input');
+            });
             
             if (currentTask.canBeSimplified) {
                 document.getElementById('simplifiedSection').style.display = 'flex';
@@ -785,86 +594,64 @@
                 document.getElementById('simplifiedExplanation').style.display = 'none';
             }
             
-            document.getElementById('feedbackMessage').textContent = 'Введите ответ и нажмите "Проверить"';
+            document.getElementById('feedbackMessage').textContent = 'Заполните поля и нажмите "Проверить"';
             document.getElementById('feedbackMessage').style.color = '#2c3e50';
             document.getElementById('feedbackEmoji').textContent = '';
             document.getElementById('checkButton').style.display = 'block';
             document.getElementById('nextButton').style.display = 'none';
-            
-            document.getElementById('solutionContainer').style.display = 'none';
-            document.querySelector('.task-title').classList.remove('hidden');
-            document.querySelector('.multiplier-explanation').classList.remove('hidden');
         }
         
         function checkAnswer() {
-            const userMultiplier1Numerator = parseInt(document.getElementById('multiplier1Numerator').value);
-            const userMultiplier1Denominator = parseInt(document.getElementById('multiplier1Denominator').value);
-            const userMultiplier2Numerator = parseInt(document.getElementById('multiplier2Numerator').value);
-            const userMultiplier2Denominator = parseInt(document.getElementById('multiplier2Denominator').value);
+            let allCorrect = true;
+            let hasEmpty = false;
+
+            // Вспомогательная функция проверки конкретного поля
+            const checkField = (id, correctVal, isSimplifiedField = false) => {
+                const el = document.getElementById(id);
+                if (isSimplifiedField && !currentTask.canBeSimplified) return; // Пропускаем проверку скрытых полей
+
+                el.classList.remove('correct-input', 'wrong-input');
+                const val = parseInt(el.value);
+
+                if (isNaN(val)) {
+                    el.classList.add('wrong-input');
+                    hasEmpty = true;
+                    allCorrect = false;
+                } else if (val === correctVal) {
+                    el.classList.add('correct-input');
+                    el.readOnly = true; // Блокируем правильный ответ
+                } else {
+                    el.classList.add('wrong-input');
+                    allCorrect = false;
+                }
+            };
+
+            // Проверяем все поля по очереди
+            checkField('multiplier1Numerator', currentTask.multiplier1);
+            checkField('multiplier1Denominator', currentTask.multiplier1);
+            checkField('multiplier2Numerator', currentTask.multiplier2);
+            checkField('multiplier2Denominator', currentTask.multiplier2);
             
-            const userResult1Numerator = parseInt(document.getElementById('result1Numerator').value);
-            const userResult1Denominator = parseInt(document.getElementById('result1Denominator').value);
-            const userResult2Numerator = parseInt(document.getElementById('result2Numerator').value);
-            const userResult2Denominator = parseInt(document.getElementById('result2Denominator').value);
+            checkField('result1Numerator', currentTask.result1Numerator);
+            checkField('result1Denominator', currentTask.result1Denominator);
+            checkField('result2Numerator', currentTask.result2Numerator);
+            checkField('result2Denominator', currentTask.result2Denominator);
             
-            const userSumNumerator = parseInt(document.getElementById('sumNumerator').value);
-            const userSumDenominator = parseInt(document.getElementById('sumDenominator').value);
-            
-            const userSimplifiedNumerator = parseInt(document.getElementById('simplifiedNumerator').value);
-            const userSimplifiedDenominator = parseInt(document.getElementById('simplifiedDenominator').value);
-            
-            if (isNaN(userMultiplier1Numerator) || isNaN(userMultiplier1Denominator) ||
-                isNaN(userMultiplier2Numerator) || isNaN(userMultiplier2Denominator) ||
-                isNaN(userResult1Numerator) || isNaN(userResult1Denominator) ||
-                isNaN(userResult2Numerator) || isNaN(userResult2Denominator) ||
-                isNaN(userSumNumerator) || isNaN(userSumDenominator)) {
-                document.getElementById('feedbackMessage').textContent = 'Пожалуйста, заполните все поля';
-                document.getElementById('feedbackMessage').style.color = '#e74c3c';
-                return;
-            }
-            
-            const isMultiplier1Correct = userMultiplier1Numerator === currentTask.multiplier1 && 
-                                        userMultiplier1Denominator === currentTask.multiplier1;
-            const isMultiplier2Correct = userMultiplier2Numerator === currentTask.multiplier2 && 
-                                        userMultiplier2Denominator === currentTask.multiplier2;
-            
-            const isResult1Correct = userResult1Numerator === currentTask.result1Numerator && 
-                                    userResult1Denominator === currentTask.result1Denominator;
-            const isResult2Correct = userResult2Numerator === currentTask.result2Numerator && 
-                                    userResult2Denominator === currentTask.result2Denominator;
-            
-            const isSumCorrect = userSumNumerator === currentTask.sumNumerator && 
-                                userSumDenominator === currentTask.sumDenominator;
-            
-            let isSimplifiedCorrect = true;
+            checkField('sumNumerator', currentTask.sumNumerator);
+            checkField('sumDenominator', currentTask.sumDenominator);
+
             if (currentTask.canBeSimplified) {
-                if (isNaN(userSimplifiedNumerator) || isNaN(userSimplifiedDenominator)) {
-                    document.getElementById('feedbackMessage').textContent = 'Пожалуйста, заполните все поля, включая сокращенную дробь';
-                    document.getElementById('feedbackMessage').style.color = '#e74c3c';
-                    return;
-                }
-                isSimplifiedCorrect = userSimplifiedNumerator === currentTask.simplifiedNumerator && 
-                                     userSimplifiedDenominator === currentTask.simplifiedDenominator;
-            } else {
-                if (!isNaN(userSimplifiedNumerator) || !isNaN(userSimplifiedDenominator)) {
-                    isSimplifiedCorrect = false;
-                }
+                checkField('simplifiedNumerator', currentTask.simplifiedNumerator, true);
+                checkField('simplifiedDenominator', currentTask.simplifiedDenominator, true);
             }
             
-            document.querySelector('.task-title').classList.add('hidden');
-            document.querySelector('.multiplier-explanation').classList.add('hidden');
-            document.getElementById('solutionContainer').style.display = 'block';
-            
-            if (isMultiplier1Correct && isMultiplier2Correct && isResult1Correct && isResult2Correct && isSumCorrect && isSimplifiedCorrect) {
+            if (allCorrect) {
                 handleCorrectAnswer();
+                document.getElementById('checkButton').style.display = 'none';
+                document.getElementById('nextButton').style.display = 'block';
             } else {
-                handleIncorrectAnswer();
+                handleIncorrectAnswer(hasEmpty);
             }
-            
-            showSolution();
-            
-            document.getElementById('checkButton').style.display = 'none';
-            document.getElementById('nextButton').style.display = 'block';
         }
         
         function handleCorrectAnswer() {
@@ -894,83 +681,26 @@
             }
         }
         
-        function handleIncorrectAnswer() {
-            stats.incorrect++;
-            stats.streak = 0;
-            stats.total++;
-            updateStats();
-            
-            document.getElementById('feedbackMessage').textContent = 'Попробуйте следующее задание!';
-            document.getElementById('feedbackMessage').style.color = '#e74c3c';
-            document.getElementById('feedbackEmoji').textContent = '💡';
+        function handleIncorrectAnswer(hasEmpty) {
+            // Засчитываем ошибку только если пользователь действительно ошибся (а не просто нажал проверить с пустыми полями)
+            if (!hasEmpty) {
+                stats.incorrect++;
+                stats.streak = 0;
+                stats.total++;
+                updateStats();
+                if (window.RewardSystem) {
+                    window.RewardSystem.registerError("fraction_addition");
+                }
+            }
 
-            if (window.RewardSystem) {
-                window.RewardSystem.registerError("fraction_addition");
-            }
-        }
-        
-        function showSolution() {
-            const {
-                numerator1, denominator1, numerator2, denominator2,
-                commonDenominator, multiplier1, multiplier2,
-                result1Numerator, result1Denominator, result2Numerator, result2Denominator,
-                sumNumerator, sumDenominator, simplifiedNumerator, simplifiedDenominator, canBeSimplified
-            } = currentTask;
-            
-            document.getElementById('fractionText1').textContent = `${numerator1}/${denominator1}`;
-            document.getElementById('fractionText2').textContent = `${numerator2}/${denominator2}`;
-            document.getElementById('commonFractionText1').textContent = `${result1Numerator}/${result1Denominator}`;
-            document.getElementById('commonFractionText2').textContent = `${result2Numerator}/${result2Denominator}`;
-            document.getElementById('commonDenominatorValue').textContent = commonDenominator;
-            document.getElementById('sumFractionText').textContent = `Результат: ${sumNumerator}/${sumDenominator}`;
-            document.getElementById('sumFractionResult').textContent = `${sumNumerator}/${sumDenominator}`;
-            
-            if (canBeSimplified) {
-                document.getElementById('simplifiedSolutionSection').style.display = 'block';
-                document.getElementById('simplifiedFractionValue').textContent = `${simplifiedNumerator}/${simplifiedDenominator}`;
-                document.getElementById('simplifiedFractionResult').textContent = `${simplifiedNumerator}/${simplifiedDenominator}`;
-                document.getElementById('simplifiedChartGroup').style.display = 'block';
+            if (hasEmpty) {
+                document.getElementById('feedbackMessage').textContent = 'Заполните все пустые поля (выделены красным)';
             } else {
-                document.getElementById('simplifiedSolutionSection').style.display = 'none';
-                document.getElementById('simplifiedChartGroup').style.display = 'none';
+                document.getElementById('feedbackMessage').textContent = 'В выделенных полях ошибка. Исправьте и попробуйте снова!';
             }
             
-            drawFractionChart(numerator1, denominator1, 'chart1');
-            drawFractionChart(numerator2, denominator2, 'chart2');
-            drawFractionChart(result1Numerator, result1Denominator, 'commonChart1');
-            drawFractionChart(result2Numerator, result2Denominator, 'commonChart2');
-            drawFractionChart(sumNumerator, sumDenominator, 'sumChart');
-            
-            if (canBeSimplified) {
-                drawFractionChart(simplifiedNumerator, simplifiedDenominator, 'simplifiedChart');
-            }
-            
-            document.getElementById('multiplier1Numerator').value = multiplier1;
-            document.getElementById('multiplier1Denominator').value = multiplier1;
-            document.getElementById('multiplier2Numerator').value = multiplier2;
-            document.getElementById('multiplier2Denominator').value = multiplier2;
-            document.getElementById('result1Numerator').value = result1Numerator;
-            document.getElementById('result1Denominator').value = result1Denominator;
-            document.getElementById('result2Numerator').value = result2Numerator;
-            document.getElementById('result2Denominator').value = result2Denominator;
-            document.getElementById('sumNumerator').value = sumNumerator;
-            document.getElementById('sumDenominator').value = sumDenominator;
-            
-            if (canBeSimplified) {
-                document.getElementById('simplifiedNumerator').value = simplifiedNumerator;
-                document.getElementById('simplifiedDenominator').value = simplifiedDenominator;
-            }
-        }
-        
-        function drawFractionChart(numerator, denominator, chartId) {
-            const chart = document.getElementById(chartId);
-            chart.innerHTML = '';
-            for (let i = 0; i < denominator; i++) {
-                const segment = document.createElement('div');
-                segment.className = `segment ${i < numerator ? 'filled' : 'empty'}`;
-                segment.title = `${i + 1}/${denominator}`;
-                chart.appendChild(segment);
-            }
+            document.getElementById('feedbackMessage').style.color = '#e74c3c';
+            document.getElementById('feedbackEmoji').textContent = '👀';
         }
         
         function updateStats() {
@@ -986,7 +716,7 @@
         }
         
         function updateLevelIndicator(successRate) {
-            let level, levelText;
+            let levelText;
             if (successRate >= 90) {
                 levelText = 'Эксперт';
             } else if (successRate >= 75) {
@@ -1015,7 +745,7 @@
                     'Правильно! Отличная работа!',
                     'Верно! Вы отлично справляетесь!',
                     'Правильный ответ! Так держать!',
-                    'Верно! Вы хорошо разбираетесь в дробях!'
+                    'Всё верно! Переходим к следующему.'
                 ];
                 return messages[Math.floor(Math.random() * messages.length)];
             }
