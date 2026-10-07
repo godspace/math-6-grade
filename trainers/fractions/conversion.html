@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- ─── SEO-БЛОК ─── -->
+    <title>Тренажёр: Как перевести неправильную дробь в смешанную и наоборот</title>
+    <meta name="description" content="Интерактивный тренажёр для 5 и 6 класса. Узнай, как перевести смешанную дробь в неправильную и как выделить целую часть из неправильной дроби.">
+    <meta name="keywords" content="как перевести неправильную дробь в правильную, как перевести смешанную дробь в неправильную, как выделить целую часть из неправильной дроби, как из неправильной дроби сделать смешанную, как перевести дробь в неправильную, математика 5 класс, математика 6 класс">
+    <meta name="author" content="Козлов Сергей Владимирович">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://godspace.github.io/math-6-grade/trainers/fractions/conversion.html">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Перевод дробей: из смешанной в неправильную и обратно">
+    <meta property="og:description" content="Пошаговая тренировка базовых правил: умножаем целое на знаменатель или делим с остатком. Понятно и просто!">
+    <meta property="og:url" content="https://godspace.github.io/math-6-grade/trainers/fractions/conversion.html">
+    <meta property="og:site_name" content="Математика 6 класс">
+
+    <!-- JSON-LD -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "LearningResource",
+        "name": "Тренажёр: Перевод обыкновенных дробей",
+        "description": "Интерактивная практика по переводу смешанных чисел в неправильные дроби и выделению целой части из неправильной дроби.",
+        "educationalLevel": ["5 класс", "6 класс"],
+        "learningResourceType": "Интерактивный тренажёр",
+        "inLanguage": "ru",
+        "isAccessibleForFree": true,
+        "teaches": ["Перевод смешанной дроби в неправильную", "Выделение целой части из неправильной дроби", "Деление с остатком"],
+        "url": "https://godspace.github.io/math-6-grade/trainers/fractions/conversion.html"
+    }
+    </script>
+    <!-- ─── КОНЕЦ SEO-БЛОКА ─── -->
+
+    <link rel="icon" href="/math-6-grade/favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="16x16" href="/math-6-grade/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/math-6-grade/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="48x48" href="/math-6-grade/favicon-48x48.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/math-6-grade/apple-touch-icon.png">
+    <link rel="manifest" href="/math-6-grade/site.webmanifest">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Глобальный скрипт с аналитикой и лутбоксами -->
+    <script src="../../assets/analytics.js" defer></script>
+    
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #2ec4b6;
+            --warning: #ff9f1c;
+            --danger: #e71d36;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-main: #2b2d42;
+            --text-muted: #8d99ae;
+        }
+
+        * { box-sizing: border-box; font-family: 'Nunito', sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: radial-gradient(#e2e8f0 10%, transparent 11%);
+            background-size: 20px 20px;
+            color: var(--text-main);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+            padding: 30px;
+            margin-top: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 { margin: 0; font-size: 2rem; color: var(--secondary); }
+        .header p { color: var(--text-muted); margin-top: 5px; font-size: 1.1rem; }
+
+        /* Табы режимов */
+        .mode-selector {
+            display: flex;
+            background: #edf2f4;
+            border-radius: 12px;
+            padding: 5px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: transparent;
+            font-size: 1rem;
+            font-weight: bold;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s;
+            z-index: 2;
+        }
+
+        .mode-btn.active { color: white; }
+
+        .mode-slider {
+            position: absolute;
+            top: 5px; bottom: 5px;
+            width: calc(50% - 5px);
+            background: var(--primary);
+            border-radius: 8px;
+            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            z-index: 1;
+            box-shadow: 0 4px 10px rgba(67, 97, 238, 0.3);
+        }
+
+        .mode-2-active .mode-slider { transform: translateX(100%); }
+
+        /* Область тренажера */
+        .workspace {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .workspace.active { display: flex; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Оформление дробей */
+        .equation {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            font-size: 2rem;
+            font-weight: 900;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        .fraction {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0 5px;
+        }
+
+        .frac-num, .frac-den { padding: 5px 10px; }
+        .frac-line { width: 100%; height: 4px; background: var(--text-main); border-radius: 2px; }
+
+        .mixed-fraction { display: flex; align-items: center; }
+        .whole-part { margin-right: 5px; font-size: 2.5rem; }
+
+        .equals { color: var(--text-muted); margin: 0 10px; }
+
+        /* Поля ввода */
+        input[type="number"] {
+            -moz-appearance: textfield;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1.8rem;
+            font-weight: bold;
+            text-align: center;
+            border: 2px solid #ced4da;
+            border-radius: 12px;
+            background: #fff;
+            color: var(--text-main);
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+        input[type="number"]:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.15);
+        }
+
+        .input-sm { width: 60px; height: 60px; }
+        .input-lg { width: 70px; height: 70px; font-size: 2rem; }
+
+        .correct { border-color: var(--success) !important; background: #f0fdf4 !important; color: var(--success) !important; pointer-events: none; }
+        .wrong { border-color: var(--danger) !important; background: #fff0f0 !important; color: var(--danger) !important; animation: shake 0.4s; }
+
+        @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
+
+        /* Подсказки */
+        .hint-box {
+            background: rgba(255, 159, 28, 0.1);
+            border-left: 4px solid var(--warning);
+            padding: 15px 20px;
+            border-radius: 0 12px 12px 0;
+            color: #d35400;
+            font-weight: bold;
+            margin-bottom: 25px;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* Кнопки и статистика */
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .feedback { min-height: 24px; font-weight: bold; margin-bottom: 15px; font-size: 1.1rem; }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: 900;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 15px rgba(67, 97, 238, 0.3);
+            transition: all 0.2s;
+        }
+
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 12px 20px rgba(67, 97, 238, 0.4); }
+        .btn:active { transform: translateY(-1px); }
+        .btn-next { background: var(--success); box-shadow: 0 8px 15px rgba(46, 196, 182, 0.3); display: none; }
+        .btn-next:hover { box-shadow: 0 12px 20px rgba(46, 196, 182, 0.4); }
+
+        .stats {
+            display: flex; gap: 20px; margin-top: 20px; color: var(--text-muted); font-weight: bold;
+        }
+        .streak { color: var(--warning); }
+
+        /* Конфетти */
+        #confetti { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 100; }
+
+        /* Блок промежуточного вычисления (Режим 1) */
+        .calc-group {
+            display: flex;
+            align-items: center;
+            background: #f8f9fa;
+            padding: 10px 20px;
+            border-radius: 16px;
+            border: 2px dashed #dee2e6;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>Перевод дробей</h1>
+        <p>Выбери, что будем тренировать</p>
+    </div>
+
+    <div class="mode-selector" id="modeSelector">
+        <div class="mode-slider"></div>
+        <button class="mode-btn active" onclick="switchMode(1)">Смешанная ➔ Неправильная</button>
+        <button class="mode-btn" onclick="switchMode(2)">Неправильная ➔ Смешанная</button>
+    </div>
+
+    <!-- РЕЖИМ 1: Смешанная в Неправильную -->
+    <div class="workspace active" id="workspace1">
+        <div class="hint-box">
+            Правило: (Целое × Знаменатель) + Числитель
+        </div>
+
+        <div class="equation">
+            <!-- Исходная дробь -->
+            <div class="mixed-fraction">
+                <span class="whole-part" id="m1_w">3</span>
+                <div class="fraction">
+                    <span class="frac-num" id="m1_n">1</span>
+                    <div class="frac-line"></div>
+                    <span class="frac-den" id="m1_d">2</span>
+                </div>
+            </div>
+
+            <span class="equals">=</span>
+
+            <!-- Процесс -->
+            <div class="fraction">
+                <div class="calc-group">
+                    (<input type="number" class="input-sm" id="m1_inp_w" placeholder="Ц"> 
+                    <span style="color:var(--text-muted); margin:0 8px;">×</span> 
+                    <span id="m1_d_static1" style="color:var(--primary);">2</span> 
+                    <span style="color:var(--text-muted); margin:0 8px;">+</span> 
+                    <input type="number" class="input-sm" id="m1_inp_n" placeholder="Ч">)
+                </div>
+                <div class="frac-line" style="margin: 10px 0;"></div>
+                <span class="frac-den" id="m1_d_static2">2</span>
+            </div>
+
+            <span class="equals">=</span>
+
+            <!-- Итог -->
+            <div class="fraction">
+                <input type="number" class="input-sm" id="m1_inp_final" placeholder="?">
+                <div class="frac-line"></div>
+                <span class="frac-den" id="m1_d_static3">2</span>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="feedback" id="fb1"></div>
+            <button class="btn" id="btn1" onclick="checkMode1()">Проверить</button>
+            <button class="btn btn-next" id="next1" onclick="generateTask()">Следующий пример ➡</button>
+        </div>
+    </div>
+
+    <!-- РЕЖИМ 2: Неправильная в Смешанную -->
+    <div class="workspace" id="workspace2">
+        <div class="hint-box" id="m2_hint">
+            Раздели числитель на знаменатель с остатком
+        </div>
+
+        <div class="equation">
+            <!-- Исходная дробь -->
+            <div class="fraction">
+                <span class="frac-num" id="m2_imp_n">7</span>
+                <div class="frac-line"></div>
+                <span class="frac-den" id="m2_d">2</span>
+            </div>
+
+            <span class="equals">=</span>
+
+            <!-- Итог (Смешанная) -->
+            <div class="mixed-fraction">
+                <input type="number" class="input-lg" id="m2_inp_w" placeholder="Ц">
+                <div class="fraction">
+                    <input type="number" class="input-sm" id="m2_inp_n" placeholder="Ост">
+                    <div class="frac-line"></div>
+                    <span class="frac-den" id="m2_d_static">2</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="feedback" id="fb2"></div>
+            <button class="btn" id="btn2" onclick="checkMode2()">Проверить</button>
+            <button class="btn btn-next" id="next2" onclick="generateTask()">Следующий пример ➡</button>
+        </div>
+    </div>
+
+    <div class="stats">
+        <div>Решено: <span id="scoreVal">0</span></div>
+        <div class="streak">Серия: <span id="streakVal">0</span> 🔥</div>
+    </div>
+</div>
+
+<canvas id="confetti"></canvas>
+
+<script>
+    // Состояние приложения
+    let currentMode = 1;
+    let task = { w: 0, n: 0, d: 0, imp_n: 0 };
+    let score = 0;
+    let streak = 0;
+
+    // Утилиты
+    const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+    function switchMode(mode) {
+        currentMode = mode;
+        const selector = document.getElementById('modeSelector');
+        const btns = document.querySelectorAll('.mode-btn');
+        
+        if (mode === 1) {
+            selector.classList.remove('mode-2-active');
+            btns[0].classList.add('active');
+            btns[1].classList.remove('active');
+            document.getElementById('workspace1').classList.add('active');
+            document.getElementById('workspace2').classList.remove('active');
+        } else {
+            selector.classList.add('mode-2-active');
+            btns[1].classList.add('active');
+            btns[0].classList.remove('active');
+            document.getElementById('workspace2').classList.add('active');
+            document.getElementById('workspace1').classList.remove('active');
+        }
+        
+        streak = 0; // Сброс серии при смене режима
+        updateStats();
+        generateTask();
+    }
+
+    function generateTask() {
+        // Интеграция с RewardSystem: сброс ошибок
+        if (window.RewardSystem) window.RewardSystem.resetErrors();
+
+        // Генерация чисел
+        task.d = rand(3, 12);
+        task.w = rand(1, 9);
+        task.n = rand(1, task.d - 1);
+        task.imp_n = task.w * task.d + task.n;
+
+        if (currentMode === 1) {
+            // Обновляем UI Режима 1
+            document.getElementById('m1_w').textContent = task.w;
+            document.getElementById('m1_n').textContent = task.n;
+            document.getElementById('m1_d').textContent = task.d;
+            document.getElementById('m1_d_static1').textContent = task.d;
+            document.getElementById('m1_d_static2').textContent = task.d;
+            document.getElementById('m1_d_static3').textContent = task.d;
+
+            // Сброс инпутов
+            const inps = ['m1_inp_w', 'm1_inp_n', 'm1_inp_final'];
+            inps.forEach(id => {
+                const el = document.getElementById(id);
+                el.value = ''; el.disabled = false;
+                el.classList.remove('correct', 'wrong');
+            });
+
+            document.getElementById('btn1').style.display = 'block';
+            document.getElementById('next1').style.display = 'none';
+            document.getElementById('fb1').textContent = '';
+            setTimeout(() => document.getElementById('m1_inp_w').focus(), 100);
+
+        } else {
+            // Обновляем UI Режима 2
+            document.getElementById('m2_imp_n').textContent = task.imp_n;
+            document.getElementById('m2_d').textContent = task.d;
+            document.getElementById('m2_d_static').textContent = task.d;
+            
+            document.getElementById('m2_hint').textContent = `Подсказка: ${task.imp_n} ÷ ${task.d} = ? (остаток ?)`;
+
+            // Сброс инпутов
+            const inps = ['m2_inp_w', 'm2_inp_n'];
+            inps.forEach(id => {
+                const el = document.getElementById(id);
+                el.value = ''; el.disabled = false;
+                el.classList.remove('correct', 'wrong');
+            });
+
+            document.getElementById('btn2').style.display = 'block';
+            document.getElementById('next2').style.display = 'none';
+            document.getElementById('fb2').textContent = '';
+            setTimeout(() => document.getElementById('m2_inp_w').focus(), 100);
+        }
+    }
+
+    function checkMode1() {
+        const uW = parseInt(document.getElementById('m1_inp_w').value);
+        const uN = parseInt(document.getElementById('m1_inp_n').value);
+        const uF = parseInt(document.getElementById('m1_inp_final').value);
+        
+        let allCorrect = true;
+
+        const checkField = (id, expected) => {
+            const el = document.getElementById(id);
+            if (parseInt(el.value) === expected) {
+                el.classList.add('correct'); el.classList.remove('wrong'); el.disabled = true;
+            } else {
+                el.classList.add('wrong'); el.classList.remove('correct');
+                allCorrect = false;
+            }
+        };
+
+        checkField('m1_inp_w', task.w);
+        checkField('m1_inp_n', task.n);
+        checkField('m1_inp_final', task.imp_n);
+
+        handleResult(allCorrect, 'fb1', 'btn1', 'next1');
+    }
+
+    function checkMode2() {
+        const uW = parseInt(document.getElementById('m2_inp_w').value);
+        const uN = parseInt(document.getElementById('m2_inp_n').value);
+        
+        let allCorrect = true;
+
+        const checkField = (id, expected) => {
+            const el = document.getElementById(id);
+            if (parseInt(el.value) === expected) {
+                el.classList.add('correct'); el.classList.remove('wrong'); el.disabled = true;
+            } else {
+                el.classList.add('wrong'); el.classList.remove('correct');
+                allCorrect = false;
+            }
+        };
+
+        checkField('m2_inp_w', task.w);
+        checkField('m2_inp_n', task.n);
+
+        handleResult(allCorrect, 'fb2', 'btn2', 'next2');
+    }
+
+    function handleResult(isCorrect, fbId, btnId, nextId) {
+        const fb = document.getElementById(fbId);
+        
+        if (isCorrect) {
+            fb.textContent = "Верно! Молодец! 🎉";
+            fb.style.color = "var(--success)";
+            document.getElementById(btnId).style.display = 'none';
+            document.getElementById(nextId).style.display = 'block';
+            
+            score++;
+            streak++;
+            updateStats();
+
+            // Интеграция: Выдача лутбокса за серию из 4 правильных ответов
+            if (window.RewardSystem) {
+                window.RewardSystem.resetErrors();
+                if (streak > 0 && streak % 4 === 0) {
+                    setTimeout(() => window.RewardSystem.showWin(`Серия ${streak}! Перевод дробей`, "fraction_conversion"), 1000);
+                    fireConfetti();
+                }
+            }
+        } else {
+            fb.textContent = "Есть ошибка. Исправь красные поля!";
+            fb.style.color = "var(--danger)";
+            streak = 0;
+            updateStats();
+            
+            // Интеграция: Вызов спасательного круга
+            if (window.RewardSystem) window.RewardSystem.registerError("fraction_conversion");
+        }
+    }
+
+    function updateStats() {
+        document.getElementById('scoreVal').textContent = score;
+        document.getElementById('streakVal').textContent = streak;
+    }
+
+    // Поддержка Enter
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            if (currentMode === 1) {
+                if (document.getElementById('btn1').style.display !== 'none') checkMode1();
+                else if (document.getElementById('next1').style.display !== 'none') generateTask();
+            } else {
+                if (document.getElementById('btn2').style.display !== 'none') checkMode2();
+                else if (document.getElementById('next2').style.display !== 'none') generateTask();
+            }
+        }
+    });
+
+    // Конфетти для стриков
+    function fireConfetti() {
+        const canvas = document.getElementById('confetti');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        const pieces = [];
+        const colors = ['#4361ee', '#2ec4b6', '#ff9f1c', '#e71d36'];
+        for(let i=0; i<100; i++) {
+            pieces.push({
+                x: canvas.width/2, y: canvas.height/2 + 100,
+                vx: (Math.random() - 0.5) * 20, vy: (Math.random() - 1) * 20,
+                s: Math.random() * 10 + 5, c: colors[Math.floor(Math.random()*colors.length)]
+            });
+        }
+        function animate() {
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            let active = false;
+            pieces.forEach(p => {
+                p.x += p.vx; p.y += p.vy; p.vy += 0.5; // гравитация
+                if (p.y < canvas.height) active = true;
+                ctx.fillStyle = p.c; ctx.fillRect(p.x, p.y, p.s, p.s);
+            });
+            if (active) requestAnimationFrame(animate);
+            else ctx.clearRect(0,0,canvas.width,canvas.height);
+        }
+        animate();
+    }
+
+    // Запуск
+    generateTask();
+</script>
+</body>
+</html>
