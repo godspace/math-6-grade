@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- ─── SEO-БЛОК ─── -->
+    <title>Тренажёр: Архитектор — Визуальные дроби и проценты на плане квартиры | 5-6 класс</title>
+    <meta name="description" content="Интерактивный тренажёр по математике для 5-6 класса. Закрашивай плитку на плане квартиры, находи долю комнаты от всей площади и переводи её в проценты.">
+    <meta name="keywords" content="визуальные проценты, проценты на сетке, дроби и проценты планировка квартиры, задачи на проценты 6 класс, нахождение процента от площади, интерактивный тренажер проценты">
+    <meta name="author" content="Козлов Сергей Владимирович">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://godspace.github.io/math-6-grade/trainers/percents/tiles.html">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Архитектор: Плитка и Проценты (5-6 класс)">
+    <meta property="og:description" content="Интерактивный чертёж квартиры: закрашивай нужную долю плитки и вычисляй процент площади с мгновенной проверкой!">
+    <meta property="og:url" content="https://godspace.github.io/math-6-grade/trainers/percents/tiles.html">
+    <meta property="og:site_name" content="Математика 6 класс">
+
+    <!-- JSON-LD -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "LearningResource",
+        "name": "Тренажёр: Архитектор — Плитка и Проценты",
+        "description": "Практическое применение обыкновенных дробей и процентов при планировке комнат на сетчатом плане квартиры.",
+        "educationalLevel": ["5 класс", "6 класс"],
+        "learningResourceType": "Интерактивный тренажёр",
+        "inLanguage": "ru",
+        "isAccessibleForFree": true,
+        "teaches": ["Связь дробей и процентов", "Нахождение части от площади", "Визуальное представление процентов"],
+        "url": "https://godspace.github.io/math-6-grade/trainers/percents/tiles.html"
+    }
+    </script>
+    <!-- ─── КОНЕЦ SEO-БЛОКА ─── -->
+
+    <link rel="icon" href="/math-6-grade/favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="16x16" href="/math-6-grade/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/math-6-grade/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="48x48" href="/math-6-grade/favicon-48x48.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/math-6-grade/apple-touch-icon.png">
+    <link rel="manifest" href="/math-6-grade/site.webmanifest">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="../../assets/analytics.js" defer></script>
+    
+    <style>
+        :root {
+            --primary: #4361ee;
+            --success: #2ec4b6;
+            --warning: #ff9f1c;
+            --danger: #e71d36;
+            --percent-color: #f72585;
+            --tile-bg: #e2e8f0;
+            --tile-border: #cbd5e1;
+            --tile-selected: #4361ee;
+            --bg-gradient: linear-gradient(135deg, #8BC6EC 0%, #9599E2 100%);
+            --card-bg: rgba(255, 255, 255, 0.98);
+        }
+
+        * { box-sizing: border-box; font-family: 'Nunito', sans-serif; }
+
+        body {
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #1e293b;
+        }
+
+        .container {
+            background: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            width: 100%;
+            max-width: 1000px;
+            padding: 35px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* Шапка */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .level-badges { display: flex; gap: 10px; }
+        .lvl-badge {
+            width: 38px; height: 38px; border-radius: 50%; background: #ddd;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; color: #fff; font-size: 15px; transition: all 0.3s;
+        }
+        .lvl-badge.active { background: var(--primary); transform: scale(1.15); box-shadow: 0 0 12px var(--primary); }
+        .lvl-badge.completed { background: var(--success); }
+
+        .stats-box {
+            background: #f8f9fa; padding: 10px 20px; border-radius: 12px;
+            font-weight: bold; color: var(--primary);
+        }
+
+        h1 { margin: 0; color: #2d3436; font-size: 1.8rem; }
+        .subtitle { color: #636e72; margin-top: 5px; }
+
+        /* Карточка задачи */
+        .task-statement {
+            background: #ffffff;
+            border: 2px solid #e2e8f0;
+            border-left: 6px solid var(--primary);
+            border-radius: 18px;
+            padding: 20px 28px;
+            text-align: center;
+            font-size: 1.35rem;
+            line-height: 1.6;
+            width: 100%;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.03);
+        }
+
+        .highlight-frac {
+            color: var(--primary); font-weight: 900; background: rgba(67, 97, 238, 0.12);
+            padding: 2px 10px; border-radius: 8px; display: inline-block;
+        }
+        .highlight-area {
+            color: #0f172a; font-weight: 900; background: #f1f5f9;
+            padding: 2px 10px; border-radius: 8px; display: inline-block;
+        }
+        .highlight-room {
+            color: var(--percent-color); font-weight: 900;
+        }
+
+        /* Область чертежа квартиры (Grid) */
+        .blueprint-card {
+            background: #f8fafc;
+            border: 2px dashed #94a3b8;
+            border-radius: 20px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .blueprint-header {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 500px;
+            align-items: center;
+            font-weight: 800;
+            font-size: 0.95rem;
+            color: #64748b;
+        }
+
+        .tile-counter {
+            background: #ffffff;
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid #cbd5e1;
+            font-weight: 900;
+            color: var(--primary);
+        }
+
+        .grid {
+            display: grid;
+            gap: 6px;
+            padding: 12px;
+            background: #ffffff;
+            border: 2px solid #cbd5e1;
+            border-radius: 16px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.06);
+            touch-action: none; /* Предотвращает прокрутку при рисовании пальцем */
+            user-select: none;
+        }
+
+        .tile {
+            width: 36px;
+            height: 36px;
+            background-color: var(--tile-bg);
+            border: 2px solid var(--tile-border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.15s, transform 0.1s, border-color 0.15s;
+        }
+
+        .tile:hover {
+            transform: scale(1.05);
+            border-color: #94a3b8;
+        }
+
+        .tile.selected {
+            background-color: var(--tile-selected);
+            border-color: #312e81;
+            box-shadow: 0 2px 8px rgba(67, 97, 238, 0.4);
+        }
+
+        .grid-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-clear-grid {
+            background: transparent;
+            color: #64748b;
+            border: 1px solid #cbd5e1;
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            font-weight: 800;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-clear-grid:hover {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+
+        /* Блок ввода процентов */
+        .answer-card {
+            background: #ffffff;
+            border: 2px solid #e2e8f0;
+            border-radius: 18px;
+            padding: 20px 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .answer-label {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #334155;
+            text-align: center;
+        }
+
+        .percent-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .percent-input {
+            width: 130px;
+            height: 60px;
+            font-size: 1.8rem;
+            text-align: center;
+            border: 2px solid #cbd5e1;
+            border-radius: 14px;
+            font-weight: 900;
+            color: var(--percent-color);
+            outline: none;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .percent-input:focus {
+            border-color: var(--percent-color);
+            box-shadow: 0 0 0 4px rgba(247, 37, 133, 0.15);
+            cursor: text;
+        }
+
+        .percent-sign {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: var(--percent-color);
+        }
+
+        .percent-input.correct {
+            border-color: var(--success) !important;
+            background: #f0fdf4 !important;
+            color: var(--success) !important;
+            pointer-events: none;
+        }
+
+        .percent-input.wrong {
+            border-color: var(--danger) !important;
+            background: #fff0f0 !important;
+            animation: shake 0.4s;
+        }
+
+        /* Кнопки управления */
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 25px;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px 42px;
+            font-size: 1.15rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: 800;
+            box-shadow: 0 8px 18px rgba(67, 97, 238, 0.25);
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(67, 97, 238, 0.35); }
+        .btn:active { transform: translateY(0); }
+
+        .btn-next { background: linear-gradient(45deg, var(--primary), #4834d4); display: none; }
+
+        .feedback {
+            min-height: 28px;
+            font-weight: bold;
+            font-size: 1.15rem;
+            margin-bottom: 12px;
+            text-align: center;
+            transition: opacity 0.2s;
+        }
+
+        .victory-modal {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.98); z-index: 100; display: none;
+            flex-direction: column; justify-content: center; align-items: center; text-align: center;
+            animation: fadeIn 0.5s;
+        }
+        .trophy { font-size: 90px; margin-bottom: 15px; animation: bounce 2s infinite; }
+
+        @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
+        @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
+        @keyframes bounce { 0%, 100% {transform: translateY(0);} 50% {transform: translateY(-15px);} }
+
+        #confettiCanvas { position: absolute; top: 0; left: 0; pointer-events: none; }
+
+        @media (max-width: 600px) {
+            .tile { width: 28px; height: 28px; }
+            .task-statement { font-size: 1.15rem; padding: 15px 18px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <div>
+            <h1>Архитектор: Плитка и Проценты</h1>
+            <div class="subtitle" id="levelDescription">Задание 1 из 5</div>
+        </div>
+        <div class="level-badges">
+            <div class="lvl-badge active" id="badge1">1</div>
+            <div class="lvl-badge" id="badge2">2</div>
+            <div class="lvl-badge" id="badge3">3</div>
+            <div class="lvl-badge" id="badge4">4</div>
+            <div class="lvl-badge" id="badge5">5</div>
+        </div>
+        <div class="stats-box">
+            Счёт: <span id="score">0</span> | Ошибки: <span id="errors">0</span>
+        </div>
+    </div>
+
+    <!-- Задание -->
+    <div class="task-statement" id="taskStatement"></div>
+
+    <!-- Чертёж квартиры (Сетка) -->
+    <div class="blueprint-card">
+        <div class="blueprint-header">
+            <span>📐 План квартиры (1 клетка = 1 м²)</span>
+            <span class="tile-counter" id="tileCounter">Закрашено: 0 / 0 м²</span>
+        </div>
+
+        <div id="grid" class="grid"></div>
+
+        <div class="grid-actions">
+            <button class="btn-clear-grid" onclick="clearGridSelection()">Очистить план ↺</button>
+        </div>
+    </div>
+
+    <!-- Ввод процента -->
+    <div class="answer-card">
+        <div class="answer-label">Сколько процентов (%) от площади квартиры занимает эта комната?</div>
+        <div class="percent-input-wrapper">
+            <input type="number" class="percent-input" id="percentInput" placeholder="?">
+            <span class="percent-sign">%</span>
+        </div>
+    </div>
+
+    <!-- Управление -->
+    <div class="controls">
+        <div class="feedback" id="feedbackMsg"></div>
+        <button class="btn" id="checkBtn" onclick="checkAnswer()">Проверить чертёж 🎯</button>
+        <button class="btn btn-next" id="nextBtn" onclick="nextTask()">Следующий проект ➡</button>
+    </div>
+
+    <!-- Победный экран -->
+    <div class="victory-modal" id="victoryScreen">
+        <canvas id="confettiCanvas"></canvas>
+        <div class="trophy">🏆</div>
+        <div style="font-size: 2.2rem; color: var(--primary); font-weight: 900; margin-bottom: 10px;">СЕРТИФИКАТ АРХИТЕКТОРА</div>
+        <h2 style="margin: 0 0 10px 0;">Все 5 планировок выполнены идеально!</h2>
+        <div style="margin: 15px 0; font-size: 1.2rem;">
+            <div>Верных решений: <span id="finalScore" style="color:var(--success); font-weight: 900;">0</span></div>
+            <div>Ошибок: <span id="finalErrors" style="color:var(--danger); font-weight: 900;">0</span></div>
+        </div>
+        <button class="btn" onclick="location.reload()">Начать заново</button>
+    </div>
+</div>
+
+<script>
+// Пресеты ровных прямоугольных планировок
+const APARTMENT_CONFIGS = [
+    { area: 20, cols: 5, rows: 4 },
+    { area: 24, cols: 6, rows: 4 },
+    { area: 25, cols: 5, rows: 5 },
+    { area: 30, cols: 6, rows: 5 },
+    { area: 40, cols: 8, rows: 5 },
+    { area: 50, cols: 10, rows: 5 },
+    { area: 60, cols: 10, rows: 6 }
+];
+
+const ROOM_NAMES = [
+    "кухню", "гостиную", "детскую комнату", "спальню", "лоджию", "ванную комнату"
+];
+
+// Дроби, дающие целое количество плиток и целые проценты
+const FRACTIONS_POOL = [
+    { str: '1/2', n: 1, d: 2, pct: 50 },
+    { str: '1/4', n: 1, d: 4, pct: 25 },
+    { str: '3/4', n: 3, d: 4, pct: 75 },
+    { str: '1/5', n: 1, d: 5, pct: 20 },
+    { str: '2/5', n: 2, d: 5, pct: 40 },
+    { str: '3/5', n: 3, d: 5, pct: 60 },
+    { str: '4/5', n: 4, d: 5, pct: 80 },
+    { str: '1/10', n: 1, d: 10, pct: 10 },
+    { str: '3/10', n: 3, d: 10, pct: 30 },
+    { str: '7/10', n: 7, d: 10, pct: 70 },
+    { str: '9/10', n: 9, d: 10, pct: 90 }
+];
+
+let state = {
+    level: 1,
+    score: 0,
+    errors: 0,
+    currentTask: null
+};
+
+// Состояние рисования по сетке
+let isDrawing = false;
+let drawMode = 'fill'; // 'fill' или 'remove'
+
+function pickRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function generateTask() {
+    if (window.RewardSystem) window.RewardSystem.resetErrors();
+
+    // Подбираем согласованную пару: квартира и подходящая дробь
+    let valid = false;
+    let cfg, frac;
+
+    while (!valid) {
+        cfg = pickRandom(APARTMENT_CONFIGS);
+        const validFracs = FRACTIONS_POOL.filter(f => cfg.area % f.d === 0);
+        if (validFracs.length > 0) {
+            frac = pickRandom(validFracs);
+            valid = true;
+        }
+    }
+
+    const roomName = pickRandom(ROOM_NAMES);
+    const requiredTiles = (cfg.area * frac.n) / frac.d;
+
+    state.currentTask = {
+        totalArea: cfg.area,
+        cols: cfg.cols,
+        rows: cfg.rows,
+        fractionStr: frac.str,
+        requiredTiles: requiredTiles,
+        correctPercent: frac.pct,
+        roomName: roomName
+    };
+
+    renderTask();
+}
+
+function renderTask() {
+    const t = state.currentTask;
+
+    document.getElementById('levelDescription').textContent = `Задание ${state.level} из 5`;
+
+    for (let i = 1; i <= 5; i++) {
+        const b = document.getElementById(`badge${i}`);
+        b.className = 'lvl-badge';
+        if (i < state.level) b.classList.add('completed');
+        if (i === state.level) b.classList.add('active');
+    }
+
+    // Текст задания
+    document.getElementById('taskStatement').innerHTML = 
+        `Закрась на плане участок под <span class="highlight-room">${t.roomName}</span>. ` +
+        `Её площадь составляет <span class="highlight-frac">${t.fractionStr}</span> ` +
+        `от общей площади квартиры (<span class="highlight-area">${t.totalArea} м²</span>).`;
+
+    // Сброс поля ввода
+    const inp = document.getElementById('percentInput');
+    inp.value = '';
+    inp.disabled = false;
+    inp.classList.remove('correct', 'wrong');
+
+    document.getElementById('checkBtn').style.display = 'inline-block';
+    document.getElementById('nextBtn').style.display = 'none';
+    setFeedback("");
+
+    createGrid(t.cols, t.rows, t.totalArea);
+    updateTileCounter();
+}
+
+// Генерация интерактивной сетки плиток
+function createGrid(cols, rows, totalArea) {
+    const grid = document.getElementById('grid');
+    grid.innerHTML = '';
+    grid.style.gridTemplateColumns = `repeat(${cols}, 36px)`;
+
+    for (let i = 0; i < totalArea; i++) {
+        const tile = document.createElement('div');
+        tile.className = 'tile';
+        tile.dataset.index = i;
+
+        // Pointer Events для идеальной работы на ПК и смартфонах/планшетах
+        tile.addEventListener('pointerdown', (e) => {
+            e.preventDefault();
+            isDrawing = true;
+            drawMode = tile.classList.contains('selected') ? 'remove' : 'fill';
+            applyTileMode(tile, drawMode);
+            updateTileCounter();
+        });
+
+        grid.appendChild(tile);
+    }
+}
+
+// Глобальные слушатели перемещения указателя/пальца
+window.addEventListener('pointermove', (e) => {
+    if (!isDrawing) return;
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    if (el && el.classList && el.classList.contains('tile')) {
+        applyTileMode(el, drawMode);
+        updateTileCounter();
+    }
+});
+
+window.addEventListener('pointerup', () => { isDrawing = false; });
+window.addEventListener('pointercancel', () => { isDrawing = false; });
+
+function applyTileMode(tile, mode) {
+    if (mode === 'fill') tile.classList.add('selected');
+    else tile.classList.remove('selected');
+}
+
+function clearGridSelection() {
+    document.querySelectorAll('.tile.selected').forEach(t => t.classList.remove('selected'));
+    updateTileCounter();
+}
+
+function updateTileCounter() {
+    const selectedCount = document.querySelectorAll('.tile.selected').length;
+    const total = state.currentTask ? state.currentTask.totalArea : 0;
+    const counterEl = document.getElementById('tileCounter');
+    counterEl.textContent = `Закрашено: ${selectedCount} / ${total} м²`;
+    
+    if (state.currentTask && selectedCount === state.currentTask.requiredTiles) {
+        counterEl.style.color = "var(--success)";
+        counterEl.style.borderColor = "var(--success)";
+    } else {
+        counterEl.style.color = "var(--primary)";
+        counterEl.style.borderColor = "#cbd5e1";
+    }
+}
+
+// ─── СБРОС КРАСНОЙ ОБВОДКИ ПРИ КЛИКЕ НА ОШИБОЧНОЕ ПОЛЕ ───
+const percentInputEl = document.getElementById('percentInput');
+
+function clearWrongInput(e) {
+    if (e.target.classList.contains('wrong')) {
+        e.target.value = '';
+        e.target.classList.remove('wrong');
+        setFeedback("");
+    }
+}
+
+percentInputEl.addEventListener('pointerdown', clearWrongInput);
+percentInputEl.addEventListener('focusin', clearWrongInput);
+
+// Проверка ответа
+function checkAnswer() {
+    const t = state.currentTask;
+    const selectedCount = document.querySelectorAll('.tile.selected').length;
+    const userPercent = parseInt(document.getElementById('percentInput').value);
+
+    // 1. Проверяем плитку на плане
+    if (selectedCount !== t.requiredTiles) {
+        setFeedback(`Неверное число плиток на плане. Нужно ${t.fractionStr} от ${t.totalArea} = ${t.requiredTiles} м²!`, "error");
+        if (window.RewardSystem) window.RewardSystem.registerError("percent_tiles");
+        state.errors++;
+        document.getElementById('errors').textContent = state.errors;
+        return;
+    }
+
+    // 2. Проверяем введённый процент
+    const inp = document.getElementById('percentInput');
+    inp.classList.remove('correct', 'wrong');
+
+    if (userPercent === t.correctPercent) {
+        inp.classList.add('correct');
+        inp.disabled = true;
+
+        if (window.RewardSystem) window.RewardSystem.resetErrors();
+
+        setFeedback("Идеально! План и процент рассчитаны верно! 🌟", "success");
+        state.score++;
+        document.getElementById('score').textContent = state.score;
+        document.getElementById('checkBtn').style.display = 'none';
+
+        if (state.level < 5) {
+            document.getElementById('nextBtn').textContent = "Следующий проект ➡";
+        } else {
+            document.getElementById('nextBtn').textContent = "Получить сертификат! 🏆";
+        }
+        document.getElementById('nextBtn').style.display = 'inline-block';
+
+    } else {
+        void inp.offsetWidth; // перезапуск анимации shake
+        inp.classList.add('wrong');
+
+        if (window.RewardSystem) window.RewardSystem.registerError("percent_tiles");
+
+        state.errors++;
+        document.getElementById('errors').textContent = state.errors;
+        setFeedback(`Плитка закрашена верно (${t.requiredTiles} м²), но процент не тот. Нажми на красное поле для исправления!`, "error");
+    }
+}
+
+function nextTask() {
+    if (state.level >= 5) {
+        showVictory();
+        return;
+    }
+    state.level++;
+    generateTask();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function setFeedback(msg, type) {
+    const el = document.getElementById('feedbackMsg');
+    el.textContent = msg;
+    el.style.opacity = msg ? '1' : '0';
+    el.style.color = type === 'error' ? 'var(--danger)' : 'var(--success)';
+}
+
+function showVictory() {
+    document.getElementById('victoryScreen').style.display = 'flex';
+    document.getElementById('finalScore').textContent = state.score;
+    document.getElementById('finalErrors').textContent = state.errors;
+    startConfetti();
+
+    if (window.RewardSystem) {
+        setTimeout(() => window.RewardSystem.showWin("Архитектор Процентов! Все 5 планов готовы", "percent_tiles"), 1500);
+    }
+}
+
+function startConfetti() {
+    const canvas = document.getElementById('confettiCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const pieces = [];
+    const colors = ['#4361ee', '#f72585', '#2ec4b6', '#ff9f1c'];
+    for (let i = 0; i < 250; i++) {
+        pieces.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height - canvas.height,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            size: Math.random() * 10 + 5,
+            speed: Math.random() * 5 + 2,
+            angle: Math.random() * Math.PI * 2,
+            spin: Math.random() * 0.2 - 0.1
+        });
+    }
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        pieces.forEach(p => {
+            p.y += p.speed;
+            p.angle += p.spin;
+            p.x += Math.sin(p.angle) * 2;
+            if (p.y > canvas.height) p.y = -20;
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.angle);
+            ctx.fillStyle = p.color;
+            ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+            ctx.restore();
+        });
+        requestAnimationFrame(animate);
+    }
+    animate();
+}
+
+// Поддержка нажатия Enter
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        const checkBtn = document.getElementById('checkBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        if (checkBtn && checkBtn.style.display !== 'none') {
+            checkAnswer();
+        } else if (nextBtn && nextBtn.style.display !== 'none') {
+            nextTask();
+        }
+    }
+});
+
+generateTask();
+</script>
+</body>
+</html>
