@@ -1,15 +1,51 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- ─── SEO-БЛОК ─── -->
+    <title>Тренажёр и калькулятор: Как найти процент от числа | Задачи 6 класс</title>
+    <meta name="description" content="Интерактивный онлайн тренажёр. Учимся находить процент от числа: перевод процентов в дробь, умножение, сокращение и вычисление итогового ответа.">
+    <meta name="keywords" content="как найти процент от числа, процент от числа 6 класс, задачи на проценты 6 класс, нахождение процента от числа тренажер, калькулятор процентов онлайн, математика 6 класс проценты">
+    <meta name="author" content="Козлов Сергей Владимирович">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://godspace.github.io/math-6-grade/trainers/percents/percent-of.html">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Мастер Процентов: Нахождение процента от числа (6 класс)">
+    <meta property="og:description" content="Визуальные задачи на проценты. Переведи процент в дробь, разложи на множители и найди итоговый ответ с автоматической проверкой!">
+    <meta property="og:url" content="https://godspace.github.io/math-6-grade/trainers/percents/percent-of.html">
+    <meta property="og:site_name" content="Математика 6 класс">
+
+    <!-- JSON-LD -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "LearningResource",
+        "name": "Тренажёр: Нахождение процента от числа",
+        "description": "Интерактивная сюжетная практика по нахождению процента от числа. Включает визуализацию на шкале, перевод процентов в обыкновенную дробь и сокращение.",
+        "educationalLevel": "6 класс",
+        "learningResourceType": "Интерактивный тренажёр",
+        "inLanguage": "ru",
+        "isAccessibleForFree": true,
+        "teaches": ["Как найти процент от числа", "Задачи на проценты", "Перевод процентов в дробь"],
+        "url": "https://godspace.github.io/math-6-grade/trainers/percents/percent-of.html"
+    }
+    </script>
+    <!-- ─── КОНЕЦ SEO-БЛОКА ─── -->
+
     <link rel="icon" href="/math-6-grade/favicon.ico" sizes="any">
     <link rel="icon" type="image/png" sizes="16x16" href="/math-6-grade/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/math-6-grade/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="48x48" href="/math-6-grade/favicon-48x48.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/math-6-grade/apple-touch-icon.png">
     <link rel="manifest" href="/math-6-grade/site.webmanifest">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мастер Процентов: Сюжетный режим</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="../../assets/analytics.js" defer></script>
+    
     <style>
         :root {
             --primary: #4361ee;
@@ -22,7 +58,7 @@
         }
 
         body {
-            font-family: 'Segoe UI', 'Roboto', sans-serif;
+            font-family: 'Nunito', sans-serif;
             background: var(--bg-gradient);
             min-height: 100vh;
             margin: 0;
@@ -38,282 +74,154 @@
             border-radius: 24px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.15);
             width: 100%;
-            max-width: 1100px;
+            max-width: 1150px;
             padding: 40px;
             position: relative;
             overflow: hidden;
             transition: all 0.3s ease;
         }
 
-        /* Шапка и прогресс */
+        /* Шапка */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
-        .level-badges {
-            display: flex;
-            gap: 10px;
-        }
-
+        .level-badges { display: flex; gap: 10px; }
         .lvl-badge {
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            background: #ddd;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: #fff;
-            font-size: 14px;
-            transition: all 0.3s;
+            width: 35px; height: 35px; border-radius: 50%; background: #ddd;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; color: #fff; font-size: 14px; transition: all 0.3s;
         }
-
         .lvl-badge.active { background: var(--primary); transform: scale(1.2); box-shadow: 0 0 10px var(--primary); }
         .lvl-badge.completed { background: var(--success); }
 
         .stats-box {
-            background: #f8f9fa;
-            padding: 10px 20px;
-            border-radius: 12px;
-            font-weight: bold;
-            color: var(--primary);
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+            background: #f8f9fa; padding: 10px 20px; border-radius: 12px;
+            font-weight: bold; color: var(--primary); box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
         }
 
         h1 { margin: 0; color: #2d3436; font-size: 1.8rem; }
         .subtitle { color: #636e72; margin-top: 5px; }
 
+        /* ИНСТРУКЦИИ ДЛЯ ДЕТЕЙ */
+        .kids-guide {
+            display: flex; gap: 15px; margin-bottom: 25px; width: 100%; justify-content: center; flex-wrap: wrap;
+        }
+        .guide-step {
+            background: rgba(157, 78, 221, 0.05); border: 2px dashed rgba(157, 78, 221, 0.3);
+            border-radius: 12px; padding: 15px; display: flex; align-items: center; gap: 12px;
+            max-width: 300px; font-size: 0.95rem; color: #4b5563; box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            transition: transform 0.2s;
+        }
+        .guide-step:hover { transform: translateY(-3px); }
+        .guide-step.step-1 { border-color: var(--percent-color); background: rgba(157, 78, 221, 0.05); }
+        .guide-step.step-2 { border-color: var(--primary); background: rgba(67, 97, 238, 0.05); }
+        .guide-step.step-3 { border-color: var(--success); background: rgba(46, 196, 182, 0.05); }
+        .step-num {
+            width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-weight: bold; color: white; flex-shrink: 0; font-size: 1.1rem;
+        }
+        .step-1 .step-num { background: var(--percent-color); }
+        .step-2 .step-num { background: var(--primary); }
+        .step-3 .step-num { background: var(--success); }
+
         /* Рабочая область */
         .work-area {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 25px;
-            min-height: 350px; /* Фиксируем высоту, чтобы не прыгало */
+            display: flex; flex-direction: column; align-items: center; gap: 20px; min-height: 350px;
         }
 
-        /* АНИМАЦИЯ ПОЯВЛЕНИЯ */
         .fade-element {
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.6s ease, transform 0.6s ease;
-            pointer-events: none;
-            display: none; /* Скрываем полностью, чтобы не занимало место */
+            opacity: 0; transform: translateY(15px); transition: opacity 0.5s ease, transform 0.5s ease;
+            pointer-events: none; display: none;
         }
-
-        .fade-element.visible {
-            opacity: 1;
-            transform: translateY(0);
-            pointer-events: auto;
-            display: flex; /* Возвращаем display */
-        }
-        
-        /* Специфично для блока инпутов, чтобы сохранить форматирование */
-        #inputSection.visible {
-            display: flex;
-        }
+        .fade-element.visible { opacity: 1; transform: translateY(0); pointer-events: auto; display: flex; }
+        #inputSection.visible { display: flex; }
 
         .task-statement {
-            background: #f8f9fa;
-            padding: 25px;
-            border-radius: 16px;
-            text-align: center;
-            font-size: 1.4rem;
-            line-height: 1.6;
-            margin-bottom: 0px;
-            border-left: 5px solid var(--percent-color);
-            width: 90%;
-            min-height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background: #f8f9fa; padding: 20px 30px; border-radius: 16px;
+            text-align: center; font-size: 1.3rem; line-height: 1.5; margin-bottom: 0px;
+            border-left: 5px solid var(--percent-color); width: 90%; display: block;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
         }
         
-        /* Курсор печатной машинки */
-        .typing-cursor::after {
-            content: '|';
-            animation: blink 1s infinite;
-            color: var(--primary);
-        }
-        
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-        
-        /* Визуализация */
         .visual-container {
-            width: 80%;
-            background: #fff;
-            padding: 15px;
-            border-radius: 16px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            width: 90%; background: #fff; padding: 15px; border-radius: 16px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: flex; flex-direction: column; align-items: center;
         }
-        
-        canvas#visualCanvas {
-            width: 100%;
-            height: 60px;
-            border-radius: 8px;
-            background: #f0f0f0;
-        }
+        canvas#visualCanvas { width: 100%; height: 60px; border-radius: 8px; background: #f0f0f0; }
 
-        .highlight-percent { color: var(--percent-color); font-weight: bold; }
-        .highlight-number { color: var(--primary); font-weight: bold; }
+        .highlight-percent { color: var(--percent-color); font-weight: bold; background: rgba(157, 78, 221, 0.1); padding: 2px 6px; border-radius: 6px; }
+        .highlight-number { color: var(--primary); font-weight: bold; background: rgba(67, 97, 238, 0.1); padding: 2px 6px; border-radius: 6px; }
 
         .fraction-row {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            font-size: 2rem;
-            font-weight: bold;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin-top: 10px;
+            display: flex; align-items: center; gap: 20px; font-size: 2rem;
+            font-weight: bold; flex-wrap: wrap; justify-content: center; margin-top: 10px; width: 100%;
         }
 
-        .fraction {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 80px;
-        }
-
-        .frac-num, .frac-den { padding: 5px; }
-        .frac-line { width: 100%; height: 4px; background: #333; border-radius: 2px; }
-        
-        .operator { font-size: 2.5rem; color: var(--primary); }
-
-        /* Область разложения */
-        .factorization-area {
-            background: #fff;
-            padding: 25px;
-            border-radius: 16px;
-            border: 2px dashed #ccc;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-            transition: border-color 0.3s;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.03);
-        }
-
-        .factors-container {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            flex-wrap: wrap;
-            justify-content: center;
-            min-height: 60px;
-        }
-
-        .factor-input {
-            width: 60px;
-            height: 60px;
-            font-size: 1.5rem;
-            text-align: center;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            outline: none;
-            transition: all 0.2s;
-            font-weight: bold;
-            color: #333;
-            background: #fff;
-            -moz-appearance: textfield;
-        }
-
-        .factor-input::-webkit-outer-spin-button,
-        .factor-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-
-        .factor-input:focus { 
-            border-color: var(--primary); 
-            box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.2); 
-            z-index: 2;
+        .fraction-block {
+            display: flex; flex-direction: column; align-items: center;
+            background: #fff; padding: 15px; border-radius: 16px; border: 1px dashed #ccc;
             position: relative;
         }
 
-        .factor-input.live-cancelled {
-            text-decoration: line-through;
-            color: #aaa;
-            border-color: transparent;
-            opacity: 0.8;
-            transform: scale(0.95);
+        .block-label {
+            position: absolute; top: -12px; background: #fff; padding: 0 10px;
+            font-size: 0.8rem; color: #888; text-transform: uppercase; font-weight: bold;
         }
 
-        .pair-color-0 { background-color: #f2f2f2; }
-        .pair-color-1 { background-color: #e3f2fd; }
-        .pair-color-2 { background-color: #fce4ec; }
-        .pair-color-3 { background-color: #e8f5e9; }
-        .pair-color-4 { background-color: #fff3e0; }
+        .fraction { display: flex; flex-direction: column; align-items: center; width: 80px; }
+        .frac-num, .frac-den { padding: 5px; }
+        .frac-line { width: 100%; height: 4px; background: #333; border-radius: 2px; }
+        .operator { font-size: 2.5rem; color: var(--primary); margin-top: 10px;}
 
-        .factor-input.correct { border-color: var(--success) !important; color: var(--success) !important; background: #fff !important; text-decoration: none; opacity: 1; transform: scale(1); }
-        .factor-input.wrong { border-color: var(--danger) !important; background: #ffebeb !important; animation: shake 0.4s; }
-
-        .big-fraction-line {
-            width: 100%;
-            height: 4px;
-            background: linear-gradient(90deg, #ccc, #999, #ccc);
-            border-radius: 2px;
-            margin: 5px 0;
+        /* Область разложения */
+        .factorization-area {
+            background: #fff; padding: 25px; border-radius: 16px; border: 2px dashed var(--primary);
+            display: flex; flex-direction: column; align-items: center; gap: 15px;
+            box-shadow: inset 0 0 20px rgba(67, 97, 238, 0.05); position: relative;
         }
 
-        .final-answer-fraction {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: #fff;
-            padding: 10px;
-            border-radius: 16px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            border: 1px solid #eee;
+        .factors-container {
+            display: flex; gap: 12px; align-items: center; flex-wrap: wrap; justify-content: center; min-height: 60px;
         }
+
+        .factor-input {
+            width: 60px; height: 60px; font-size: 1.5rem; text-align: center; border: 2px solid #e0e0e0;
+            border-radius: 12px; outline: none; transition: all 0.2s; font-weight: bold; color: #333;
+            background: #fff; -moz-appearance: textfield;
+        }
+        .factor-input::-webkit-outer-spin-button, .factor-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .factor-input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.2); z-index: 2; position: relative; }
+
+        .factor-input.live-cancelled { text-decoration: line-through; color: #aaa; border-color: transparent; opacity: 0.8; transform: scale(0.95); }
+        .pair-color-0 { background-color: #f2f2f2; } .pair-color-1 { background-color: #e3f2fd; } .pair-color-2 { background-color: #fce4ec; } .pair-color-3 { background-color: #e8f5e9; } .pair-color-4 { background-color: #fff3e0; }
+
+        .correct { border-color: var(--success) !important; color: var(--success) !important; background: #f0fdf4 !important; pointer-events: none; }
+        .wrong { border-color: var(--danger) !important; background: #fff0f0 !important; animation: shake 0.4s; }
+
+        .big-fraction-line { width: 100%; height: 4px; background: linear-gradient(90deg, #ccc, #999, #ccc); border-radius: 2px; margin: 5px 0; }
 
         .final-result-box {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            margin-top: 10px;
-            background: linear-gradient(to right, #f8f9fa, #fff);
-            padding: 15px 30px;
-            border-radius: 16px;
-            border: 2px solid var(--primary);
+            display: flex; flex-direction: column; align-items: center; gap: 10px;
+            background: linear-gradient(to right, #f8f9fa, #fff); padding: 15px 30px;
+            border-radius: 16px; border: 2px solid var(--success); position: relative;
         }
-
         .final-input {
-            width: 120px;
-            height: 60px;
-            font-size: 1.8rem;
-            text-align: center;
-            border: 2px solid #ccc;
-            border-radius: 12px;
-            font-weight: bold;
-            color: var(--primary);
+            width: 120px; height: 60px; font-size: 1.8rem; text-align: center; border: 2px solid #ccc;
+            border-radius: 12px; font-weight: bold; color: var(--success);
         }
-        
-        .final-input:focus { border-color: var(--percent-color); outline: none; box-shadow: 0 0 0 4px rgba(157, 78, 221, 0.2); }
-        .final-input.correct { border-color: var(--success); background-color: #e8f5e9; }
-        .final-input.wrong { border-color: var(--danger); background-color: #ffebee; animation: shake 0.4s; }
-
-        .answer-label { font-size: 0.9rem; color: #666; font-weight: normal; }
+        .final-input:focus { border-color: var(--success); outline: none; box-shadow: 0 0 0 4px rgba(46, 196, 182, 0.2); }
 
         .btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            font-size: 1.2rem;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            font-weight: bold;
-            box-shadow: 0 10px 20px rgba(67, 97, 238, 0.3);
-            margin: 0 10px;
+            background: var(--primary); color: white; border: none; padding: 15px 40px; font-size: 1.2rem;
+            border-radius: 50px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; font-weight: bold;
+            box-shadow: 0 10px 20px rgba(67, 97, 238, 0.3); margin: 0 10px;
         }
-
         .btn:hover { transform: translateY(-3px); box-shadow: 0 15px 25px rgba(67, 97, 238, 0.4); }
         .btn:active { transform: translateY(-1px); }
         
@@ -321,27 +229,13 @@
         .btn-check { background: linear-gradient(45deg, var(--success), #20bf6b); display: none; }
         .btn-next { background: linear-gradient(45deg, var(--primary), #4834d4); display: none; }
 
-        .feedback {
-            height: 30px;
-            font-weight: bold;
-            text-align: center;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
+        .feedback { height: 30px; font-weight: bold; text-align: center; opacity: 0; transition: opacity 0.3s; font-size: 1.1rem;}
 
         .victory-modal {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255,255,255,0.98);
-            z-index: 100;
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            animation: fadeIn 0.5s;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.98);
+            z-index: 100; display: none; flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; animation: fadeIn 0.5s;
         }
-
         .trophy { font-size: 100px; margin-bottom: 20px; animation: bounce 2s infinite; }
         .cert-title { font-size: 2.5rem; color: var(--primary); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; }
         
@@ -352,8 +246,11 @@
         canvas { position: absolute; top: 0; left: 0; pointer-events: none; }
         canvas#visualCanvas { position: relative; pointer-events: auto; }
 
+        @media (max-width: 768px) {
+            .fraction-row { flex-direction: column; gap: 15px; }
+            .operator { transform: rotate(90deg); margin: 0; }
+        }
     </style>
-<script src="../../assets/analytics.js"></script>
 </head>
 <body>
 
@@ -375,8 +272,23 @@
         </div>
     </div>
 
+    <!-- Инструкция -->
+    <div class="kids-guide">
+        <div class="guide-step step-1">
+            <div class="step-num">%</div>
+            <div>Запиши проценты как дробь со знаменателем <b>100</b>, а число как дробь со знаменателем <b>1</b>.</div>
+        </div>
+        <div class="guide-step step-2">
+            <div class="step-num">×</div>
+            <div>Разложи на простые множители и <b>сократи</b> одинаковые цифры сверху и снизу.</div>
+        </div>
+        <div class="guide-step step-3">
+            <div class="step-num">=</div>
+            <div>Перемножь то, что осталось, и запиши <b>итоговый ответ</b> целым числом.</div>
+        </div>
+    </div>
+
     <div class="work-area">
-        
         <div class="visual-container">
             <canvas id="visualCanvas" width="600" height="80"></canvas>
         </div>
@@ -387,47 +299,43 @@
 
         <div id="inputSection" class="fade-element" style="width: 100%; flex-direction: column; align-items: center;">
             <div class="fraction-row">
-                <div class="fraction">
-                    <input type="number" class="factor-input" id="percentNum">
-                    <div class="frac-line"></div>
-                    <div class="frac-den" id="percentDen">100</div>
+                
+                <div class="fraction-block" style="border-color: var(--percent-color);">
+                    <div class="block-label" style="color: var(--percent-color);">Процент</div>
+                    <div class="fraction" style="margin-top: 10px;">
+                        <input type="number" class="factor-input" id="percentNum" placeholder="P">
+                        <div class="frac-line"></div>
+                        <div class="frac-den" id="percentDen">100</div>
+                    </div>
                 </div>
                 
                 <div class="operator">×</div>
                 
-                <div class="fraction">
-                    <input type="number" class="factor-input" id="numberNum">
-                    <div class="frac-line"></div>
-                    <div class="frac-den" id="numberDen">1</div>
+                <div class="fraction-block" style="border-color: var(--primary);">
+                    <div class="block-label" style="color: var(--primary);">Число</div>
+                    <div class="fraction" style="margin-top: 10px;">
+                        <input type="number" class="factor-input" id="numberNum" placeholder="N">
+                        <div class="frac-line"></div>
+                        <div class="frac-den" id="numberDen">1</div>
+                    </div>
                 </div>
                 
                 <div class="operator">=</div>
                 
                 <div class="factorization-area" id="factorArea">
-                    <div class="factors-container" id="numFactorsInputs"></div>
+                    <div class="block-label" style="color: var(--primary);">Сокращение</div>
+                    <div class="factors-container" id="numFactorsInputs" style="margin-top: 5px;"></div>
                     <div class="big-fraction-line"></div>
                     <div class="factors-container" id="denFactorsInputs"></div>
                 </div>
 
                 <div class="operator">=</div>
 
-                <div class="final-answer-fraction">
-                    <div class="answer-box">
-                        <div class="answer-label">Дробь:</div>
-                        <div class="fraction">
-                            <input type="number" class="factor-input" id="finalNum">
-                            <div class="frac-line"></div>
-                            <input type="number" class="factor-input" id="finalDen">
-                        </div>
-                    </div>
+                <div class="final-result-box">
+                    <div class="block-label" style="color: var(--success);">Ответ</div>
+                    <input type="number" class="final-input" id="finalResultInt" placeholder="?" style="margin-top: 5px;">
                 </div>
-            </div>
-            
-            <div style="width: 100%; border-bottom: 2px dashed #eee; margin: 20px 0;"></div>
 
-            <div class="final-result-box">
-                <div class="answer-label" style="font-size: 1.1rem; color: #333;">Итоговый ответ (целое число):</div>
-                <input type="number" class="final-input" id="finalResultInt" placeholder="?">
             </div>
         </div>
     </div>
@@ -435,7 +343,7 @@
     <div style="text-align: center; margin-top: 30px;">
         <div class="feedback" id="feedbackMsg"></div>
         <br>
-        <button class="btn btn-check" id="checkBtn">Проверить</button>
+        <button class="btn btn-check" id="checkBtn">Проверить решение</button>
         <button class="btn btn-next" id="nextBtn">Следующий пример ➡</button>
     </div>
 
@@ -445,8 +353,8 @@
         <div class="cert-title">СЕРТИФИКАТ МАСТЕРА</div>
         <h2>Курс "Нахождение процента от числа" пройден!</h2>
         <div class="cert-stats">
-            <div>Верных решений: <span id="finalScore" style="color:var(--success)">0</span></div>
-            <div>Ошибок: <span id="finalErrors" style="color:var(--danger)">0</span></div>
+            <div>Верных решений: <span id="finalScore" style="color:var(--success); font-weight: bold; font-size: 1.5rem;">0</span></div>
+            <div>Ошибки: <span id="finalErrors" style="color:var(--danger); font-weight: bold; font-size: 1.5rem;">0</span></div>
         </div>
         <br>
         <button class="btn" onclick="location.reload()">Начать заново</button>
@@ -462,8 +370,6 @@ const LEVELS = {
     5: { name: "Легенда", desc: "Сложные комбинации", complexReduction: true }
 };
 
-// БАЗА СЮЖЕТОВ (Легенды)
-// {n} - число, {p} - процент
 const TEMPLATES = [
     "В классе {n} учеников. <span class='highlight-percent'>{p}%</span> из них занимаются спортом. Сколько учеников занимаются спортом?",
     "Цена книги {n} рублей. Скидка по акции составляет <span class='highlight-percent'>{p}%</span>. Сколько рублей составит скидка?",
@@ -479,22 +385,15 @@ const TEMPLATES = [
 let state = {
     level: 1,
     tasksCompletedInLevel: 0,
-    tasksToAdvance: 1, 
+    tasksToAdvance: 2, 
     score: 0,
     errors: 0,
     currentTask: null,
-    animationId: null,
-    timeouts: [] // Для очистки таймеров при быстром переключении
+    animationId: null
 };
-
-function clearTimeouts() {
-    state.timeouts.forEach(t => clearTimeout(t));
-    state.timeouts = [];
-}
 
 function getRandomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 function pickRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-function gcd(a, b) { return b == 0 ? a : gcd(b, a % b); }
 
 function primeFactors(n) {
     const factors = [];
@@ -511,6 +410,9 @@ function primeFactors(n) {
 }
 
 function generateTask() {
+    // Интеграция с RewardSystem: сброс ошибок при старте задания
+    if (window.RewardSystem) window.RewardSystem.resetErrors();
+
     const lvl = state.level;
     let percent, number;
 
@@ -560,14 +462,10 @@ function generateTask() {
     let denFactors = primeFactors(percentDen);
     denFactors.sort((a,b) => a-b);
     
-    let finalNum = Math.round(result);
-    let finalDen = 1; 
-    
-    // Формируем текст задачи из шаблона
     const rawTemplate = pickRandom(TEMPLATES);
     const taskText = rawTemplate
         .replace('{n}', `<span class='highlight-number'>${number}</span>`)
-        .replace('{p}', percent); // percent уже внутри span в шаблоне
+        .replace('{p}', percent);
 
     state.currentTask = {
         text: taskText,
@@ -578,18 +476,13 @@ function generateTask() {
         percentDen: percentDen,
         numberNum: number,
         numberDen: 1,
-        totalNum: totalNum,
-        totalDen: totalDen,
         expectedNumFactors: numFactors,
-        expectedDenFactors: denFactors,
-        finalNum: finalNum,
-        finalDen: finalDen
+        expectedDenFactors: denFactors
     };
     
     renderTask();
 }
 
-// Рисует кадр визуализации
 function drawFrame(currentPercent, maxPercent, number) {
     const canvas = document.getElementById('visualCanvas');
     const ctx = canvas.getContext('2d');
@@ -613,14 +506,24 @@ function drawFrame(currentPercent, maxPercent, number) {
     const fillW = drawW * (fillPct / 100);
     
     if (fillW > 0) {
-        ctx.fillStyle = '#9d4edd';
+        // Создаем градиент для шкалы
+        const gradient = ctx.createLinearGradient(padding, 0, padding + fillW, 0);
+        gradient.addColorStop(0, '#9d4edd');
+        gradient.addColorStop(1, '#c77dff');
+        ctx.fillStyle = gradient;
         ctx.beginPath();
         ctx.roundRect(padding, barY, fillW, barH, 5);
+        ctx.fill();
+        
+        // Блик
+        ctx.fillStyle = 'rgba(255,255,255,0.2)';
+        ctx.beginPath();
+        ctx.roundRect(padding, barY, fillW, barH/2, 5);
         ctx.fill();
     }
     
     ctx.fillStyle = '#333';
-    ctx.font = 'bold 16px "Segoe UI"';
+    ctx.font = 'bold 16px "Nunito"';
     ctx.textAlign = 'center';
     
     ctx.fillText("0", padding, barY + barH + 20);
@@ -644,79 +547,35 @@ function drawFrame(currentPercent, maxPercent, number) {
     }
 }
 
-// Умная печатная машинка (игнорирует HTML теги при паузах)
-function typeWriterHTML(html, elementId, speed, callback) {
-    const el = document.getElementById(elementId);
-    el.innerHTML = "";
-    el.classList.add('typing-cursor'); // курсор мигает
-    
-    let i = 0;
-    function type() {
-        if (i >= html.length) {
-            el.classList.remove('typing-cursor');
-            if(callback) callback();
-            return;
-        }
-        
-        const char = html.charAt(i);
-        
-        if (char === '<') {
-            // Если встретили тег, находим его конец и вставляем целиком сразу
-            let tag = '';
-            while (html.charAt(i) !== '>' && i < html.length) {
-                tag += html.charAt(i);
-                i++;
-            }
-            tag += '>';
-            i++;
-            el.innerHTML += tag;
-            // Сразу продолжаем, не ждем таймера для тега
-            type();
-        } else {
-            el.innerHTML += char;
-            i++;
-            state.timeouts.push(setTimeout(type, speed));
-        }
-    }
-    type();
-}
-
-// Анимация вступления
 function animateTaskIntro(targetPercent, targetNumber, taskText) {
     const inputsEl = document.getElementById('inputSection');
     const startBtn = document.getElementById('startBtn');
     
-    // Сброс
     inputsEl.classList.remove('visible');
     startBtn.style.display = 'none';
     
     if (state.animationId) cancelAnimationFrame(state.animationId);
-    clearTimeouts(); // сброс таймеров текста
     
-    // 1. Анимация шкалы (ОЧЕНЬ МЕДЛЕННАЯ)
+    // Текст теперь появляется сразу с плавным эффектом opacity, без дерганий
+    const statementEl = document.getElementById('taskStatement');
+    statementEl.innerHTML = taskText;
+    statementEl.style.opacity = 0;
+    setTimeout(() => { statementEl.style.opacity = 1; }, 100);
+    
     let currentPct = 0;
-    // Делим на 180 (примерно 3 секунды для 100%)
-    const speed = Math.max(0.2, targetPercent / 180); 
+    const speed = Math.max(0.4, targetPercent / 90); 
 
     function step() {
         currentPct += speed;
         if (currentPct >= targetPercent) {
             currentPct = targetPercent;
             drawFrame(currentPct, targetPercent, targetNumber);
-            
-            // 2. Запускаем печатную машинку текста
-            // Скорость 30мс на букву
-            typeWriterHTML(taskText, 'taskStatement', 30, () => {
-                // 3. Когда текст напечатан - показываем кнопку
-                startBtn.style.display = 'inline-block';
-            });
-            
+            startBtn.style.display = 'inline-block';
         } else {
             drawFrame(currentPct, targetPercent, targetNumber);
             state.animationId = requestAnimationFrame(step);
         }
     }
-    
     step();
 }
 
@@ -742,18 +601,19 @@ function renderTask() {
     document.getElementById('nextBtn').style.display = 'none';
     setFeedback("");
     
-    // ЗАПУСК ПОСЛЕДОВАТЕЛЬНОСТИ
-    // Очищаем текст перед анимацией
-    document.getElementById('taskStatement').innerHTML = "";
     animateTaskIntro(t.percent, t.number, t.text);
 }
 
-// Обработчик кнопки "Начать"
 document.getElementById('startBtn').addEventListener('click', function() {
     this.style.display = 'none';
     const inputsEl = document.getElementById('inputSection');
     inputsEl.classList.add('visible');
     document.getElementById('checkBtn').style.display = 'inline-block';
+    // Плавный скролл к полям ввода
+    setTimeout(() => {
+        window.scrollBy({ top: 300, behavior: 'smooth' });
+        document.getElementById('percentNum').focus();
+    }, 100);
 });
 
 function createInputs(containerId, count) {
@@ -788,22 +648,16 @@ function createInputs(containerId, count) {
 }
 
 function clearAllInputs() {
-    document.getElementById('percentNum').value = '';
-    document.getElementById('numberNum').value = '';
-    document.getElementById('finalNum').value = '';
-    document.getElementById('finalDen').value = '';
-    document.getElementById('finalResultInt').value = '';
-    
-    document.getElementById('percentNum').className = 'factor-input';
-    document.getElementById('numberNum').className = 'factor-input';
-    document.getElementById('finalNum').className = 'factor-input';
-    document.getElementById('finalDen').className = 'factor-input';
-    document.getElementById('finalResultInt').className = 'final-input';
+    const ids = ['percentNum', 'numberNum', 'finalResultInt'];
+    ids.forEach(id => {
+        const el = document.getElementById(id);
+        el.value = '';
+        el.classList.remove('correct', 'wrong');
+    });
     
     const factorInputs = document.querySelectorAll('.factors-container .factor-input');
     factorInputs.forEach(input => {
         input.value = '';
-        input.className = 'factor-input';
         input.classList.remove('live-cancelled', 'correct', 'wrong', 
                               'pair-color-0', 'pair-color-1', 'pair-color-2', 'pair-color-3', 'pair-color-4');
     });
@@ -815,13 +669,12 @@ function updateLiveCancellation() {
     
     [...nInputs, ...dInputs].forEach(inp => {
         inp.classList.remove('live-cancelled', 'pair-color-0', 'pair-color-1', 'pair-color-2', 'pair-color-3', 'pair-color-4');
-        inp.style.backgroundColor = '';
     });
     
     let colorIndex = 0;
     const dTakenIndices = new Set();
     
-    nInputs.forEach((nInp, nIndex) => {
+    nInputs.forEach((nInp) => {
         const nVal = parseInt(nInp.value);
         if (isNaN(nVal) || nVal === 1) return;
         
@@ -848,74 +701,85 @@ function checkAnswer() {
     const t = state.currentTask;
     let allCorrect = true;
     
+    // Проверка первичных дробей
     const userPercentNum = parseFloat(document.getElementById('percentNum').value);
     const percentNumEl = document.getElementById('percentNum');
+    percentNumEl.classList.remove('correct', 'wrong');
     if (userPercentNum === t.percentNum) percentNumEl.classList.add('correct');
-    else { percentNumEl.classList.add('wrong'); allCorrect = false; }
+    else { void percentNumEl.offsetWidth; percentNumEl.classList.add('wrong'); allCorrect = false; }
     
     const userNumberNum = parseFloat(document.getElementById('numberNum').value);
     const numberNumEl = document.getElementById('numberNum');
+    numberNumEl.classList.remove('correct', 'wrong');
     if (userNumberNum === t.numberNum) numberNumEl.classList.add('correct');
-    else { numberNumEl.classList.add('wrong'); allCorrect = false; }
+    else { void numberNumEl.offsetWidth; numberNumEl.classList.add('wrong'); allCorrect = false; }
     
+    // Проверка разложения
     const userNumInputs = document.querySelectorAll('#numFactorsInputs .factor-input');
     const userNumVals = Array.from(userNumInputs).map(i => parseFloat(i.value) || 1).sort((a,b)=>a-b);
     const userDenInputs = document.querySelectorAll('#denFactorsInputs .factor-input');
     const userDenVals = Array.from(userDenInputs).map(i => parseFloat(i.value) || 1).sort((a,b)=>a-b);
     
+    userNumInputs.forEach(i => i.classList.remove('wrong'));
+    userDenInputs.forEach(i => i.classList.remove('wrong'));
+
     if (JSON.stringify(userNumVals) === JSON.stringify(t.expectedNumFactors) &&
         JSON.stringify(userDenVals) === JSON.stringify(t.expectedDenFactors)) {
-        userNumInputs.forEach(i => i.classList.add('correct'));
-        userDenInputs.forEach(i => i.classList.add('correct'));
+        // Мы не вешаем класс .correct на факторы, чтобы не перебить цвета сокращения,
+        // но они верные.
     } else {
-        userNumInputs.forEach(i => i.classList.add('wrong'));
-        userDenInputs.forEach(i => i.classList.add('wrong'));
+        if (JSON.stringify(userNumVals) !== JSON.stringify(t.expectedNumFactors)) {
+            userNumInputs.forEach(i => { void i.offsetWidth; i.classList.add('wrong'); });
+        }
+        if (JSON.stringify(userDenVals) !== JSON.stringify(t.expectedDenFactors)) {
+            userDenInputs.forEach(i => { void i.offsetWidth; i.classList.add('wrong'); });
+        }
         allCorrect = false;
     }
     
-    const uFinalNum = parseFloat(document.getElementById('finalNum').value);
-    const uFinalDen = parseFloat(document.getElementById('finalDen').value) || 1;
-    const finalNumEl = document.getElementById('finalNum');
-    const finalDenEl = document.getElementById('finalDen');
-    
-    if (uFinalNum === t.finalNum && uFinalDen === t.finalDen) {
-        finalNumEl.classList.add('correct');
-        finalDenEl.classList.add('correct');
-    } else {
-        finalNumEl.classList.add('wrong');
-        finalDenEl.classList.add('wrong');
-        allCorrect = false;
-    }
-    
+    // Проверка итогового ответа
     const finalIntEl = document.getElementById('finalResultInt');
     const userFinalInt = parseInt(finalIntEl.value);
     const correctFinalInt = Math.round(t.result);
     
+    finalIntEl.classList.remove('correct', 'wrong');
     if (userFinalInt === correctFinalInt) {
         finalIntEl.classList.add('correct');
     } else {
+        void finalIntEl.offsetWidth;
         finalIntEl.classList.add('wrong');
         allCorrect = false;
     }
 
     if (allCorrect) {
-        setFeedback("Верно! 🌟", "success");
+        // Интеграция с RewardSystem: сброс ошибок при правильном шаге
+        if (window.RewardSystem) window.RewardSystem.resetErrors();
+
+        setFeedback("Верно! Отличная работа! 🌟", "success");
         state.score++;
         state.tasksCompletedInLevel++;
         document.getElementById('score').textContent = state.score;
         document.getElementById('checkBtn').style.display = 'none';
         
+        // Интеграция с RewardSystem: выдача лутбокса (за прохождение уровня)
+        if (window.RewardSystem && state.tasksCompletedInLevel >= state.tasksToAdvance) {
+            setTimeout(() => window.RewardSystem.showWin(`Уровень ${state.level} пройден!`, "percent_of"), 1000);
+        }
+
         if (state.tasksCompletedInLevel >= state.tasksToAdvance) {
             document.getElementById('nextBtn').textContent = state.level < 5 ? "Следующий уровень! 🆙" : "Получить сертификат! 🏆";
         } else {
-            document.getElementById('nextBtn').textContent = "Следующий пример ➡";
+            document.getElementById('nextBtn').textContent = "Следующая задача ➡";
         }
         document.getElementById('nextBtn').style.display = 'inline-block';
     } else {
-        if (userFinalInt !== correctFinalInt && !isNaN(userFinalInt)) {
-            setFeedback("Ошибка в итоговом ответе.", "error");
+        // Интеграция с RewardSystem: регистрация ошибки
+        if (window.RewardSystem) window.RewardSystem.registerError("percent_of");
+
+        if (userFinalInt !== correctFinalInt && !isNaN(userFinalInt) && userPercentNum === t.percentNum) {
+            setFeedback("Ошибка в итоговом ответе или разложении. Проверь красные поля.", "error");
         } else {
-            setFeedback("Есть ошибки. Проверь вычисления.", "error");
+            setFeedback("Есть ошибки. Внимательно проверь красные поля.", "error");
         }
         state.errors++;
         document.getElementById('errors').textContent = state.errors;
@@ -923,15 +787,13 @@ function checkAnswer() {
 }
 
 function nextTask() {
-    const factorInputs = document.querySelectorAll('.factors-container .factor-input');
-    factorInputs.forEach(input => input.removeEventListener('input', updateLiveCancellation));
-    
     if (state.tasksCompletedInLevel >= state.tasksToAdvance) {
         if (state.level === 5) { showVictory(); return; }
         state.level++;
         state.tasksCompletedInLevel = 0;
     }
     generateTask();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function setFeedback(msg, type) {
@@ -946,6 +808,11 @@ function showVictory() {
     document.getElementById('finalScore').textContent = state.score;
     document.getElementById('finalErrors').textContent = state.errors;
     startConfetti();
+    
+    // Интеграция с RewardSystem: финальный лутбокс
+    if (window.RewardSystem) {
+        setTimeout(() => window.RewardSystem.showWin("Мастер Процентов! Сертификат получен", "percent_of"), 1500);
+    }
 }
 
 function startConfetti() {
@@ -979,5 +846,4 @@ function startConfetti() {
 generateTask();
 </script>
 </body>
-
 </html>
