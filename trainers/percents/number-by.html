@@ -1,15 +1,51 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- ─── SEO-БЛОК ─── -->
+    <title>Тренажёр: Нахождение числа по его проценту | Задачи 6 класс</title>
+    <meta name="description" content="Интерактивный онлайн тренажёр по математике для 6 класса. Учимся находить целое число по значению его процента через конструктор уравнений и пошаговый алгоритм.">
+    <meta name="keywords" content="нахождение числа по его проценту, как найти число по проценту, задачи на проценты 6 класс, число по проценту тренажер, математика 6 класс проценты">
+    <meta name="author" content="Козлов Сергей Владимирович">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://godspace.github.io/math-6-grade/trainers/percents/number-by.html">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Мастер Целого: Нахождение числа по его проценту (6 класс)">
+    <meta property="og:description" content="Интерактивный конструктор уравнения, пошаговый алгоритм с переворотом дроби и автоматическая проверка!">
+    <meta property="og:url" content="https://godspace.github.io/math-6-grade/trainers/percents/number-by.html">
+    <meta property="og:site_name" content="Математика 6 класс">
+
+    <!-- JSON-LD -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "LearningResource",
+        "name": "Тренажёр: Нахождение числа по его проценту",
+        "description": "Практика решения задач на нахождение целого числа по известному проценту с интерактивным составлением уравнений.",
+        "educationalLevel": "6 класс",
+        "learningResourceType": "Интерактивный тренажёр",
+        "inLanguage": "ru",
+        "isAccessibleForFree": true,
+        "teaches": ["Нахождение числа по его проценту", "Составление уравнений к задачам", "Деление дробей"],
+        "url": "https://godspace.github.io/math-6-grade/trainers/percents/number-by.html"
+    }
+    </script>
+    <!-- ─── КОНЕЦ SEO-БЛОКА ─── -->
+
     <link rel="icon" href="/math-6-grade/favicon.ico" sizes="any">
     <link rel="icon" type="image/png" sizes="16x16" href="/math-6-grade/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/math-6-grade/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="48x48" href="/math-6-grade/favicon-48x48.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/math-6-grade/apple-touch-icon.png">
     <link rel="manifest" href="/math-6-grade/site.webmanifest">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мастер Целого: Обучение</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="../../assets/analytics.js" defer></script>
+    
     <style>
         :root {
             --primary: #4361ee;
@@ -21,8 +57,9 @@
             --card-bg: rgba(255, 255, 255, 0.98);
         }
 
+        * { box-sizing: border-box; font-family: 'Nunito', sans-serif; }
+
         body {
-            font-family: 'Segoe UI', 'Roboto', sans-serif;
             background: var(--bg-gradient);
             min-height: 100vh;
             margin: 0;
@@ -39,7 +76,7 @@
             box-shadow: 0 20px 60px rgba(0,0,0,0.15);
             width: 100%;
             max-width: 1100px;
-            padding: 40px;
+            padding: 35px;
             position: relative;
             overflow: hidden;
             transition: all 0.3s ease;
@@ -50,7 +87,9 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
         .level-badges { display: flex; gap: 10px; }
@@ -59,7 +98,7 @@
             display: flex; align-items: center; justify-content: center;
             font-weight: bold; color: #fff; font-size: 14px; transition: all 0.3s;
         }
-        .lvl-badge.active { background: var(--primary); transform: scale(1.2); box-shadow: 0 0 10px var(--primary); }
+        .lvl-badge.active { background: var(--primary); transform: scale(1.15); box-shadow: 0 0 10px var(--primary); }
         .lvl-badge.completed { background: var(--success); }
 
         .stats-box {
@@ -72,157 +111,317 @@
 
         /* Область задачи */
         .work-area {
-            display: flex; flex-direction: column; align-items: center; gap: 25px; min-height: 400px;
+            display: flex; flex-direction: column; align-items: center; gap: 20px; min-height: 380px;
         }
 
         .fade-element {
-            opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease;
+            opacity: 0; transform: translateY(15px); transition: opacity 0.5s ease, transform 0.5s ease;
             pointer-events: none; display: none;
         }
         .fade-element.visible { opacity: 1; transform: translateY(0); pointer-events: auto; display: flex; }
-        
         #inputSection.visible { display: flex; }
         #tutorialSection.visible { display: flex; }
 
+        /* ИСПРАВЛЕНИЕ: Текст задачи отображается цельным блоком без flex-колонок */
+        .task-statement.fade-element.visible,
         .task-statement {
-            background: #f8f9fa; padding: 25px; border-radius: 16px;
-            text-align: center; font-size: 1.4rem; line-height: 1.6;
-            border-left: 5px solid var(--percent-color); width: 90%; min-height: 80px;
-            display: flex; align-items: center; justify-content: center;
+            background: #ffffff;
+            border: 2px solid #e2e8f0;
+            border-left: 6px solid var(--percent-color);
+            border-radius: 18px;
+            padding: 22px 30px;
+            text-align: center;
+            font-size: 1.35rem;
+            line-height: 1.7;
+            width: 100%;
+            max-width: 860px;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.03);
+            display: block !important;
         }
-        
-        .typing-cursor::after { content: '|'; animation: blink 1s infinite; color: var(--primary); }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-        
-        /* Визуализация */
+
+        /* Визуализация на холсте (Canvas) */
         .visual-container {
-            width: 80%; background: #fff; padding: 15px; border-radius: 16px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: flex; flex-direction: column; align-items: center;
+            width: 100%;
+            max-width: 860px;
+            background: #ffffff;
+            padding: 14px 20px;
+            border-radius: 18px;
+            border: 2px solid #e2e8f0;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.03);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
-        canvas#visualCanvas { width: 100%; height: 60px; border-radius: 8px; background: #f0f0f0; }
+        canvas#visualCanvas {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 700 / 100;
+            border-radius: 10px;
+            display: block;
+        }
 
-        .highlight-percent { color: var(--percent-color); font-weight: bold; }
-        .highlight-number { color: var(--primary); font-weight: bold; }
+        /* Выделение чисел и процентов внутри текста задачи */
+        .highlight-percent {
+            color: var(--percent-color);
+            font-weight: 800;
+            background: rgba(247, 37, 133, 0.12);
+            padding: 2px 10px;
+            border-radius: 8px;
+            display: inline-block;
+            vertical-align: baseline;
+            margin: 0 2px;
+            white-space: nowrap;
+        }
+        .highlight-number {
+            color: var(--primary);
+            font-weight: 800;
+            background: rgba(67, 97, 238, 0.12);
+            padding: 2px 10px;
+            border-radius: 8px;
+            display: inline-block;
+            vertical-align: baseline;
+            margin: 0 2px;
+            white-space: nowrap;
+        }
 
-        /* --- ТУТОРИАЛ (НОВЫЙ БЛОК) --- */
+        /* ИНТЕРАКТИВНЫЙ БЛОК-РАЗМИНКА */
         #tutorialSection {
-            flex-direction: column; align-items: center; gap: 20px;
-            background: #fff; padding: 30px; border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1); border: 2px solid #eee;
-            width: 80%;
+            flex-direction: column; align-items: center; gap: 15px;
+            background: #ffffff; padding: 25px 30px; border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(67, 97, 238, 0.1); border: 2px solid #e0e7ff;
+            width: 100%; max-width: 860px;
         }
 
-        .tutorial-equation {
-            font-size: 3rem; font-weight: bold; color: #333;
-            background: #f0f4f8; padding: 20px 40px; border-radius: 15px;
-            margin: 10px 0; letter-spacing: 2px;
+        .tut-title {
+            display: flex; align-items: center; gap: 10px; font-size: 1.2rem;
+            font-weight: 900; color: var(--primary); text-transform: uppercase; letter-spacing: 1px;
         }
-        
-        .tutorial-hint { font-size: 1.2rem; color: #666; }
-        .var-x { color: var(--danger); }
-        .var-num { color: var(--primary); }
-        .var-perc { color: var(--percent-color); }
 
-        /* Дроби */
+        .tut-card {
+            background: #f8faff; border: 2px dashed #cbd5e1; border-radius: 16px;
+            padding: 20px; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 15px;
+        }
+
+        .tut-equation-row {
+            display: flex; align-items: center; gap: 12px; font-size: 2rem; font-weight: 900; color: #1e293b;
+        }
+
+        .tut-select {
+            font-size: 1.5rem; font-weight: bold; padding: 5px 12px; border-radius: 10px;
+            border: 2px solid #94a3b8; background: #fff; cursor: pointer; outline: none;
+        }
+
+        .tut-input {
+            width: 70px; height: 55px; font-size: 1.8rem; font-weight: bold;
+            text-align: center; border: 2px solid #94a3b8; border-radius: 12px; outline: none;
+        }
+
+        .tut-feedback {
+            font-size: 1.05rem; font-weight: bold; min-height: 24px; text-align: center;
+        }
+
+        /* КОНСТРУКТОР УРАВНЕНИЯ */
+        .builder-slots-container {
+            display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: center; margin: 10px 0;
+        }
+
+        .builder-slot {
+            min-width: 90px; height: 60px; padding: 0 15px; border-radius: 14px;
+            border: 2px dashed #94a3b8; background: #ffffff; display: flex;
+            align-items: center; justify-content: center; font-size: 1.4rem;
+            font-weight: 900; color: #334155; cursor: pointer; transition: all 0.2s;
+        }
+        .builder-slot.filled {
+            border-style: solid; box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+        }
+        .builder-slot.correct-slot {
+            border-color: var(--success) !important; background: #f0fdf4 !important; color: var(--success) !important;
+        }
+        .builder-slot.wrong-slot {
+            border-color: var(--danger) !important; background: #fff0f0 !important; animation: shake 0.4s;
+        }
+
+        .builder-op { font-size: 2.2rem; font-weight: 900; color: var(--primary); }
+
+        .chips-bank {
+            display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+            background: #edf2f7; padding: 12px 20px; border-radius: 16px; min-height: 65px;
+            width: 100%; max-width: 450px; align-items: center;
+        }
+
+        .chip-btn {
+            padding: 10px 20px; border-radius: 12px; font-size: 1.3rem; font-weight: 900;
+            cursor: pointer; border: 2px solid transparent; transition: all 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.06); user-select: none;
+        }
+        .chip-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.1); }
+        .chip-perc { background: #fff; color: var(--percent-color); border-color: var(--percent-color); }
+        .chip-x { background: #fff; color: #7928ca; border-color: #7928ca; }
+        .chip-part { background: #fff; color: var(--primary); border-color: var(--primary); }
+
+        /* ОПОРНОЕ УРАВНЕНИЕ (СОХРАНЯЕТСЯ ПЕРЕД ГЛАЗАМИ) */
+        .equation-anchor {
+            background: #ffffff;
+            border: 2px solid #c7d2fe;
+            border-radius: 18px;
+            padding: 16px 24px;
+            width: 100%;
+            max-width: 860px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 16px rgba(67, 97, 238, 0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .anchor-header {
+            font-size: 0.95rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .anchor-body {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .anchor-formula, .anchor-derived {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chip-slot-static {
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 1.25rem;
+            font-weight: 900;
+            border: 2px solid;
+            background: #fff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .anchor-op { font-size: 1.6rem; font-weight: 900; color: #475569; }
+        .anchor-arrow-right { font-size: 1.8rem; font-weight: 900; color: var(--primary); }
+
+        .anchor-hint {
+            font-size: 0.95rem;
+            color: #64748b;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        /* Пошаговая рабочая область */
+        .step-label {
+            font-size: 0.9rem; color: #64748b; margin-bottom: 5px; text-transform: uppercase;
+            font-weight: 800; letter-spacing: 0.5px;
+        }
+
+        .arrow-down { font-size: 1.6rem; color: #94a3b8; margin: 10px 0; font-weight: bold; }
+
         .fraction-row {
             display: flex; align-items: center; gap: 15px; font-size: 2rem;
-            font-weight: bold; flex-wrap: wrap; justify-content: center; margin-top: 10px;
+            font-weight: bold; flex-wrap: wrap; justify-content: center; width: 100%;
         }
 
         .fraction { display: flex; flex-direction: column; align-items: center; width: 80px; }
         .frac-line { width: 100%; height: 4px; background: #333; border-radius: 2px; }
-        .operator { font-size: 2.5rem; color: var(--primary); margin: 0 5px; }
-        
-        .step-label {
-            width: 100%; text-align: center; font-size: 0.9rem; color: #777; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;
-        }
-        
-        .arrow-down {
-            font-size: 2rem; color: #aaa; margin: 15px 0; animation: bounceArrow 2s infinite;
-        }
-        @keyframes bounceArrow { 0%, 100% {transform: translateY(0);} 50% {transform: translateY(5px);} }
+        .operator { font-size: 2.2rem; color: var(--primary); margin: 0 5px; }
 
-        /* Инпуты */
         .factor-input {
             width: 60px; height: 60px; font-size: 1.5rem; text-align: center;
-            border: 2px solid #e0e0e0; border-radius: 12px; outline: none;
+            border: 2px solid #cbd5e1; border-radius: 12px; outline: none;
             transition: all 0.2s; font-weight: bold; color: #333; background: #fff;
             -moz-appearance: textfield;
         }
-        .factor-input::-webkit-outer-spin-button,
-        .factor-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        .factor-input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.2); }
+        .factor-input::-webkit-outer-spin-button, .factor-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .factor-input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.15); }
 
-        .factor-input.live-cancelled {
-            text-decoration: line-through; color: #aaa; border-color: transparent; opacity: 0.8; transform: scale(0.95);
-        }
+        .factor-input.live-cancelled { text-decoration: line-through; color: #aaa; border-color: transparent; opacity: 0.8; transform: scale(0.95); }
         .pair-color-0 { background-color: #f2f2f2; }
         .pair-color-1 { background-color: #e3f2fd; }
         .pair-color-2 { background-color: #fce4ec; }
         .pair-color-3 { background-color: #e8f5e9; }
         .pair-color-4 { background-color: #fff3e0; }
 
-        .factor-input.correct { border-color: var(--success) !important; color: var(--success) !important; background: #e8f5e9 !important; }
-        .factor-input.wrong { border-color: var(--danger) !important; background: #ffebeb !important; animation: shake 0.4s; }
+        .correct { border-color: var(--success) !important; color: var(--success) !important; background: #f0fdf4 !important; pointer-events: none; }
+        .wrong { border-color: var(--danger) !important; background: #fff0f0 !important; animation: shake 0.4s; }
 
-        /* Зона разложения */
         .factorization-area {
-            background: #fff; padding: 15px; border-radius: 16px; border: 2px dashed #ccc;
+            background: #fff; padding: 15px 20px; border-radius: 16px; border: 2px dashed #cbd5e1;
             display: flex; flex-direction: column; align-items: center; gap: 10px;
         }
         .factors-container { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: center; min-height: 60px; }
-        .big-fraction-line { width: 100%; height: 4px; background: linear-gradient(90deg, #ccc, #999, #ccc); border-radius: 2px; }
+        .big-fraction-line { width: 100%; height: 4px; background: linear-gradient(90deg, #cbd5e1, #94a3b8, #cbd5e1); border-radius: 2px; }
 
-        /* Финал */
         .final-answer-fraction {
-            display: flex; align-items: center; gap: 10px; background: #fff; padding: 10px;
-            border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #eee;
+            display: flex; align-items: center; background: #fff; padding: 8px;
+            border-radius: 16px; border: 2px solid #e2e8f0;
         }
+
         .final-result-box {
-            display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 10px;
-            background: linear-gradient(to right, #f8f9fa, #fff); padding: 15px 30px;
-            border-radius: 16px; border: 2px solid var(--primary);
+            display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 10px;
+            background: linear-gradient(to right, #f8faff, #fff); padding: 15px 30px;
+            border-radius: 16px; border: 2px solid var(--success);
         }
         .final-input {
-            width: 120px; height: 60px; font-size: 1.8rem; text-align: center;
-            border: 2px solid #ccc; border-radius: 12px; font-weight: bold; color: var(--primary);
+            width: 130px; height: 60px; font-size: 1.8rem; text-align: center;
+            border: 2px solid #cbd5e1; border-radius: 12px; font-weight: bold; color: var(--success); outline: none;
         }
-        .final-input:focus { border-color: var(--percent-color); outline: none; }
-        .final-input.correct { border-color: var(--success); background-color: #e8f5e9; }
-        .final-input.wrong { border-color: var(--danger); background-color: #ffebee; animation: shake 0.4s; }
+        .final-input:focus { border-color: var(--success); box-shadow: 0 0 0 4px rgba(46, 196, 182, 0.15); }
 
         /* Кнопки */
         .btn {
-            background: var(--primary); color: white; border: none; padding: 15px 40px;
-            font-size: 1.2rem; border-radius: 50px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
-            font-weight: bold; box-shadow: 0 10px 20px rgba(67, 97, 238, 0.3); margin: 0 10px;
+            background: var(--primary); color: white; border: none; padding: 14px 36px;
+            font-size: 1.1rem; border-radius: 50px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: 800; box-shadow: 0 8px 15px rgba(67, 97, 238, 0.25); margin: 0 10px;
         }
-        .btn:hover { transform: translateY(-3px); }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 12px 20px rgba(67, 97, 238, 0.35); }
+        .btn:active { transform: translateY(0); }
+
         .btn-start { background: linear-gradient(45deg, #ff9f1c, #f39c12); display: none; }
         .btn-check { background: linear-gradient(45deg, var(--success), #20bf6b); display: none; }
         .btn-next { background: linear-gradient(45deg, var(--primary), #4834d4); display: none; }
-        .btn-tut { background: #6c5ce7; font-size: 1rem; padding: 10px 30px; }
+        .btn-tut-toggle {
+            background: transparent; color: var(--primary); border: 2px solid var(--primary);
+            padding: 8px 18px; font-size: 0.9rem; border-radius: 30px; box-shadow: none; margin: 0;
+        }
+        .btn-tut-toggle:hover { background: rgba(67, 97, 238, 0.08); transform: none; }
 
-        .feedback { height: 30px; font-weight: bold; text-align: center; opacity: 0; transition: opacity 0.3s; }
+        .feedback { min-height: 28px; font-weight: bold; text-align: center; font-size: 1.1rem; }
 
-        /* Победа */
         .victory-modal {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(255,255,255,0.98); z-index: 100; display: none;
             flex-direction: column; justify-content: center; align-items: center; text-align: center;
             animation: fadeIn 0.5s;
         }
-        .trophy { font-size: 100px; margin-bottom: 20px; animation: bounce 2s infinite; }
-        
+        .trophy { font-size: 90px; margin-bottom: 15px; animation: bounce 2s infinite; }
+
         @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
         @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
-        @keyframes bounce { 0%, 100% {transform: translateY(0);} 50% {transform: translateY(-20px);} }
+        @keyframes bounce { 0%, 100% {transform: translateY(0);} 50% {transform: translateY(-15px);} }
         
         canvas { position: absolute; top: 0; left: 0; pointer-events: none; }
         canvas#visualCanvas { position: relative; pointer-events: auto; }
 
+        @media (max-width: 768px) {
+            .fraction-row { flex-direction: column; gap: 15px; }
+            .operator { transform: rotate(90deg); margin: 0; }
+            .anchor-body { flex-direction: column; gap: 8px; }
+            .anchor-arrow-right { transform: rotate(90deg); margin: 4px 0; }
+        }
     </style>
-<script src="../../assets/analytics.js"></script>
 </head>
 <body>
 
@@ -230,7 +429,7 @@
     <div class="header">
         <div>
             <h1>Мастер Целого</h1>
-            <div class="subtitle" id="levelDescription">Уровень 1</div>
+            <div class="subtitle" id="levelDescription">Уровень 1: Базовые доли</div>
         </div>
         <div class="level-badges">
             <div class="lvl-badge active" id="badge1">1</div>
@@ -245,56 +444,131 @@
     </div>
 
     <div class="work-area">
-        
         <div class="visual-container">
-            <canvas id="visualCanvas" width="600" height="80"></canvas>
+            <canvas id="visualCanvas" width="700" height="100"></canvas>
         </div>
 
         <div class="task-statement fade-element visible" id="taskStatement"></div>
         
-        <button class="btn btn-start" id="startBtn">Решить задачу ✏️</button>
-
-        <div id="tutorialSection" class="fade-element">
-            <div class="tutorial-hint" id="tutHint">Вспомни простой пример:</div>
-            <div class="tutorial-equation" id="tutEquation">2 · X = 10</div>
-            <button class="btn btn-tut" id="tutNextBtn">Далее ➡</button>
+        <div style="display: flex; gap: 15px; align-items: center;">
+            <button class="btn btn-start" id="startBtn">Решить задачу ✏️</button>
+            <button class="btn btn-tut-toggle" id="tutToggleBtn" style="display: none;" onclick="openTutorialManually()">💡 Собрать уравнение</button>
         </div>
 
+        <!-- ИНТЕРАКТИВНЫЙ БЛОК-РАЗМИНКА -->
+        <div id="tutorialSection" class="fade-element">
+            <div class="tut-title">🧠 Быстрая разминка: найди X</div>
+
+            <!-- Шаг 1: Простое уравнение -->
+            <div class="tut-card" id="tutCardStep1">
+                <div style="font-size: 1.1rem; color: #475569;">
+                    Вспомни, как найти неизвестный множитель:
+                </div>
+                <div class="tut-equation-row">
+                    <span>2 · X = 10</span>
+                </div>
+                <div class="tut-equation-row" style="font-size: 1.4rem;">
+                    <span>X = 10</span>
+                    <select class="tut-select" id="tutOpSelect">
+                        <option value="?">?</option>
+                        <option value=":">:</option>
+                        <option value="*">×</option>
+                    </select>
+                    <span>2 =</span>
+                    <input type="number" class="tut-input" id="tutAnsInput" placeholder="?">
+                </div>
+                <div class="tut-feedback" id="tutFb1"></div>
+                <button class="btn" id="tutStep1CheckBtn" onclick="checkTutorialStep1()">Проверить разминку 🎯</button>
+            </div>
+
+            <!-- Шаг 2: Конструктор уравнения из карточек -->
+            <div class="tut-card" id="tutCardStep2" style="display: none;">
+                <div style="font-size: 1.1rem; color: #475569; text-align: center;">
+                    А теперь <b>составь уравнение</b> для нашей задачи из карточек:
+                </div>
+
+                <div class="builder-slots-container">
+                    <div class="builder-slot" id="slot0" onclick="removeChipFromSlot(0)">?</div>
+                    <div class="builder-op">·</div>
+                    <div class="builder-slot" id="slot1" onclick="removeChipFromSlot(1)">?</div>
+                    <div class="builder-op">=</div>
+                    <div class="builder-slot" id="slot2" onclick="removeChipFromSlot(2)">?</div>
+                </div>
+
+                <div style="font-size: 0.95rem; color: #64748b; font-weight: 700;">Нажимай на карточки, чтобы вставить их в слоты:</div>
+                <div class="chips-bank" id="chipsBank"></div>
+
+                <div class="tut-feedback" id="tutFb2"></div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn" style="background: #94a3b8; padding: 10px 24px; font-size: 1rem;" onclick="resetBuilderSlots()">Сбросить</button>
+                    <button class="btn" id="tutBuilderCheckBtn" onclick="checkTutorialEquation()">Проверить уравнение 🚀</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ОСНОВНАЯ РАБОЧАЯ ОБЛАСТЬ -->
         <div id="inputSection" class="fade-element" style="width: 100%; flex-direction: column; align-items: center;">
             
-            <div class="step-label">Шаг 1: Составь деление (Часть : Доля)</div>
+            <!-- ОПОРНОЕ УРАВНЕНИЕ (СОХРАНЯЕТСЯ ПЕРЕД ГЛАЗАМИ) -->
+            <div class="equation-anchor" id="equationAnchor">
+                <div class="anchor-header">
+                    <span>📌</span> Твоё уравнение и алгоритм:
+                </div>
+                <div class="anchor-body">
+                    <div class="anchor-formula">
+                        <span class="chip-slot-static chip-perc" id="anchorPerc">?%</span>
+                        <span class="anchor-op">·</span>
+                        <span class="chip-slot-static chip-x">X</span>
+                        <span class="anchor-op">=</span>
+                        <span class="chip-slot-static chip-part" id="anchorPart">?</span>
+                    </div>
+                    <span class="anchor-arrow-right">➜</span>
+                    <div class="anchor-derived">
+                        <span class="chip-slot-static chip-x">X</span>
+                        <span class="anchor-op">=</span>
+                        <span class="chip-slot-static chip-part" id="anchorDerivedPart">?</span>
+                        <span class="anchor-op">:</span>
+                        <span class="chip-slot-static chip-perc" id="anchorDerivedPerc">?%</span>
+                    </div>
+                </div>
+                <div class="anchor-hint">
+                    Именно это деление переводим в дроби и вычисляем! 👇
+                </div>
+            </div>
+
+            <div class="step-label">Шаг 1: Делим часть на процент (Часть : Доля)</div>
             <div class="fraction-row">
                 <div class="fraction">
-                    <input type="number" class="factor-input" id="divPartNum" placeholder="?">
+                    <input type="number" class="factor-input" id="divPartNum" placeholder="Ч">
                     <div class="frac-line"></div>
-                    <input type="number" class="factor-input" id="divPartDen" placeholder="?">
+                    <input type="number" class="factor-input" id="divPartDen" placeholder="1">
                 </div>
                 
                 <div class="operator">:</div>
                 
                 <div class="fraction">
-                    <input type="number" class="factor-input" id="divPercNum" placeholder="?">
+                    <input type="number" class="factor-input" id="divPercNum" placeholder="%">
                     <div class="frac-line"></div>
-                    <input type="number" class="factor-input" id="divPercDen" placeholder="?">
+                    <input type="number" class="factor-input" id="divPercDen" placeholder="100">
                 </div>
             </div>
 
-            <div class="arrow-down">⬇ Переворот ⬇</div>
+            <div class="arrow-down">⬇ Переворот второй дроби ⬇</div>
 
-            <div class="step-label">Шаг 2: Преврати в умножение</div>
+            <div class="step-label">Шаг 2: Умножаем и сокращаем</div>
             <div class="fraction-row">
                 <div class="fraction">
-                    <input type="number" class="factor-input" id="multPartNum" placeholder="?">
+                    <input type="number" class="factor-input" id="multPartNum" placeholder="Ч">
                     <div class="frac-line"></div>
-                    <input type="number" class="factor-input" id="multPartDen" placeholder="?">
+                    <input type="number" class="factor-input" id="multPartDen" placeholder="1">
                 </div>
                 
                 <div class="operator">×</div>
                 
                 <div class="fraction">
-                    <input type="number" class="factor-input" id="multPercNum" placeholder="?">
+                    <input type="number" class="factor-input" id="multPercNum" placeholder="100">
                     <div class="frac-line"></div>
-                    <input type="number" class="factor-input" id="multPercDen" placeholder="?">
+                    <input type="number" class="factor-input" id="multPercDen" placeholder="%">
                 </div>
                 
                 <div class="operator">=</div>
@@ -316,32 +590,31 @@
                 </div>
             </div>
             
-            <div style="width: 100%; border-bottom: 2px dashed #eee; margin: 20px 0;"></div>
+            <div style="width: 100%; border-bottom: 2px dashed #cbd5e1; margin: 20px 0;"></div>
 
             <div class="final-result-box">
-                <div class="answer-label" style="font-size: 1.1rem; color: #333;">Итоговый ответ (целое число):</div>
+                <div class="step-label" style="color: #334155;">Итоговый ответ (целое число):</div>
                 <input type="number" class="final-input" id="finalResultInt" placeholder="?">
             </div>
         </div>
     </div>
 
-    <div style="text-align: center; margin-top: 30px;">
+    <div style="text-align: center; margin-top: 25px;">
         <div class="feedback" id="feedbackMsg"></div>
         <br>
-        <button class="btn btn-check" id="checkBtn">Проверить</button>
+        <button class="btn btn-check" id="checkBtn">Проверить решение</button>
         <button class="btn btn-next" id="nextBtn">Следующий пример ➡</button>
     </div>
 
     <div class="victory-modal" id="victoryScreen">
         <canvas id="confettiCanvas"></canvas>
         <div class="trophy">🏆</div>
-        <div class="cert-title">СЕРТИФИКАТ МАСТЕРА</div>
+        <div class="cert-title" style="font-size: 2.2rem; color: var(--primary); font-weight: 900; margin-bottom: 10px;">СЕРТИФИКАТ МАСТЕРА</div>
         <h2>Курс "Нахождение числа по проценту" пройден!</h2>
-        <div class="cert-stats">
-            <div>Верных решений: <span id="finalScore" style="color:var(--success)">0</span></div>
-            <div>Ошибок: <span id="finalErrors" style="color:var(--danger)">0</span></div>
+        <div style="margin: 15px 0; font-size: 1.2rem;">
+            <div>Верных решений: <span id="finalScore" style="color:var(--success); font-weight: 900;">0</span></div>
+            <div>Ошибок: <span id="finalErrors" style="color:var(--danger); font-weight: 900;">0</span></div>
         </div>
-        <br>
         <button class="btn" onclick="location.reload()">Начать заново</button>
     </div>
 </div>
@@ -356,18 +629,18 @@ const LEVELS = {
 };
 
 const TEMPLATES_DIRECT = [
-    "На экскурсию поехали <span class='highlight-number'>{part}</span> учеников, что составляет <span class='highlight-percent'>{p}%</span> от всего класса. Сколько всего учеников в классе?",
+    "На экскурсию поехали <span class='highlight-number'>{part}</span> учеников, что составляет <span class='highlight-percent'>{p}%</span> всего класса. Сколько всего учеников в классе?",
     "<span class='highlight-percent'>{p}%</span> длины всей дороги составляет <span class='highlight-number'>{part}</span> км. Какова длина всей дороги?",
     "Скачано <span class='highlight-number'>{part}</span> Гб игры. Это <span class='highlight-percent'>{p}%</span> от общего веса. Сколько весит вся игра?",
     "Заряд батареи <span class='highlight-percent'>{p}%</span>, что равно <span class='highlight-number'>{part}</span> мАч. Какова полная ёмкость?",
-    "В саду <span class='highlight-number'>{part}</span> яблонь. Это <span class='highlight-percent'>{p}%</span> от всех деревьев. Сколько всего деревьев?"
+    "В саду <span class='highlight-number'>{part}</span> яблонь. Это <span class='highlight-percent'>{p}%</span> всех деревьев. Сколько всего деревьев?"
 ];
 
 const TEMPLATES_INDIRECT = [
-    "После уценки стола на <span class='highlight-percent'>{diff}%</span> его новая цена стала <span class='highlight-number'>{part}</span> рублей. Какова была первоначальная цена?",
+    "После уценки стола на <span class='highlight-percent'>{diff}%</span> его цена стала <span class='highlight-number'>{part}</span> рублей. Какова была первоначальная цена?",
     "Масса уменьшилась на <span class='highlight-percent'>{diff}%</span> и стала <span class='highlight-number'>{part}</span> г. Сколько было изначально?",
-    "Число игроков уменьшилось на <span class='highlight-percent'>{diff}%</span>, теперь их <span class='highlight-number'>{part}</span>. Сколько было?",
-    "Потрачено <span class='highlight-percent'>{diff}%</span> денег, осталось <span class='highlight-number'>{part}</span> рублей. Сколько было денег?"
+    "Число игроков уменьшилось на <span class='highlight-percent'>{diff}%</span>, теперь их <span class='highlight-number'>{part}</span>. Сколько было участников?",
+    "Потрачено <span class='highlight-percent'>{diff}%</span> денег, осталось <span class='highlight-number'>{part}</span> рублей. Сколько денег было изначально?"
 ];
 
 let state = {
@@ -378,14 +651,14 @@ let state = {
     errors: 0,
     currentTask: null,
     animationId: null,
-    timeouts: [],
-    tutorialStep: 0
+    tutorialCompletedOnce: false
 };
 
-function clearTimeouts() {
-    state.timeouts.forEach(t => clearTimeout(t));
-    state.timeouts = [];
-}
+// Состояние конструктора уравнения
+let builderState = {
+    slots: [null, null, null],
+    bank: []
+};
 
 function getRandomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 function pickRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
@@ -393,6 +666,7 @@ function pickRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 function primeFactors(n) {
     const factors = [];
     if (n === 1) return [1];
+    if (n % 1 !== 0) return factors;
     let d = 2;
     let temp = n;
     while (d * d <= temp) {
@@ -404,6 +678,8 @@ function primeFactors(n) {
 }
 
 function generateTask() {
+    if (window.RewardSystem) window.RewardSystem.resetErrors();
+
     const lvl = state.level;
     let percentVal, whole, part, text;
     let isIndirect = false;
@@ -468,53 +744,78 @@ function generateTask() {
     renderTask();
 }
 
+// ОТРИСОВКА ШКАЛЫ С ЗАЩИТОЙ ОТ ОБРЕЗАНИЙ
 function drawFrame(currentProgress) {
     const canvas = document.getElementById('visualCanvas');
+    if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    const w = canvas.width;
-    const h = canvas.height;
+    const w = canvas.width;  // 700
+    const h = canvas.height; // 100
     
     ctx.clearRect(0, 0, w, h);
-    const padding = 20; const barH = 30; const barY = (h - barH) / 2; const drawW = w - padding * 2;
     
-    ctx.strokeStyle = '#ccc'; ctx.lineWidth = 2; ctx.setLineDash([5, 5]);
-    ctx.beginPath(); ctx.roundRect(padding, barY, drawW, barH, 5); ctx.stroke(); ctx.setLineDash([]);
+    const padding = 45;
+    const barH = 24;
+    const barY = 38; 
+    const drawW = w - padding * 2; // 610
     
+    // Пунктирный контур целого числа
+    ctx.strokeStyle = '#cbd5e1';
+    ctx.lineWidth = 2.5;
+    ctx.setLineDash([7, 7]);
+    ctx.beginPath();
+    ctx.roundRect(padding, barY, drawW, barH, 12);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    
+    // Заливка известной части
     const targetRatio = state.currentTask.part / state.currentTask.whole;
     const currentRatio = targetRatio * currentProgress;
-    const fillW = drawW * currentRatio;
+    const fillW = Math.max(0, Math.min(drawW, drawW * currentRatio));
     
     if (fillW > 0) {
-        ctx.fillStyle = '#f72585'; ctx.beginPath(); ctx.roundRect(padding, barY, fillW, barH, 5); ctx.fill();
+        const gradient = ctx.createLinearGradient(padding, 0, padding + fillW, 0);
+        gradient.addColorStop(0, '#f72585');
+        gradient.addColorStop(1, '#ff4d94');
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.roundRect(padding, barY, fillW, barH, 12);
+        ctx.fill();
     }
     
-    ctx.fillStyle = '#333'; ctx.font = 'bold 16px "Segoe UI"'; ctx.textAlign = 'center';
-    ctx.fillText("0", padding, barY + barH + 20);
-    ctx.fillStyle = '#4361ee'; ctx.fillText("? (Целое)", padding + drawW, barY + barH + 20);
+    // Нижние метки с выравниванием по границам (без обрезаний)
+    ctx.font = 'bold 15px "Nunito", sans-serif';
+    ctx.textBaseline = 'top';
+    const textBottomY = barY + barH + 9;
     
-    if (currentProgress > 0.1) {
+    // 0 слева
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#64748b';
+    ctx.fillText("0", padding, textBottomY);
+    
+    // ? (Ищем всё целое) справа
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#4361ee';
+    ctx.fillText("? (Ищем всё целое)", padding + drawW, textBottomY);
+    
+    // Верхняя метка над полосой
+    if (currentProgress > 0.05 && fillW > 0) {
         let xPos = padding + fillW;
+        xPos = Math.max(padding + 20, Math.min(padding + drawW - 20, xPos));
+        
+        ctx.beginPath();
+        ctx.moveTo(xPos, barY - 4);
+        ctx.lineTo(xPos, barY);
+        ctx.strokeStyle = '#f72585';
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+        
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
         ctx.fillStyle = '#f72585';
-        ctx.fillText(state.currentTask.part, xPos, barY - 10);
-        ctx.beginPath(); ctx.moveTo(xPos, barY - 5); ctx.lineTo(xPos, barY);
-        ctx.strokeStyle = '#f72585'; ctx.lineWidth = 2; ctx.stroke();
+        ctx.font = '900 18px "Nunito", sans-serif';
+        ctx.fillText(state.currentTask.part, xPos, barY - 6);
     }
-}
-
-function typeWriterHTML(html, elementId, speed, callback) {
-    const el = document.getElementById(elementId);
-    el.innerHTML = ""; el.classList.add('typing-cursor');
-    let i = 0;
-    function type() {
-        if (i >= html.length) { el.classList.remove('typing-cursor'); if(callback) callback(); return; }
-        const char = html.charAt(i);
-        if (char === '<') {
-            let tag = '';
-            while (html.charAt(i) !== '>' && i < html.length) { tag += html.charAt(i); i++; }
-            tag += '>'; i++; el.innerHTML += tag; type();
-        } else { el.innerHTML += char; i++; state.timeouts.push(setTimeout(type, speed)); }
-    }
-    type();
 }
 
 function animateTaskIntro() {
@@ -526,17 +827,22 @@ function animateTaskIntro() {
     tutEl.classList.remove('visible');
     startBtn.style.display = 'none';
     if (state.animationId) cancelAnimationFrame(state.animationId);
-    clearTimeouts();
+    
+    const statementEl = document.getElementById('taskStatement');
+    statementEl.innerHTML = state.currentTask.text;
+    statementEl.style.opacity = 0;
+    setTimeout(() => { statementEl.style.opacity = 1; }, 100);
     
     let progress = 0;
     function step() {
-        progress += 0.015;
+        progress += 0.03;
         if (progress >= 1) {
             progress = 1;
             drawFrame(progress);
-            typeWriterHTML(state.currentTask.text, 'taskStatement', 25, () => {
-                startBtn.style.display = 'inline-block';
-            });
+            startBtn.style.display = 'inline-block';
+            if (state.tutorialCompletedOnce) {
+                document.getElementById('tutToggleBtn').style.display = 'inline-block';
+            }
         } else {
             drawFrame(progress);
             state.animationId = requestAnimationFrame(step);
@@ -564,54 +870,199 @@ function renderTask() {
     document.getElementById('nextBtn').style.display = 'none';
     setFeedback("");
     
-    document.getElementById('taskStatement').innerHTML = "";
     animateTaskIntro();
 }
 
-// ЛОГИКА ОБУЧЕНИЯ
+// Запуск решения
 document.getElementById('startBtn').addEventListener('click', function() {
     this.style.display = 'none';
-    startTutorial();
+    document.getElementById('tutToggleBtn').style.display = 'none';
+    
+    if (!state.tutorialCompletedOnce) {
+        startInteractiveTutorial();
+    } else {
+        openWorkspace();
+    }
 });
 
-document.getElementById('tutNextBtn').addEventListener('click', nextTutorialStep);
-
-function startTutorial() {
-    state.tutorialStep = 0;
-    document.getElementById('tutorialSection').classList.add('visible');
-    updateTutorialView();
+function openTutorialManually() {
+    document.getElementById('startBtn').style.display = 'none';
+    document.getElementById('tutToggleBtn').style.display = 'none';
+    document.getElementById('inputSection').classList.remove('visible');
+    document.getElementById('checkBtn').style.display = 'none';
+    startInteractiveTutorial();
 }
 
-function updateTutorialView() {
-    const hint = document.getElementById('tutHint');
-    const eq = document.getElementById('tutEquation');
-    const t = state.currentTask;
+// ─── ЛОГИКА РАЗМИНКИ ───
+function startInteractiveTutorial() {
+    const tutSec = document.getElementById('tutorialSection');
+    tutSec.classList.add('visible');
+
+    document.getElementById('tutCardStep1').style.display = 'flex';
+    document.getElementById('tutCardStep2').style.display = 'none';
     
-    if (state.tutorialStep === 0) {
-        hint.textContent = "Вспомни простой пример:";
-        eq.innerHTML = `2 · <span class='var-x'>X</span> = 10`;
-    } else if (state.tutorialStep === 1) {
-        hint.textContent = "Чтобы найти X, мы делим:";
-        eq.innerHTML = `<span class='var-x'>X</span> = 10 : 2`;
-    } else if (state.tutorialStep === 2) {
-        hint.textContent = "Теперь посмотри на нашу задачу:";
-        // Используем цветные классы для подсветки чисел из условия
-        eq.innerHTML = `<span class='var-perc'>${t.percentVal}%</span> · <span class='var-x'>X</span> = <span class='var-num'>${t.part}</span>`;
-    } else if (state.tutorialStep === 3) {
-        hint.textContent = "Значит, чтобы найти Целое:";
-        eq.innerHTML = `<span class='var-x'>X</span> = <span class='var-num'>${t.part}</span> : <span class='var-perc'>${t.percentVal}%</span>`;
+    document.getElementById('tutOpSelect').value = '?';
+    document.getElementById('tutAnsInput').value = '';
+    document.getElementById('tutAnsInput').classList.remove('correct', 'wrong');
+    document.getElementById('tutFb1').textContent = '';
+    document.getElementById('tutFb2').textContent = '';
+
+    initTutorialStep2();
+}
+
+function checkTutorialStep1() {
+    const op = document.getElementById('tutOpSelect').value;
+    const ans = parseInt(document.getElementById('tutAnsInput').value);
+    const fb = document.getElementById('tutFb1');
+    const input = document.getElementById('tutAnsInput');
+
+    if (op === ':' && ans === 5) {
+        input.classList.remove('wrong'); input.classList.add('correct');
+        fb.textContent = 'Верно! Чтобы найти неизвестный множитель, делим результат!';
+        fb.style.color = 'var(--success)';
+
+        setTimeout(() => {
+            document.getElementById('tutCardStep1').style.display = 'none';
+            document.getElementById('tutCardStep2').style.display = 'flex';
+        }, 800);
+    } else {
+        input.classList.add('wrong');
+        fb.textContent = 'Вспомни: чтобы найти X, делим 10 на 2!';
+        fb.style.color = 'var(--danger)';
     }
 }
 
-function nextTutorialStep() {
-    state.tutorialStep++;
-    if (state.tutorialStep > 3) {
-        document.getElementById('tutorialSection').classList.remove('visible');
-        document.getElementById('inputSection').classList.add('visible');
-        document.getElementById('checkBtn').style.display = 'inline-block';
-    } else {
-        updateTutorialView();
+// ─── КОНСТРУКТОР УРАВНЕНИЯ ИЗ КАРТОЧЕК ───
+function initTutorialStep2() {
+    const t = state.currentTask;
+    builderState.slots = [null, null, null];
+    builderState.bank = [
+        { id: 'perc', label: `${t.percentVal}%`, cls: 'chip-perc' },
+        { id: 'x', label: 'X', cls: 'chip-x' },
+        { id: 'part', label: `${t.part}`, cls: 'chip-part' }
+    ];
+    renderBuilderUI();
+}
+
+function renderBuilderUI() {
+    for (let i = 0; i < 3; i++) {
+        const slotEl = document.getElementById(`slot${i}`);
+        slotEl.className = 'builder-slot';
+        const item = builderState.slots[i];
+        if (item) {
+            slotEl.textContent = item.label;
+            slotEl.classList.add('filled', item.cls);
+        } else {
+            slotEl.textContent = '?';
+        }
     }
+
+    const bankEl = document.getElementById('chipsBank');
+    bankEl.innerHTML = '';
+    builderState.bank.forEach(chip => {
+        const btn = document.createElement('button');
+        btn.className = `chip-btn ${chip.cls}`;
+        btn.textContent = chip.label;
+        btn.onclick = () => addChipToSlot(chip);
+        bankEl.appendChild(btn);
+    });
+}
+
+function addChipToSlot(chip) {
+    const emptyIdx = builderState.slots.indexOf(null);
+    if (emptyIdx === -1) return;
+
+    builderState.slots[emptyIdx] = chip;
+    builderState.bank = builderState.bank.filter(c => c.id !== chip.id);
+    renderBuilderUI();
+    document.getElementById('tutFb2').textContent = '';
+}
+
+function removeChipFromSlot(idx) {
+    const chip = builderState.slots[idx];
+    if (!chip) return;
+
+    builderState.slots[idx] = null;
+    builderState.bank.push(chip);
+    renderBuilderUI();
+    document.getElementById('tutFb2').textContent = '';
+}
+
+function resetBuilderSlots() {
+    initTutorialStep2();
+    document.getElementById('tutFb2').textContent = '';
+}
+
+function checkTutorialEquation() {
+    const fb = document.getElementById('tutFb2');
+    const s = builderState.slots;
+    const t = state.currentTask;
+
+    if (s.includes(null)) {
+        fb.textContent = 'Заполни все три слота уравнения карточками!';
+        fb.style.color = 'var(--danger)';
+        return;
+    }
+
+    const s0 = s[0].id;
+    const s1 = s[1].id;
+    const s2 = s[2].id;
+
+    const isFactorsCorrect = (s0 === 'perc' && s1 === 'x') || (s0 === 'x' && s1 === 'perc');
+    const isResultCorrect = (s2 === 'part');
+
+    if (isFactorsCorrect && isResultCorrect) {
+        for (let i = 0; i < 3; i++) {
+            document.getElementById(`slot${i}`).classList.add('correct-slot');
+        }
+        fb.textContent = `В яблочко! ${t.percentVal}% · X = ${t.part}. Значит целое X = ${t.part} : ${t.percentVal}%! 🚀`;
+        fb.style.color = 'var(--success)';
+        state.tutorialCompletedOnce = true;
+
+        setTimeout(() => {
+            document.getElementById('tutorialSection').classList.remove('visible');
+            openWorkspace();
+        }, 1100);
+    } else {
+        for (let i = 0; i < 3; i++) {
+            document.getElementById(`slot${i}`).classList.add('wrong-slot');
+        }
+        setTimeout(() => {
+            for (let i = 0; i < 3; i++) {
+                document.getElementById(`slot${i}`).classList.remove('wrong-slot');
+            }
+        }, 400);
+
+        if (s2 === 'x') {
+            fb.textContent = 'Ловушка! X — это всё число (целое). Процент умножается на X, а в итоге получается часть!';
+        } else {
+            fb.textContent = `Не совсем. Вспомни: (Доля) · (Всё число X) = (Известная часть ${t.part}).`;
+        }
+        fb.style.color = 'var(--danger)';
+    }
+}
+
+// Обновление постоянного опорного уравнения в рабочей области
+function updateEquationAnchor() {
+    const t = state.currentTask;
+    document.getElementById('anchorPerc').textContent = `${t.percentVal}%`;
+    document.getElementById('anchorPart').textContent = t.part;
+    document.getElementById('anchorDerivedPart').textContent = t.part;
+    document.getElementById('anchorDerivedPerc').textContent = `${t.percentVal}%`;
+}
+
+function openWorkspace() {
+    updateEquationAnchor();
+    const inputsEl = document.getElementById('inputSection');
+    inputsEl.classList.add('visible');
+    document.getElementById('checkBtn').style.display = 'inline-block';
+    if (state.tutorialCompletedOnce) {
+        document.getElementById('tutToggleBtn').style.display = 'inline-block';
+    }
+    setTimeout(() => {
+        window.scrollBy({ top: 320, behavior: 'smooth' });
+        document.getElementById('divPartNum').focus();
+    }, 100);
 }
 
 function createInputs(containerId, count) {
@@ -633,7 +1084,7 @@ function createInputs(containerId, count) {
 }
 
 function clearAllInputs() {
-    const inputs = document.querySelectorAll('input');
+    const inputs = document.querySelectorAll('#inputSection input');
     inputs.forEach(i => {
         i.value = ''; i.classList.remove('correct', 'wrong', 'live-cancelled'); i.style.backgroundColor = '';
     });
@@ -675,9 +1126,10 @@ document.getElementById('nextBtn').addEventListener('click', nextTask);
 function checkField(id, expected) {
     const el = document.getElementById(id);
     const val = parseFloat(el.value);
-    if (isNaN(val)) { el.classList.add('wrong'); return false; }
+    el.classList.remove('correct', 'wrong');
+    if (isNaN(val)) { void el.offsetWidth; el.classList.add('wrong'); return false; }
     if (val === expected) { el.classList.add('correct'); return true; } 
-    else { el.classList.add('wrong'); return false; }
+    else { void el.offsetWidth; el.classList.add('wrong'); return false; }
 }
 
 function checkAnswer() {
@@ -699,16 +1151,17 @@ function checkAnswer() {
     const userDenInputs = document.querySelectorAll('#denFactorsInputs .factor-input');
     const userDenVals = Array.from(userDenInputs).map(i => parseFloat(i.value) || 1).sort((a,b)=>a-b);
     
-    if (JSON.stringify(userNumVals) === JSON.stringify(t.numFactors)) {
-        userNumInputs.forEach(i => i.classList.add('correct'));
-    } else {
-        userNumInputs.forEach(i => i.classList.add('wrong')); allCorrect = false;
+    userNumInputs.forEach(i => i.classList.remove('wrong'));
+    userDenInputs.forEach(i => i.classList.remove('wrong'));
+
+    if (JSON.stringify(userNumVals) !== JSON.stringify(t.numFactors)) {
+        userNumInputs.forEach(i => { void i.offsetWidth; i.classList.add('wrong'); });
+        allCorrect = false;
     }
     
-    if (JSON.stringify(userDenVals) === JSON.stringify(t.denFactors)) {
-        userDenInputs.forEach(i => i.classList.add('correct'));
-    } else {
-        userDenInputs.forEach(i => i.classList.add('wrong')); allCorrect = false;
+    if (JSON.stringify(userDenVals) !== JSON.stringify(t.denFactors)) {
+        userDenInputs.forEach(i => { void i.offsetWidth; i.classList.add('wrong'); });
+        allCorrect = false;
     }
     
     if (!checkField('finalNum', t.finalNum)) allCorrect = false;
@@ -716,11 +1169,17 @@ function checkAnswer() {
     if (!checkField('finalResultInt', t.whole)) allCorrect = false;
 
     if (allCorrect) {
-        setFeedback("Верно! Алгоритм работает! 🌟", "success");
+        if (window.RewardSystem) window.RewardSystem.resetErrors();
+
+        setFeedback("Верно! Алгоритм работает отлично! 🌟", "success");
         state.score++; state.tasksCompletedInLevel++;
         document.getElementById('score').textContent = state.score;
         document.getElementById('checkBtn').style.display = 'none';
         
+        if (window.RewardSystem && state.tasksCompletedInLevel >= state.tasksToAdvance) {
+            setTimeout(() => window.RewardSystem.showWin(`Уровень ${state.level} пройден!`, "number_by"), 1000);
+        }
+
         if (state.tasksCompletedInLevel >= state.tasksToAdvance) {
             document.getElementById('nextBtn').textContent = state.level < 5 ? "Следующий уровень! 🆙" : "Получить сертификат! 🏆";
         } else {
@@ -728,6 +1187,8 @@ function checkAnswer() {
         }
         document.getElementById('nextBtn').style.display = 'inline-block';
     } else {
+        if (window.RewardSystem) window.RewardSystem.registerError("number_by");
+
         state.errors++;
         document.getElementById('errors').textContent = state.errors;
         
@@ -735,9 +1196,9 @@ function checkAnswer() {
         if (divPNum !== t.percentVal) {
              setFeedback("В делении вторая дробь — это процент!", "error");
         } else if (parseFloat(document.getElementById('multPercNum').value) !== 100) {
-             setFeedback("При переходе к умножению дробь переворачивается!", "error");
+             setFeedback("При переходе к умножению дробь переворачивается (100 вверху)!", "error");
         } else {
-             setFeedback("Ошибка. Проверь порядок действий.", "error");
+             setFeedback("Есть ошибки в красных полях. Проверь вычисления.", "error");
         }
     }
 }
@@ -751,6 +1212,7 @@ function nextTask() {
         state.level++; state.tasksCompletedInLevel = 0;
     }
     generateTask();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function setFeedback(msg, type) {
@@ -764,6 +1226,10 @@ function showVictory() {
     document.getElementById('finalScore').textContent = state.score;
     document.getElementById('finalErrors').textContent = state.errors;
     startConfetti();
+
+    if (window.RewardSystem) {
+        setTimeout(() => window.RewardSystem.showWin("Мастер Целого! Сертификат получен", "number_by"), 1500);
+    }
 }
 
 function startConfetti() {
@@ -795,5 +1261,4 @@ function startConfetti() {
 generateTask();
 </script>
 </body>
-
 </html>
