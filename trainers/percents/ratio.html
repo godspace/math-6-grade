@@ -1,15 +1,51 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- ─── SEO-БЛОК ─── -->
+    <title>Тренажёр: Нахождение процентного отношения двух чисел | Задачи 6 класс</title>
+    <meta name="description" content="Интерактивный онлайн тренажёр по математике для 6 класса. Учимся находить процентное отношение чисел: сколько процентов составляет одно число от другого, задачи на доли и изменение величин.">
+    <meta name="keywords" content="нахождение процентного отношения двух чисел, процентное отношение, сколько процентов составляет одно число от другого, задачи на проценты 6 класс, отношение в процентах тренажер, математика 6 класс проценты">
+    <meta name="author" content="Козлов Сергей Владимирович">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://godspace.github.io/math-6-grade/trainers/percents/ratio.html">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Мастер Долей: Процентное отношение двух чисел (6 класс)">
+    <meta property="og:description" content="Пошаговая тренировка: составь отношение часть/целое, умножь на 100%, сократи дробь и получи процент с автопроверкой!">
+    <meta property="og:url" content="https://godspace.github.io/math-6-grade/trainers/percents/ratio.html">
+    <meta property="og:site_name" content="Математика 6 класс">
+
+    <!-- JSON-LD -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "LearningResource",
+        "name": "Тренажёр: Нахождение процентного отношения двух чисел",
+        "description": "Практика решения задач на нахождение процентного отношения двух чисел: базовые доли, остаток и изменение величин.",
+        "educationalLevel": "6 класс",
+        "learningResourceType": "Интерактивный тренажёр",
+        "inLanguage": "ru",
+        "isAccessibleForFree": true,
+        "teaches": ["Процентное отношение двух чисел", "Отношение части к целому", "Умножение дроби на 100%"],
+        "url": "https://godspace.github.io/math-6-grade/trainers/percents/ratio.html"
+    }
+    </script>
+    <!-- ─── КОНЕЦ SEO-БЛОКА ─── -->
+
     <link rel="icon" href="/math-6-grade/favicon.ico" sizes="any">
     <link rel="icon" type="image/png" sizes="16x16" href="/math-6-grade/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/math-6-grade/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="48x48" href="/math-6-grade/favicon-48x48.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/math-6-grade/apple-touch-icon.png">
     <link rel="manifest" href="/math-6-grade/site.webmanifest">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мастер Долей: Блиц (5 заданий)</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="../../assets/analytics.js" defer></script>
+    
     <style>
         :root {
             --primary: #4361ee;
@@ -18,11 +54,12 @@
             --danger: #e71d36;
             --percent-color: #f72585;
             --bg-gradient: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
-            --card-bg: rgba(255, 255, 255, 0.95);
+            --card-bg: rgba(255, 255, 255, 0.98);
         }
 
+        * { box-sizing: border-box; font-family: 'Nunito', sans-serif; }
+
         body {
-            font-family: 'Segoe UI', 'Roboto', sans-serif;
             background: var(--bg-gradient);
             min-height: 100vh;
             margin: 0;
@@ -39,7 +76,7 @@
             box-shadow: 0 20px 60px rgba(0,0,0,0.15);
             width: 100%;
             max-width: 1100px;
-            padding: 40px;
+            padding: 35px;
             position: relative;
             overflow: hidden;
             transition: all 0.3s ease;
@@ -51,16 +88,18 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
         .level-badges { display: flex; gap: 10px; }
         .lvl-badge {
-            width: 40px; height: 40px; border-radius: 50%; background: #ddd;
+            width: 38px; height: 38px; border-radius: 50%; background: #ddd;
             display: flex; align-items: center; justify-content: center;
-            font-weight: bold; color: #fff; font-size: 16px; transition: all 0.3s;
+            font-weight: 800; color: #fff; font-size: 15px; transition: all 0.3s;
         }
-        .lvl-badge.active { background: var(--primary); transform: scale(1.15); box-shadow: 0 0 15px var(--primary); }
+        .lvl-badge.active { background: var(--primary); transform: scale(1.15); box-shadow: 0 0 12px var(--primary); }
         .lvl-badge.completed { background: var(--success); }
 
         .stats-box {
@@ -71,59 +110,135 @@
         h1 { margin: 0; color: #2d3436; font-size: 1.8rem; }
         .subtitle { color: #636e72; margin-top: 5px; }
 
-        /* --- РАБОЧАЯ ОБЛАСТЬ --- */
+        /* ИНСТРУКЦИЯ ДЛЯ УЧЕНИКА */
+        .kids-guide {
+            display: flex; gap: 15px; margin-bottom: 20px; width: 100%; justify-content: center; flex-wrap: wrap;
+        }
+        .guide-step {
+            background: #f8faff; border: 2px dashed #cbd5e1;
+            border-radius: 14px; padding: 14px 18px; display: flex; align-items: center; gap: 12px;
+            max-width: 330px; font-size: 0.95rem; color: #475569; box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            transition: transform 0.2s;
+        }
+        .guide-step:hover { transform: translateY(-2px); }
+        .guide-step.step-1 { border-color: var(--primary); }
+        .guide-step.step-2 { border-color: var(--warning); }
+        .guide-step.step-3 { border-color: var(--percent-color); }
+        .step-num {
+            width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-weight: 900; color: white; flex-shrink: 0; font-size: 1rem;
+        }
+        .step-1 .step-num { background: var(--primary); }
+        .step-2 .step-num { background: var(--warning); }
+        .step-3 .step-num { background: var(--percent-color); }
+
+        /* Рабочая область */
         .work-area {
-            display: flex; flex-direction: column; align-items: center; gap: 25px;
+            display: flex; flex-direction: column; align-items: center; gap: 20px;
         }
 
         .fade-element {
-            opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease;
+            opacity: 0; transform: translateY(15px); transition: opacity 0.5s ease, transform 0.5s ease;
             pointer-events: none; display: none;
         }
         .fade-element.visible { opacity: 1; transform: translateY(0); pointer-events: auto; display: flex; }
-        
         #inputSection.visible { display: flex; }
 
+        /* Текст задачи цельным блоком */
+        .task-statement.fade-element.visible,
         .task-statement {
-            background: #f8f9fa; padding: 25px; border-radius: 16px;
-            text-align: center; font-size: 1.4rem; line-height: 1.6;
-            border-left: 5px solid var(--primary); width: 90%; min-height: 80px;
-            display: flex; align-items: center; justify-content: center;
+            background: #ffffff;
+            border: 2px solid #e2e8f0;
+            border-left: 6px solid var(--primary);
+            border-radius: 18px;
+            padding: 22px 30px;
+            text-align: center;
+            font-size: 1.35rem;
+            line-height: 1.7;
+            width: 100%;
+            max-width: 860px;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.03);
+            display: block !important;
         }
-        
-        .typing-cursor::after { content: '|'; animation: blink 1s infinite; color: var(--primary); }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-        
-        /* Визуализация */
-        .visual-container {
-            width: 80%; background: #fff; padding: 15px; border-radius: 16px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: flex; flex-direction: column; align-items: center;
-        }
-        canvas#visualCanvas { width: 100%; height: 60px; border-radius: 8px; background: #f0f0f0; }
 
-        .highlight-percent { color: var(--percent-color); font-weight: bold; }
-        .highlight-number { color: var(--primary); font-weight: bold; }
-        .highlight-whole { color: #333; font-weight: bold; border-bottom: 2px solid #ccc; }
+        /* Визуализация на холсте */
+        .visual-container {
+            width: 100%;
+            max-width: 860px;
+            background: #ffffff;
+            padding: 14px 20px;
+            border-radius: 18px;
+            border: 2px solid #e2e8f0;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.03);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        canvas#visualCanvas {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 700 / 100;
+            border-radius: 10px;
+            display: block;
+        }
+
+        /* Бейджи внутри текста */
+        .highlight-percent {
+            color: var(--percent-color);
+            font-weight: 800;
+            background: rgba(247, 37, 133, 0.12);
+            padding: 2px 10px;
+            border-radius: 8px;
+            display: inline-block;
+            vertical-align: baseline;
+            margin: 0 2px;
+            white-space: nowrap;
+        }
+        .highlight-number {
+            color: var(--primary);
+            font-weight: 800;
+            background: rgba(67, 97, 238, 0.12);
+            padding: 2px 10px;
+            border-radius: 8px;
+            display: inline-block;
+            vertical-align: baseline;
+            margin: 0 2px;
+            white-space: nowrap;
+        }
+        .highlight-whole {
+            color: #1e293b;
+            font-weight: 800;
+            background: rgba(148, 163, 184, 0.18);
+            padding: 2px 10px;
+            border-radius: 8px;
+            display: inline-block;
+            vertical-align: baseline;
+            margin: 0 2px;
+            white-space: nowrap;
+        }
 
         .fraction-row {
             display: flex; align-items: center; gap: 15px; font-size: 2rem;
-            font-weight: bold; flex-wrap: wrap; justify-content: center; margin-top: 10px;
+            font-weight: bold; flex-wrap: wrap; justify-content: center; margin-top: 10px; width: 100%;
         }
-        .fraction { display: flex; flex-direction: column; align-items: center; width: 80px; }
+        .fraction { display: flex; flex-direction: column; align-items: center; width: 85px; }
         .frac-line { width: 100%; height: 4px; background: #333; border-radius: 2px; }
-        .operator { font-size: 2.5rem; color: var(--primary); margin: 0 5px; }
+        .operator { font-size: 2.2rem; color: var(--primary); margin: 0 5px; }
         
         .step-label {
-            width: 100%; text-align: center; font-size: 0.9rem; color: #777; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;
+            width: 100%; text-align: center; font-size: 0.95rem; color: #64748b;
+            margin-bottom: 5px; text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px;
         }
 
         .factor-input {
             width: 70px; height: 60px; font-size: 1.5rem; text-align: center;
-            border: 2px solid #e0e0e0; border-radius: 12px; outline: none;
+            border: 2px solid #cbd5e1; border-radius: 12px; outline: none;
             transition: all 0.2s; font-weight: bold; color: #333; background: #fff;
             -moz-appearance: textfield;
+            cursor: pointer;
         }
-        .factor-input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.2); }
+        .factor-input::-webkit-outer-spin-button, .factor-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .factor-input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.15); cursor: text; }
         .factor-input.live-cancelled { text-decoration: line-through; color: #aaa; border-color: transparent; opacity: 0.8; transform: scale(0.95); }
         
         .pair-color-0 { background-color: #f2f2f2; }
@@ -132,55 +247,61 @@
         .pair-color-3 { background-color: #e8f5e9; }
         .pair-color-4 { background-color: #fff3e0; }
 
-        .factor-input.correct { border-color: var(--success) !important; color: var(--success) !important; background: #e8f5e9 !important; }
-        .factor-input.wrong { border-color: var(--danger) !important; background: #ffebeb !important; animation: shake 0.4s; }
+        .correct { border-color: var(--success) !important; color: var(--success) !important; background: #f0fdf4 !important; pointer-events: none; }
+        .wrong { border-color: var(--danger) !important; background: #fff0f0 !important; animation: shake 0.4s; }
 
         .factorization-area {
-            background: #fff; padding: 15px; border-radius: 16px; border: 2px dashed #ccc;
+            background: #fff; padding: 15px 20px; border-radius: 16px; border: 2px dashed #cbd5e1;
             display: flex; flex-direction: column; align-items: center; gap: 10px;
         }
         .factors-container { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: center; min-height: 60px; }
-        .big-fraction-line { width: 100%; height: 4px; background: linear-gradient(90deg, #ccc, #999, #ccc); border-radius: 2px; }
+        .big-fraction-line { width: 100%; height: 4px; background: linear-gradient(90deg, #cbd5e1, #94a3b8, #cbd5e1); border-radius: 2px; }
 
         .final-result-box {
-            display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 10px;
-            background: linear-gradient(to right, #f8f9fa, #fff); padding: 15px 30px;
+            display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 10px;
+            background: linear-gradient(to right, #f8faff, #fff); padding: 15px 30px;
             border-radius: 16px; border: 2px solid var(--percent-color);
         }
         .final-input {
             width: 120px; height: 60px; font-size: 1.8rem; text-align: center;
-            border: 2px solid #ccc; border-radius: 12px; font-weight: bold; color: var(--percent-color);
+            border: 2px solid #cbd5e1; border-radius: 12px; font-weight: bold; color: var(--percent-color); outline: none;
+            cursor: pointer;
         }
-        .final-input.correct { border-color: var(--success); background-color: #e8f5e9; }
-        .final-input.wrong { border-color: var(--danger); background-color: #ffebee; animation: shake 0.4s; }
+        .final-input:focus { border-color: var(--percent-color); box-shadow: 0 0 0 4px rgba(247, 37, 133, 0.15); cursor: text; }
 
         .btn {
-            background: var(--primary); color: white; border: none; padding: 15px 40px;
-            font-size: 1.2rem; border-radius: 50px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
-            font-weight: bold; box-shadow: 0 10px 20px rgba(67, 97, 238, 0.3); margin: 0 10px;
+            background: var(--primary); color: white; border: none; padding: 14px 36px;
+            font-size: 1.1rem; border-radius: 50px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: 800; box-shadow: 0 8px 15px rgba(67, 97, 238, 0.25); margin: 0 10px;
         }
-        .btn:hover { transform: translateY(-3px); }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 12px 20px rgba(67, 97, 238, 0.35); }
+        .btn:active { transform: translateY(0); }
+
         .btn-start { background: linear-gradient(45deg, #ff9f1c, #f39c12); display: none; }
         .btn-check { background: linear-gradient(45deg, var(--success), #20bf6b); display: none; }
         .btn-next { background: linear-gradient(45deg, var(--primary), #4834d4); display: none; }
 
-        .feedback { height: 30px; font-weight: bold; text-align: center; opacity: 0; transition: opacity 0.3s; }
+        .feedback { min-height: 28px; font-weight: bold; text-align: center; font-size: 1.1rem; transition: opacity 0.2s; }
+        
         .victory-modal {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(255,255,255,0.98); z-index: 100; display: none;
             flex-direction: column; justify-content: center; align-items: center; text-align: center; animation: fadeIn 0.5s;
         }
-        .trophy { font-size: 100px; margin-bottom: 20px; animation: bounce 2s infinite; }
+        .trophy { font-size: 90px; margin-bottom: 15px; animation: bounce 2s infinite; }
         
         @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
         @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
-        @keyframes bounce { 0%, 100% {transform: translateY(0);} 50% {transform: translateY(-20px);} }
+        @keyframes bounce { 0%, 100% {transform: translateY(0);} 50% {transform: translateY(-15px);} }
         
         canvas { position: absolute; top: 0; left: 0; pointer-events: none; }
         canvas#visualCanvas { position: relative; pointer-events: auto; }
 
+        @media (max-width: 768px) {
+            .fraction-row { flex-direction: column; gap: 15px; }
+            .operator { transform: rotate(90deg); margin: 0; }
+        }
     </style>
-<script src="../../assets/analytics.js"></script>
 </head>
 <body>
 
@@ -202,10 +323,26 @@
         </div>
     </div>
 
+    <!-- Инструкция -->
+    <div class="kids-guide">
+        <div class="guide-step step-1">
+            <div class="step-num">1</div>
+            <div>Составь дробь: <b>Часть</b> запиши в числитель, а <b>Целое (всего)</b> — в знаменатель.</div>
+        </div>
+        <div class="guide-step step-2">
+            <div class="step-num">2</div>
+            <div>Умножь на <b>100%</b> и разложи на простые множители для сокращения.</div>
+        </div>
+        <div class="guide-step step-3">
+            <div class="step-num">3</div>
+            <div>Сократи одинаковые множители и запиши <b>итоговый процент (%)</b>.</div>
+        </div>
+    </div>
+
     <div class="work-area" id="workArea">
         
         <div class="visual-container">
-            <canvas id="visualCanvas" width="600" height="80"></canvas>
+            <canvas id="visualCanvas" width="700" height="100"></canvas>
         </div>
 
         <div class="task-statement fade-element visible" id="taskStatement"></div>
@@ -217,9 +354,9 @@
             <div class="step-label">Запиши дробь (Часть / Целое) и умножь на 100%</div>
             <div class="fraction-row">
                 <div class="fraction">
-                    <input type="number" class="factor-input" id="partNum" placeholder="?">
+                    <input type="number" class="factor-input" id="partNum" placeholder="Часть">
                     <div class="frac-line"></div>
-                    <input type="number" class="factor-input" id="wholeDen" placeholder="?">
+                    <input type="number" class="factor-input" id="wholeDen" placeholder="Целое">
                 </div>
                 
                 <div class="operator">×</div>
@@ -239,35 +376,34 @@
                 </div>
             </div>
             
-            <div style="width: 100%; border-bottom: 2px dashed #eee; margin: 20px 0;"></div>
+            <div style="width: 100%; border-bottom: 2px dashed #cbd5e1; margin: 20px 0;"></div>
 
             <div class="final-result-box">
-                <div class="answer-label" style="font-size: 1.1rem; color: #333;">Итоговый процент:</div>
-                <div style="display:flex; align-items:center; gap:5px;">
+                <div class="step-label" style="color: #334155;">Итоговый процент:</div>
+                <div style="display:flex; align-items:center; gap:8px;">
                     <input type="number" class="final-input" id="finalResultInt" placeholder="?">
-                    <span style="font-size: 2rem; color: var(--percent-color); font-weight:bold;">%</span>
+                    <span style="font-size: 2rem; color: var(--percent-color); font-weight:900;">%</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <div style="text-align: center; margin-top: 30px;">
+    <div style="text-align: center; margin-top: 25px;">
         <div class="feedback" id="feedbackMsg"></div>
         <br>
-        <button class="btn btn-check" id="checkBtn">Проверить</button>
+        <button class="btn btn-check" id="checkBtn">Проверить решение</button>
         <button class="btn btn-next" id="nextBtn">Следующее задание ➡</button>
     </div>
 
     <div class="victory-modal" id="victoryScreen">
         <canvas id="confettiCanvas"></canvas>
         <div class="trophy">🏆</div>
-        <div class="cert-title">СЕРТИФИКАТ МАСТЕРА</div>
+        <div class="cert-title" style="font-size: 2.2rem; color: var(--primary); font-weight: 900; margin-bottom: 10px;">СЕРТИФИКАТ МАСТЕРА</div>
         <h2>Все 5 заданий выполнены!</h2>
-        <div class="cert-stats">
-            <div>Верных решений: <span id="finalScore" style="color:var(--success)">0</span></div>
-            <div>Ошибок: <span id="finalErrors" style="color:var(--danger)">0</span></div>
+        <div style="margin: 15px 0; font-size: 1.2rem;">
+            <div>Верных решений: <span id="finalScore" style="color:var(--success); font-weight: 900;">0</span></div>
+            <div>Ошибок: <span id="finalErrors" style="color:var(--danger); font-weight: 900;">0</span></div>
         </div>
-        <br>
         <button class="btn" onclick="location.reload()">Начать заново</button>
     </div>
 </div>
@@ -278,13 +414,13 @@ const LEVELS = {
     1: { name: "Задание 1", desc: "Простые доли (из 25, 50)" },
     2: { name: "Задание 2", desc: "Крупные числа (из 200, 500)" },
     3: { name: "Задание 3", desc: "Внимание к деталям (остаток)" },
-    4: { name: "Задание 4", desc: "Изменение цены (рост)" },
+    4: { name: "Задание 4", desc: "Изменение величины (рост)" },
     5: { name: "Задание 5", desc: "Финальное испытание" }
 };
 
-// ТИПЫ ЗАДАЧ (Templates)
+// ТИПЫ ЗАДАЧ
 const TEMPLATES_DIRECT = [
-    "Из <span class='highlight-whole'>{whole}</span> выстрелов стрелок попал в мишень <span class='highlight-number'>{target}</span> раз. Каков процент его попаданий?",
+    "Из <span class='highlight-whole'>{whole}</span> выстрелов стрелок попал в мишень <span class='highlight-number'>{target}</span> раз. Какой процент его попаданий?",
     "В тесте <span class='highlight-whole'>{whole}</span> вопросов. Ты ответил верно на <span class='highlight-number'>{target}</span>. Какой твой результат в процентах?",
     "В классе <span class='highlight-whole'>{whole}</span> учеников, из них <span class='highlight-number'>{target}</span> — девочки. Какой процент девочек в классе?",
     "Из <span class='highlight-whole'>{whole}</span> дней отпуска было <span class='highlight-number'>{target}</span> солнечных. Какой процент солнечных дней?"
@@ -293,7 +429,7 @@ const TEMPLATES_DIRECT = [
 const TEMPLATES_REMAINDER = [
     "В саду растёт <span class='highlight-whole'>{whole}</span> деревьев: <span class='highlight-number'>{given}</span> яблонь и остальные — груши. Какой процент составляют <b>груши</b>?",
     "Книга стоит <span class='highlight-whole'>{whole}</span> рублей. Ты заплатил <span class='highlight-number'>{given}</span> бонусами, а остальное деньгами. Какой процент ты заплатил деньгами?",
-    "На диске <span class='highlight-whole'>{whole}</span> Гб. Фильмы занимают <span class='highlight-number'>{given}</span> Гб, остальное свободно. Какой процент свободен?"
+    "На диске <span class='highlight-whole'>{whole}</span> Гб. Фильмы занимают <span class='highlight-number'>{given}</span> Гб, остальное свободно. Какой процент диска свободен?"
 ];
 
 const TEMPLATES_CHANGE = [
@@ -309,11 +445,9 @@ let state = {
     score: 0,
     errors: 0,
     currentTask: null,
-    animationId: null,
-    timeouts: []
+    animationId: null
 };
 
-function clearTimeouts() { state.timeouts.forEach(t => clearTimeout(t)); state.timeouts = []; }
 function getRandomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 function pickRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
@@ -327,15 +461,16 @@ function primeFactors(n) {
 }
 
 function generateTask() {
+    if (window.RewardSystem) window.RewardSystem.resetErrors();
+
     const lvl = state.level;
     let whole, part, text, targetPart;
     let percent = 0;
 
-    // Сложность по уровням
     let possibleDenominators = [];
     if (lvl === 1) possibleDenominators = [4, 5, 10, 20, 25, 50]; 
     else if (lvl === 2) possibleDenominators = [200, 300, 400, 500];
-    else possibleDenominators = [20, 40, 50, 80, 100]; // Для 3, 4, 5
+    else possibleDenominators = [20, 40, 50, 80, 100];
 
     whole = pickRandom(possibleDenominators);
     
@@ -348,7 +483,6 @@ function generateTask() {
         }
     }
 
-    // Выбор типа задачи
     if (lvl === 1 || lvl === 2) {
         text = pickRandom(TEMPLATES_DIRECT).replace('{whole}', whole).replace('{target}', targetPart);
         part = targetPart;
@@ -364,9 +498,8 @@ function generateTask() {
         part = targetPart; 
     }
     else {
-        // 5-й уровень: случайная сложная задача (3 или 4 тип)
         const type = Math.random() > 0.5 ? 'rem' : 'change';
-        if(type === 'rem') {
+        if (type === 'rem') {
             let given = whole - targetPart;
             text = pickRandom(TEMPLATES_REMAINDER).replace('{whole}', whole).replace('{given}', given);
             part = targetPart;
@@ -377,8 +510,10 @@ function generateTask() {
         }
     }
 
-    let numFactors = primeFactors(part).concat(primeFactors(100)); numFactors.sort((a,b) => a-b);
-    let denFactors = primeFactors(whole); denFactors.sort((a,b) => a-b);
+    let numFactors = primeFactors(part).concat(primeFactors(100)); 
+    numFactors.sort((a,b) => a-b);
+    let denFactors = primeFactors(whole); 
+    denFactors.sort((a,b) => a-b);
 
     state.currentTask = {
         text, whole, part, percentResult: percent,
@@ -408,58 +543,77 @@ function renderTask() {
     document.getElementById('nextBtn').style.display = 'none';
     setFeedback("");
     
-    document.getElementById('taskStatement').innerHTML = "";
     animateTaskIntro();
 }
 
+// ОТРИСОВКА ШКАЛЫ С ЗАЩИТОЙ ОТ ОБРЕЗАНИЙ
 function drawFrame(currentProgress) {
     const canvas = document.getElementById('visualCanvas');
+    if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    const w = canvas.width; const h = canvas.height;
+    const w = canvas.width;  // 700
+    const h = canvas.height; // 100
     ctx.clearRect(0, 0, w, h);
     
-    const padding = 20; const barH = 30; const barY = (h - barH) / 2; const drawW = w - padding * 2;
+    const padding = 45;
+    const barH = 24;
+    const barY = 38;
+    const drawW = w - padding * 2; // 610
     
-    // Целое
-    ctx.fillStyle = '#e0e0e0';
-    ctx.beginPath(); ctx.roundRect(padding, barY, drawW, barH, 5); ctx.fill();
+    // Фоновая полоса (Целое)
+    ctx.fillStyle = '#e2e8f0';
+    ctx.beginPath();
+    ctx.roundRect(padding, barY, drawW, barH, 12);
+    ctx.fill();
     
-    // Часть
+    // Заливка известной части
     const realRatio = state.currentTask.part / state.currentTask.whole;
     const animRatio = realRatio * currentProgress;
-    const fillW = drawW * animRatio;
+    const fillW = Math.max(0, Math.min(drawW, drawW * animRatio));
     
     if (fillW > 0) {
-        ctx.fillStyle = '#4361ee'; ctx.beginPath(); ctx.roundRect(padding, barY, fillW, barH, 5); ctx.fill();
+        const gradient = ctx.createLinearGradient(padding, 0, padding + fillW, 0);
+        gradient.addColorStop(0, '#4361ee');
+        gradient.addColorStop(1, '#6366f1');
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.roundRect(padding, barY, fillW, barH, 12);
+        ctx.fill();
     }
     
-    ctx.fillStyle = '#333'; ctx.font = 'bold 16px "Segoe UI"'; ctx.textAlign = 'center';
-    ctx.fillText(state.currentTask.whole + " (всего)", padding + drawW, barY + barH + 20);
+    // Метки снизу
+    ctx.font = 'bold 15px "Nunito", sans-serif';
+    ctx.textBaseline = 'top';
+    const textBottomY = barY + barH + 9;
     
-    if (currentProgress > 0.1) {
+    // 0 слева
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#64748b';
+    ctx.fillText("0", padding, textBottomY);
+    
+    // Целое справа
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#1e293b';
+    ctx.fillText(`${state.currentTask.whole} (всего)`, padding + drawW, textBottomY);
+    
+    // Верхняя метка над полосой
+    if (currentProgress > 0.05 && fillW > 0) {
         let xPos = padding + fillW;
-        if(xPos < padding + 20) xPos = padding + 20;
+        xPos = Math.max(padding + 25, Math.min(padding + drawW - 25, xPos));
+        
+        ctx.beginPath();
+        ctx.moveTo(xPos, barY - 4);
+        ctx.lineTo(xPos, barY);
+        ctx.strokeStyle = '#4361ee';
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+        
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
         ctx.fillStyle = '#4361ee';
-        ctx.fillText(`${state.currentTask.part} (?%)`, xPos, barY - 10);
-        ctx.beginPath(); ctx.moveTo(xPos, barY - 5); ctx.lineTo(xPos, barY);
-        ctx.strokeStyle = '#4361ee'; ctx.lineWidth = 2; ctx.stroke();
+        ctx.font = '900 18px "Nunito", sans-serif';
+        ctx.fillText(`${state.currentTask.part} (?%)`, xPos, barY - 6);
     }
-}
-
-function typeWriterHTML(html, elementId, speed, callback) {
-    const el = document.getElementById(elementId);
-    el.innerHTML = ""; el.classList.add('typing-cursor');
-    let i = 0;
-    function type() {
-        if (i >= html.length) { el.classList.remove('typing-cursor'); if(callback) callback(); return; }
-        const char = html.charAt(i);
-        if (char === '<') {
-            let tag = '';
-            while (html.charAt(i) !== '>' && i < html.length) { tag += html.charAt(i); i++; }
-            tag += '>'; i++; el.innerHTML += tag; type();
-        } else { el.innerHTML += char; i++; state.timeouts.push(setTimeout(type, speed)); }
-    }
-    type();
 }
 
 function animateTaskIntro() {
@@ -469,17 +623,19 @@ function animateTaskIntro() {
     inputsEl.classList.remove('visible');
     startBtn.style.display = 'none';
     if (state.animationId) cancelAnimationFrame(state.animationId);
-    clearTimeouts();
+    
+    const statementEl = document.getElementById('taskStatement');
+    statementEl.innerHTML = state.currentTask.text;
+    statementEl.style.opacity = 0;
+    setTimeout(() => { statementEl.style.opacity = 1; }, 100);
     
     let progress = 0;
     function step() {
-        progress += 0.02;
+        progress += 0.03;
         if (progress >= 1) {
             progress = 1;
             drawFrame(progress);
-            typeWriterHTML(state.currentTask.text, 'taskStatement', 25, () => {
-                startBtn.style.display = 'inline-block';
-            });
+            startBtn.style.display = 'inline-block';
         } else {
             drawFrame(progress);
             state.animationId = requestAnimationFrame(step);
@@ -492,6 +648,10 @@ document.getElementById('startBtn').addEventListener('click', function() {
     this.style.display = 'none';
     document.getElementById('inputSection').classList.add('visible');
     document.getElementById('checkBtn').style.display = 'inline-block';
+    setTimeout(() => {
+        window.scrollBy({ top: 300, behavior: 'smooth' });
+        document.getElementById('partNum').focus();
+    }, 100);
 });
 
 function createInputs(containerId, count) {
@@ -515,13 +675,12 @@ function createInputs(containerId, count) {
 function clearAllInputs() {
     const inputs = document.querySelectorAll('#workArea input');
     inputs.forEach(i => {
-        // Сброс значений (кроме 100 и 1, если они используются по умолчанию)
         if(i.id !== 'mult100Num' && i.id !== 'mult1Den') {
              i.value = ''; 
         }
-        i.classList.remove('correct', 'wrong', 'live-cancelled'); i.style.backgroundColor = '';
+        i.classList.remove('correct', 'wrong', 'live-cancelled'); 
+        i.style.backgroundColor = '';
     });
-    // Явно задаем 100 и 1 для удобства, но не блокируем
     document.getElementById('mult100Num').value = '100';
     document.getElementById('mult1Den').value = '1';
 }
@@ -556,14 +715,44 @@ function updateLiveCancellation() {
     });
 }
 
+// ─── СБРОС КРАСНОЙ ОБВОДКИ И ОЧИСТКА ВСЕХ ОШИБОК ПРИ ПЕРВОМ КЛИКЕ ───
+function clearWrongInputs(e) {
+    if (e.target && e.target.classList && e.target.classList.contains('wrong')) {
+        const wrongInputs = document.querySelectorAll('#inputSection input.wrong');
+        wrongInputs.forEach(inp => {
+            if (inp.id === 'mult100Num') {
+                inp.value = '100';
+            } else if (inp.id === 'mult1Den') {
+                inp.value = '1';
+            } else {
+                inp.value = '';
+            }
+            inp.classList.remove('wrong');
+        });
+        updateLiveCancellation();
+        
+        const fb = document.getElementById('feedbackMsg');
+        if (fb) {
+            fb.textContent = '';
+            fb.style.opacity = '0';
+        }
+    }
+}
+
+const inputSectionEl = document.getElementById('inputSection');
+inputSectionEl.addEventListener('pointerdown', clearWrongInputs);
+inputSectionEl.addEventListener('focusin', clearWrongInputs);
+
 document.getElementById('checkBtn').addEventListener('click', checkAnswer);
 document.getElementById('nextBtn').addEventListener('click', nextTask);
 
 function checkField(id, expected) {
     const el = document.getElementById(id);
     const val = parseFloat(el.value);
+    el.classList.remove('correct', 'wrong');
+    if (isNaN(val)) { void el.offsetWidth; el.classList.add('wrong'); return false; }
     if (val === expected) { el.classList.add('correct'); return true; }
-    else { el.classList.add('wrong'); return false; }
+    else { void el.offsetWidth; el.classList.add('wrong'); return false; }
 }
 
 function checkAnswer() {
@@ -578,23 +767,32 @@ function checkAnswer() {
     if (!checkField('mult100Num', 100)) allCorrect = false;
     if (!checkField('mult1Den', 1)) allCorrect = false;
     
-    // Факторы
+    // Разложение на простые множители
     const userNumInputs = document.querySelectorAll('#numFactorsInputs .factor-input');
     const userNumVals = Array.from(userNumInputs).map(i => parseFloat(i.value) || 1).sort((a,b)=>a-b);
     const userDenInputs = document.querySelectorAll('#denFactorsInputs .factor-input');
     const userDenVals = Array.from(userDenInputs).map(i => parseFloat(i.value) || 1).sort((a,b)=>a-b);
     
-    if (JSON.stringify(userNumVals) === JSON.stringify(t.numFactors)) userNumInputs.forEach(i => i.classList.add('correct'));
-    else { userNumInputs.forEach(i => i.classList.add('wrong')); allCorrect = false; }
+    userNumInputs.forEach(i => i.classList.remove('wrong'));
+    userDenInputs.forEach(i => i.classList.remove('wrong'));
+
+    if (JSON.stringify(userNumVals) !== JSON.stringify(t.numFactors)) {
+        userNumInputs.forEach(i => { void i.offsetWidth; i.classList.add('wrong'); });
+        allCorrect = false;
+    }
     
-    if (JSON.stringify(userDenVals) === JSON.stringify(t.denFactors)) userDenInputs.forEach(i => i.classList.add('correct'));
-    else { userDenInputs.forEach(i => i.classList.add('wrong')); allCorrect = false; }
+    if (JSON.stringify(userDenVals) !== JSON.stringify(t.denFactors)) {
+        userDenInputs.forEach(i => { void i.offsetWidth; i.classList.add('wrong'); });
+        allCorrect = false;
+    }
     
     // Итоговый процент
     if (!checkField('finalResultInt', t.percentResult)) allCorrect = false;
 
     if (allCorrect) {
-        setFeedback("Верно! 🎯", "success");
+        if (window.RewardSystem) window.RewardSystem.resetErrors();
+
+        setFeedback("Верно! Отличный результат! 🎯", "success");
         state.score++; state.tasksCompletedInLevel++;
         document.getElementById('score').textContent = state.score;
         document.getElementById('checkBtn').style.display = 'none';
@@ -606,33 +804,39 @@ function checkAnswer() {
         }
         document.getElementById('nextBtn').style.display = 'inline-block';
     } else {
+        if (window.RewardSystem) window.RewardSystem.registerError("ratio");
+
         state.errors++;
         document.getElementById('errors').textContent = state.errors;
         
         if (state.level >= 3 && state.level <= 5) {
-             // Проверка на частую ошибку (путаница часть/целое или остаток)
              if (parseFloat(document.getElementById('partNum').value) === (t.whole - t.part)) {
-                 setFeedback("Ошибка: нужно найти процент другого множества (остатка/разницы).", "error");
+                 setFeedback("Ошибка: нужно найти процент остатка или разницы!", "error");
              } else {
-                 setFeedback("Ошибка. Проверь, правильно ли выбрана часть и целое.", "error");
+                 setFeedback("Ошибка. Проверь, правильно ли выбрана часть и целое (всего).", "error");
              }
         } else {
-             setFeedback("Ошибка. Часть дели на Целое и умножай на 100.", "error");
+             setFeedback("Ошибка. Часть дели на Целое и умножай на 100%.", "error");
         }
     }
 }
 
 function nextTask() {
+    const factorInputs = document.querySelectorAll('.factors-container .factor-input');
+    factorInputs.forEach(input => input.removeEventListener('input', updateLiveCancellation));
+    
     if (state.tasksCompletedInLevel >= state.tasksToAdvance) {
         if (state.level === 5) { showVictory(); return; }
         state.level++; state.tasksCompletedInLevel = 0;
     }
     generateTask();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function setFeedback(msg, type) {
     const el = document.getElementById('feedbackMsg');
-    el.textContent = msg; el.style.opacity = 1;
+    el.textContent = msg; 
+    el.style.opacity = '1';
     el.style.color = type === 'error' ? '#e71d36' : '#2ec4b6';
 }
 
@@ -641,6 +845,10 @@ function showVictory() {
     document.getElementById('finalScore').textContent = state.score;
     document.getElementById('finalErrors').textContent = state.errors;
     startConfetti();
+
+    if (window.RewardSystem) {
+        setTimeout(() => window.RewardSystem.showWin("Мастер Долей! Все 5 заданий пройдены", "ratio"), 1500);
+    }
 }
 
 function startConfetti() {
@@ -669,8 +877,20 @@ function startConfetti() {
     animate();
 }
 
+// Поддержка нажатия Enter
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        const checkBtn = document.getElementById('checkBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        if (checkBtn && checkBtn.style.display !== 'none') {
+            checkAnswer();
+        } else if (nextBtn && nextBtn.style.display !== 'none') {
+            nextTask();
+        }
+    }
+});
+
 generateTask();
 </script>
 </body>
-
 </html>
