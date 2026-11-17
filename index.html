@@ -383,6 +383,25 @@
         footer { text-align: center; margin-top: 50px; color: #475569; font-size: 0.85rem; padding-bottom: 30px;}
         footer a { color: var(--text-muted); text-decoration: none; }
         footer a:hover { color: #fff; }
+        footer .support { margin-top: 14px; font-size: 0.78rem; }
+        footer .support summary {
+            display: inline-block; cursor: pointer; color: var(--text-muted);
+            padding: 4px 12px; border: 1px solid #334155; border-radius: 999px;
+            list-style: none;
+        }
+        footer .support summary::-webkit-details-marker { display: none; }
+        footer .support summary::marker { content: ''; }
+        footer .support summary:hover { color: #fff; border-color: #475569; }
+        footer .support[open] summary { margin-bottom: 10px; }
+        footer .support-body {
+            display: flex; gap: 12px; align-items: center; justify-content: center;
+            flex-wrap: wrap; text-align: left;
+        }
+        footer .support-body img {
+            display: block; width: 132px; height: 132px;
+            border-radius: 8px; background: #fff; padding: 6px; box-sizing: content-box;
+        }
+        footer .support-body p { margin: 0; max-width: 34ch; color: var(--text-muted); line-height: 1.5; }
 
         @media (max-width: 600px) {
             .hero-lobby h1 { font-size: 2.5rem; }
@@ -697,6 +716,15 @@
         <p>© Козлов Сергей Владимирович, 2026. <br>
         <a href="https://github.com/godspace/math-6-grade" target="_blank" rel="noopener">Исходный код на GitHub (v2.0 Cyber Edition)</a> | 
         <a href="/math-6-grade/privacy.html">Политика конфиденциальности</a></p>
+
+        <details class="support">
+            <summary>Поддержать проект</summary>
+            <div class="support-body">
+                <img src="assets/my_QR.png" alt="QR-код для добровольной поддержки проекта"
+                     width="132" height="132" loading="lazy" decoding="async">
+                <p>Тренажёры бесплатные, без рекламы в заданиях. Если они помогают — можно сказать спасибо. Это не обязательно.</p>
+            </div>
+        </details>
     </footer>
 
 </main>
