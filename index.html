@@ -194,6 +194,61 @@
         }
         .play-btn:active { transform: scale(0.95); }
 
+        .cta-row { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; align-items: stretch; }
+
+        .support-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: rgba(245, 158, 11, 0.08);
+            color: var(--accent-yellow);
+            padding: 18px 28px;
+            border-radius: 12px;
+            border: 2px solid rgba(245, 158, 11, 0.45);
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .support-btn:hover {
+            border-color: var(--accent-yellow);
+            background: rgba(245, 158, 11, 0.14);
+            transform: translateY(-2px);
+        }
+        .support-btn:active { transform: scale(0.97); }
+        .support-btn:focus-visible { outline: 2px solid var(--accent-yellow); outline-offset: 3px; }
+
+        dialog.support-dialog {
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            background: linear-gradient(160deg, #1e293b, var(--bg-dark));
+            color: var(--text-main);
+            padding: 28px 24px 20px;
+            max-width: 340px;
+            width: calc(100% - 40px);
+            box-sizing: border-box;
+            text-align: center;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+        }
+        dialog.support-dialog::backdrop { background: rgba(6, 10, 20, 0.7); backdrop-filter: blur(3px); }
+        dialog.support-dialog h2 { font-size: 1.15rem; margin: 0 0 14px; }
+        dialog.support-dialog img {
+            display: block; width: 180px; height: 180px; margin: 0 auto 14px;
+            border-radius: 10px; background: #fff; padding: 8px; box-sizing: content-box;
+        }
+        dialog.support-dialog p { margin: 0 0 18px; color: var(--text-muted); font-size: 0.85rem; line-height: 1.5; }
+        dialog.support-dialog .support-close {
+            width: 100%; padding: 12px; border-radius: 10px;
+            border: 1px solid #334155; background: transparent; color: var(--text-main);
+            font-family: inherit; font-size: 0.9rem; cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        dialog.support-dialog .support-close:hover { background: rgba(255, 255, 255, 0.06); border-color: #475569; }
+
         /* Дейлики (Hot Drops) */
         .hot-drops {
             margin-bottom: 40px;
@@ -407,6 +462,8 @@
             .hero-lobby h1 { font-size: 2.5rem; }
             .hero-lobby { padding: 40px 15px; }
             .play-btn { width: 100%; justify-content: center; box-sizing: border-box;}
+            .cta-row { flex-direction: column; align-items: stretch; }
+            .support-btn { width: 100%; box-sizing: border-box; padding: 14px 20px; font-size: 1rem; }
         }
     </style>
     <script src="assets/analytics.js" defer></script>
@@ -419,7 +476,10 @@
     <header class="hero-lobby">
         <h1>Прокачай <br><span class="highlight">Математику</span></h1>
         <p class="subtitle">Интерактивные онлайн-тренажёры для 6 класса. Без скуки. Без регистрации.</p>
-        <a href="#map" class="play-btn">▶ В БОЙ</a>
+        <div class="cta-row">
+            <a href="#map" class="play-btn">▶ В БОЙ</a>
+            <button type="button" class="support-btn" id="support-open" aria-haspopup="dialog">♥ Поддержать</button>
+        </div>
     </header>
 
     <!-- ДЕЙЛИКИ (HOT DROPS) -->
@@ -729,7 +789,25 @@
 
 </main>
 
+<dialog class="support-dialog" id="support-dialog" aria-labelledby="support-dialog-title">
+    <h2 id="support-dialog-title">Поддержать проект</h2>
+    <img src="assets/my_QR.png" alt="QR-код для добровольной поддержки проекта"
+         width="180" height="180" loading="lazy" decoding="async">
+    <p>Тренажёры бесплатные, без рекламы в заданиях. Если они помогают — можно сказать спасибо. Это не обязательно.</p>
+    <form method="dialog"><button class="support-close" type="submit">Закрыть</button></form>
+</dialog>
+
 <script>
+    // Кнопка «Поддержать»: диалог с QR-кодом
+    const supportDialog = document.getElementById('support-dialog');
+    const supportOpenBtn = document.getElementById('support-open');
+    if (supportDialog && supportOpenBtn) {
+        supportOpenBtn.addEventListener('click', () => supportDialog.showModal());
+        supportDialog.addEventListener('click', (e) => {
+            if (e.target === supportDialog) supportDialog.close();
+        });
+    }
+
     // Скрипт для прокрутки мышью блока "Квесты дня"
     const slider = document.querySelector('.drops-grid');
     let isDown = false;
