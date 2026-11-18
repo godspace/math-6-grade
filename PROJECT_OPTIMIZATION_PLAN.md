@@ -869,11 +869,11 @@ python -X utf8 tools/page_console.py "trainers/percents/base-change.html" --offl
 
 ### 23.2 Факты (замерено 2026-11-18)
 
-- Миссий в разметке — **32** (`class="mission-link"`), зон — **7** (`class="zone-card"`): 30 внутренних + 2 внешних.
-- `window.RewardSystem.showWin(msg, subId)` — `assets/analytics.js:154`; вызывается в **15 файлах тренажёров (24 места)** + `assets/trainer-core.js:267,315`.
+- Миссий в разметке — **32** (`class="mission-link"`: 30 внутренних + 2 внешних; ещё 2 вхождения — CSS 629/641), зон — **7** (`class="zone-card"`, CSS 571/581).
+- `window.RewardSystem.showWin(msg, subId)` — `assets/analytics.js:154`; вызывается в **18 файлах тренажёров (24 вызова)** + `assets/trainer-core.js:267,315`. Файлы: gcd, lcm, primes, signs(2), equations, equations_construct(2), opening, addition, comparison, conversion, division(2), mixed, mixed_complex, multiplication(2), number-by(2), percent-of(2), ratio, tiles.
 - `window.trackGoal(goal, params)` вызывается в `trainers/equations/opening.html` (756 `task_solved`, 821 `trainer_started`, 828 `course_finished`), **но нигде не определён** — сейчас это мёртвые вызовы под `if (window.trackGoal)`. Определяем его в `analytics.js` — страница начинает отдавать события без правок (§23.4).
 - Финальный уровень `trainer-core.js` идёт через `showVictory()` → `showWin('Все N уровней пройдены!', cfg.id)` (315): достаточно третьего аргумента `{ final: true }`.
-- `analytics.js` подключён на лендинге (738) и на **всех 30 страницах-миссиях** (строка ~48, `defer`) — 31 файл из 46 HTML; без него только служебные: `privacy.html`, `head-snippet.html`, 9 старых `trainers/equations/construct/taskN.html` + `construct/teacher.html`, `tests/math_board.smoke.html` и 2 файла верификации. `page_console.py` запускает headless с `--allow-file-access-from-files`, поэтому `file://` + `localStorage` работают.
+- `analytics.js` подключён на лендинге (738) и на **всех 30 страницах-миссиях** (строки 45–52) — 31 файл из 46 HTML. Но `defer` стоит только на **21** из них (лендинг + 20 тренажёров), а **10 страниц грузят скрипт синхронно** (`opening-test`, `equations-test`, `equations_construct-2`, `pi`, `area-metaphor`, `area`, `perimeter-area`, `motion`, `coordinates-pro`, `phone-balance`) — см. §23.4. Без него только служебные: `privacy.html`, `head-snippet.html`, 9 старых `trainers/equations/construct/taskN.html` + `construct/teacher.html`, `tests/math_board.smoke.html` и 2 файла верификации. `page_console.py` запускает headless с `--allow-file-access-from-files`, поэтому `file://` + `localStorage` работают.
 
 | зона | миссии: `mission-id` (✔ — есть `showWin`) |
 |---|---|
@@ -898,7 +898,7 @@ python -X utf8 tools/page_console.py "trainers/percents/base-change.html" --offl
 
 `s` — первый старт, `w` — число побед/решённых серий, `l` — последняя активность, `d` — время завершения (есть только у `done`). 30 миссий × ~90 байт ≈ 3 КБ при лимите 5 МБ — запас огромный; версия и в ключе, и в поле `v` (при `v != 1` старые данные игнорируем и перезаписываем, без миграций).
 
-Все обращения — в `try/catch`: `SecurityError` (приватный режим/Safari, запрет cookies) и `QuotaExceededError` не должны ломать тренажёр. При ошибке пишем в память и продолжаем (прогресс просто не сохранится), в консоль — один `warn`, не `error` (иначе `page_console.py` даст FAIL: он считает падением `Uncaught`/`is not defined`).
+Все обращения — в `try/catch`: `SecurityError` (приватный режим/Safari, запрет cookies) и `QuotaExceededError` не должны ломать тренажёр. При ошибке пишем в память и продолжаем (прогресс просто не сохранится), в консоль — один `warn`, не `error`: `page_console.py` падением считает только текст по `ERROR_RE` (`Uncaught|Unhandled|is not defined|is not a function`), так что `console.error` его формально не уронит, но `warn` не пугает ученика и не шумит в логе.
 
 ### 23.4 API: `MissionStore` + `trackGoal` в `assets/analytics.js`
 
@@ -938,7 +938,7 @@ showWin(customMessage, subId = 'general', opts) {
 
 Плюс одна строка в `assets/trainer-core.js:315`: `showWin('Все ' + cfg.totalLevels + ' уровней пройдены!', cfg.id, { final: true })` — после этого `base_change` и все будущие тренажёры каркаса закрывают миссию корректно, без правок страниц.
 
-Ограничение, которое принимаем: `analytics.js` подключён с `defer`, поэтому `trackGoal` **до** `DOMContentLoaded` теряется (например, `trainer_started` первого уровня в `opening.html`). Первичный источник данных — действия пользователя (`showWin`, `task_solved`), они всегда после загрузки. `analytics.js` без `defer` не делать: сломаются 44 страницы.
+Ограничение, которое принимаем: на **21** странице из 31 `analytics.js` подключён с `defer`, поэтому `trackGoal` **до** `DOMContentLoaded` там теряется (например, `trainer_started` первого уровня в `opening.html`). На **10** страницах (`opening-test`, `equations-test`, `equations_construct-2`, `pi`, `area-metaphor`, `area`, `perimeter-area`, `motion`, `coordinates-pro`, `phone-balance`) скрипт подключён синхронно, и там `trackGoal` доступен сразу — это задел для P3, менять эти подключения не надо. Первичный источник данных — действия пользователя (`showWin`, `task_solved`), они всегда после загрузки. Существующие 21 подключение с `defer` не трогать: снятие `defer` ради ранних событий — отдельная задача с прогоном всех 31 страницы (baseline 2026-11-18: синхронные `pi.html` и `coordinates-pro.html` — 0 ошибок JS, `check.py` 38/38).
 
 ### 23.5 Манифест зон `assets/missions.js` (только id)
 
@@ -957,6 +957,8 @@ window.MG6_ZONES = {
     // survival (ВПР, бизнес-симулятор) — внешние origin, прогресс не собирается
 };
 ```
+
+Имена id — канонические, не по именам файлов: `equations_test` (`equations-test.html`), `opening_test` (`opening-test.html`), `equations_construct_2` (`equations_construct-2.html`), `area_constructor` (`area.html`), `perimeter_area` (`perimeter-area.html`), `coordinates_pro` (`coordinates-pro.html`), `math_board` (`math_board.html`). Все 24 существующих вызова `showWin` передают `subId`, совпадающий с манифестом дословно (сверено 2026-11-18), поэтому в P3 на 11 страницах без хука `showWin`/`trackGoal` нужно передавать **ровно** эти id — иначе миссия не подсветится.
 
 ### 23.6 Разметка и рендер на лендинге
 
@@ -990,20 +992,20 @@ window.MG6_ZONES = {
 
 ### 23.8 Готчи (на чём легко упасть)
 
-1. **`defer`.** `trackGoal` до `DOMContentLoaded` теряется (§23.4); не «чинить» это подключением `analytics.js` без `defer` — сломаются 44 страницы.
+1. **`defer`.** На 21 странице из 31 `trackGoal` до `DOMContentLoaded` теряется (§23.4); на остальных 10 подключение синхронное — это не баг, там события доступны сразу. Существующие подключения не переделывать, а если в P3 появится нужда в раннем событии на defer-странице — переносить вызов в `DOMContentLoaded`, а не снимать `defer`.
 2. **Двойные `showWin`.** В `division`, `multiplication`, `number-by`, `percent-of` (уровень + сертификат), `signs` (комбо + «Система взломана»), `equations_construct` (каждая 2-я задача + «Все задачи решены!») флаг `{final:true}` ставить **только** в финальной ветке, иначе миссия закроется на первом уровне.
 3. **`index.html:861` — статический `<span>0%</span>`.** Если renderer не перезапишет текст, рядом с «3 / 6» останется «0%».
 4. **Origin.** `localStorage` привязан к origin: `file://` и `https://godspace.github.io/math-6-grade/` — разные хранилища. Проверять там, где сидит ученик. В headless профиль каждый раз новый (`tempfile.mkdtemp`), поэтому «залипания» между прогонами `page_console.py` нет — это плюс.
 5. **Два таба.** Read-modify-write гонка: запись всегда через `merge` по текущему `read()`, чтение — по событию `storage`; иначе открытая вкладка лендинга не увидит свежий прогресс.
 6. **Чужие ключи** (`mathExam_v3_db`, `op_onboard`, `mathBoardData`, `task<i>_completed`) не трогаем; новых ключей ровно один — `mg6.progress.v1`.
 7. **`dup_scan.py`** считает копии ≥200 символов: в `progress.js`/`missions.js` не должно быть localStorage-кода из `equations_construct-2.html` (там свой формат `task<i>_completed`).
-8. **`analytics.js` общий для лендинга и всех 30 миссий** → `page_console.py` гоняем не только по лендингу, но и по 4 контрольным тренажёрам (`opening`, `gcd`, `base-change`, `math_board`); `check.py` — 38/38 smoke.
+8. **`analytics.js` общий для лендинга и всех 30 миссий** → `page_console.py` гоняем не только по лендингу, но и по 5 контрольным тренажёрам (`opening`, `gcd`, `base-change`, `math_board` + `pi` как страница с синхронным подключением); `check.py` — 38/38 smoke.
 
 ### 23.9 Приёмка P1+P2
 
 - `python tools/check.py` → **38/38**, exit 0.
 - `python -X utf8 tools/page_console.py index.html --offline --expect 'data-progress-ready="1"'` → PASS, 0 ошибок JS.
-- `python -X utf8 tools/page_console.py trainers/equations/opening.html trainers/divisibility/gcd.html trainers/percents/base-change.html trainers/fractions/math_board.html --offline` → 4/4 PASS, 0 ошибок JS (правки в `analytics.js`/`trainer-core.js`).
+- `python -X utf8 tools/page_console.py trainers/equations/opening.html trainers/divisibility/gcd.html trainers/percents/base-change.html trainers/fractions/math_board.html trainers/geometry/pi.html --offline` → 5/5 PASS, 0 ошибок JS (правки в `analytics.js`/`trainer-core.js`; `pi` — контроль синхронного подключения).
 - `python -X utf8 tools/dup_scan.py` → новых копий нет.
 - Ручной проход (за пользователем, headless не кликает): `gcd` → одна победа → лендинг: «Делимость» = `0 / 4` + «1 в процессе»; `base_change` пройти 5 уровней → «Проценты» = `1 / 5`, у миссии ✔; F5 — сохраняется; приватное окно — `0 / 5` и никаких падений.
 - `git diff --stat` — только целевые файлы шага; `Object.keys(localStorage)` — новый ключ ровно один; откат = `git revert` коммита P1/P2.
@@ -1016,7 +1018,7 @@ window.MG6_ZONES = {
 Сделай ТОЛЬКО P1 и P2 из §23.7; P3/P4 не начинай.
 P1 (assets/analytics.js, assets/trainer-core.js): window.MissionStore + window.trackGoal по §23.3/§23.4; в RewardSystem.showWin третий аргумент opts с opts.final; одна строка {final:true} в trainer-core.js:315. Ключ ровно один — mg6.progress.v1. Весь localStorage в try/catch, console.warn вместо console.error.
 P2 (assets/missions.js, assets/progress.js, index.html): манифест по §23.5 дословно; progress.js ~100 строк (полосы done/total + сегмент active, классы миссий, метка «N / M», aria, body.dataset.progressReady='1', перерисовка по storage); в index.html — два defer-тега после analytics.js (строка 738), data-mission на 32 ссылки, data-zone на 7 карточек, бары в 6 зон по образцу §23.6, в зоне «Уравнения» заменить статические «0%»/width:5% на хуки, CSS ≤20 строк.
-Проверка — команды §23.9 (PowerShell 5.1: python -X utf8, вывод через Out-File -Encoding utf8): check.py 38/38, page_console.py по index.html с --expect 'data-progress-ready="1"' и по 4 контрольным тренажёрам, dup_scan.py без новых копий.
+Проверка — команды §23.9 (PowerShell 5.1: python -X utf8, вывод через Out-File -Encoding utf8): check.py 38/38, page_console.py по index.html с --expect 'data-progress-ready="1"' и по 5 контрольным тренажёрам (opening, gcd, base-change, math_board, pi), dup_scan.py без новых копий.
 Коммиты: P1, затем P2, затем отдельный план-коммит с фактом и цифрами (дополнить §23 фактическими числами). Ничего вне целевых файлов не менять.
 ```
 
