@@ -449,6 +449,15 @@
         input[type="number"] {
             -moz-appearance: textfield;
         }
+    /* SEO-блок (S4b): объяснение алгоритма под тренажёром */
+    .seo-note { max-width: 720px; margin: 26px auto 6px; padding: 20px 22px; border-radius: 16px; background: #fff; border: 1px solid #e5e7eb; box-shadow: 0 8px 20px rgba(15,23,42,.06); color: #1f2937; font-size: 15px; line-height: 1.65; text-align: left; }
+    .seo-note h2 { margin: 0 0 10px; font-size: clamp(1.05rem, 2.5vw, 1.3rem); font-weight: 800; line-height: 1.3; color: #111827; }
+    .seo-note p { margin: 0 0 10px; }
+    .seo-note ol { margin: 0 0 10px; padding-left: 22px; }
+    .seo-note li { margin: 4px 0; }
+    .seo-note a { color: #4f46e5; font-weight: 600; }
+    .seo-note .seo-example { padding: 10px 12px; border-radius: 12px; background: #f3f4f6; }
+    @media (max-width: 420px) { .seo-note { padding: 14px; font-size: 14.5px; } }
     </style>
 <!-- ─── S5a: перелинковка ─── -->
 <style>
@@ -589,6 +598,18 @@
             <div class="progress-bar" id="progressBar"></div>
         </div>
         <div class="level-indicator" id="levelIndicator">Уровень: Новичок</div>
+<section class="seo-note">
+  <h2>Как сравнить дроби с разными знаменателями</h2>
+  <p>Сравнивать дроби «на глаз» нельзя: 3/5 кажется больше 2/3 только потому, что пятёрка меньше тройки. Тренажёр требует довести обе дроби до общего знаменателя, подписать дополнительные множители и новые числители, вписать общий знаменатель и выбрать знак: больше, меньше или равно.</p>
+  <ol>
+    <li>Найдите общий знаменатель — НОК знаменателей; тренажёр следит, чтобы он не превышал 100.</li>
+    <li>Умножьте числитель каждой дроби на её дополнительный множитель.</li>
+    <li>Сравните полученные числители: у дробей с одинаковым знаменателем больше та, у которой числитель больше.</li>
+    <li>Заполните поле «Общий знаменатель» и выберите нужный знак сравнения.</li>
+  </ol>
+  <p class="seo-example">Разбор: 3/5 и 2/3. НОК(5, 3) = 15, множители 3 и 5, значит 3/5 = 9/15, а 2/3 = 10/15. Так как 9 &lt; 10, получаем 3/5 &lt; 2/3. Если числители совпали — между дробями знак «равно».</p>
+  <p>Приведение к общему знаменателю нужно и при сложении — см. <a href="addition.html">«Сложение дробей»</a>; перевод дробей разобран в <a href="conversion.html">«Переводе дробей»</a>, а смешанные числа — в <a href="mixed.html">«Дроби: шаг за шагом»</a>.</p>
+</section>
 <!-- ─── S5a: ссылка на каталог + «Смотри также» ─── -->
 <div class="seo-links">
   <a class="seo-back" href="../../index.html">← Все тренажёры</a>

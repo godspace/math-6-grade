@@ -254,6 +254,15 @@
         button.next-btn { background: var(--dark); display: none; margin-top: 10px;}
         button.next-btn:hover { background: #334155; }
 
+    /* SEO-блок (S4b): объяснение алгоритма под тренажёром */
+    .seo-note { max-width: 720px; margin: 26px auto 6px; padding: 20px 22px; border-radius: 16px; background: #fff; border: 1px solid #e5e7eb; box-shadow: 0 8px 20px rgba(15,23,42,.06); color: #1f2937; font-size: 15px; line-height: 1.65; text-align: left; }
+    .seo-note h2 { margin: 0 0 10px; font-size: clamp(1.05rem, 2.5vw, 1.3rem); font-weight: 800; line-height: 1.3; color: #111827; }
+    .seo-note p { margin: 0 0 10px; }
+    .seo-note ol { margin: 0 0 10px; padding-left: 22px; }
+    .seo-note li { margin: 4px 0; }
+    .seo-note a { color: #4f46e5; font-weight: 600; }
+    .seo-note .seo-example { padding: 10px 12px; border-radius: 12px; background: #f3f4f6; }
+    @media (max-width: 420px) { .seo-note { padding: 14px; font-size: 14.5px; } }
     </style>
 <!-- ─── S5a: перелинковка ─── -->
 <style>
@@ -352,6 +361,18 @@
                 Здесь появятся ваши правильные ответы.
             </div>
         </div>
+<section class="seo-note">
+  <h2>Круг: как найти радиус, диаметр и площадь через π</h2>
+  <p>В тренажёре три вкладки: «Найти радиус» (дано C), «Найти площадь» (дано d) и «Найти диаметр» (дано S). Задача разбита на шаги: сначала вы собираете формулу перетаскиванием карточек, затем подставляете числа и только потом вычисляете. Верные ответы попадают в «Журнал решений», во всех расчётах π ≈ 3,14.</p>
+  <ol>
+    <li>Из длины окружности: C = π · d, значит d = C : π, а радиус r = d : 2.</li>
+    <li>Из диаметра: r = d : 2 и S = π · r².</li>
+    <li>Из площади обратным ходом: r² = S : π, r = √(r²), d = 2 · r.</li>
+    <li>Ответ записывайте десятичной дробью с той точностью, которую подсказывает подстановка.</li>
+  </ol>
+  <p class="seo-example">Разбор: r = 5. Тогда d = 2 · 5 = 10, C = 3,14 · 10 = 31,4, S = 3,14 · 5² = 3,14 · 25 = 78,5. Проверка обратным ходом: 78,5 : 3,14 = 25, значит r = √25 = 5.</p>
+  <p>Само число π и длина окружности разобраны в <a href="pi.html">«Числе π»</a>, а периметр и площадь прямоугольников — в <a href="perimeter-area.html">«Периметре и площади на сетке»</a>.</p>
+</section>
 <!-- ─── S5a: ссылка на каталог + «Смотри также» ─── -->
 <div class="seo-links">
   <a class="seo-back" href="../../index.html">← Все тренажёры</a>

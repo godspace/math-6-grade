@@ -373,6 +373,15 @@
         input[type="number"] {
             -moz-appearance: textfield;
         }
+    /* SEO-блок (S4b): объяснение алгоритма под тренажёром */
+    .seo-note { max-width: 720px; margin: 26px auto 6px; padding: 20px 22px; border-radius: 16px; background: #fff; border: 1px solid #e5e7eb; box-shadow: 0 8px 20px rgba(15,23,42,.06); color: #1f2937; font-size: 15px; line-height: 1.65; text-align: left; }
+    .seo-note h2 { margin: 0 0 10px; font-size: clamp(1.05rem, 2.5vw, 1.3rem); font-weight: 800; line-height: 1.3; color: #111827; }
+    .seo-note p { margin: 0 0 10px; }
+    .seo-note ol { margin: 0 0 10px; padding-left: 22px; }
+    .seo-note li { margin: 4px 0; }
+    .seo-note a { color: #4f46e5; font-weight: 600; }
+    .seo-note .seo-example { padding: 10px 12px; border-radius: 12px; background: #f3f4f6; }
+    @media (max-width: 420px) { .seo-note { padding: 14px; font-size: 14.5px; } }
     </style>
 <!-- ─── S5a: перелинковка ─── -->
 <style>
@@ -516,6 +525,18 @@
             <div class="progress-bar" id="progressBar"></div>
         </div>
         <div class="level-indicator" id="levelIndicator">Уровень: Новичок</div>
+<section class="seo-note">
+  <h2>Сложение дробей с разными знаменателями</h2>
+  <p>Тренажёр выдаёт две дроби с разными знаменателями и требует заполнить всю цепочку решения: дополнительный множитель к каждой дроби, новые числители и знаменатели, сумму, а когда сумма сократимая — ещё и сокращённый ответ. Счётчик «Правильно», «Успешность» и «Серия» обновляются после каждой проверки.</p>
+  <ol>
+    <li>Найдите общий знаменатель — наименьшее общее кратное знаменателей (тренажёр подбирает примеры так, чтобы оно не превышало 100).</li>
+    <li>Дополнительный множитель дроби = общий знаменатель : её знаменатель; на него умножают и числитель, и знаменатель.</li>
+    <li>После приведения сложите числители, а знаменатель оставьте общим.</li>
+    <li>Если появились поля сокращения, разделите числитель и знаменатель на их наибольший общий делитель.</li>
+  </ol>
+  <p class="seo-example">Разбор: 1/6 + 1/10. НОК(6, 10) = 30, дополнительные множители 5 и 3: 1/6 = 5/30, 1/10 = 3/30. Сумма 5/30 + 3/30 = 8/30, сокращаем на 2 и получаем 4/15.</p>
+  <p>Сначала потренируйте приведение к общему знаменателю в <a href="comparison.html">«Сравнении дробей»</a>, а перевод смешанных чисел — в <a href="conversion.html">«Переводе дробей»</a>.</p>
+</section>
 <!-- ─── S5a: ссылка на каталог + «Смотри также» ─── -->
 <div class="seo-links">
   <a class="seo-back" href="../../index.html">← Все тренажёры</a>

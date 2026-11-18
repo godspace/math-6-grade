@@ -269,6 +269,15 @@
             border-radius: 16px;
             border: 2px dashed #dee2e6;
         }
+    /* SEO-блок (S4b): объяснение алгоритма под тренажёром */
+    .seo-note { max-width: 720px; margin: 26px auto 6px; padding: 20px 22px; border-radius: 16px; background: #fff; border: 1px solid #e5e7eb; box-shadow: 0 8px 20px rgba(15,23,42,.06); color: #1f2937; font-size: 15px; line-height: 1.65; text-align: left; }
+    .seo-note h2 { margin: 0 0 10px; font-size: clamp(1.05rem, 2.5vw, 1.3rem); font-weight: 800; line-height: 1.3; color: #111827; }
+    .seo-note p { margin: 0 0 10px; }
+    .seo-note ol { margin: 0 0 10px; padding-left: 22px; }
+    .seo-note li { margin: 4px 0; }
+    .seo-note a { color: #4f46e5; font-weight: 600; }
+    .seo-note .seo-example { padding: 10px 12px; border-radius: 12px; background: #f3f4f6; }
+    @media (max-width: 420px) { .seo-note { padding: 14px; font-size: 14.5px; } }
     </style>
 <!-- ─── S5a: перелинковка ─── -->
 <style>
@@ -404,6 +413,17 @@
         <div>Решено: <span id="scoreVal">0</span></div>
         <div class="streak">Серия: <span id="streakVal">0</span> 🔥</div>
     </div>
+<section class="seo-note">
+  <h2>Как перевести смешанное число в неправильную дробь и обратно</h2>
+  <p>В тренажёре два режима: «Смешанная → Неправильная» и «Неправильная → Смешанная». В каждом свой пример, поля для ввода и кнопка «Проверить», а правильный ответ можно закрепить кнопкой «Следующий пример» — счёт и серия верных решений растут внизу страницы.</p>
+  <ol>
+    <li>Смешанное число в неправильную дробь: знаменатель переписываем без изменений, а числитель считаем по формуле (целое · знаменатель) + числитель.</li>
+    <li>Обратный перевод: делим числитель на знаменатель с остатком — целая часть становится целым, остаток числителем, знаменатель не меняется.</li>
+    <li>Заполните все поля цепочки (в режиме смешанной дроби их три) и нажмите «Проверить».</li>
+  </ol>
+  <p class="seo-example">Разбор: 3 1/2 = (3 · 2 + 1)/2 = 7/2. Обратно: 7 : 2 = 3 и 1 в остатке, значит 7/2 = 3 1/2.</p>
+  <p>Готовые примеры со смешанными числами по шагам — в <a href="mixed.html">«Дроби: шаг за шагом»</a>, сложение дробей после приведения к общему знаменателю — в <a href="addition.html">«Сложении дробей»</a>.</p>
+</section>
 <!-- ─── S5a: ссылка на каталог + «Смотри также» ─── -->
 <div class="seo-links">
   <a class="seo-back" href="../../index.html">← Все тренажёры</a>

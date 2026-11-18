@@ -356,6 +356,15 @@
             .tile { width: 28px; height: 28px; }
             .task-statement { font-size: 1.15rem; padding: 15px 18px; }
         }
+    /* SEO-блок (S4b): объяснение алгоритма под тренажёром */
+    .seo-note { max-width: 720px; margin: 26px auto 6px; padding: 20px 22px; border-radius: 16px; background: #fff; border: 1px solid #e5e7eb; box-shadow: 0 8px 20px rgba(15,23,42,.06); color: #1f2937; font-size: 15px; line-height: 1.65; text-align: left; }
+    .seo-note h2 { margin: 0 0 10px; font-size: clamp(1.05rem, 2.5vw, 1.3rem); font-weight: 800; line-height: 1.3; color: #111827; }
+    .seo-note p { margin: 0 0 10px; }
+    .seo-note ol { margin: 0 0 10px; padding-left: 22px; }
+    .seo-note li { margin: 4px 0; }
+    .seo-note a { color: #4f46e5; font-weight: 600; }
+    .seo-note .seo-example { padding: 10px 12px; border-radius: 12px; background: #f3f4f6; }
+    @media (max-width: 420px) { .seo-note { padding: 14px; font-size: 14.5px; } }
     </style>
 <!-- ─── S5a: перелинковка ─── -->
 <style>
@@ -455,6 +464,18 @@
         </div>
         <button class="btn" onclick="location.reload()">Начать заново</button>
     </div>
+<section class="seo-note">
+  <h2>Сколько процентов квартиры занимает комната</h2>
+  <p>Тренажёр — пять планировок. План квартиры нарисован клетками, где 1 клетка = 1 м², а в задании сказано, какую часть квартиры занимает комната (например, 3/5). Нужно закрасить на плане комнату нужной площади и вписать, сколько это процентов.</p>
+  <ol>
+    <li>Найдите площадь комнаты: доля · площадь квартиры. Для 3/5 от 50 м² это 3 · 50 : 5 = 30 плиток.</li>
+    <li>Закрасьте на плане ровно столько клеток: потяните мышкой по сетке, лишнее снимается повторным протягиванием.</li>
+    <li>Переведите долю в проценты: 3/5 = 3 · 100 : 5 = 60%.</li>
+    <li>Впишите число в поле с знаком «%» и нажмите «Проверить чертёж»: при ошибке тренажёр подскажет, сколько плиток требовалось.</li>
+  </ol>
+  <p class="seo-example">Разбор: квартира 40 м², комната занимает 1/4. Площадь комнаты 40 : 4 = 10 клеток, в процентах 1/4 = 25%.</p>
+  <p>Процент от числа разбирается в <a href="percent-of.html">«Проценте от числа»</a>, отношение двух величин — в <a href="ratio.html">«Пропорции и отношении»</a>, а «на сколько процентов больше» — в <a href="base-change.html">«Смене базы сравнения»</a>.</p>
+</section>
 <!-- ─── S5a: ссылка на каталог + «Смотри также» ─── -->
 <div class="seo-links">
   <a class="seo-back" href="../../index.html">← Все тренажёры</a>
