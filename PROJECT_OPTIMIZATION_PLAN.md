@@ -105,7 +105,7 @@
 - `tools/inventory.py` — замер всего проекта (HTML/JS/CSS/картинки, inline-блоки, `on*`, дубли). Базовая точка «до»: 45 HTML / 1 132 349 симв. / inline-JS 602 803 / inline-CSS 250 242 / `on*` 184.
 - `tools/size.py` — замер доски (HTML + `assets/math_board.css` + `assets/math_board.js`), 2979 стр. / 125 363 симв. / ~31 341 токенов. Переписывать не нужно: `inventory.py` покрывает его цифры.
 - Логи: `[Console]::OutputEncoding=[Text.Encoding]::UTF8; python -X utf8 tools/<tool>.py | Out-File -Encoding utf8 <файл>` — иначе PowerShell 5.1 пишет UTF-16 и кириллица ломается.
-- Git: `main` = `origin/main` = `bf903f0`, рабочее дерево чистое. Хеши шагов доски: 4.1 `4831f2d`, 4.2 `c256858`, 5.1 `758a8bd`, 5.2 `a29b94f`.
+- Git: `main` = `origin/main` = `ae2a37b`, рабочее дерево чистое. Хеши: доска 4.1 `4831f2d`, 4.2 `c256858`, 5.1 `758a8bd`, 5.2 `a29b94f`; подготовка этапа 6: `05e7fe7` (`tools/inventory.py`), `45f6c01` (этот документ), `ae2a37b` (`.gitignore`).
 
 ## 10. Разделение с `MATH_BOARD_PLAN.md`
 
