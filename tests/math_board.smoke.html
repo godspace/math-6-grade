@@ -189,7 +189,73 @@
         win.undo();
         check('undo() возвращает удалённый элемент', countItems(doc) === 3, 'items=' + countItems(doc));
 
-        // 10. Итоговое состояние записано
+        // 10. Кнопки через data-action (обвязка в assets/math_board.js)
+        const viewportEl = doc.getElementById('viewport');
+        const zoomValEl = doc.getElementById('zoom-val');
+        const groupToolbar = doc.getElementById('group-toolbar');
+        const groupCount = doc.getElementById('group-count');
+        const selectModeBtn = doc.getElementById('select-mode-btn');
+        const zoomIn = doc.querySelector('#hud [data-action="zoom"][data-zoom="0.1"]');
+        const zoomOut = doc.querySelector('#hud [data-action="zoom"][data-zoom="-0.1"]');
+        const resetViewBtn = doc.querySelector('[data-action="reset-view"]');
+
+        check('HUD: кнопки зума, «Центр камеры» и «Выделение» найдены',
+            !!zoomIn && !!zoomOut && !!resetViewBtn && !!selectModeBtn && !!zoomValEl,
+            'zoom+/-/reset/select/val = ' +
+                [!!zoomIn, !!zoomOut, !!resetViewBtn, !!selectModeBtn, !!zoomValEl].join('/'));
+
+        if (zoomIn) zoomIn.click();
+        const zoomedVal = zoomValEl ? zoomValEl.textContent : '?';
+        if (zoomOut) zoomOut.click();
+        const restoredVal = zoomValEl ? zoomValEl.textContent : '?';
+        check('Зум +/−: 100% → 110% → 100%',
+            zoomedVal === '110%' && restoredVal === '100%',
+            'после +: ' + zoomedVal + ', после −: ' + restoredVal);
+
+        if (zoomIn) zoomIn.click();
+        if (resetViewBtn) resetViewBtn.click();
+        check('«Центр камеры» возвращает зум к 100%',
+            !!zoomValEl && zoomValEl.textContent === '100%',
+            'zoom=' + (zoomValEl ? zoomValEl.textContent : '?'));
+
+        if (selectModeBtn) selectModeBtn.click();
+        const selectOn = !!viewportEl && viewportEl.style.cursor === 'crosshair' &&
+            selectModeBtn.classList.contains('active');
+        if (selectModeBtn) selectModeBtn.click();
+        const selectOff = !!viewportEl && viewportEl.style.cursor === 'default' &&
+            !selectModeBtn.classList.contains('active');
+        check('Режим выделения: crosshair при вкл, default при выкл', selectOn && selectOff,
+            'on=' + selectOn + ' off=' + selectOff);
+
+        const groupItems = Array.from(doc.querySelectorAll('.board-item'));
+        groupItems.forEach(item => item.classList.add('selected'));
+        win.updateSelectionUI();
+        check('Панель групповых операций видна и «Выбрано: 3»',
+            !!groupToolbar && groupToolbar.classList.contains('visible') &&
+                !!groupCount && groupCount.textContent.replace(/\D+/g, '') === '3',
+            'visible=' + (!!groupToolbar && groupToolbar.classList.contains('visible')) +
+                ' count=' + (groupCount ? groupCount.textContent : '?'));
+
+        const nudgeRight = doc.querySelector('#group-toolbar [data-action="nudge"][data-dx="10"][data-dy="0"]');
+        const anchor = groupItems[0];
+        const leftBefore = anchor ? parseFloat(anchor.style.left) || 0 : 0;
+        const topBefore = anchor ? parseFloat(anchor.style.top) || 0 : 0;
+        if (nudgeRight) nudgeRight.click();
+        const leftAfter = anchor ? parseFloat(anchor.style.left) || 0 : 0;
+        const topAfter = anchor ? parseFloat(anchor.style.top) || 0 : 0;
+        check('«→» сдвигает выделенные на 10px по X',
+            !!nudgeRight && Math.round(leftAfter - leftBefore) === 10 && Math.round(topAfter - topBefore) === 0,
+            'dx=' + Math.round(leftAfter - leftBefore) + ' dy=' + Math.round(topAfter - topBefore));
+        await wait(WAIT_MS);
+
+        const deleteSelectedBtn = doc.querySelector('#group-toolbar [data-action="delete-selected"]');
+        if (deleteSelectedBtn) deleteSelectedBtn.click();
+        await wait(WAIT_MS);
+        check('«Удалить» убирает выделенные элементы', countItems(doc) === 0, 'items=' + countItems(doc));
+        win.undo();
+        check('undo() после «Удалить» возвращает 3 items', countItems(doc) === 3, 'items=' + countItems(doc));
+
+        // 11. Итоговое состояние записано
         await wait(WAIT_MS);
         const finalState = parseStored(win);
         check('Финальное состояние сохранено (3 items)', !!finalState && finalState.items.length === 3,
