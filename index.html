@@ -194,6 +194,35 @@
         }
         .play-btn:active { transform: scale(0.95); }
 
+        /* Заметный вход в Math Board: часть пользователей приходит на главную только за доской */
+        .board-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: rgba(0, 242, 254, 0.08);
+            color: var(--accent-neon);
+            padding: 18px 28px;
+            border-radius: 12px;
+            border: 2px solid rgba(0, 242, 254, 0.55);
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-decoration: none;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 0 18px rgba(0, 242, 254, 0.18);
+        }
+        .board-btn:hover {
+            border-color: var(--accent-neon);
+            background: rgba(0, 242, 254, 0.16);
+            transform: translateY(-2px);
+            box-shadow: 0 0 26px rgba(0, 242, 254, 0.35);
+        }
+        .board-btn:active { transform: scale(0.97); }
+        .board-btn:focus-visible { outline: 2px solid var(--accent-neon); outline-offset: 3px; }
+
         .cta-row { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; align-items: stretch; }
 
         .support-btn {
@@ -464,6 +493,7 @@
             .play-btn { width: 100%; justify-content: center; box-sizing: border-box;}
             .cta-row { flex-direction: column; align-items: stretch; }
             .support-btn { width: 100%; box-sizing: border-box; padding: 14px 20px; font-size: 1rem; }
+            .board-btn { width: 100%; box-sizing: border-box; padding: 14px 20px; font-size: 1rem; }
         }
     </style>
     <script src="assets/analytics.js" defer></script>
@@ -478,6 +508,7 @@
         <p class="subtitle">Интерактивные онлайн-тренажёры для 6 класса. Без скуки. Без регистрации.</p>
         <div class="cta-row">
             <a href="#map" class="play-btn">▶ В БОЙ</a>
+            <a href="trainers/fractions/math_board.html" class="board-btn">🧩 Открыть доску</a>
             <button type="button" class="support-btn" id="support-open" aria-haspopup="dialog">♥ Поддержать</button>
         </div>
     </header>
