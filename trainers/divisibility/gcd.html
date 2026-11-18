@@ -44,6 +44,7 @@
 <link rel="manifest" href="/math-6-grade/site.webmanifest">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
 
+<script src="../../assets/trainers-utils.js"></script>
 <!-- Подключаем глобальный скрипт -->
 <script src="../../assets/analytics.js" defer></script>
 <style>
@@ -369,25 +370,6 @@
   let currentStage = 1; 
   let currentSelection = { value: null, items: [] }; 
 
-  function vibrate(ms) { if ('vibrate' in navigator) navigator.vibrate(ms); }
-
-  function isPrime(num) {
-    if (num < 2) return false;
-    for (let i = 2; i <= Math.sqrt(num); i++) {
-      if (num % i === 0) return false;
-    }
-    return true;
-  }
-
-  function getPrimeFactors(num) {
-    let factors = [];
-    let d = 2;
-    while (num >= 2) {
-      if (num % d === 0) { factors.push(d); num /= d; } else { d++; }
-    }
-    return factors; 
-  }
-
   function setInstruction(htmlText, stage) {
     const instr = document.getElementById('instructions');
     instr.innerHTML = htmlText;
@@ -435,7 +417,7 @@
     setInstruction('Шаг 1. 🎯 Заполни пустые слоты простыми множителями (в любом порядке)', 1);
 
     currentSet = sets[Math.floor(Math.random() * sets.length)];
-    targetFactors = currentSet.map(n => getPrimeFactors(n));
+    targetFactors = currentSet.map(n => primeFactors(n));
     factorsArr = [];
     
     targetFactors.forEach(row => {
