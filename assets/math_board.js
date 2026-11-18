@@ -1142,26 +1142,47 @@
             scheduleSave();
         }
 
-        function resizeDivCols(delta) {
+        // Лимиты разрядов: делимое — до 16 клеток (многочлены и длинные числа вида
+        // 2x³ − 3x² + 5x − 2 занимают 12–13 клеток), делитель и частное — до 10.
+        const DIV_LIMITS = { left: { min: 3, max: 16 }, right: { min: 3, max: 10 } };
+
+        // side: 'left' — делимое, наметки и строки шагов; 'right' — делитель и частное
+        function resizeDivCols(side, delta) {
             syncModelFromDOM(currentRefs);
-            const newLeft = Math.max(3, Math.min(10, model.leftCols + delta));
-            const newRight = Math.max(3, Math.min(8, model.rightCols + delta));
-            const adjustEnd = (arr, len, factory) => {
+            const limits = DIV_LIMITS[side];
+            const current = side === 'left' ? model.leftCols : model.rightCols;
+            const next = Math.max(limits.min, Math.min(limits.max, current + delta));
+            if (next === current) return;
+
+            // Сжатие не должно стирать введённое: если в отрезаемом хвосте есть символы — отказываемся
+            const dropped = side === 'left'
+                ? model.dividend.slice(next)
+                    .concat(model.markers.slice(next))
+                    .concat(model.steps.reduce((acc, st) => acc.concat(st.sub.slice(next), st.rem.slice(next)), []))
+                : model.divisor.slice(next).concat(model.quotient.slice(next));
+            const hasData = dropped.some(cell => (typeof cell === 'string' ? cell : (cell && cell.v)));
+            if (next < current && hasData) return;
+
+            const resize = (arr, len, factory) => {
                 const copy = arr.slice(0, len);
                 while (copy.length < len) copy.push(factory());
                 return copy;
             };
-            model.leftCols = newLeft;
-            model.rightCols = newRight;
-            model.markers = adjustEnd(model.markers, newLeft, () => '');
-            model.dividend = adjustEnd(model.dividend, newLeft, () => ({ v: '', c: false }));
-            model.divisor = adjustEnd(model.divisor, newRight, () => ({ v: '', c: false }));
-            model.quotient = adjustEnd(model.quotient, newRight, () => ({ v: '', c: false, dot: false }));
-            model.steps.forEach(st => {
-                st.offset = Math.min(st.offset, newLeft - 1);
-                st.sub = adjustEnd(st.sub, newLeft, () => ({ v: '', c: false }));
-                st.rem = adjustEnd(st.rem, newLeft, () => ({ v: '', c: false }));
-            });
+
+            if (side === 'left') {
+                model.leftCols = next;
+                model.markers = resize(model.markers, next, () => '');
+                model.dividend = resize(model.dividend, next, () => ({ v: '', c: false }));
+                model.steps.forEach(st => {
+                    st.offset = Math.min(st.offset, next - 1);
+                    st.sub = resize(st.sub, next, () => ({ v: '', c: false }));
+                    st.rem = resize(st.rem, next, () => ({ v: '', c: false }));
+                });
+            } else {
+                model.rightCols = next;
+                model.divisor = resize(model.divisor, next, () => ({ v: '', c: false }));
+                model.quotient = resize(model.quotient, next, () => ({ v: '', c: false, dot: false }));
+            }
             render();
             scheduleSave();
         }
@@ -1208,8 +1229,18 @@
                 b.addEventListener('click', (e) => { e.stopPropagation(); fn(); });
                 return b;
             };
-            btns.appendChild(makeBtn('− разр.', () => resizeDivCols(-1)));
-            btns.appendChild(makeBtn('+ разр.', () => resizeDivCols(1)));
+            const dividendMinus = makeBtn('делимое −', () => resizeDivCols('left', -1));
+            dividendMinus.title = 'Делимое: убрать разряд';
+            btns.appendChild(dividendMinus);
+            const dividendPlus = makeBtn('делимое +', () => resizeDivCols('left', 1));
+            dividendPlus.title = 'Делимое: добавить разряд (до 16)';
+            btns.appendChild(dividendPlus);
+            const divisorMinus = makeBtn('частное −', () => resizeDivCols('right', -1));
+            divisorMinus.title = 'Делитель и частное: убрать разряд';
+            btns.appendChild(divisorMinus);
+            const divisorPlus = makeBtn('частное +', () => resizeDivCols('right', 1));
+            divisorPlus.title = 'Делитель и частное: добавить разряд (до 10)';
+            btns.appendChild(divisorPlus);
             btns.appendChild(makeBtn('+ шаг', () => changeSteps(1)));
             btns.appendChild(makeBtn('− шаг', () => changeSteps(-1)));
             toolbar.appendChild(btns);
@@ -1430,7 +1461,8 @@
             // Подвал
             const footer = document.createElement('div');
             footer.className = 'col-footer';
-            footer.innerHTML = '<span>Над делимым: клик для дуги ⌒ или сноса ↓</span><span>‹ › — сдвиг шага</span>';
+            footer.innerHTML = '<span>Над делимым: клик для дуги ⌒ или сноса ↓</span><span>‹ › — сдвиг шага</span>' +
+                '<span>Клетки: делимое до 16, делитель до 10</span>';
             container.appendChild(footer);
 
             function moveLeftFocus(r, c, dr, dc) {

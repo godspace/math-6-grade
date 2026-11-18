@@ -255,7 +255,81 @@
         win.undo();
         check('undo() после «Удалить» возвращает 3 items', countItems(doc) === 3, 'items=' + countItems(doc));
 
-        // 11. Итоговое состояние записано
+        // 11. «Уголок»: разряды делимого и делителя меняются раздельно
+        //     (фикс по фидбэку: длинный многочлен не вмещался в 10 клеток)
+        clickPalette(doc, 'col-div');
+        await wait(WAIT_MS);
+        const divItem = doc.querySelector('.board-item[data-type="col-div"]');
+        check('Уголок добавлен', !!divItem);
+        if (divItem) {
+            // render() пересобирает кнопки — ищем заново после каждого клика
+            const miniBtn = (text) => Array.prototype.find.call(
+                divItem.querySelectorAll('.col-mini-btn'),
+                b => b.textContent.trim() === text);
+            const leftCols = () => divItem.querySelectorAll('.div-marker-cell').length;
+            const rightCols = () => divItem.querySelectorAll('.div-divisor-row .col-cell-wrap').length;
+            const left0 = leftCols();
+            const right0 = rightCols();
+
+            const dividendPlus = miniBtn('делимое +');
+            if (dividendPlus) dividendPlus.click();
+            await wait(WAIT_MS);
+            check('Уголок: «делимое +» добавляет разряд только делимому',
+                leftCols() === left0 + 1 && rightCols() === right0,
+                'left ' + left0 + '→' + leftCols() + ', right ' + right0 + '→' + rightCols());
+
+            const divisorPlus = miniBtn('частное +');
+            if (divisorPlus) divisorPlus.click();
+            await wait(WAIT_MS);
+            check('Уголок: «частное +» добавляет разряд только делителю и частному',
+                rightCols() === right0 + 1 && leftCols() === left0 + 1,
+                'left ' + leftCols() + ', right ' + rightCols());
+
+            const divSaved = win.serializeBoard().items.find(it => it.type === 'col-div');
+            check('Уголок: новые разряды сохраняются в colData',
+                !!divSaved && !!divSaved.colData &&
+                    divSaved.colData.leftCols === left0 + 1 && divSaved.colData.rightCols === right0 + 1,
+                divSaved && divSaved.colData
+                    ? 'leftCols=' + divSaved.colData.leftCols + ' rightCols=' + divSaved.colData.rightCols
+                    : 'нет colData');
+
+            // Защита от стирания: разряд с введённым символом не отрезается
+            const dividendCols = () => divItem.querySelectorAll('.div-left-col .col-row')[0];
+            const lastDividendInput = () => {
+                const row = dividendCols();
+                const inputs = row ? row.querySelectorAll('.col-cell-input') : [];
+                return inputs.length ? inputs[inputs.length - 1] : null;
+            };
+            const filled = lastDividendInput();
+            let shrinkBlocked = false;
+            if (filled) {
+                filled.value = '5';
+                filled.dispatchEvent(new win.Event('input', { bubbles: true }));
+                const beforeShrink = leftCols();
+                const dividendMinus = miniBtn('делимое −');
+                if (dividendMinus) dividendMinus.click();
+                await wait(WAIT_MS);
+                shrinkBlocked = leftCols() === beforeShrink;
+
+                const afterBlock = lastDividendInput();
+                if (afterBlock) {
+                    afterBlock.value = '';
+                    afterBlock.dispatchEvent(new win.Event('input', { bubbles: true }));
+                }
+                const dividendMinus2 = miniBtn('делимое −');
+                if (dividendMinus2) dividendMinus2.click();
+                await wait(WAIT_MS);
+            }
+            check('Уголок: разряд с символом не отрезается, пустой — отрезается',
+                shrinkBlocked && leftCols() === left0,
+                'blocked=' + shrinkBlocked + ', left ' + (left0 + 1) + '→' + leftCols());
+
+            const divDel = divItem.querySelector('.delete-btn');
+            if (divDel) divDel.click();
+            await wait(WAIT_MS);
+        }
+
+        // 12. Итоговое состояние записано
         await wait(WAIT_MS);
         const finalState = parseStored(win);
         check('Финальное состояние сохранено (3 items)', !!finalState && finalState.items.length === 3,
