@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- ─── SEO-БЛОК ─── -->
+    <title>Тренажёр: Смена базы сравнения — проценты и разы | 6 класс</title>
+    <meta name="description" content="Интерактивный онлайн тренажёр по математике для 6 класса: смена базы сравнения. Снижение на p% → «во сколько раз», рост в k раз → «на сколько процентов», «больше на p%» ↔ «меньше на ?%».">
+    <meta name="keywords" content="смена базы сравнения, проценты и разы, на сколько процентов больше, на сколько процентов меньше, во сколько раз уменьшилось, рост в разах, задачи на проценты 6 класс, тренажер проценты">
+    <meta name="author" content="Козлов Сергей Владимирович">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://godspace.github.io/math-6-grade/trainers/percents/base-change.html">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Смена базы: проценты и разы (6 класс)">
+    <meta property="og:description" content="Пять уровней: снижение на p% → «во сколько раз», рост в k раз → проценты, «больше на p%» ↔ «меньше на ?%». Два столбика и переключатель базы помогут не путать основание 100%.">
+    <meta property="og:url" content="https://godspace.github.io/math-6-grade/trainers/percents/base-change.html">
+    <meta property="og:site_name" content="Математика 6 класс">
+
+    <!-- JSON-LD -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "LearningResource",
+        "name": "Тренажёр: Смена базы сравнения (проценты и разы)",
+        "description": "Практика задач на проценты со сменой базы сравнения: снижение на p% и «во сколько раз», рост в k раз и проценты, прямое и обратное сравнение двух величин.",
+        "educationalLevel": "6 класс",
+        "learningResourceType": "Интерактивный тренажёр",
+        "inLanguage": "ru",
+        "isAccessibleForFree": true,
+        "teaches": ["Смена базы сравнения", "Проценты и разы", "Процентное сравнение двух величин"],
+        "url": "https://godspace.github.io/math-6-grade/trainers/percents/base-change.html"
+    }
+    </script>
+    <!-- ─── КОНЕЦ SEO-БЛОКА ─── -->
+
+    <link rel="icon" href="/math-6-grade/favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="16x16" href="/math-6-grade/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/math-6-grade/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="48x48" href="/math-6-grade/favicon-48x48.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/math-6-grade/apple-touch-icon.png">
+    <link rel="manifest" href="/math-6-grade/site.webmanifest">
+
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Каркас страницы: CSS до локального <style>, скрипты — utils → core → analytics (§22.3) -->
+    <link rel="stylesheet" href="../../assets/trainer-core.css">
+    <script src="../../assets/trainers-utils.js"></script>
+    <script src="../../assets/trainer-core.js"></script>
+    <script src="../../assets/analytics.js" defer></script>
+
+    <style>
+        /* Локальный визуал страницы: два столбика + переключатель базы (§22.2) */
+        .bars {
+            display: flex; align-items: flex-end; justify-content: center;
+            gap: 48px; min-height: 210px; width: 100%; padding: 8px 0 0;
+        }
+        .bar-col { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .bar {
+            width: 84px; border-radius: 12px 12px 4px 4px;
+            background: linear-gradient(180deg, #a5b4fc, #6366f1);
+            transition: height 0.35s ease, background 0.25s ease, box-shadow 0.25s ease;
+        }
+        .bar-col.base .bar {
+            background: linear-gradient(180deg, #f9a8d4, var(--percent-color));
+            box-shadow: 0 0 0 3px rgba(247, 37, 133, 0.25);
+        }
+        .bar-name { font-weight: 800; font-size: 0.95rem; color: var(--text-muted); }
+        .bar-col.base .bar-name { color: var(--percent-color); }
+        .bar-col.base .bar-name::after { content: ' = 100%'; }
+        .base-switch {
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            flex-wrap: wrap; margin-top: 16px; width: 100%;
+        }
+        .switch-label { font-size: 0.9rem; font-weight: 800; color: var(--text-muted); }
+        .base-btn {
+            border: 2px solid var(--tile-border); background: #fff; color: var(--text-muted);
+            font-family: inherit; font-weight: 800; font-size: 0.95rem;
+            padding: 8px 18px; border-radius: 50px; cursor: pointer; transition: all 0.2s;
+        }
+        .base-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .base-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+        @media (max-width: 640px) {
+            .bars { gap: 18px; min-height: 160px; }
+            .bar { width: 58px; }
+            .bar-name { font-size: 0.85rem; }
+            .base-switch { margin-top: 12px; gap: 8px; }
+            .switch-label { width: 100%; text-align: center; }
+            .base-btn { padding: 7px 14px; font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <div>
+            <h1>Смена базы</h1>
+            <div class="subtitle" id="levelDescription">Задание 1 из 5</div>
+        </div>
+    </div>
+    <div id="trainerRoot"></div>
+</div>
+
+<script>
+(function () {
+    'use strict';
+
+    // §22.4 «красивые числа»: генерируем от ответа, а не от условия.
+    // Допустимые наборы — строго из таблицы; ответ, который не целый
+    // и не конечная десятичная с ≤2 знаками, бракуется и пара берётся заново
+    // (лимит попыток), последний рубеж — fallback-пара из таблицы.
+    var PAIRS = [[5, 4], [10, 8], [4, 2], [5, 2], [5, 1]];
+    var CUTS = [50, 75, 80, 90];
+    var GROWTH = [1.5, 2, 2.5, 3, 5];
+
+    var STORIES_CUT = [
+        'Цену товара снизили на <b>{p}%</b>. Во сколько раз уменьшилась цена?',
+        'Зарплату уменьшили на <b>{p}%</b>. Во сколько раз она уменьшилась?',
+        'Время в пути сократили на <b>{p}%</b>. Во сколько раз сократилось время?',
+        'Массу груза уменьшили на <b>{p}%</b>. Во сколько раз уменьшилась масса?'
+    ];
+
+    var STORIES_GROWTH = [
+        'Зарплату увеличили в <b>{k}</b> {times}. На сколько процентов она выросла?',
+        'Число подписчиков выросло в <b>{k}</b> {times}. На сколько процентов выросло число подписчиков?',
+        'Цену товара повысили в <b>{k}</b> {times}. На сколько процентов выросла цена?',
+        'Скорость поезда увеличили в <b>{k}</b> {times}. На сколько процентов выросла скорость?'
+    ];
+
+    var STORIES_MORE = [
+        'Первый лыжник прошёл <b>{big}</b> км, второй — <b>{small}</b> км. Первый прошёл на <b>{more}%</b> больше второго. На сколько процентов второй прошёл меньше первого?',
+        'В первом альбоме <b>{big}</b> наклеек, во втором — <b>{small}</b>. В первом на <b>{more}%</b> больше. На сколько процентов во втором альбоме меньше наклеек?',
+        'Одна бригада сделала <b>{big}</b> деталей, другая — <b>{small}</b>. Первая сделала на <b>{more}%</b> больше. На сколько процентов вторая бригада сделала меньше?'
+    ];
+
+    var STORIES_LESS = [
+        'Второй лыжник прошёл <b>{small}</b> км, первый — <b>{big}</b> км. Второй прошёл на <b>{less}%</b> меньше первого. На сколько процентов первый прошёл больше второго?',
+        'Во втором альбоме <b>{small}</b> наклеек, в первом — <b>{big}</b>. Во втором на <b>{less}%</b> меньше. На сколько процентов в первом альбоме больше наклеек?',
+        'Вторая бригада сделала <b>{small}</b> деталей, первая — <b>{big}</b>. Вторая сделала на <b>{less}%</b> меньше. На сколько процентов первая бригада сделала больше?'
+    ];
+
+    function fmt(value) {
+        return String(Math.round(value * 100) / 100).replace('.', ',');
+    }
+
+    function timesWord(k) {
+        if (Math.abs(k - Math.round(k)) > 1e-9) return 'раза';
+        return Math.round(k) % 10 === 1 ? 'раз' : 'раза';
+    }
+
+    // Перегенерация брака: не более TrainerCore.MAX_TRIES попыток на пару
+    function makeCut() {
+        var fallback = null;
+        for (var attempt = 0; attempt < TrainerCore.MAX_TRIES; attempt++) {
+            var p = pickRandom(CUTS);
+            var answer = 100 / (100 - p);
+            if (!fallback) fallback = { p: p, answer: answer };
+            if (TrainerCore.isNiceAnswer(answer)) return { p: p, answer: answer };
+        }
+        return fallback || { p: CUTS[0], answer: 100 / (100 - CUTS[0]) };
+    }
+
+    function makeGrowth() {
+        var fallback = null;
+        for (var attempt = 0; attempt < TrainerCore.MAX_TRIES; attempt++) {
+            var k = pickRandom(GROWTH);
+            var answer = (k - 1) * 100;
+            if (!fallback) fallback = { k: k, answer: answer };
+            if (TrainerCore.isNiceAnswer(answer)) return { k: k, answer: answer };
+        }
+        return fallback || { k: GROWTH[0], answer: (GROWTH[0] - 1) * 100 };
+    }
+
+    function makePair() {
+        var fallback = null;
+        for (var attempt = 0; attempt < TrainerCore.MAX_TRIES; attempt++) {
+            var pair = pickRandom(PAIRS);
+            var big = Math.max(pair[0], pair[1]);
+            var small = Math.min(pair[0], pair[1]);
+            var more = (big - small) / small * 100;
+            var less = (big - small) / big * 100;
+            if (!fallback) fallback = { big: big, small: small, more: more, less: less };
+            if (TrainerCore.isNiceAnswer(more) && TrainerCore.isNiceAnswer(less)) {
+                return { big: big, small: small, more: more, less: less };
+            }
+        }
+        return fallback || { big: 5, small: 4, more: 25, less: 20 };
+    }
+
+    // --- Тип 3: снижение на p% → «во сколько раз» ---
+    function taskCut() {
+        var data = makeCut();
+        var text = pickRandom(STORIES_CUT).replace('{p}', fmt(data.p));
+        return {
+            text: '<p>' + text + '</p>',
+            answer: data.answer,
+            unit: 'раз',
+            explain: 'Новая величина — это ' + fmt(100 - data.p) + '% от старой, значит 100 : ' +
+                fmt(100 - data.p) + ' = ' + fmt(data.answer) + '.',
+            visual: { names: ['Было', 'Стало'], values: [100, 100 - data.p], base: 0 }
+        };
+    }
+
+    // --- Тип 4: рост в k раз → «на сколько процентов» ---
+    function taskGrowth() {
+        var data = makeGrowth();
+        var text = pickRandom(STORIES_GROWTH)
+            .replace('{k}', fmt(data.k))
+            .replace('{times}', timesWord(data.k));
+        return {
+            text: '<p>' + text + '</p>',
+            answer: data.answer,
+            unit: '%',
+            explain: 'Было 100%, стало ' + fmt(data.k * 100) + '%, значит выросло на ' + fmt(data.answer) + '%.',
+            visual: { names: ['Было', 'Стало'], values: [1, data.k], base: 0 }
+        };
+    }
+
+    // --- Тип 1: «первый на p% больше» → «второй на сколько % меньше» ---
+    function taskPairMore() {
+        var data = makePair();
+        var text = pickRandom(STORIES_MORE)
+            .replace('{big}', fmt(data.big))
+            .replace('{small}', fmt(data.small))
+            .replace('{more}', fmt(data.more));
+        return {
+            text: '<p>' + text + '</p>',
+            answer: data.less,
+            unit: '%',
+            explain: 'За 100% берём первый столбик: ' + fmt(data.big - data.small) + ' : ' +
+                fmt(data.big) + ' × 100% = ' + fmt(data.less) + '%.',
+            visual: { names: ['Первый', 'Второй'], values: [data.big, data.small], base: 0 }
+        };
+    }
+
+    // --- Та же пара, но база переключена: «второй на q% меньше» → «первый на сколько % больше» ---
+    function taskPairLess() {
+        var data = makePair();
+        var text = pickRandom(STORIES_LESS)
+            .replace('{big}', fmt(data.big))
+            .replace('{small}', fmt(data.small))
+            .replace('{less}', fmt(data.less));
+        return {
+            text: '<p>' + text + '</p>',
+            answer: data.more,
+            unit: '%',
+            explain: 'База переключена на второй столбик: ' + fmt(data.big - data.small) + ' : ' +
+                fmt(data.small) + ' × 100% = ' + fmt(data.more) + '%.',
+            visual: { names: ['Первый', 'Второй'], values: [data.big, data.small], base: 1 }
+        };
+    }
+
+    // --- Визуал: два столбика + переключатель базы (перерисовывается на каждой задаче) ---
+    function renderBars(task) {
+        var host = document.getElementById('taskVisual');
+        if (!host) return;
+        var visual = task.visual;
+        var max = Math.max.apply(null, visual.values.concat([1]));
+        var bars = visual.values.map(function (value, index) {
+            var height = Math.max(20, Math.round(Math.abs(value) / max * 168));
+            return '<div class="bar-col' + (index === visual.base ? ' base' : '') + '">' +
+                '<div class="bar" style="height:' + height + 'px"></div>' +
+                '<div class="bar-name">' + visual.names[index] + '</div>' +
+                '</div>';
+        }).join('');
+        var buttons = visual.names.map(function (name, index) {
+            return '<button type="button" class="base-btn' + (index === visual.base ? ' active' : '') +
+                '" data-base="' + index + '">' + name + '</button>';
+        }).join('');
+        host.innerHTML = '<div class="bars">' + bars + '</div>' +
+            '<div class="base-switch"><span class="switch-label">За 100% принять:</span>' + buttons + '</div>';
+    }
+
+    function checkBaseChange(task, value) {
+        return TrainerCore.close(value, task.answer);
+    }
+
+    var LEVELS = {
+        1: { desc: 'Снижение на p% → «во сколько раз»', generate: taskCut },
+        2: { desc: 'Рост в k раз → «на сколько %»', generate: taskGrowth },
+        3: { desc: 'Больше на p% → меньше на ?%', generate: taskPairMore },
+        4: { desc: 'Та же пара, база переключена', generate: taskPairLess },
+        5: {
+            desc: 'Смешанное задание',
+            generate: function () { return pickRandom([taskCut, taskGrowth, taskPairMore, taskPairLess])(); }
+        }
+    };
+
+    // Переключатель базы — учебный помощник: подсвечивает, какой столбик принят за 100%
+    document.addEventListener('click', function (event) {
+        var button = event.target.closest ? event.target.closest('.base-btn') : null;
+        if (!button) return;
+        var host = document.getElementById('taskVisual');
+        if (!host) return;
+        var index = Number(button.getAttribute('data-base'));
+        var buttons = host.querySelectorAll('.base-btn');
+        for (var i = 0; i < buttons.length; i++) buttons[i].classList.toggle('active', i === index);
+        var columns = host.querySelectorAll('.bar-col');
+        for (var j = 0; j < columns.length; j++) columns[j].classList.toggle('base', j === index);
+    });
+
+    TrainerCore.init({
+        id: 'base_change',
+        totalLevels: 5,
+        guide: [
+            'Сравниваем <b>две величины</b>: за 100% берём ту, с которой сравнивают (базу).',
+            'Кнопки под столбиками показывают, какой столбик сейчас принят за 100%.',
+            'Разница одна и та же, а проценты разные: <b>разница : база × 100%</b>.'
+        ],
+        level: function (level) {
+            var current = LEVELS[level] || LEVELS[1];
+            return {
+                desc: current.desc,
+                generate: current.generate,
+                render: renderBars,
+                check: checkBaseChange
+            };
+        }
+    });
+})();
+</script>
+</body>
+</html>
+

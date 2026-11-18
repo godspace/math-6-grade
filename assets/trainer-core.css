@@ -1,0 +1,194 @@
+/* Файл: assets/trainer-core.css
+   Общий каркас новых тренажёров «Проценты и пропорции»
+   (PROJECT_OPTIMIZATION_PLAN.md §22.3). Подключается только новыми страницами
+   (trainers/percents/base-change.html и далее), старые 4 страницы percents
+   каркас не используют (§21). В локальном <style> страницы — только визуал
+   её задачи (столбики, график, стакан, карточки пропорций). */
+
+:root {
+    --primary: #4361ee;
+    --primary-dark: #4834d4;
+    --percent-color: #f72585;
+    --success: #2ec4b6;
+    --warning: #ff9f1c;
+    --danger: #e71d36;
+    --bg-gradient: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+    --card-bg: rgba(255, 255, 255, 0.98);
+    --tile-bg: #f8faff;
+    --tile-border: #cbd5e1;
+    --text: #2d3436;
+    --text-muted: #636e72;
+}
+
+* { box-sizing: border-box; font-family: 'Nunito', sans-serif; }
+
+body {
+    background: var(--bg-gradient);
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--text);
+}
+
+.container {
+    background: var(--card-bg);
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    width: 100%;
+    max-width: 1100px;
+    min-height: 550px;
+    padding: 35px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Шапка: заголовок, бейджи уровней, счёт */
+.header {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 15px; flex-wrap: wrap; margin-bottom: 25px;
+}
+h1 { margin: 0; color: var(--text); font-size: 1.8rem; }
+.subtitle { color: var(--text-muted); margin-top: 5px; font-weight: 600; }
+.level-badges { display: flex; gap: 10px; }
+.lvl-badge {
+    width: 38px; height: 38px; border-radius: 50%; background: #ddd;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; color: #fff; font-size: 15px; transition: all 0.3s;
+}
+.lvl-badge.active { background: var(--primary); transform: scale(1.15); box-shadow: 0 0 12px var(--primary); }
+.lvl-badge.completed { background: var(--success); }
+.stats-box {
+    background: #f8f9fa; padding: 10px 20px; border-radius: 12px;
+    font-weight: 800; color: var(--primary);
+}
+
+/* Инструкция для ученика (строится из config.guide) */
+.kids-guide {
+    display: flex; gap: 15px; width: 100%; justify-content: center;
+    flex-wrap: wrap; margin-bottom: 22px;
+}
+.kids-guide:empty { display: none; }
+.guide-step {
+    background: var(--tile-bg); border: 2px dashed var(--tile-border); border-radius: 14px;
+    padding: 14px 18px; display: flex; align-items: center; gap: 12px;
+    max-width: 330px; font-size: 0.95rem; color: #475569;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02); transition: transform 0.2s;
+}
+.guide-step:hover { transform: translateY(-2px); }
+.guide-step:nth-child(1) { border-color: var(--primary); }
+.guide-step:nth-child(2) { border-color: var(--warning); }
+.guide-step:nth-child(3) { border-color: var(--percent-color); }
+.step-num {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--primary);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; color: #fff; font-size: 1rem; flex-shrink: 0;
+}
+.guide-step:nth-child(2) .step-num { background: var(--warning); }
+.guide-step:nth-child(3) .step-num { background: var(--percent-color); }
+
+
+/* Рабочая область */
+.work-area { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+
+.visual-container {
+    width: 100%; max-width: 860px; background: #fff;
+    padding: 14px 20px; border-radius: 18px;
+    border: 2px solid #e2e8f0; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+    display: flex; flex-direction: column; align-items: center;
+}
+.visual-container:empty { display: none; }
+
+/* Текст задачи */
+.task-statement {
+    background: #fff; border: 2px solid #e2e8f0; border-left: 6px solid var(--primary);
+    border-radius: 18px; padding: 22px 30px; width: 100%; max-width: 860px;
+    text-align: center; font-size: 1.35rem; line-height: 1.7;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.03);
+}
+.task-statement p { margin: 0; }
+.task-statement p + p { margin-top: 10px; }
+.task-statement b { color: var(--percent-color); font-weight: 900; }
+.task-statement.intro { animation: taskIn 0.4s ease; }
+
+/* Ввод ответа */
+.answer-row {
+    display: flex; align-items: center; justify-content: center;
+    gap: 10px; flex-wrap: wrap; width: 100%;
+}
+.answer-input {
+    width: 150px; height: 60px; font-size: 1.6rem; font-weight: 800;
+    text-align: center; color: var(--primary); background: #fff;
+    border: 2px solid var(--tile-border); border-radius: 14px; outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.answer-input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.15); }
+.answer-input.correct {
+    border-color: var(--success); color: var(--success);
+    background: #f0fdf4; pointer-events: none;
+}
+.answer-input.wrong { border-color: var(--danger); background: #fff0f0; animation: shake 0.4s; }
+.answer-unit { font-size: 1.5rem; font-weight: 900; color: var(--percent-color); }
+
+/* Кнопки и обратная связь */
+.actions { text-align: center; margin-top: 25px; }
+.btn {
+    background: var(--primary); color: #fff; border: none; padding: 14px 36px;
+    font-family: inherit; font-size: 1.1rem; border-radius: 50px; cursor: pointer;
+    font-weight: 800; margin: 0 10px; box-shadow: 0 8px 15px rgba(67, 97, 238, 0.25);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.btn:hover { transform: translateY(-2px); box-shadow: 0 12px 20px rgba(67, 97, 238, 0.35); }
+.btn:active { transform: translateY(0); }
+.btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn-check { background: linear-gradient(45deg, var(--success), #20bf6b); display: none; }
+.btn-next { background: linear-gradient(45deg, var(--primary), var(--primary-dark)); display: none; }
+
+.feedback { min-height: 28px; font-weight: 800; text-align: center; font-size: 1.05rem; }
+.feedback.ok { color: var(--success); }
+.feedback.err { color: var(--danger); }
+
+/* Победа */
+.victory-modal {
+    position: absolute; inset: 0; background: rgba(255, 255, 255, 0.98);
+    z-index: 100; display: none; flex-direction: column;
+    justify-content: center; align-items: center; text-align: center;
+    padding: 20px;
+}
+.victory-modal.active { display: flex; animation: fadeIn 0.5s; }
+.victory-modal h2 { color: var(--primary); margin: 0 0 14px; }
+.victory-stats { font-size: 1.15rem; line-height: 1.8; margin-bottom: 20px; }
+.victory-stats b { color: var(--success); font-weight: 900; }
+.trophy { font-size: 90px; margin-bottom: 15px; animation: bounce 2s infinite; }
+#confettiCanvas {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: -1;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+@keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+@keyframes taskIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+@media (max-width: 640px) {
+    body { padding: 10px; align-items: flex-start; }
+    .container { padding: 18px; border-radius: 18px; min-height: auto; }
+    .header { gap: 10px; margin-bottom: 16px; }
+    h1 { font-size: 1.35rem; }
+    .subtitle { font-size: 0.9rem; }
+    .lvl-badge { width: 32px; height: 32px; font-size: 13px; }
+    .stats-box { padding: 8px 14px; font-size: 0.9rem; }
+    .kids-guide { gap: 10px; margin-bottom: 16px; }
+    .guide-step { max-width: 100%; padding: 10px 14px; font-size: 0.88rem; }
+    .step-num { width: 28px; height: 28px; font-size: 0.9rem; }
+    .work-area { gap: 14px; }
+    .visual-container { padding: 10px 12px; }
+    .task-statement { padding: 16px; font-size: 1.05rem; border-radius: 14px; }
+    .answer-input { width: 120px; height: 52px; font-size: 1.35rem; }
+    .answer-unit { font-size: 1.2rem; }
+    .actions { margin-top: 16px; }
+    .btn { width: 100%; margin: 6px 0; padding: 13px 20px; font-size: 1rem; }
+    .trophy { font-size: 64px; }
+}
