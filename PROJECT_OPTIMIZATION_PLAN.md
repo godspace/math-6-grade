@@ -962,22 +962,25 @@ window.MG6_ZONES = {
 
 ### 23.6 Разметка и рендер на лендинге
 
-1. На каждый `.mission-link` — `data-mission="<id>"` (32 места), на каждый `.zone-card` — `data-zone="<zone>"` (7 мест).
-2. В `.zone-header` остальных 6 зон — тот же блок, что у «Уравнений» (860–863), с `data-progress`; в зоне «Уравнения» статику `0%` и `style="width: 5%"` заменить на те же хуки:
+1. На каждый `.mission-link` — `data-mission="<id>"` (32 места: 30 внутренних + 2 внешних `vpr`/`business` — они перечислены в `MG6_EXTERNAL` и в знаменатель не входят), на каждый `.zone-card` — `data-zone="<zone>"` (7 мест; у двух карточек есть доп. классы — `zone-highlight`, `zone-vpr`, поэтому точный матч `class="zone-card"` даёт 5).
+2. В `.zone-header` остальных 6 зон — тот же блок, что у «Уравнений» (860–863), с `data-progress`; в зоне «Уравнения» статику `0%` и `style="width: 5%"` заменить на те же хуки. Заливок две — `done` (сплошная `fill-green`) и сегмент `active` рядом, поэтому `.progress-track` получает `display: flex`:
 
 ```html
 <div>
     <h3 class="zone-title">🍰 Зона: Дроби</h3>
     <div class="progress-container" data-progress="fractions">
         <div class="progress-text"><span>Прогресс миссий</span> <span data-progress-label>0 / 8</span></div>
-        <div class="progress-track"><div class="progress-fill fill-green" data-progress-fill style="width: 0%"></div></div>
+        <div class="progress-track">
+            <div class="progress-fill fill-green" data-progress-fill style="width: 0%"></div>
+            <div class="progress-fill is-active" data-progress-active style="width: 0%"></div>
+        </div>
     </div>
 </div>
 ```
 
 3. CSS — существующий (`.progress-container/.progress-text/.progress-track/.progress-fill/.fill-green`, строки 621–625) переиспользуется; добавляется ≤20 строк: `.progress-fill.is-active` (полупрозрачная заливка под `done`), `.mission-link.is-done` (галочка `::after`), `.mission-link.is-active` (тонкая полоса слева).
 4. Подключение — сразу после `assets/analytics.js` (строка 738): `<script src="assets/missions.js" defer></script>` + `<script src="assets/progress.js" defer></script>`; порядок defer сохраняется, `MissionStore` уже определён.
-5. `assets/progress.js` (~100 строк): для каждой зоны из `MG6_ZONES` считает `done`/`active` по `MissionStore.get(id)`, ставит метку `N / M`, ширины заливок (`done`, затем `active`), классы миссиям; доступность — `role="progressbar"`, `aria-valuenow`. В конце — `document.body.dataset.progressReady = '1'` (маркер для headless, как §22.3). Неизвестный `data-mission` → один `console.warn`, миссия не учитывается. Перерисовка по событию `storage` (вкладка лендинга, открытая до прохождения тренажёра, обновляется сама).
+5. `assets/progress.js` (~100 строк): для каждой зоны из `MG6_ZONES` считает `done`/`active` по `MissionStore.get(id)`, ставит метку `N / M` (при непустом `active` — `N / M · K в процессе`), ширины заливок (`done`, затем `active`), классы миссиям; доступность — `role="progressbar"`, `aria-valuenow`. В конце — `document.body.dataset.progressReady = '1'` (маркер для headless, как §22.3). Неизвестный `data-mission` → один `console.warn`, миссия не учитывается; id из `MG6_EXTERNAL` пропускаются молча. Перерисовка по событию `storage` (вкладка лендинга, открытая до прохождения тренажёра, обновляется сама).
 
 ### 23.7 Нарезка на коммиты (этап 7 = 3 задачи Cline)
 
@@ -989,6 +992,8 @@ window.MG6_ZONES = {
 | **P4** плюшки (по желанию) | звёзды, «Продолжить с того места», общий счётчик курса, кнопка «Сбросить прогресс» | ~2–3 ч | `progress: ...` |
 
 После P1+P2 прогресс реальный для 19 миссий (`base_change` доходит до `done`, остальные 18 — до `active`), 11 показывают пусто до P3. Коммит с планом — отдельный (`plan: этап 7 — прогресс миссий`), как §17.4 п.8.
+
+**Сделано (2026-11-18):** P1 — `1af06a6` (`analytics.js` +78/−2, `trainer-core.js` +1/−1), P2 — `92cfccc` (`missions.js` 14 строк, `progress.js` 104 строки, `index.html` +104/−47: 2 defer-тега, 6 баров, 32 `data-mission`, 7 `data-zone`, 6 CSS-строк). П3/P4 не начаты.
 
 ### 23.8 Готчи (на чём легко упасть)
 
@@ -1004,11 +1009,13 @@ window.MG6_ZONES = {
 ### 23.9 Приёмка P1+P2
 
 - `python tools/check.py` → **38/38**, exit 0.
-- `python -X utf8 tools/page_console.py index.html --offline --expect 'data-progress-ready="1"'` → PASS, 0 ошибок JS.
+- `python -X utf8 tools/page_console.py index.html --offline --expect 'data-progress-ready'` → PASS, 0 ошибок JS (имя атрибута, а не `="1"`: PowerShell 5.1 съедает экранированные кавычки в аргументе — см. результат прогона ниже).
 - `python -X utf8 tools/page_console.py trainers/equations/opening.html trainers/divisibility/gcd.html trainers/percents/base-change.html trainers/fractions/math_board.html trainers/geometry/pi.html --offline` → 5/5 PASS, 0 ошибок JS (правки в `analytics.js`/`trainer-core.js`; `pi` — контроль синхронного подключения).
 - `python -X utf8 tools/dup_scan.py` → новых копий нет.
 - Ручной проход (за пользователем, headless не кликает): `gcd` → одна победа → лендинг: «Делимость» = `0 / 4` + «1 в процессе»; `base_change` пройти 5 уровней → «Проценты» = `1 / 5`, у миссии ✔; F5 — сохраняется; приватное окно — `0 / 5` и никаких падений.
 - `git diff --stat` — только целевые файлы шага; `Object.keys(localStorage)` — новый ключ ровно один; откат = `git revert` коммита P1/P2.
+
+**Результат прогона 2026-11-18:** `check.py` → 38/38, exit 0; `index.html` → PASS (0 ошибок, 0 предупреждений; `body data-progress-ready="1"`, 6 `role="progressbar"` с `aria-valuemax` 6/8/4/4/5/3 и метками `0 / N`); 5 контрольных тренажёров → 5/5 PASS, 0 ошибок; `dup_scan.py` → 45 HTML, новых копий нет (`missions.js`/`progress.js` — по 1 подключению). Логика `done`/`active` проверена на временной копии лендинга с засеянным `mg6.progress.v1`: «Делимость» → `0 / 4 · 1 в процессе`, сегмент `active` 25%, `.is-active` на `gcd`; «Проценты» → `1 / 5`, `aria-valuenow="1"`, `.is-done` на `base_change`; внешние `vpr`/`business` без классов и без `warn`.
 
 ### 23.10 Стартовый промпт для новой задачи (скопировать целиком)
 
