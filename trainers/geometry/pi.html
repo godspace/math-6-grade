@@ -104,7 +104,8 @@
 
         .app-title {
             margin: 0 0 15px 0;
-            font-size: 2rem;
+            font-size: clamp(1.15rem, 2.1vw, 1.6rem);
+            line-height: 1.25;
             font-weight: 800;
             color: var(--dark);
             letter-spacing: -0.03em;
@@ -274,7 +275,7 @@
     </div>
 
     <div class="sidebar">
-        <h1 class="app-title" id="appTitleText">Число Пи</h1>
+        <h1 class="app-title" id="appTitleText">Число Пи: длина окружности и площадь круга</h1>
         
         <div class="instructions" id="instructionsBox">
             <ol>
@@ -618,7 +619,7 @@
         document.getElementById('mainBtn').innerText = "Измеряй...";
 
         // Обновляем инструкции
-        document.getElementById('appTitleText').innerText = "Площадь круга";
+        document.getElementById('appTitleText').innerText = "Число Пи: площадь круга";
         document.getElementById('instructionsBox').innerHTML = `
             <ol>
                 <li>Дотяни фиолетовую ленту (<strong>радиус</strong>) до конца и впиши значение <strong>r</strong>.</li>
