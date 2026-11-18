@@ -356,7 +356,6 @@
 | 2a | `utils: assets/trainers-utils.js (divisibility)` (п.1) — **сделано, `8fb34d2`** | `assets/trainers-utils.js` (новый, 861 симв.) + `gcd`, `lcm` (`primes` — по решению §17); 3 файла, +32 / −43 | `gcd` −18 строк / −450 симв. inline-JS, `lcm` −21 / −559; `page_console.py` 4/4 + `check.py` 38/38; факт — §17.7 |
 | 2b | `utils: assets/trainers-utils.js (fractions)` (п.1) — **сделано, `c27abec`** | `assets/trainers-utils.js` (+5 строк / +268 симв.) + `addition`, `comparison`, `division`, `multiplication`, `mixed`, `mixed_complex` (`conversion` не меняется); 7 файлов, +13 / −50 | −42 строки / −1 565 симв. inline-JS (оценка −37 / −1 340: вместе с блоками ушли комментарии и пустые строки, §18.3 п.4); `page_console.py` 8/8 PASS (2 контрольные: `conversion`, `math_board`); `check.py` 38/38; факт — §18.9 |
 | 2b.1 | `tailwind: assets/tailwind.css вместо cdn.tailwindcss.com` (доступность + перф) — **сделано, `173ddc7`** | `trainers/fractions/mixed.html`, `mixed_complex.html` (по 1 замене), новые `assets/tailwind.css` (12 941 Б, minified) и `tools/tailwind.input.css` (834 Б) | `page_console.py` 2/2 PASS, `check.py` 38/38, скриншоты 1280×1000; факт — §19 |
-
 | 2c | `utils: percents, geometry, rational, motion, equations` | остальные страницы с утилитами | по 1 странице каждого раздела + `check.py` |
 | 3a | `percents: assets/percents.css` (п.3) | 4 страницы `percents` | 4 страницы, скриншоты |
 | 3b | `percents: assets/percents-common.js` (п.3) | те же 4 | 4 страницы по 3 задания |
@@ -612,10 +611,6 @@ python -X utf8 tools/utils_scan.py --pages "trainers/fractions/*.html" --names g
 - `dup_scan.py` «до/после» (число файлов с объявлением): `gcd` 6 → **0**, `lcm` 4 → **0**, `getRandomInt` 9 → **6**, `pickRandom` 5 → **4**, `primeFactors` 4 → **3** (`number-by`, `percent-of`, `ratio` — это 2c); `animate` 8 и `fireConfetti` 4 без изменений. В `trainers/fractions/*.html` объявлений `gcd|lcm|getRandomInt|pickRandom|primeFactors` — 0.
 - Ручной проход по 6 изменённым страницам (по одному заданию) — за пользователем: headless не кликает.
 - Откат: `git revert` одного коммита `c27abec`; коммит с планом — только документация, на работу страниц не влияет.
-
-
-
-
 
 ## 19. Шаг 2b.1: локальный Tailwind вместо CDN (2026-11-18)
 
