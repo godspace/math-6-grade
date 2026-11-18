@@ -949,20 +949,23 @@ showWin(customMessage, subId = 'general', opts) {
 // Тексты и href берутся из DOM по a[data-mission]; здесь только id.
 window.MG6_ZONES = {
     equations:    ['opening', 'opening_test', 'equations_constructor', 'equations_test', 'equations_construct', 'equations_construct_2'],
-    fractions:    ['fraction_conversion', 'fraction_comparison', 'fraction_addition', 'fraction_multiplication', 'fraction_division', 'fraction_mixed', 'mixed_complex', 'math_board'],
+    fractions:    ['fraction_conversion', 'fraction_comparison', 'fraction_addition', 'fraction_multiplication', 'fraction_division', 'fraction_mixed', 'mixed_complex'],
     divisibility: ['primes', 'divisibility_signs', 'gcd', 'lcm'],
     geometry:     ['pi', 'area_metaphor', 'area_constructor', 'perimeter_area'],
     percents:     ['percent_of', 'number_by', 'ratio', 'percent_tiles', 'base_change'],
     rational:     ['motion', 'coordinates_pro', 'phone_balance']
     // survival (ВПР, бизнес-симулятор) — внешние origin, прогресс не собирается
 };
+
+// `math_board` — песочница без цели: в разметке остаётся, в знаменатель не входит (P3).
+window.MG6_UNTRACKED = ['math_board'];
 ```
 
 Имена id — канонические, не по именам файлов: `equations_test` (`equations-test.html`), `opening_test` (`opening-test.html`), `equations_construct_2` (`equations_construct-2.html`), `area_constructor` (`area.html`), `perimeter_area` (`perimeter-area.html`), `coordinates_pro` (`coordinates-pro.html`), `math_board` (`math_board.html`). Все 24 существующих вызова `showWin` передают `subId`, совпадающий с манифестом дословно (сверено 2026-11-18), поэтому в P3 на 11 страницах без хука `showWin`/`trackGoal` нужно передавать **ровно** эти id — иначе миссия не подсветится.
 
 ### 23.6 Разметка и рендер на лендинге
 
-1. На каждый `.mission-link` — `data-mission="<id>"` (32 места: 30 внутренних + 2 внешних `vpr`/`business` — они перечислены в `MG6_EXTERNAL` и в знаменатель не входят), на каждый `.zone-card` — `data-zone="<zone>"` (7 мест; у двух карточек есть доп. классы — `zone-highlight`, `zone-vpr`, поэтому точный матч `class="zone-card"` даёт 5).
+1. На каждый `.mission-link` — `data-mission="<id>"` (32 места: 30 внутренних + 2 внешних `vpr`/`business` — они перечислены в `MG6_EXTERNAL` и в знаменатель не входят; после P3 `math_board` тоже вне знаменателя — `MG6_UNTRACKED`, поэтому учитываемых внутренних 29), на каждый `.zone-card` — `data-zone="<zone>"` (7 мест; у двух карточек есть доп. классы — `zone-highlight`, `zone-vpr`, поэтому точный матч `class="zone-card"` даёт 5).
 2. В `.zone-header` остальных 6 зон — тот же блок, что у «Уравнений» (860–863), с `data-progress`; в зоне «Уравнения» статику `0%` и `style="width: 5%"` заменить на те же хуки. Заливок две — `done` (сплошная `fill-green`) и сегмент `active` рядом, поэтому `.progress-track` получает `display: flex`:
 
 ```html
@@ -980,7 +983,7 @@ window.MG6_ZONES = {
 
 3. CSS — существующий (`.progress-container/.progress-text/.progress-track/.progress-fill/.fill-green`, строки 621–625) переиспользуется; добавляется ≤20 строк: `.progress-fill.is-active` (полупрозрачная заливка под `done`), `.mission-link.is-done` (галочка `::after`), `.mission-link.is-active` (тонкая полоса слева).
 4. Подключение — сразу после `assets/analytics.js` (строка 738): `<script src="assets/missions.js" defer></script>` + `<script src="assets/progress.js" defer></script>`; порядок defer сохраняется, `MissionStore` уже определён.
-5. `assets/progress.js` (~100 строк): для каждой зоны из `MG6_ZONES` считает `done`/`active` по `MissionStore.get(id)`, ставит метку `N / M` (при непустом `active` — `N / M · K в процессе`), ширины заливок (`done`, затем `active`), классы миссиям; доступность — `role="progressbar"`, `aria-valuenow`. В конце — `document.body.dataset.progressReady = '1'` (маркер для headless, как §22.3). Неизвестный `data-mission` → один `console.warn`, миссия не учитывается; id из `MG6_EXTERNAL` пропускаются молча. Перерисовка по событию `storage` (вкладка лендинга, открытая до прохождения тренажёра, обновляется сама).
+5. `assets/progress.js` (~100 строк): для каждой зоны из `MG6_ZONES` считает `done`/`active` по `MissionStore.get(id)`, ставит метку `N / M` (при непустом `active` — `N / M · K в процессе`), ширины заливок (`done`, затем `active`), классы миссиям; доступность — `role="progressbar"`, `aria-valuenow`. В конце — `document.body.dataset.progressReady = '1'` (маркер для headless, как §22.3). Неизвестный `data-mission` → один `console.warn`, миссия не учитывается; id из `MG6_EXTERNAL` и `MG6_UNTRACKED` пропускаются молча. Перерисовка по событию `storage` (вкладка лендинга, открытая до прохождения тренажёра, обновляется сама).
 
 ### 23.7 Нарезка на коммиты (этап 7 = 3 задачи Cline)
 
@@ -993,7 +996,23 @@ window.MG6_ZONES = {
 
 После P1+P2 прогресс реальный для 19 миссий (`base_change` доходит до `done`, остальные 18 — до `active`), 11 показывают пусто до P3. Коммит с планом — отдельный (`plan: этап 7 — прогресс миссий`), как §17.4 п.8.
 
-**Сделано (2026-11-18):** P1 — `1af06a6` (`analytics.js` +78/−2, `trainer-core.js` +1/−1), P2 — `92cfccc` (`missions.js` 14 строк, `progress.js` 104 строки, `index.html` +104/−47: 2 defer-тега, 6 баров, 32 `data-mission`, 7 `data-zone`, 6 CSS-строк). П3/P4 не начаты.
+**Сделано (2026-11-18):** P1 — `1af06a6` (`analytics.js` +78/−2, `trainer-core.js` +1/−1), P2 — `92cfccc` (`missions.js` 14 строк, `progress.js` 104 строки, `index.html` +104/−47: 2 defer-тега, 6 баров, 32 `data-mission`, 7 `data-zone`, 6 CSS-строк). P3 — коммит `progress: final events for remaining trainers`: `{final:true}` в **8** сертификатных `showWin` (`signs:587`, `division:702`, `multiplication:735`, `number-by:1275`, `percent-of:891`, `ratio:854`, `tiles:678`, `equations_construct:1223`) и `trackGoal('course_finished')` на **11** страницах без хука:
+
+| миссия | точка вызова `course_finished` |
+|---|---|
+| `opening_test` | `opening-test.html` — `logout()`, внутри `if(confirm(...))` |
+| `equations_test` | `equations-test.html` — `finishExam()` |
+| `equations_construct_2` | `equations_construct-2.html` — `DOMContentLoaded`, когда `doneCount === 8` |
+| `pi` | `pi.html` — `showFinal()` |
+| `area_metaphor` | `area-metaphor.html` — `startFinalPhase()` |
+| `area_constructor` | `area.html` — ветка `isLastStep` (`isTaskCompleted = true`) |
+| `perimeter_area` | `perimeter-area.html` — `loadLevel()`, ветка «Курс пройден!» (20 уровней) |
+| `motion` | `motion.html` — `checkAnswers()`, ветка `allCorrect` (все 4 поля) |
+| `coordinates_pro` | `coordinates-pro.html` — `check()`: `task_solved` на каждый верный, `course_finished` при `score >= 5` (счётчик сбрасывается при смене режима) |
+| `phone_balance` | `phone-balance.html` — `nextLevel()`, ветка последнего уровня |
+| `math_board` | **не пишет прогресс**: песочница без цели, вынесена в `MG6_UNTRACKED`, зона «Дроби» считается `7` (`index.html` → `0 / 7`) |
+
+Все вызовы под `if (window.trackGoal)`, поэтому страницы работают и без аналитики. Порогов три (`motion` — 1 полная задача, `area_constructor` — 1 задание до последнего шага, `coordinates_pro` — 5 верных) — вынужденная мера: у этих трёх тренажёров задания генерируются бесконечно и финального экрана нет. P4 не начат.
 
 ### 23.8 Готчи (на чём легко упасть)
 
@@ -1016,6 +1035,15 @@ window.MG6_ZONES = {
 - `git diff --stat` — только целевые файлы шага; `Object.keys(localStorage)` — новый ключ ровно один; откат = `git revert` коммита P1/P2.
 
 **Результат прогона 2026-11-18:** `check.py` → 38/38, exit 0; `index.html` → PASS (0 ошибок, 0 предупреждений; `body data-progress-ready="1"`, 6 `role="progressbar"` с `aria-valuemax` 6/8/4/4/5/3 и метками `0 / N`); 5 контрольных тренажёров → 5/5 PASS, 0 ошибок; `dup_scan.py` → 45 HTML, новых копий нет (`missions.js`/`progress.js` — по 1 подключению). Логика `done`/`active` проверена на временной копии лендинга с засеянным `mg6.progress.v1`: «Делимость» → `0 / 4 · 1 в процессе`, сегмент `active` 25%, `.is-active` на `gcd`; «Проценты» → `1 / 5`, `aria-valuenow="1"`, `.is-done` на `base_change`; внешние `vpr`/`business` без классов и без `warn`.
+
+### 23.9а Приёмка P3
+
+- `python -X utf8 tools/check.py` → **38/38**, exit 0.
+- `python -X utf8 tools/page_console.py index.html --offline --expect 'data-progress-ready'` → PASS, 0 ошибок, 0 предупреждений; после исключения `math_board` — 6 `role="progressbar"` с `aria-valuemax` **6/7/4/4/5/3**, метка «Дроби» `0 / 7`, у ссылки `math_board` классов `is-done`/`is-active` нет и `console.warn` «неизвестная миссия» не появляется.
+- 18 изменённых страниц (`opening-test`, `equations-test`, `equations_construct-2`, `equations_construct`, `pi`, `area-metaphor`, `area`, `perimeter-area`, `phone-balance`, `coordinates-pro`, `motion`, `division`, `multiplication`, `number-by`, `percent-of`, `ratio`, `tiles`, `signs`) → `page_console.py --offline` → **18/18 PASS**, 0 ошибок JS (`equations_construct-2` — один прежний warn про Firebase в офлайне).
+- 4 контрольных тренажёра (`opening`, `gcd`, `base-change`, `math_board`) → **4/4 PASS**, 0 ошибок.
+- `python -X utf8 tools/dup_scan.py` → новых копий нет, `assets/missions.js` и `assets/progress.js` — по 1 подключению.
+- Ручной проход (за пользователем): `pi` → «ПОДВЕСТИ ИТОГ» → «Геометрия» `1 / 4`; `perimeter-area` пройти 20 уровней → `1 / 4` + ✔; `motion` — все 4 поля верно → «Рациональные» `1 / 3`; `coordinates_pro` — 5 верных в одном режиме; `math_board` — прогресс не меняется (песочница).
 
 ### 23.10 Стартовый промпт для новой задачи (скопировать целиком)
 
