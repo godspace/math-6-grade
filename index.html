@@ -223,6 +223,235 @@
         .board-btn:active { transform: scale(0.97); }
         .board-btn:focus-visible { outline: 2px solid var(--accent-neon); outline-offset: 3px; }
 
+        /* Витрина Math Board: светлое превью самой доски внутри тёмной карточки */
+        .board-showcase {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+            gap: 30px;
+            align-items: center;
+            padding: 32px;
+            margin-bottom: 40px;
+            border: 1px solid rgba(0, 242, 254, 0.22);
+            border-radius: 24px;
+            background:
+                radial-gradient(circle at 12% 0%, rgba(0, 242, 254, 0.12), transparent 45%),
+                linear-gradient(145deg, rgba(30, 41, 59, 0.85) 0%, rgba(15, 23, 42, 0.92) 100%);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+        }
+        .showcase-eyebrow {
+            display: inline-block;
+            margin-bottom: 10px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+            color: var(--accent-neon);
+        }
+        .board-showcase h2 {
+            margin: 0 0 12px;
+            font-size: 1.7rem;
+            line-height: 1.25;
+            color: #fff;
+        }
+        .board-showcase h2 span {
+            background: linear-gradient(to right, var(--accent-neon), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .board-showcase p { margin: 0 0 16px; color: var(--text-muted); }
+        .showcase-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 0 0 22px;
+            padding: 0;
+            list-style: none;
+        }
+        .showcase-chips li {
+            padding: 5px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.04);
+            font-size: 0.78rem;
+            color: var(--text-main);
+        }
+        .showcase-actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+        .showcase-note { font-size: 0.8rem; color: var(--text-muted); }
+
+        /* Макет доски — только оформление, ссылка целиком ведёт в тренажёр */
+        .board-mock {
+            display: block;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 16px;
+            background: #f4f6f8;
+            text-decoration: none;
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45), 0 0 0 6px rgba(255, 255, 255, 0.03);
+            transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.25s;
+        }
+        .board-mock:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 24px 50px rgba(0, 0, 0, 0.5), 0 0 0 6px rgba(0, 242, 254, 0.14);
+        }
+        .board-mock:focus-visible { outline: 2px solid var(--accent-neon); outline-offset: 4px; }
+
+        .mock-topbar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            background: #1e293b;
+        }
+        .mock-dot { width: 9px; height: 9px; border-radius: 50%; background: #475569; }
+        .mock-dot:nth-child(1) { background: #ef4444; }
+        .mock-dot:nth-child(2) { background: #f59e0b; }
+        .mock-dot:nth-child(3) { background: #10b981; }
+        .mock-url {
+            margin-left: 8px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.06);
+            font-size: 11px;
+            line-height: 1;
+            color: #94a3b8;
+        }
+
+        .mock-body { display: flex; min-height: 216px; }
+        .mock-sidebar {
+            flex: 0 0 62px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 8px;
+            background: #fff;
+            border-right: 1px solid #e2e8f0;
+        }
+        .mock-chip {
+            width: 100%;
+            height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background: #f8fafc;
+            font-size: 11px;
+            font-weight: 700;
+            line-height: 1;
+            color: #4f46e5;
+        }
+        .mock-chip.is-active {
+            background: #eef2ff;
+            border-color: #c7d2fe;
+            box-shadow: inset 0 0 0 1px rgba(79, 70, 229, 0.2);
+        }
+
+        .mock-surface {
+            position: relative;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 16px;
+            background-color: #f4f6f8;
+            background-image:
+                linear-gradient(#e0e0ea 1px, transparent 1px),
+                linear-gradient(90deg, #e0e0ea 1px, transparent 1px);
+            background-size: 22px 22px;
+        }
+        .mock-expr {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Inter', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .mock-frac {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 1rem;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+        .mock-frac > span:last-child {
+            padding-top: 2px;
+            border-top: 2px solid currentColor;
+        }
+        .mock-chip .mock-frac { font-size: 9px; }
+        .mock-chip .mock-frac > span:last-child { border-top-width: 1.5px; padding-top: 1px; }
+
+        .mock-drag {
+            position: absolute;
+            right: 30px;
+            bottom: 64px;
+            padding: 6px 10px;
+            border: 1px solid #c7d2fe;
+            border-radius: 8px;
+            background: #fff;
+            color: #1e293b;
+            box-shadow: 0 10px 20px rgba(79, 70, 229, 0.25);
+            animation: mock-float 4s ease-in-out infinite;
+        }
+        .mock-drag .mock-frac { font-size: 1rem; }
+        .mock-drag::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border: 1.5px dashed rgba(79, 70, 229, 0.45);
+            border-radius: 10px;
+        }
+        .mock-hud {
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+            display: flex;
+            gap: 6px;
+        }
+        .mock-hud span {
+            padding: 3px 8px;
+            border: 1px solid #e2e8f0;
+            border-radius: 999px;
+            background: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            line-height: 1;
+            color: #475569;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+        }
+        .mock-foot {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 10px 14px;
+            border-top: 1px solid #e2e8f0;
+            background: #fff;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #64748b;
+        }
+        .mock-foot .mock-cta { color: var(--accent-purple); }
+
+        @keyframes mock-float {
+            0%, 100% { transform: translateY(0) rotate(-1.5deg); }
+            50% { transform: translateY(-7px) rotate(1.5deg); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .mock-drag { animation: none; }
+            .board-mock { transition: none; }
+        }
+        @media (max-width: 900px) {
+            .board-showcase { grid-template-columns: 1fr; padding: 24px 20px; gap: 22px; }
+            .mock-body { min-height: 186px; }
+            .mock-drag { right: 16px; bottom: 48px; }
+        }
+
         .cta-row { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; align-items: stretch; }
 
         .support-btn {
@@ -494,6 +723,16 @@
             .cta-row { flex-direction: column; align-items: stretch; }
             .support-btn { width: 100%; box-sizing: border-box; padding: 14px 20px; font-size: 1rem; }
             .board-btn { width: 100%; box-sizing: border-box; padding: 14px 20px; font-size: 1rem; }
+            .board-showcase { padding: 20px 16px; border-radius: 20px; }
+            .board-showcase h2 { font-size: 1.35rem; }
+            .showcase-actions { gap: 10px; }
+            .showcase-note { width: 100%; text-align: center; }
+            .mock-sidebar { flex-basis: 52px; padding: 8px 6px; }
+            .mock-chip { height: 24px; font-size: 10px; }
+            .mock-expr { font-size: 1.2rem; gap: 8px; }
+            .mock-url { display: none; }
+            .mock-drag { right: 12px; bottom: 44px; }
+            .mock-hud span { padding: 2px 6px; font-size: 9px; }
         }
     </style>
     <script src="assets/analytics.js" defer></script>
@@ -512,6 +751,59 @@
             <button type="button" class="support-btn" id="support-open" aria-haspopup="dialog">♥ Поддержать</button>
         </div>
     </header>
+
+    <!-- ВИТРИНА MATH BOARD -->
+    <section class="board-showcase" aria-labelledby="board-showcase-title">
+        <div class="board-showcase-text">
+            <span class="showcase-eyebrow">Sandbox · без регистрации</span>
+            <h2 id="board-showcase-title">🧩 Math Board — <span>доска, где всё двигается</span></h2>
+            <p>Свободная интерактивная доска: перетаскивай числа, дроби и знаки, собирай примеры, решай столбиком и уголком. Ничего не проверяет — просто пробуй и смотри, что получается.</p>
+            <ul class="showcase-chips">
+                <li>Drag &amp; Drop</li>
+                <li>Дроби и смешанные числа</li>
+                <li>Столбиком и уголком</li>
+                <li>Степени и корни</li>
+            </ul>
+            <div class="showcase-actions">
+                <a href="trainers/fractions/math_board.html" class="board-btn">🧩 Открыть доску</a>
+                <span class="showcase-note">Работает и на телефоне</span>
+            </div>
+        </div>
+
+        <a class="board-mock" href="trainers/fractions/math_board.html" aria-label="Открыть Math Board — интерактивную доску с дробями">
+            <div class="mock-topbar" aria-hidden="true">
+                <span class="mock-dot"></span><span class="mock-dot"></span><span class="mock-dot"></span>
+                <span class="mock-url">math_board.html</span>
+            </div>
+            <div class="mock-body" aria-hidden="true">
+                <div class="mock-sidebar">
+                    <span class="mock-chip is-active">123</span>
+                    <span class="mock-chip">x</span>
+                    <span class="mock-chip"><span class="mock-frac"><span>1</span><span>2</span></span></span>
+                    <span class="mock-chip">+</span>
+                    <span class="mock-chip">−</span>
+                    <span class="mock-chip">×</span>
+                    <span class="mock-chip">:</span>
+                    <span class="mock-chip">=</span>
+                </div>
+                <div class="mock-surface">
+                    <div class="mock-expr">
+                        <span class="mock-frac"><span>3</span><span>4</span></span>
+                        <span>+</span>
+                        <span class="mock-frac"><span>1</span><span>4</span></span>
+                        <span>=</span>
+                        <span>1</span>
+                    </div>
+                    <div class="mock-drag"><span class="mock-frac"><span>1</span><span>4</span></span></div>
+                    <div class="mock-hud"><span>↶</span><span>↷</span><span>100%</span></div>
+                </div>
+            </div>
+            <div class="mock-foot" aria-hidden="true">
+                <span>Перетащи дробь на доску</span>
+                <span class="mock-cta">Попробовать →</span>
+            </div>
+        </a>
+    </section>
 
     <!-- ДЕЙЛИКИ (HOT DROPS) -->
     <section class="hot-drops">
