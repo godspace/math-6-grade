@@ -873,7 +873,7 @@ python -X utf8 tools/page_console.py "trainers/percents/base-change.html" --offl
 - `window.RewardSystem.showWin(msg, subId)` — `assets/analytics.js:154`; вызывается в **15 файлах тренажёров (24 места)** + `assets/trainer-core.js:267,315`.
 - `window.trackGoal(goal, params)` вызывается в `trainers/equations/opening.html` (756 `task_solved`, 821 `trainer_started`, 828 `course_finished`), **но нигде не определён** — сейчас это мёртвые вызовы под `if (window.trackGoal)`. Определяем его в `analytics.js` — страница начинает отдавать события без правок (§23.4).
 - Финальный уровень `trainer-core.js` идёт через `showVictory()` → `showWin('Все N уровней пройдены!', cfg.id)` (315): достаточно третьего аргумента `{ final: true }`.
-- `analytics.js` подключён на всех 44 страницах (тренажёры — `defer`, строка ~48; лендинг — 738), `page_console.py` запускает headless с `--allow-file-access-from-files`, то есть `file://` + `localStorage` работают.
+- `analytics.js` подключён на лендинге (738) и на **всех 30 страницах-миссиях** (строка ~48, `defer`) — 31 файл из 46 HTML; без него только служебные: `privacy.html`, `head-snippet.html`, 9 старых `trainers/equations/construct/taskN.html` + `construct/teacher.html`, `tests/math_board.smoke.html` и 2 файла верификации. `page_console.py` запускает headless с `--allow-file-access-from-files`, поэтому `file://` + `localStorage` работают.
 
 | зона | миссии: `mission-id` (✔ — есть `showWin`) |
 |---|---|
@@ -902,7 +902,7 @@ python -X utf8 tools/page_console.py "trainers/percents/base-change.html" --offl
 
 ### 23.4 API: `MissionStore` + `trackGoal` в `assets/analytics.js`
 
-Новые скрипты на 30 страниц-тренажёров **не добавляем** — `analytics.js` уже есть везде.
+Новые скрипты на 30 страниц-тренажёров **не добавляем** — `analytics.js` уже есть на лендинге и на всех 30 страницах-миссиях.
 
 ```js
 // assets/analytics.js, рядом с RewardSystem
@@ -997,7 +997,7 @@ window.MG6_ZONES = {
 5. **Два таба.** Read-modify-write гонка: запись всегда через `merge` по текущему `read()`, чтение — по событию `storage`; иначе открытая вкладка лендинга не увидит свежий прогресс.
 6. **Чужие ключи** (`mathExam_v3_db`, `op_onboard`, `mathBoardData`, `task<i>_completed`) не трогаем; новых ключей ровно один — `mg6.progress.v1`.
 7. **`dup_scan.py`** считает копии ≥200 символов: в `progress.js`/`missions.js` не должно быть localStorage-кода из `equations_construct-2.html` (там свой формат `task<i>_completed`).
-8. **`analytics.js` общий для всех страниц** → `page_console.py` гоняем не только по лендингу, но и по 4 контрольным тренажёрам (`opening`, `gcd`, `base-change`, `math_board`); `check.py` — 38/38 smoke.
+8. **`analytics.js` общий для лендинга и всех 30 миссий** → `page_console.py` гоняем не только по лендингу, но и по 4 контрольным тренажёрам (`opening`, `gcd`, `base-change`, `math_board`); `check.py` — 38/38 smoke.
 
 ### 23.9 Приёмка P1+P2
 
