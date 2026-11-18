@@ -114,6 +114,7 @@
 - `tools/dup_scan.py` — замер дублирования (шаги 6.2–6.3): экономия по зонам (head/CSS/JS/body), топ общих блоков, экономия внутри кластеров страниц, повторяемые функции, `on*`, внешние `<script src>`. Запуск: `python -X utf8 tools/dup_scan.py` (текст) или `--json`; методика и ограничения — в шапке файла.
 - `tools/size.py` — замер доски (HTML + `assets/math_board.css` + `assets/math_board.js`), 2979 стр. / 125 363 симв. / ~31 341 токенов. Переписывать не нужно: `inventory.py` покрывает его цифры.
 - `tools/page_console.py` — проверка **изменённых страниц** без ручного прохода: `python -X utf8 tools/page_console.py "trainers/divisibility/*.html" --offline` → `[PASS]/[FAIL]` по каждой странице, число ошибок JS (`Uncaught …`, `is not defined`), опционально `--expect "текст"` (маркер отрисовался) и `--dump-dir` (сохранить DOM). `--offline` блокирует CDN/шрифты/счётчики: быстрее и детерминированнее. Код возврата 0/1/2.
+- `assets/trainers-utils.js` — общий модуль утилит страниц-тренажёров: с шага 2a там `vibrate`, `isPrime`, `gcd`, `lcm`, `primeFactors` (§17.7). Подключается обычным `<script>` (без `defer`) в `<head>` перед `analytics.js`; новая утилита добавляется сюда, только если её тело в страницах идентично — варианты тела остаются локальными (§14.2 п.1).
 - Логи: `[Console]::OutputEncoding=[Text.Encoding]::UTF8; python -X utf8 tools/<tool>.py | Out-File -Encoding utf8 <файл>` — иначе PowerShell 5.1 пишет UTF-16 и кириллица ломается.
 - Git: `main` = `origin/main`, рабочее дерево чистое (сверять `git status -sb`). Хеши: доска 4.1 `4831f2d`, 4.2 `c256858`, 5.1 `758a8bd`, 5.2 `a29b94f`; подготовка этапа 6: `05e7fe7` (`tools/inventory.py`), `45f6c01` (этот документ), `ae2a37b` (`.gitignore`).
 
@@ -296,6 +297,8 @@
 **Факт по п.2 — сделано, `4cd5792`.** Из всех 9 задач `construct` удалена ровно одна строка
 `<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>` (была 8-й строкой). `git diff --stat` — 9 файлов, −9 строк; `tools/inventory.py` — HTML 1 132 349 → 1 131 629 симв. (−720 = по 80 на файл), inline-JS/inline-CSS/`on*`/картинки не изменились. Headless-прогон (Edge, `--dump-dom`) всех 9 задач: Этап 1 — drag&drop собирается верно (`correct` = все зоны) и Этап 2 активируется; Этап 2 — верное уравнение принимается (`success-text`); Этап 3 — активен, формула перерисована MathJax (`mjx-container` в `#stage3-eq-display` = 1, всего по странице 23–49), консоль без ошибок. `python tools/check.py` — 38/38.
 
+**Факт по п.1 (шаг 2a) — начато, `8fb34d2`.** Создан первый общий файл `assets/trainers-utils.js` (861 симв. / 28 стр.): `vibrate`, `isPrime`, `gcd`, `lcm`, `primeFactors`; копии удалены из `gcd.html` и `lcm.html`, в страницах остались только вызовы, тела перенесены дословно (сверка 6/6). `gcd` −18 строк / −450 симв. inline-JS, `lcm` −21 строка / −559 симв. inline-JS. Подробности — §17.7.
+
 **Сумма группы A ≈ 162 000 симв.** Пункты 1, 3, 5, 7 частично пересекаются (одни и те же строки), поэтому сумма не аддитивна — это верхняя граница.
 
 ### 14.3 Группа B — гигиена (K4 = 1); порядок по цене/риску, формальный P указан
@@ -336,7 +339,7 @@
 ### 14.6 Ответ на вопрос «что делать первым»
 
 1. **П.2 — убрать `polyfill.io`** — **сделано (`4cd5792`)**: 9 строк, ~10 минут, риск ≈ 0; минус 9 подключений к мёртвому домену на 9 страницах раздела `construct`.
-2. **П.1 — `assets/trainers-utils.js`**, начиная с утилит с **одним вариантом тела** (`getRandomInt`, `pickRandom`), затем с двумя (`declOfNum`, `gcd`, `lcm`, `isPrime`, `shuffleArray`, `vibrate`): 15 410 симв., 68 вхождений → 14, поведение не меняется.
+2. **П.1 — `assets/trainers-utils.js`**, начиная с утилит с **одним вариантом тела** (`getRandomInt`, `pickRandom`), затем с двумя (`declOfNum`, `gcd`, `lcm`, `isPrime`, `shuffleArray`, `vibrate`): 15 410 симв., 68 вхождений → 14, поведение не меняется. **Первый шаг (2a, divisibility) сделан — `8fb34d2`, §17.7**; дальше 2b (`fractions`), 2c (остальные разделы).
 3. **П.3 — `percents`**: 28 891 симв. на 4 страницах, лучший удельный выигрыш (`ratio`: 58 % JS и 77 % CSS — копия).
 4. Дальше по таблице. П.5 (`construct`, 52 190) — самый большой объём и самый высокий риск, поэтому после п.1–4, когда общий JS-файл уже обкатан на безопасных утилитах.
 5. Группа B — только после A; внутри: п.10 (~10 минут) → п.11 → п.12.
@@ -349,7 +352,7 @@
 |---|---|---|---|
 | 0 | `plan: 6.2–6.4 — карта дублирования, inline-блоки, ранжирование` | этот файл, `tools/dup_scan.py`, `tools/inventory-before-2026-11-18.json` | страницы не затронуты; `git diff --stat` — только эти 3 файла |
 | 1 | `construct: убрать polyfill.io` (п.2) — **сделано, `4cd5792`** | 9 `trainers/equations/construct/task*.html` (−1 строка) | все 9 задач + `check.py`: 9/9 задач проходят 3 этапа, `check.py` 38/38 |
-| 2a | `utils: assets/trainers-utils.js (divisibility)` (п.1) | `assets/trainers-utils.js` + `gcd`, `lcm` (`primes` — по решению §17) | `page_console.py` 4/4 + `check.py`; точный объём и базовая линия — §17 |
+| 2a | `utils: assets/trainers-utils.js (divisibility)` (п.1) — **сделано, `8fb34d2`** | `assets/trainers-utils.js` (новый, 861 симв.) + `gcd`, `lcm` (`primes` — по решению §17); 3 файла, +32 / −43 | `gcd` −18 строк / −450 симв. inline-JS, `lcm` −21 / −559; `page_console.py` 4/4 + `check.py` 38/38; факт — §17.7 |
 | 2b | `utils: fractions` | `addition`, `comparison`, `conversion`, `division`, `multiplication`, `mixed`, `mixed_complex` | 7 страниц + `check.py` |
 | 2c | `utils: percents, geometry, rational, motion, equations` | остальные страницы с утилитами | по 1 странице каждого раздела + `check.py` |
 | 3a | `percents: assets/percents.css` (п.3) | 4 страницы `percents` | 4 страницы, скриншоты |
@@ -379,6 +382,7 @@
 - [x] Гипотезы §6 проверены, две опровергнуты с цифрами (§14.4), исключения обоснованы (§14.5).
 - [x] План не исполнялся: изменены только `PROJECT_OPTIMIZATION_PLAN.md`, `tools/dup_scan.py`, `tools/inventory-before-2026-11-18.json`.
 - [x] После первого исполненного шага — факт заполнен: п.2 (`polyfill.io`), `4cd5792` (9 задач «construct», −9 строк, −720 симв.); план — `fd768af`; `check.py` 38/38 до и после; `inventory.py` — изменены только эти 9 файлов, inline-JS/CSS/`on*`/картинки без изменений; ссылок на `polyfill` в проекте не осталось.
+- [x] После шага 2a — факт заполнен: `8fb34d2` (`assets/trainers-utils.js` +861 симв.; `gcd` −18 строк / −450 симв. inline-JS, `lcm` −21 / −559), §17.7; `check.py` 38/38 и `page_console.py` 4/4 PASS до и после; `dup_scan` — `isPrime` 3 файла → 1, `getPrimeFactors` 2 → 0; inline-CSS/`on*`/картинки не изменились; ручной проход 3 этапов остаётся за пользователем.
 
 ## 17. Handoff: шаг 2a — `assets/trainers-utils.js` (divisibility)
 
@@ -410,6 +414,8 @@
 
 `gcd.html` −17 строк, `lcm.html` −21 строка; по §12.2: `isPrime` 288 + `gcd` 210 + `lcm` 108 + `primeFactors` 735 ≈ **1 341 симв.** inline-JS, плюс ~80 симв. подключения на страницу. Это малая часть п.1 (15 410) — основной объём дадут 2b/2c.
 
+Факт (`8fb34d2`): `gcd.html` −18 строк / −450 симв. inline-JS (−395 симв. по файлу), `lcm.html` −21 строка / −559 симв. inline-JS (−504 симв. по файлу) — ожидание по строкам сошлось (±1 — снятие пустых строк между блоками), по символам ниже оценки, потому что `isPrime`/`gcd`/`lcm` в страницах были короче, чем средние тела в §12.2. В модуль ушёл и `vibrate` (копия по §17.1), поэтому фактическая экономия inline-JS −1 009 симв. на две страницы.
+
 ### 17.4 Порядок работы
 
 1. `git status -sb` — чисто, `main` = `origin/main`.
@@ -418,19 +424,41 @@
 4. Создать `assets/trainers-utils.js`: `gcd`, `lcm`, `isPrime`, `primeFactors` (каноническое имя — `primeFactors` по §14.2; в страницах вызовы `getPrimeFactors(...)` заменить на `primeFactors(...)` — мест немного).
 5. В `gcd.html` и `lcm.html` удалить перечисленные копии, добавить подключение.
 6. Проверить: `python tools/check.py` (38/38) → `python -X utf8 tools/page_console.py "trainers/divisibility/*.html" --offline` (4/4 PASS) → вручную пройти 3 этапа в `gcd.html` и `lcm.html` (подсветка простых, сборка множителей, конфетти и подсказка в конце).
-7. Снять «после»: `inventory.py --json`, `dup_scan.py` — `isPrime`/`primeFactors` исчезают из списка повторяемых функций.
+7. Снять «после»: `inventory.py --json`, `dup_scan.py` — `isPrime` и `getPrimeFactors` уходят из списка повторяемых функций (`primeFactors` в 4 страницах других разделов остаётся — это 2b/2c).
 8. Коммиты: `utils: assets/trainers-utils.js (divisibility)` — только `assets/trainers-utils.js`, `trainers/divisibility/gcd.html`, `trainers/divisibility/lcm.html`; затем отдельный `plan: шаг 2a — факт и цифры` (§14.2 п.1, §15 строка 2a, этот раздел).
 
 ### 17.5 Приёмка
 
-- [ ] `gcd`/`lcm`/`isPrime`/`primeFactors` определены только в `assets/trainers-utils.js` (для этих страниц).
-- [ ] `git diff --stat` — только целевые 3 файла; inline-CSS, `on*`, картинки не изменены.
-- [ ] `check.py` 38/38; `page_console.py` 4/4 PASS; ручной проход `gcd`/`lcm`.
-- [ ] `dup_scan`: `isPrime` и `primeFactors` ушли из списка повторяемых функций.
-- [ ] Откат = `git revert` одного коммита (модуль появляется раньше удаления копий, промежуточное состояние работоспособно).
+- [x] `gcd`/`lcm`/`isPrime`/`primeFactors` определены только в `assets/trainers-utils.js` (для этих страниц); `getPrimeFactors` в проекте не осталось (0 вхождений).
+- [x] `git diff --stat` — только целевые 3 файла (+32 / −43); inline-CSS 6 882 / 7 121 и `on*` 2 / 2 без изменений, картинки не тронуты.
+- [x] `check.py` 38/38; `page_console.py` 4/4 PASS (0 ошибок JS), с `--expect "Заполни пустые слоты"` — 2/2; тела функций сверены с `8fb34d2~1` — 6/6 дословно. Ручной проход 3 этапов — за пользователем (headless не кликает).
+- [x] `dup_scan`: `isPrime` ушёл из списка (3 файла → 1 — `primes.html`, другой вариант тела по §17.1), `getPrimeFactors` 2 → 0, `vibrate` 3 → 1. `primeFactors` остаётся в 4 страницах других разделов (`multiplication`, `number-by`, `percent-of`, `ratio`) — это 2b/2c, в 2a не входило.
+- [x] Откат = `git revert` одного коммита (`8fb34d2`); коммит с планом — только документация, на работу страниц не влияет.
 
 ### 17.6 Что не входит в 2a
 
 `primes.html` (другой `isPrime`), `signs.html` (утилит нет), `fireConfetti`/`animate` (варианты тела и цвет раздела), CSS, `on*`-атрибуты, остальные разделы (2b/2c).
+
+### 17.7 Факт: шаг 2a выполнен (`8fb34d2`, 2026-11-18)
+
+`assets/trainers-utils.js` создан (28 строк / 861 симв.): `vibrate`, `isPrime`, `gcd`, `lcm`, `primeFactors`. Тела перенесены дословно — автоматическая сверка `git show 8fb34d2~1:…` против модуля: 6/6 совпало (`vibrate`, `isPrime`, `getPrimeFactors` из `gcd.html`; `vibrate`, `isPrime`, `gcd`, `lcm`, `getPrimeFactors` из `lcm.html`). В `gcd.html` и `lcm.html` копии удалены, вызов `getPrimeFactors(n)` → `primeFactors(n)` (1 место на страницу), подключение — строка 47, перед `analytics.js`.
+
+| файл | строк | симв. | inline-JS |
+|---|---|---|---|
+| `assets/trainers-utils.js` | +28 | +861 | — (внешний файл) |
+| `trainers/divisibility/gcd.html` | 818 → 800 (−18) | 27 280 → 26 885 (−395) | 16 225 → 15 775 (−450) |
+| `trainers/divisibility/lcm.html` | 869 → 848 (−21) | 28 313 → 27 809 (−504) | 17 107 → 16 548 (−559) |
+
+По проекту (`inventory.py` «до/после»): HTML 26 508 → 26 469 строк (−39), 1 131 629 → 1 130 730 симв. (−899), inline-JS 602 803 → 601 794 (−1 009); inline-CSS 250 242 и `on*` 184 без изменений; JS-файлов 2 → 3, 102 100 → 102 961 симв. (+861). `git diff --stat`: 3 файла, +32 / −43.
+
+Проверки:
+- `python tools/check.py` — 38/38 (до и после).
+- `page_console.py "trainers/divisibility/*.html" --offline` — 4/4 PASS, 0 ошибок JS, 0 предупреждений, exit 0; с `--expect "Заполни пустые слоты"` по `gcd`/`lcm` — 2/2 PASS (этап 1 отрисовался, значит `primeFactors` из модуля вызван).
+- Функциональный прогон модуля (харнесс в `%TEMP%`, не в репозитории): 12/12 assert — `isPrime(2)=true`, `isPrime(1)=false`, `isPrime(97)=true`, `isPrime(81)=false`, `gcd(36,54)=18`, `gcd(17,5)=1`, `lcm(4,6)=12`, `primeFactors(36)=[2,2,3,3]`, `primeFactors(72)="2*2*2*3*3"`, `primeFactors(97)=[97]`, `typeof vibrate`/`gcd` = `function`.
+- `dup_scan.py` «до/после»: `isPrime` 3 файла / 529 вхожд. → 1 файл (`primes.html`, вариант 6k±1 — по §17.1 остаётся), `getPrimeFactors` 2 → 0, `vibrate` 3 → 1, `gcd` 5 → 4, `lcm` 3 → 2 (остаток — вхождения имени в других страницах). Запись `primeFactors` не изменилась (4 файла / 1 002 симв.) — это `multiplication`, `number-by`, `percent-of`, `ratio`, они вне 2a (2b/2c).
+- Ручной проход 3 этапов в браузере не выполнялся: headless-инструмент не кликает по странице. Косвенное покрытие — этапы 2–5 в `gcd`/`lcm` вызывают только `isPrime`, `primeFactors`, `vibrate` и `gcd`/`lcm`, тела которых перенесены дословно (сверка 6/6), и страница загружается без ошибок JS.
+
+Вывод по шагу: сеть на страницу — +1 запрос 51 симв. подключения (861 Б, кэшируется между страницами раздела), поэтому выигрыш 2a — не символы, а канон для 2b/2c. Из 15 410 симв. п.1 закрыто 1 009 симв. inline-JS; `assets/trainers-utils.js` — теперь единственное место, куда добавляются утилиты следующих разделов (правило §14.2 п.1: варианты тела остаются локальными).
+
 
 
