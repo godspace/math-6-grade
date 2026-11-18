@@ -189,7 +189,19 @@ SEO-обвязка новой страницы: `title` «Подготовка �
 
 - В каждый тренажёр: `<nav class="see-also">` c 3–5 ссылками «Смотри также» (по кластеру: дроби → дроби, проценты → проценты + пропорции, делимость → делимость).
 - В HTML каждой страницы — ссылка «← Все тренажёры» на `../../index.html` (сейчас навигация только JS-кнопкой из `analytics.js`).
-- `og:image`: одна картинка 1200×630 (`assets/img/og-cover.png`, тёмный фон + название сайта), подключить на все страницы; проверить превью в любом отладчике OG.
+- `og:image` (сделано, S5b): одна картинка 1200×630 — `assets/img/og-cover.png` (тёмный градиент `#0f172a→#1e293b`, акцентная полоса `#38bdf8`, заголовок «Тренажёры по математике 6 класс», подпись-домен; собрана локально через `System.Drawing`, сторонних зависимостей в проекте нет). Подключение на всех 43 HTML сразу после `og:locale`/`og:site_name`:
+
+```html
+<meta property="og:image" content="https://godspace.github.io/math-6-grade/assets/img/og-cover.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Тренажёры по математике 6 класс — интерактивные задания с проверкой">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://godspace.github.io/math-6-grade/assets/img/og-cover.png">
+```
+
+  URL только абсолютный (относительный OG не понимает). Превью проверять в отладчике OG (Telegram: «Ссылка → превью», VK/Facebook Sharing Debugger). Меняете текст на картинке — перерисуйте её тем же способом и сохраните тем же путём: URL не меняется, кеш соцсетей обновится после повторного скрейпа.
 - `BreadcrumbList` JSON-LD: «Тренажёры по математике 6 класс → <страница>» (2 уровня, шаблон — §7.4). Промежуточный уровень «тема» не ставим: у темы нет собственного URL, а Google требует `item` у всех `ListItem`, кроме последнего (проверка: Rich Results Test). Тема остаётся в `title`/`description` и в блоке «Смотри также».
 
 ## 7. Шаблоны для копирования
@@ -323,6 +335,7 @@ SEO-обвязка новой страницы: `title` «Подготовка �
 | дата | страниц | ERR | WARN | thin | комментарий |
 |---|---|---|---|---|---|
 | 2026-11-18 | 42 | 49 | 156 | 39 | исходная точка (до S1): `og-image` 42, `canon/desc/ld/og` 21, `h1` 9, `title-len` 21, sitemap: нет 3 / лишнее 1 |
+| 2026-11-18 | 43 | 1 | 26 | 25 | после S5a+S5b: `orphan` 0, `og-image` 0 (картинка + twitter:card на 43 стр.), `thin` 29→25; остаток WARN = `thin` 25 + `title-len` 1, ERR = `noindex` у `construct/teacher.html` (задумано) |
 
 Замер: `python -X utf8 tools/seo_audit.py --md seo_report.md` (код возврата 1, пока есть ERR).
 
