@@ -98,6 +98,15 @@
             .switch-label { width: 100%; text-align: center; }
             .base-btn { padding: 7px 14px; font-size: 0.9rem; }
         }
+    /* SEO-блок (S4b): объяснение алгоритма под тренажёром */
+    .seo-note { max-width: 720px; margin: 26px auto 6px; padding: 20px 22px; border-radius: 16px; background: #fff; border: 1px solid #e5e7eb; box-shadow: 0 8px 20px rgba(15,23,42,.06); color: #1f2937; font-size: 15px; line-height: 1.65; text-align: left; }
+    .seo-note h2 { margin: 0 0 10px; font-size: clamp(1.05rem, 2.5vw, 1.3rem); font-weight: 800; line-height: 1.3; color: #111827; }
+    .seo-note p { margin: 0 0 10px; }
+    .seo-note ol { margin: 0 0 10px; padding-left: 22px; }
+    .seo-note li { margin: 4px 0; }
+    .seo-note a { color: #4f46e5; font-weight: 600; }
+    .seo-note .seo-example { padding: 10px 12px; border-radius: 12px; background: #f3f4f6; }
+    @media (max-width: 420px) { .seo-note { padding: 14px; font-size: 14.5px; } }
     </style>
 <!-- ─── S5a: перелинковка ─── -->
 <style>
@@ -142,6 +151,17 @@
         </div>
     </div>
     <div id="trainerRoot"></div>
+<section class="seo-note">
+  <h2>Почему «на 25% больше» и «на 20% меньше» — про одни и те же числа</h2>
+  <p>Процент всегда считают от какой-то базы, и в паре «больше — меньше» база меняется. В тренажёре пять историй про скидки, зарплату, скорость и вес: нужно ответить, во сколько раз изменилась величина или на сколько процентов, а после ответа показываются объяснение и полосы «Было — Стало».</p>
+  <ol>
+    <li>Снижение на 20%: новая величина — это 80% старой, значит уменьшение в 100 : 80 = 1,25 раза.</li>
+    <li>Рост в 1,5 раза — это плюс 50%: (1,5 − 1) · 100.</li>
+    <li>Сравнение двух чисел: 5 и 4. Первое больше на (5 − 4) : 4 · 100 = 25%, второе меньше на (5 − 4) : 5 · 100 = 20%.</li>
+  </ol>
+  <p class="seo-example">Разбор: цену снизили на 25%. Осталось 75% прежней цены, то есть цена уменьшилась в 100 : 75 ≈ 1,33 раза.</p>
+  <p>Процент от числа разбирается в <a href="percent-of.html">«Проценте от числа»</a>, поиск исходного числа по проценту — в <a href="number-by.html">«Восстановлении числа»</a>, отношение чисел — в <a href="ratio.html">«Пропорции и отношении»</a>.</p>
+</section>
 <!-- ─── S5a: ссылка на каталог + «Смотри также» ─── -->
 <div class="seo-links">
   <a class="seo-back" href="../../index.html">← Все тренажёры</a>

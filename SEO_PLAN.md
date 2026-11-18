@@ -336,6 +336,7 @@ SEO-обвязка новой страницы: `title` «Подготовка �
 |---|---|---|---|---|---|
 | 2026-11-18 | 42 | 49 | 156 | 39 | исходная точка (до S1): `og-image` 42, `canon/desc/ld/og` 21, `h1` 9, `title-len` 21, sitemap: нет 3 / лишнее 1 |
 | 2026-11-18 | 43 | 1 | 26 | 25 | после S5a+S5b: `orphan` 0, `og-image` 0 (картинка + twitter:card на 43 стр.), `thin` 29→25; остаток WARN = `thin` 25 + `title-len` 1, ERR = `noindex` у `construct/teacher.html` (задумано) |
+| 2026-11-18 | 43 | 1 | 21 | 20 | после S4b-1: блок `.seo-note` на 5 страницах (`fractions/mixed`, `geometry/perimeter-area`, `percents/base-change`, `equations/equations`, `rational/phone-balance`), `thin` 25→20; остаток WARN = `thin` 20 + `title-len` 1 |
 
 Замер: `python -X utf8 tools/seo_audit.py --md seo_report.md` (код возврата 1, пока есть ERR).
 

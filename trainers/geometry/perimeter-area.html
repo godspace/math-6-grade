@@ -149,6 +149,15 @@
             padding: 4px 8px; border-radius: 4px; font-size: 12px;
             display: none; z-index: 100;
         }
+    /* SEO-блок (S4b): объяснение алгоритма под тренажёром */
+    .seo-note { max-width: 720px; margin: 26px auto 6px; padding: 20px 22px; border-radius: 16px; background: #fff; border: 1px solid #e5e7eb; box-shadow: 0 8px 20px rgba(15,23,42,.06); color: #1f2937; font-size: 15px; line-height: 1.65; text-align: left; }
+    .seo-note h2 { margin: 0 0 10px; font-size: clamp(1.05rem, 2.5vw, 1.3rem); font-weight: 800; line-height: 1.3; color: #111827; }
+    .seo-note p { margin: 0 0 10px; }
+    .seo-note ol { margin: 0 0 10px; padding-left: 22px; }
+    .seo-note li { margin: 4px 0; }
+    .seo-note a { color: #4f46e5; font-weight: 600; }
+    .seo-note .seo-example { padding: 10px 12px; border-radius: 12px; background: #f3f4f6; }
+    @media (max-width: 420px) { .seo-note { padding: 14px; font-size: 14.5px; } }
     </style>
 <script src="../../assets/analytics.js"></script>
 <!-- ─── S5a: перелинковка ─── -->
@@ -217,6 +226,19 @@
             <button class="btn" id="btnCheck" onclick="checkAnswer()">Проверить</button>
             <button class="btn btn-reset" onclick="resetDraw()">Сброс</button>
         </div>
+<section class="seo-note">
+  <h2>Как построить прямоугольник по площади или периметру</h2>
+  <p>Поле — клетчатая сетка 10 на 10, одна клетка считается единицей длины. Задание просит нарисовать прямоугольник с нужным периметром, площадью или сразу обоими условиями: вы зажимаете клетку и тянете до нужного размера, а под полем видны «Ширина» и «Высота». Кнопка «Проверить» сверяет фигуру с условием, всего в тренажёре 20 уровней.</p>
+  <ol>
+    <li>Периметр — сумма всех сторон: P = 2 · (a + b), значит a + b = P : 2. Для P = 16 сторона квадрата равна 4.</li>
+    <li>Площадь прямоугольника: S = a · b. К 24 клеткам подходят пары 4 × 6, 3 × 8 и 2 × 12.</li>
+    <li>Квадрат: P = 4 · a, S = a · a. Площади 49 соответствует сторона 7.</li>
+    <li>Даны оба условия: P = 18 даёт a + b = 9, площадь 20 — пара 4 и 5.</li>
+    <li>Проценты: «12% от поля в 100 клеток» — это 12 клеток, их и нужно занять.</li>
+  </ol>
+  <p class="seo-example">Разбор: периметр 20, одна сторона 3. Вторая сторона: (20 − 2 · 3) : 2 = 7, площадь такой фигуры 3 · 7 = 21 клетка.</p>
+  <p>Только площадь прямоугольника и треугольника — в <a href="area.html">«Площади фигур»</a>, площадь на клетках — в <a href="area-metaphor.html">«Площади на сетке»</a>.</p>
+</section>
 <!-- ─── S5a: ссылка на каталог + «Смотри также» ─── -->
 <div class="seo-links">
   <a class="seo-back" href="../../index.html">← Все тренажёры</a>

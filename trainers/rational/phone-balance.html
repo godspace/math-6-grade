@@ -231,6 +231,15 @@
         }
         .correct { color: #2ecc71; }
         .incorrect { color: #e74c3c; }
+    /* SEO-блок (S4b): объяснение алгоритма под тренажёром */
+    .seo-note { max-width: 720px; margin: 26px auto 6px; padding: 20px 22px; border-radius: 16px; background: #fff; border: 1px solid #e5e7eb; box-shadow: 0 8px 20px rgba(15,23,42,.06); color: #1f2937; font-size: 15px; line-height: 1.65; text-align: left; }
+    .seo-note h2 { margin: 0 0 10px; font-size: clamp(1.05rem, 2.5vw, 1.3rem); font-weight: 800; line-height: 1.3; color: #111827; }
+    .seo-note p { margin: 0 0 10px; }
+    .seo-note ol { margin: 0 0 10px; padding-left: 22px; }
+    .seo-note li { margin: 4px 0; }
+    .seo-note a { color: #4f46e5; font-weight: 600; }
+    .seo-note .seo-example { padding: 10px 12px; border-radius: 12px; background: #f3f4f6; }
+    @media (max-width: 420px) { .seo-note { padding: 14px; font-size: 14.5px; } }
     </style>
     <script src="../../assets/analytics.js"></script>
 <!-- ─── S5a: перелинковка ─── -->
@@ -308,6 +317,18 @@
         </div>
         <div class="feedback" id="slider-feedback"></div>
     </div>
+<section class="seo-note">
+  <h2>Отрицательные числа: считаем баланс телефона</h2>
+  <p>Долг на счёте — это отрицательное число, и тренажёр показывает, как с ним обращаться. Десять бытовых ситуаций: пополнение, списание абонентской платы, платные SMS, загрузка в роуминге. Сначала вы собираете выражение из карточек с числами и знаками, затем ставите ползунок на получившийся баланс по шкале от −100 до 100 рублей.</p>
+  <ol>
+    <li>Долг записывается со знаком минус: задолженность 50 рублей — это −50.</li>
+    <li>Несколько одинаковых списаний удобно считать умножением: 4 дня по 7 рублей — это −7 · 4.</li>
+    <li>Списание уменьшает баланс (вычитание), пополнение увеличивает (сложение).</li>
+    <li>Сложение чисел с разными знаками: из большего модуля вычитаем меньший и ставим знак числа с большим модулем.</li>
+  </ol>
+  <p class="seo-example">Разбор: на счету −30 рублей, абонентская плата 7 рублей списывалась 4 дня. Выражение: −30 − 7 · 4 = −30 − 28 = −58 рублей.</p>
+  <p>Точки на координатной прямой разобраны в <a href="coordinates-pro.html">«Координатах»</a>, задачи про скорость и время — в <a href="../motion/motion.html">«Движении»</a>.</p>
+</section>
 <!-- ─── S5a: ссылка на каталог + «Смотри также» ─── -->
 <div class="seo-links">
   <a class="seo-back" href="../../index.html">← Все тренажёры</a>
