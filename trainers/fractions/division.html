@@ -45,6 +45,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     
     <!-- Глобальный скрипт с аналитикой и лутбоксами -->
+    <script src="../../assets/trainers-utils.js"></script>
     <script src="../../assets/analytics.js" defer></script>
     
     <style>
@@ -463,7 +464,6 @@
     };
 
     function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
-    function gcd(a, b) { return b==0 ? a : gcd(b, a%b); }
     
     function getFactors(n) {
         if(n<=1) return [1];

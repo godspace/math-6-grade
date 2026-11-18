@@ -43,6 +43,7 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/math-6-grade/apple-touch-icon.png">
     <link rel="manifest" href="/math-6-grade/site.webmanifest">
     
+    <script src="../../assets/trainers-utils.js"></script>
     <script src="../../assets/analytics.js" defer></script>
     <style>
         :root {
@@ -479,26 +480,6 @@ let state = {
     errors: 0,
     currentTask: null
 };
-
-function getRandomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
-function pickRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-function gcd(a, b) { return b == 0 ? a : gcd(b, a % b); }
-
-function primeFactors(n) {
-    const factors = [];
-    if (n === 1) return factors; 
-    let d = 2;
-    let temp = n;
-    while (d * d <= temp) {
-        while (temp % d === 0) {
-            factors.push(d);
-            temp /= d;
-        }
-        d++;
-    }
-    if (temp > 1) factors.push(temp);
-    return factors;
-}
 
 function generateTask() {
     // Интеграция с RewardSystem: сброс ошибок при старте задания

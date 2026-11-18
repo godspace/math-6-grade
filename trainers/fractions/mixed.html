@@ -47,6 +47,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
     
     <!-- Глобальный скрипт с аналитикой и лутбоксами -->
+    <script src="../../assets/trainers-utils.js"></script>
     <script src="../../assets/analytics.js" defer></script>
     <style>
         body {
@@ -235,10 +236,6 @@
         let currentProblem = null;
         let currentStepIndex = 0;
         let score = 0;
-
-        const getRandomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-        const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
-        const lcm = (a, b) => (a * b) / gcd(a, b);
 
         function renderFractionHTML(w, n, d, inputs = false, inputIds = {}) {
             let html = '<div class="inline-flex items-center">';

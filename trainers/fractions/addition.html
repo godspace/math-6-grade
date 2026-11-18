@@ -44,6 +44,7 @@
     <link rel="manifest" href="/math-6-grade/site.webmanifest">
     
     <!-- Глобальный скрипт с аналитикой и лутбоксами -->
+    <script src="../../assets/trainers-utils.js"></script>
     <script src="../../assets/analytics.js" defer></script>
     <style>
         * {
@@ -511,14 +512,6 @@
             encouragement: ['💪', '🔥', '🚀', '👍', '😊'],
             failure: ['😔', '🤔', '💡', '📚', '🔍']
         };
-        
-        function gcd(a, b) {
-            return b ? gcd(b, a % b) : a;
-        }
-        
-        function lcm(a, b) {
-            return Math.abs(a * b) / gcd(a, b);
-        }
         
         function simplifyFraction(numerator, denominator) {
             const divisor = gcd(numerator, denominator);

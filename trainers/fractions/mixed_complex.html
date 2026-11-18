@@ -46,6 +46,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
     
     <!-- Глобальный скрипт с аналитикой и лутбоксами -->
+    <script src="../../assets/trainers-utils.js"></script>
     <script src="../../assets/analytics.js" defer></script>
 
     <style>
@@ -293,11 +294,6 @@
     </div>
 
     <script>
-        // --- Math Utilities ---
-        const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
-        const lcm = (a, b) => (a * b) / gcd(a, b);
-        const getRandomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-
         // --- State ---
         let problem = {};
         let score = 0;
