@@ -1,7 +1,7 @@
 # SEO-план: ревизия и подготовка к запросам «ВПР по математике 6 класс»
 
-Статус: **план утверждён к исполнению по шагам** (один шаг = одна задача Cline = один коммит).
-Замеры: 2026-11-18, воспроизводятся `python -X utf8 tools/seo_audit.py` (сейчас exit 1 — 49 ERR).
+Статус: **выполнены S1–S6** (журнал §12); остаётся S7 — индексация и замер (без кода). Один шаг = одна задача Cline = один коммит.
+Замеры: 2026-11-18, воспроизводятся `python -X utf8 tools/seo_audit.py` (сейчас exit 1 — 1 ERR: `noindex` у `construct/teacher.html`, так задумано).
 Связанные документы: `PROJECT_OPTIMIZATION_PLAN.md` (производительность, §14.2, §18.2), `MATH_BOARD_PLAN.md` (доска), `.clinerules`.
 
 ## 1. Результат задачи
@@ -337,7 +337,7 @@ SEO-обвязка новой страницы: `title` «Подготовка �
 | 2026-11-18 | 42 | 49 | 156 | 39 | исходная точка (до S1): `og-image` 42, `canon/desc/ld/og` 21, `h1` 9, `title-len` 21, sitemap: нет 3 / лишнее 1 |
 | 2026-11-18 | 43 | 1 | 26 | 25 | после S5a+S5b: `orphan` 0, `og-image` 0 (картинка + twitter:card на 43 стр.), `thin` 29→25; остаток WARN = `thin` 25 + `title-len` 1, ERR = `noindex` у `construct/teacher.html` (задумано) |
 | 2026-11-18 | 43 | 1 | 21 | 20 | после S4b-1: блок `.seo-note` на 5 страницах (`fractions/mixed`, `geometry/perimeter-area`, `percents/base-change`, `equations/equations`, `rational/phone-balance`), `thin` 25→20; остаток WARN = `thin` 20 + `title-len` 1 |
-| 2026-11-18 | 43 | 1 | 16 | 15 | после S4b-2 (ещё 5 блоков: `fractions/conversion`, `addition`, `comparison`, `geometry/area`, `percents/tiles`): `thin` 20→15 — цель S4 (≤ 15) достигнута; остаток WARN = `thin` 15 + `title-len` 1 (`index.html`, 71 символ) |
+| 2026-11-18 | 43 | 1 | 15 | 15 | после S6 (главная): `title` 71→59, H1 «Тренажёры по математике 6 класс» + подзаголовок, блок «Подготовка к ВПР» с HTML-ссылкой в карточке «Выживание», FAQ 3→8 (видимый текст = `FAQPage`), `privacy.html` в sitemap; остаток WARN = только `thin` 15 |
 
 Замер: `python -X utf8 tools/seo_audit.py --md seo_report.md` (код возврата 1, пока есть ERR).
 
