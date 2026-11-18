@@ -1062,3 +1062,17 @@ P2 (assets/missions.js, assets/progress.js, index.html): манифест по �
 Звёзды/очки/уровни внутри миссии, синхронизация между устройствами (Firebase, код-ссылка), прогресс внешних миссий (ВПР, бизнес-симулятор), редизайн зон, «продолжить с того места» (это P4), правки финальных экранов 11 тренажёров (это P3).
 
 
+
+## 24. SEO-ревизия: отдельный план `SEO_PLAN.md` (2026-11-18)
+
+Этап 6 закрыт, но снаружи остался поисковый трафик. Замер (не «на глаз»): `python -X utf8 tools/seo_audit.py` → 42 страницы, **ERR 49 / WARN 156**.
+
+Коротко, что показал аудит (детали — `SEO_PLAN.md` §2):
+- 21 страница без `description`/`canonical`/JSON-LD/OG (`geometry/*`, `rational/*`, `motion`, `equations-test`/`construct*`, `construct/task1..9`, `privacy`);
+- 9 страниц без H1 в HTML (`gcd`, `lcm`, `signs`, `equations`, `opening-test`, `math_board`, `perimeter-area`, `motion`, `coordinates-pro`);
+- `og:image` нет ни у одной страницы; 39 страниц «тонкие» (<120 слов текста);
+- `sitemap.xml` без `fractions/conversion.html`, `percents/tiles.html`, зато с записью чужого проекта `vpr-math-6`;
+- **своей страницы под ВПР на сайте нет** — только внешняя ссылка на `godspace.github.io/vpr-math-6/`, поэтому запрос «Подготовка к ВПР по математике 6 класс» упирается в главную.
+
+Дальше: шаги S1–S7 в `SEO_PLAN.md` §6, по одной задаче Cline на шаг. Правило §18.2 (перенос утилит) и границы §3 там же.
+
