@@ -44,6 +44,8 @@
     <link rel="manifest" href="/math-6-grade/site.webmanifest">
     
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Глобальный скрипт с аналитикой и лутбоксами -->
+    <script src="../../assets/trainers-utils.js"></script>
     <script src="../../assets/analytics.js" defer></script>
     
     <style>
@@ -436,8 +438,10 @@ let state = {
     animationId: null
 };
 
-function getRandomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
-function pickRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+// getRandomInt — из assets/trainers-utils.js (канон утилит, §14.2 п.1)
+// pickRandom — из assets/trainers-utils.js (канон утилит, §14.2 п.1)
+
+// primeFactors — локальный вариант тела (n === 1 → [1], защита от нецелых); в каноне иначе, §14.2 п.1
 
 function primeFactors(n) {
     const factors = [];

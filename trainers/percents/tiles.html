@@ -44,6 +44,8 @@
     <link rel="manifest" href="/math-6-grade/site.webmanifest">
     
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Глобальный скрипт с аналитикой и лутбоксами -->
+    <script src="../../assets/trainers-utils.js"></script>
     <script src="../../assets/analytics.js" defer></script>
     
     <style>
@@ -458,7 +460,7 @@ let state = {
 let isDrawing = false;
 let drawMode = 'fill'; // 'fill' или 'remove'
 
-function pickRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+// pickRandom — из assets/trainers-utils.js (канон утилит, §14.2 п.1)
 
 function generateTask() {
     if (window.RewardSystem) window.RewardSystem.resetErrors();
