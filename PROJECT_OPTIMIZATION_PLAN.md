@@ -355,6 +355,8 @@
 | 1 | `construct: убрать polyfill.io` (п.2) — **сделано, `4cd5792`** | 9 `trainers/equations/construct/task*.html` (−1 строка) | все 9 задач + `check.py`: 9/9 задач проходят 3 этапа, `check.py` 38/38 |
 | 2a | `utils: assets/trainers-utils.js (divisibility)` (п.1) — **сделано, `8fb34d2`** | `assets/trainers-utils.js` (новый, 861 симв.) + `gcd`, `lcm` (`primes` — по решению §17); 3 файла, +32 / −43 | `gcd` −18 строк / −450 симв. inline-JS, `lcm` −21 / −559; `page_console.py` 4/4 + `check.py` 38/38; факт — §17.7 |
 | 2b | `utils: assets/trainers-utils.js (fractions)` (п.1) — **сделано, `c27abec`** | `assets/trainers-utils.js` (+5 строк / +268 симв.) + `addition`, `comparison`, `division`, `multiplication`, `mixed`, `mixed_complex` (`conversion` не меняется); 7 файлов, +13 / −50 | −42 строки / −1 565 симв. inline-JS (оценка −37 / −1 340: вместе с блоками ушли комментарии и пустые строки, §18.3 п.4); `page_console.py` 8/8 PASS (2 контрольные: `conversion`, `math_board`); `check.py` 38/38; факт — §18.9 |
+| 2b.1 | `tailwind: assets/tailwind.css вместо cdn.tailwindcss.com` (доступность + перф) — **сделано, `173ddc7`** | `trainers/fractions/mixed.html`, `mixed_complex.html` (по 1 замене), новые `assets/tailwind.css` (12 941 Б, minified) и `tools/tailwind.input.css` (834 Б) | `page_console.py` 2/2 PASS, `check.py` 38/38, скриншоты 1280×1000; факт — §19 |
+
 | 2c | `utils: percents, geometry, rational, motion, equations` | остальные страницы с утилитами | по 1 странице каждого раздела + `check.py` |
 | 3a | `percents: assets/percents.css` (п.3) | 4 страницы `percents` | 4 страницы, скриншоты |
 | 3b | `percents: assets/percents-common.js` (п.3) | те же 4 | 4 страницы по 3 задания |
@@ -613,5 +615,46 @@ python -X utf8 tools/utils_scan.py --pages "trainers/fractions/*.html" --names g
 
 
 
+
+
+## 19. Шаг 2b.1: локальный Tailwind вместо CDN (2026-11-18)
+
+Причина шага — не производительность, а доступность: при live-проверке 2b обе страницы с Tailwind открылись **без стилей**, в консоли браузера `cdn.tailwindcss.com/:1 Failed to load resource: net::ERR_CONNECTION_RESET`. Проверка с машины автора (Python, 4 запроса):
+
+| запрос | результат |
+|---|---|
+| `https://cdn.tailwindcss.com` | `URLError [WinError 10054]` — сброс соединения; DNS отдаёт 8.47.69.0 / 8.6.112.0 |
+| `https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4/dist/index.global.js` | 200 (бандл 4.3.5) |
+| `https://unpkg.com/tailwindcss@3/lib/index.js` | TLS handshake timeout |
+| `https://godspace.github.io/math-6-grade/` | 200 |
+
+То есть Pages и наш код ни при чём — блокируется сам хост CDN (провайдер/фильтр), а не GitHub. Масштаб ровно 2 страницы: `mixed` и `mixed_complex` (остальные тренажёры на собственном CSS и выглядели нормально).
+
+### 19.1 Что сделано
+
+- `tools/tailwind.input.css` (834 Б, 14 строк) — входной файл (`@tailwind base|components|utilities`) с командой пересборки в шапке.
+- `assets/tailwind.css` (12 941 Б, minified) — статическая сборка **Tailwind 3.4.17** standalone-бинарником `tailwindcss-windows-x64.exe` (Node не нужен): `-i tools/tailwind.input.css -o assets/tailwind.css --content "trainers/fractions/mixed.html,trainers/fractions/mixed_complex.html" --minify`, exit 0, сборка 357 мс.
+- `mixed.html` (строка 46) и `mixed_complex.html` (строка 45): `<script src="https://cdn.tailwindcss.com"></script>` → `<link rel="stylesheet" href="../../assets/tailwind.css">` + комментарий-указатель. Позиция в `<head>` сохранена (до встроенного `<style>`), поэтому каскад не изменился: правила страниц по-прежнему перекрывают утилиты равной специфичности (`.step-active`, `.step-completed`, `.input-mini`).
+- `git diff --stat` по страницам: 2 файла, +4 / −2 (в каждом −1 тег скрипта, +1 комментарий, +1 `<link>`).
+
+### 19.2 Покрытие классов
+
+Сверка «классы в разметке ↔ селекторы в собранном CSS»: 161 класс в двух страницах, 132 селектора в CSS. Всем Tailwind-утилитам нашлось правило (`px-1`, `px-2`, `py-2`, `text-xs/sm`, `shadow-sm/md`, `rounded-full/lg/xl`, `w-8`/`h-8`, `hover:bg-indigo-700`, `sm:p-4`, `sm:text-2xl`, `max-w-3xl`, `min-h-screen`, `bg-indigo-600/100`, `border-indigo-100/200`, `text-indigo-600`, `hidden`, `transition`, `gap-2`, `font-bold`, `items-center`, `justify-between`). В CSS нет только кастомных классов страниц (24: `fraction`, `input-mini`, `step-active`, `sub-step`, `active-part`, `visual-mult`, …) — они описаны во встроенном `<style>`.
+
+Динамических классов через конкатенацию (`bg-${color}-100`) в этих файлах нет, поэтому safelist не понадобился: единственный шаблон — `${highlight === 'mult' ? 'active-part px-1' : ''}`, где имена записаны литералами и сканер их видит. Дробных утилит (`py-0.5` и подобных) в разметке нет.
+
+### 19.3 Проверки
+
+- `python -X utf8 tools/page_console.py "trainers/fractions/mixed*.html" --offline` — **2/2 PASS**, 0 ошибок JS, 0 предупреждений; внешних запросов у страниц больше нет, кроме Google Fonts.
+- `python tools/check.py` — **38/38**, exit 0.
+- Скриншоты headless Edge (1280×1000, `file://`): карточки с тенями и скруглениями, индиго-акценты, бейдж «Первое действие», кнопки «Проверить шаг» / «ОК» / «Проверить дроби», подсветка скобок — совпадает с задуманным видом (до шага страницы выглядели как голый текст). Шрифт Nunito на скриншотах подменён (Google Fonts недоступны offline), на проде подгрузится.
+- Ручной кликовый проход по https — за пользователем.
+
+### 19.4 Побочные эффекты и сопровождение
+
+- Репозиторий: +12 941 Б CSS + 834 Б входного файла; на каждой из 2 страниц −1 внешний запрос (раньше ~100 КБ JS CDN + JIT-компиляция классов в браузере) и −зависимость от блокируемого хоста.
+- Пересборка нужна только при появлении в этих страницах новых Tailwind-классов: команда — в шапке `tools/tailwind.input.css`, версия сборщика зафиксирована там же.
+- Бинарник сборщика в репозиторий не входит (`%TEMP%`); `node` не требуется.
+- Откат: вернуть один тег `<script src="https://cdn.tailwindcss.com"></script>` в обе страницы (CSS-файл можно оставить неиспользуемым).
 
 
