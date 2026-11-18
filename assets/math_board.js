@@ -1,0 +1,2006 @@
+    const state = {
+        scale: 1,
+        panX: 0,
+        panY: 0,
+        isPanning: false,
+        isSelecting: false,
+        selectMode: false,
+        startX: 0,
+        startY: 0,
+        marqueeStartX: 0,
+        marqueeStartY: 0,
+        zIndex: 100
+    };
+    let isRestoring = false; 
+    const HISTORY_LIMIT = 50;
+    let boardHistory = [];
+    let boardHistoryIndex = -1;
+    let restoredSnapshot = null;
+
+    const viewport = document.getElementById('viewport');
+    const surface = document.getElementById('surface');
+    const gridBg = document.getElementById('grid-bg');
+    const zoomVal = document.getElementById('zoom-val');
+    const emptyState = document.getElementById('empty-state');
+    const textMeasurer = document.getElementById('text-measurer');
+    const selectionMarquee = document.getElementById('selection-marquee');
+    const groupToolbar = document.getElementById('group-toolbar');
+    const groupCount = document.getElementById('group-count');
+    const selectModeBtn = document.getElementById('select-mode-btn');
+    const undoBtn = document.getElementById('undo-btn');
+    const redoBtn = document.getElementById('redo-btn');
+    
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+    if (window.matchMedia("(min-width: 768px)").matches) {
+        document.getElementById('hud-hint').style.display = 'inline';
+    }
+
+    state.panX = viewport.clientWidth / 2;
+    state.panY = viewport.clientHeight / 2;
+    updateView();
+
+    function checkEmptyState() {
+        emptyState.style.opacity = surface.children.length > 0 ? '0' : '1';
+    }
+
+    function updateSelectionUI() {
+        const selected = document.querySelectorAll('.board-item.selected');
+        if (selected.length > 1) {
+            groupCount.textContent = `Выбрано: ${selected.length}`;
+            groupToolbar.classList.add('visible');
+        } else {
+            groupToolbar.classList.remove('visible');
+        }
+    }
+
+    function clearSelection() {
+        document.querySelectorAll('.board-item.selected').forEach(el => el.classList.remove('selected'));
+        updateSelectionUI();
+    }
+
+    function toggleSelectMode() {
+        state.selectMode = !state.selectMode;
+        selectModeBtn.classList.toggle('active', state.selectMode);
+        viewport.style.cursor = state.selectMode ? 'crosshair' : 'default';
+    }
+
+    function nudgeSelected(dx, dy) {
+        const selected = document.querySelectorAll('.board-item.selected');
+        selected.forEach(item => {
+            const x = (parseFloat(item.style.left) || 0) + dx;
+            const y = (parseFloat(item.style.top) || 0) + dy;
+            item.style.left = x + 'px';
+            item.style.top = y + 'px';
+        });
+        if (selected.length > 0) scheduleSave();
+    }
+
+    function deleteSelected() {
+        const selected = document.querySelectorAll('.board-item.selected');
+        selected.forEach(item => item.remove());
+        updateSelectionUI();
+        checkEmptyState();
+        scheduleSave();
+    }
+
+    function toggleSidebar() {
+        const isOpen = sidebar.classList.toggle('open');
+        sidebarToggle.classList.toggle('open', isOpen); 
+        sidebarToggle.setAttribute('aria-expanded', String(isOpen));
+        sidebarToggle.setAttribute('aria-label', isOpen ? 'Закрыть инструменты' : 'Открыть инструменты');
+        sidebarOverlay.classList.toggle('visible', isOpen);
+    }
+    
+    function closeSidebarMobile() {
+        if (window.innerWidth <= 768 && sidebar.classList.contains('open')) {
+            toggleSidebar();
+        }
+    }
+
+    sidebarToggle.addEventListener('click', toggleSidebar);
+    sidebarOverlay.addEventListener('click', toggleSidebar);
+
+    // Кнопки панели и HUD: разметка хранит только data-action, обработчики навешиваются здесь
+    document.querySelectorAll('[data-action]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            switch (btn.dataset.action) {
+                case 'reset-view': resetView(); break;
+                case 'clear-all': clearAll(); break;
+                case 'nudge': nudgeSelected(Number(btn.dataset.dx), Number(btn.dataset.dy)); break;
+                case 'delete-selected': deleteSelected(); break;
+                case 'toggle-select-mode': toggleSelectMode(); break;
+                case 'undo': undo(); break;
+                case 'redo': redo(); break;
+                case 'zoom': applyZoom(Number(btn.dataset.zoom)); break;
+            }
+        });
+    });
+
+    function getPos(e) {
+        if (e.touches && e.touches.length > 0) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        if (e.changedTouches && e.changedTouches.length > 0) return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
+        return { x: e.clientX, y: e.clientY };
+    }
+
+    function measureTextWidth(text, fontSizePx = 24, fontWeight = '400') {
+        textMeasurer.style.fontSize = fontSizePx + 'px';
+        textMeasurer.style.fontWeight = fontWeight;
+        textMeasurer.textContent = text || '?';
+        return Math.ceil(textMeasurer.getBoundingClientRect().width);
+    }
+
+    let saveTimeout;
+    function scheduleSave() {
+        if (isRestoring) return;
+        clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(saveBoardState, 400);
+        checkEmptyState();
+    }
+
+    function serializeBoard() {
+        const itemsData = [];
+        document.querySelectorAll('.board-item').forEach(item => {
+            const data = {
+                type: item.dataset.type,
+                val: item.dataset.val,
+                left: item.style.left,
+                top: item.style.top,
+                zIndex: parseInt(item.style.zIndex, 10) || 0,
+                inputs: Array.from(item.querySelectorAll('.smart-input')).map(i => i.value)
+            };
+            if (data.type === 'fraction-bar') {
+                const handle = item.querySelector('.segment-resize-handle');
+                if (handle && handle.previousElementSibling) {
+                    data.width = handle.previousElementSibling.style.width;
+                }
+            }
+            if (data.type === 'segment') {
+                const scaleInput = item.querySelector('.scale-input');
+                if (scaleInput) data.scale = scaleInput.value;
+                const rows = [];
+                item.querySelectorAll('.seg-row').forEach(row => {
+                    const rowInputs = row.querySelectorAll('.smart-input');
+                    if (rowInputs.length >= 2) rows.push({ step: rowInputs[0].value, len: rowInputs[1].value });
+                });
+                data.rows = rows;
+            }
+            if (item._getColData) {
+                data.colData = item._getColData();
+            }
+            itemsData.push(data);
+        });
+        return {
+            items: itemsData,
+            panX: state.panX,
+            panY: state.panY,
+            scale: state.scale
+        };
+    }
+
+    function pushSnapshot(json) {
+        if (isRestoring) return;
+        const snapshot = json || historyState();
+        if (boardHistoryIndex >= 0 && boardHistory[boardHistoryIndex] === snapshot) {
+            updateHistoryButtons();
+            return;
+        }
+        if (restoredSnapshot !== null) {
+            restoredSnapshot = null;
+            if (boardHistoryIndex < boardHistory.length - 1) {
+                updateHistoryButtons();
+                return;
+            }
+        }
+        boardHistory.splice(boardHistoryIndex + 1);
+        boardHistory.push(snapshot);
+        while (boardHistory.length > HISTORY_LIMIT) boardHistory.shift();
+        boardHistoryIndex = boardHistory.length - 1;
+        updateHistoryButtons();
+    }
+
+    function saveBoardState() {
+        const snapshot = JSON.stringify(serializeBoard());
+        localStorage.setItem('mathBoardData', snapshot);
+        pushSnapshot();
+    }
+
+    function applyBoardState(data) {
+        if (!data || !Array.isArray(data.items)) return;
+        isRestoring = true;
+        clearTimeout(saveTimeout);
+        try {
+            surface.innerHTML = '';
+            dragState.activeItem = null;
+            dragState.selectedItems = [];
+            clearSelection();
+            if (data.panX !== undefined) state.panX = data.panX;
+            if (data.panY !== undefined) state.panY = data.panY;
+            if (data.scale !== undefined) state.scale = data.scale;
+            state.zIndex = 100;
+            updateView();
+            data.items.forEach(itemData => {
+                if (!itemData || !itemData.type) return;
+                const item = createItem(itemData.type, itemData.val, 0, 0, itemData);
+                item.style.left = itemData.left;
+                item.style.top = itemData.top;
+                if (Number.isFinite(itemData.zIndex) && itemData.zIndex > 0) {
+                    item.style.zIndex = itemData.zIndex;
+                    state.zIndex = Math.max(state.zIndex, itemData.zIndex);
+                }
+                if (itemData.type !== 'segment' && !itemData.type.startsWith('col-') && itemData.inputs) {
+                    const inputs = item.querySelectorAll('.smart-input');
+                    itemData.inputs.forEach((val, i) => {
+                        if (inputs[i]) {
+                            inputs[i].value = val;
+                            inputs[i].dispatchEvent(new Event('input'));
+                        }
+                    });
+                }
+                if (itemData.type === 'fraction-bar' && itemData.width) {
+                    const handle = item.querySelector('.segment-resize-handle');
+                    if (handle && handle.previousElementSibling) {
+                        handle.previousElementSibling.style.width = itemData.width;
+                    }
+                }
+            });
+        } catch(e) {
+            console.error('Ошибка восстановления доски', e);
+        }
+        isRestoring = false;
+        checkEmptyState();
+        updateSelectionUI();
+    }
+
+    function loadBoardState() {
+        const saved = localStorage.getItem('mathBoardData');
+        if (saved) {
+            try {
+                applyBoardState(JSON.parse(saved));
+            } catch(e) {
+                console.error('Ошибка загрузки сохранения', e);
+            }
+        }
+        resetHistory();
+    }
+
+    function resetHistory() {
+        boardHistory = [historyState()];
+        boardHistoryIndex = 0;
+        restoredSnapshot = null;
+        updateHistoryButtons();
+    }
+
+    function historyState() {
+        return JSON.stringify({ items: serializeBoard().items });
+    }
+
+    function restoreFromHistory() {
+        const snapshot = boardHistory[boardHistoryIndex];
+        if (!snapshot) return;
+        applyBoardState(JSON.parse(snapshot));
+        restoredSnapshot = historyState() !== snapshot ? snapshot : null;
+        localStorage.setItem('mathBoardData', JSON.stringify(serializeBoard()));
+        updateHistoryButtons();
+    }
+
+    function undo() {
+        if (isRestoring || boardHistoryIndex <= 0) return;
+        boardHistoryIndex--;
+        restoreFromHistory();
+    }
+
+    function redo() {
+        if (isRestoring || boardHistoryIndex >= boardHistory.length - 1) return;
+        boardHistoryIndex++;
+        restoreFromHistory();
+    }
+
+    function updateHistoryButtons() {
+        if (undoBtn) undoBtn.disabled = boardHistoryIndex <= 0;
+        if (redoBtn) redoBtn.disabled = boardHistoryIndex >= boardHistory.length - 1;
+    }
+
+    surface.addEventListener('input', scheduleSave);
+    const observer = new MutationObserver(scheduleSave);
+    observer.observe(surface, { childList: true, subtree: true });
+
+    /* =========================================================
+       ПЕРЕМЕЩЕНИЕ КАМЕРЫ, ВЫДЕЛЕНИЕ ОБЛАСТИ И ГРУППОВОЙ ПЕРЕНОС
+       ========================================================= */
+    let dragState = {
+        activeItem: null,
+        selectedItems: [],
+        startWorldX: 0,
+        startWorldY: 0
+    };
+
+    function startPanOrSelect(e) {
+        if (e.target === viewport || e.target === surface || e.target === gridBg || e.target === emptyState) {
+            const pos = getPos(e);
+            const wantSelect = e.shiftKey || state.selectMode;
+
+            if (!e.shiftKey && !e.ctrlKey && !e.metaKey) {
+                clearSelection();
+            }
+
+            if (wantSelect) {
+                state.isSelecting = true;
+                state.marqueeStartX = pos.x;
+                state.marqueeStartY = pos.y;
+                selectionMarquee.style.left = pos.x + 'px';
+                selectionMarquee.style.top = pos.y + 'px';
+                selectionMarquee.style.width = '0px';
+                selectionMarquee.style.height = '0px';
+                selectionMarquee.style.display = 'block';
+            } else {
+                state.isPanning = true;
+                state.startX = pos.x - state.panX;
+                state.startY = pos.y - state.panY;
+                viewport.style.cursor = 'grabbing';
+            }
+        }
+    }
+
+    function onMove(e) {
+        const pos = getPos(e);
+
+        if (state.isSelecting) {
+            e.preventDefault();
+            const x1 = Math.min(state.marqueeStartX, pos.x);
+            const y1 = Math.min(state.marqueeStartY, pos.y);
+            const x2 = Math.max(state.marqueeStartX, pos.x);
+            const y2 = Math.max(state.marqueeStartY, pos.y);
+
+            selectionMarquee.style.left = x1 + 'px';
+            selectionMarquee.style.top = y1 + 'px';
+            selectionMarquee.style.width = (x2 - x1) + 'px';
+            selectionMarquee.style.height = (y2 - y1) + 'px';
+
+            document.querySelectorAll('.board-item').forEach(item => {
+                const r = item.getBoundingClientRect();
+                const intersects = !(r.right < x1 || r.left > x2 || r.bottom < y1 || r.top > y2);
+                item.classList.toggle('selected', intersects);
+            });
+            updateSelectionUI();
+            return;
+        }
+
+        if (state.isPanning) {
+            e.preventDefault(); 
+            state.panX = pos.x - state.startX;
+            state.panY = pos.y - state.startY;
+            updateView();
+            return;
+        }
+
+        if (dragState.activeItem) {
+            e.preventDefault();
+            const worldPos = screenToWorld(pos.x, pos.y);
+            const dx = worldPos.x - dragState.startWorldX;
+            const dy = worldPos.y - dragState.startWorldY;
+
+            dragState.selectedItems.forEach(entry => {
+                entry.el.style.left = (entry.origX + dx) + 'px';
+                entry.el.style.top = (entry.origY + dy) + 'px';
+            });
+        }
+    }
+
+    function onEnd() {
+        if (state.isSelecting) {
+            state.isSelecting = false;
+            selectionMarquee.style.display = 'none';
+            updateSelectionUI();
+        }
+        if (state.isPanning) {
+            state.isPanning = false;
+            viewport.style.cursor = state.selectMode ? 'crosshair' : 'default';
+        }
+        if (dragState.activeItem) {
+            dragState.selectedItems.forEach(entry => {
+                snapItem(entry.el);
+                entry.el.classList.remove('dragging');
+            });
+            dragState.activeItem = null;
+            dragState.selectedItems = [];
+            scheduleSave();
+        }
+    }
+
+    viewport.addEventListener('mousedown', startPanOrSelect);
+    viewport.addEventListener('touchstart', startPanOrSelect, { passive: false });
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('touchmove', onMove, { passive: false });
+    window.addEventListener('mouseup', onEnd);
+    window.addEventListener('touchend', onEnd);
+
+    viewport.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const rect = viewport.getBoundingClientRect();
+        applyZoom(-e.deltaY * 0.001, e.clientX - rect.left, e.clientY - rect.top);
+    }, { passive: false });
+
+    function applyZoom(delta, mouseX = null, mouseY = null) {
+        if (mouseX === null) mouseX = viewport.clientWidth / 2;
+        if (mouseY === null) mouseY = viewport.clientHeight / 2;
+
+        const worldXBefore = (mouseX - state.panX) / state.scale;
+        const worldYBefore = (mouseY - state.panY) / state.scale;
+
+        state.scale = Math.min(Math.max(0.2, state.scale + delta), 4);
+        state.panX = mouseX - worldXBefore * state.scale;
+        state.panY = mouseY - worldYBefore * state.scale;
+        updateView();
+        scheduleSave();
+    }
+
+    function updateView() {
+        surface.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.scale})`;
+        gridBg.style.backgroundPosition = `${state.panX}px ${state.panY}px`;
+        gridBg.style.backgroundSize = `${20 * state.scale}px ${20 * state.scale}px`;
+        zoomVal.textContent = Math.round(state.scale * 100) + '%';
+    }
+
+    function resetView() {
+        state.scale = 1;
+        state.panX = viewport.clientWidth / 2;
+        state.panY = viewport.clientHeight / 2;
+        updateView();
+        scheduleSave();
+        closeSidebarMobile();
+    }
+
+    function screenToWorld(screenX, screenY) {
+        const rect = viewport.getBoundingClientRect();
+        return {
+            x: (screenX - rect.left - state.panX) / state.scale,
+            y: (screenY - rect.top - state.panY) / state.scale
+        };
+    }
+
+    function parseInputVal(valStr) {
+        if (!valStr) return 1;
+        let v = valStr.replace(',', '.');
+        if (v.includes('/')) {
+            const [n, d] = v.split('/');
+            const num = parseFloat(n), den = parseFloat(d);
+            if (!isNaN(num) && !isNaN(den) && den !== 0) return num / den;
+        }
+        const res = parseFloat(v);
+        return (isNaN(res) || res <= 0) ? 1 : res;
+    }
+
+    function updateInputUI(inp, val) {
+        inp.value = parseFloat(val.toFixed(4));
+        inp.dispatchEvent(new Event('input'));
+    }
+
+    /* =========================================================
+       СОЗДАНИЕ ВИДЖЕТОВ СТОЛБИКОМ (СЛОЖЕНИЕ, УМНОЖЕНИЕ, УГОЛОК)
+       ========================================================= */
+
+    // Общий помощник создания ячейки в столбике
+    function createColCell({ value = '', comma = false, isCarry = false, crossed = false, shiftStart = false, inactiveShift = false, isQuotient = false, qDot = false, onChange, onMoveFocus }) {
+        const wrap = document.createElement('div');
+        wrap.className = 'col-cell-wrap';
+        if (isCarry) wrap.classList.add('carry-cell');
+        if (crossed) wrap.classList.add('crossed');
+        if (shiftStart) wrap.classList.add('shift-start-cell');
+        if (inactiveShift) wrap.classList.add('inactive-shift-cell');
+        if (comma) wrap.classList.add('has-comma');
+        if (qDot) wrap.classList.add('has-qdot');
+        if (!value) wrap.classList.add('is-empty');
+
+        const inp = document.createElement('input');
+        inp.type = 'text';
+        inp.className = 'col-cell-input';
+        inp.maxLength = isCarry ? 3 : 1;
+        inp.value = value || '';
+
+        const stopDrag = (e) => e.stopPropagation();
+        inp.addEventListener('mousedown', stopDrag);
+        inp.addEventListener('touchstart', stopDrag, { passive: false });
+
+        if (isCarry) {
+            wrap.title = 'Двойной клик — зачеркнуть пометку';
+            wrap.addEventListener('dblclick', (e) => {
+                e.stopPropagation();
+                wrap.classList.toggle('crossed');
+                onChange && onChange();
+            });
+        }
+
+        // Зона десятичной запятой
+        if (!isCarry) {
+            const commaZone = document.createElement('div');
+            commaZone.className = 'cell-comma-zone';
+            commaZone.title = 'Поставить / убрать запятую';
+            commaZone.addEventListener('mousedown', stopDrag);
+            commaZone.addEventListener('click', (e) => {
+                e.stopPropagation();
+                wrap.classList.toggle('has-comma');
+                onChange && onChange();
+            });
+            wrap.appendChild(commaZone);
+        }
+
+        // Точка-наметка в частном (уголок деления)
+        if (isQuotient) {
+            const dotToggle = document.createElement('div');
+            dotToggle.className = 'quotient-dot-toggle';
+            dotToggle.title = 'Точка-наметка разряда в частном';
+            dotToggle.addEventListener('mousedown', stopDrag);
+            dotToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                wrap.classList.toggle('has-qdot');
+                onChange && onChange();
+            });
+            wrap.appendChild(dotToggle);
+        }
+
+        inp.addEventListener('keydown', (e) => {
+            if (e.key === ',' || e.key === '.' || e.key === '/' || e.key === 'б' || e.key === 'ю') {
+                e.preventDefault();
+                if (!isCarry) {
+                    wrap.classList.toggle('has-comma');
+                    onChange && onChange();
+                }
+                return;
+            }
+            if (e.key === 'ArrowLeft') { e.preventDefault(); onMoveFocus && onMoveFocus(0, -1); return; }
+            if (e.key === 'ArrowRight') { e.preventDefault(); onMoveFocus && onMoveFocus(0, 1); return; }
+            if (e.key === 'ArrowUp') { e.preventDefault(); onMoveFocus && onMoveFocus(-1, 0); return; }
+            if (e.key === 'ArrowDown') { e.preventDefault(); onMoveFocus && onMoveFocus(1, 0); return; }
+
+            if (e.key === 'Backspace') {
+                if (inp.value !== '') {
+                    inp.value = '';
+                    wrap.classList.add('is-empty');
+                    onChange && onChange();
+                } else {
+                    onMoveFocus && onMoveFocus(0, 'back');
+                }
+                e.preventDefault();
+                return;
+            }
+
+            if (!isCarry && e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                inp.value = e.key;
+                wrap.classList.toggle('is-empty', !inp.value);
+                onChange && onChange();
+                onMoveFocus && onMoveFocus(0, 'next');
+                e.preventDefault();
+            }
+        });
+
+        inp.addEventListener('input', () => {
+            wrap.classList.toggle('is-empty', !inp.value);
+            onChange && onChange();
+        });
+
+        wrap.appendChild(inp);
+        return { wrap, inp };
+    }
+
+    // 1. ВИДЖЕТ СЛОЖЕНИЯ И ВЫЧИТАНИЯ СТОЛБИКОМ
+    function buildColAddWidget(item, initColData) {
+        let model = initColData || {
+            cols: 5,
+            op: '+',
+            rtlAnswer: true,
+            carry: Array(5).fill({ v: '', x: false }),
+            rows: [
+                Array(5).fill({ v: '', c: false }),
+                Array(5).fill({ v: '', c: false })
+            ],
+            ans: Array(5).fill({ v: '', c: false })
+        };
+
+        const container = document.createElement('div');
+        container.className = 'col-widget';
+
+        const stopProp = e => e.stopPropagation();
+
+        function syncModelFromDOM(cellRefs) {
+            if (!cellRefs) return;
+            model.carry = cellRefs.carry.map(c => ({ v: c.inp.value, x: c.wrap.classList.contains('crossed') }));
+            model.rows = cellRefs.rows.map(r => r.map(c => ({ v: c.inp.value, c: c.wrap.classList.contains('has-comma') })));
+            model.ans = cellRefs.ans.map(c => ({ v: c.inp.value, c: c.wrap.classList.contains('has-comma') }));
+            scheduleSave();
+        }
+
+        let currentRefs = null;
+
+        function resizeCols(delta) {
+            syncModelFromDOM(currentRefs);
+            const newCols = Math.max(2, Math.min(12, model.cols + delta));
+            if (newCols === model.cols) return;
+            const adjustArr = (arr, defFactory) => {
+                if (delta > 0) return [defFactory(), ...arr];
+                return arr.slice(1);
+            };
+            model.cols = newCols;
+            model.carry = adjustArr(model.carry, () => ({ v: '', x: false }));
+            model.rows = model.rows.map(r => adjustArr(r, () => ({ v: '', c: false })));
+            model.ans = adjustArr(model.ans, () => ({ v: '', c: false }));
+            render();
+            scheduleSave();
+        }
+
+        function changeRowCount(delta) {
+            syncModelFromDOM(currentRefs);
+            const newCount = Math.max(2, Math.min(4, model.rows.length + delta));
+            if (newCount === model.rows.length) return;
+            if (delta > 0) {
+                model.rows.push(Array.from({ length: model.cols }, () => ({ v: '', c: false })));
+            } else {
+                model.rows.pop();
+            }
+            render();
+            scheduleSave();
+        }
+
+        function clearCarry() {
+            syncModelFromDOM(currentRefs);
+            model.carry = Array.from({ length: model.cols }, () => ({ v: '', x: false }));
+            render();
+            scheduleSave();
+        }
+
+        function render() {
+            container.innerHTML = '';
+            const refs = { carry: [], rows: [], ans: [], allMatrix: [] };
+            currentRefs = refs;
+
+            // Шапка
+            const toolbar = document.createElement('div');
+            toolbar.className = 'col-toolbar';
+            const title = document.createElement('div');
+            title.className = 'col-title';
+            title.textContent = '± СТОЛБИК';
+            toolbar.appendChild(title);
+
+            const btns = document.createElement('div');
+            btns.className = 'col-btn-group';
+            const makeBtn = (label, fn) => {
+                const b = document.createElement('button');
+                b.className = 'col-mini-btn';
+                b.textContent = label;
+                b.addEventListener('mousedown', stopProp);
+                b.addEventListener('touchstart', stopProp, { passive: false });
+                b.addEventListener('click', (e) => { e.stopPropagation(); fn(); });
+                return b;
+            };
+            btns.appendChild(makeBtn('− разр.', () => resizeCols(-1)));
+            btns.appendChild(makeBtn('+ разр.', () => resizeCols(1)));
+            btns.appendChild(makeBtn('+ число', () => changeRowCount(1)));
+            btns.appendChild(makeBtn('− число', () => changeRowCount(-1)));
+            btns.appendChild(makeBtn('🧹 в уме', clearCarry));
+            toolbar.appendChild(btns);
+            container.appendChild(toolbar);
+
+            // Сетка
+            const gridArea = document.createElement('div');
+            gridArea.className = 'col-grid-area';
+
+            const gutter = document.createElement('div');
+            gutter.className = 'col-op-gutter';
+            gutter.style.paddingTop = '24px';
+            gutter.style.height = (model.rows.length * 36) + 'px';
+            const opSym = document.createElement('div');
+            opSym.className = 'col-op-symbol';
+            opSym.title = 'Кликните для смены знака (+ / −)';
+            opSym.textContent = model.op === '-' ? '−' : '+';
+            opSym.addEventListener('mousedown', stopProp);
+            opSym.addEventListener('click', (e) => {
+                e.stopPropagation();
+                syncModelFromDOM(currentRefs);
+                model.op = model.op === '+' ? '-' : '+';
+                opSym.textContent = model.op === '-' ? '−' : '+';
+                scheduleSave();
+            });
+            gutter.appendChild(opSym);
+            gridArea.appendChild(gutter);
+
+            const rowsWrap = document.createElement('div');
+            rowsWrap.className = 'col-rows-wrap';
+
+            // 1) Строка "в уме"
+            const carryRowEl = document.createElement('div');
+            carryRowEl.className = 'col-row';
+            for (let c = 0; c < model.cols; c++) {
+                const cellData = model.carry[c] || { v: '', x: false };
+                const cell = createColCell({
+                    value: cellData.v,
+                    crossed: cellData.x,
+                    isCarry: true,
+                    onChange: () => syncModelFromDOM(refs),
+                    onMoveFocus: (dr, dc) => moveMatrixFocus(0, c, dr, dc, false)
+                });
+                refs.carry.push(cell);
+                carryRowEl.appendChild(cell.wrap);
+            }
+            rowsWrap.appendChild(carryRowEl);
+            refs.allMatrix.push(refs.carry);
+
+            // 2) Строки слагаемых/вычитаемых
+            model.rows.forEach((rData, rIdx) => {
+                const rEl = document.createElement('div');
+                rEl.className = 'col-row';
+                if (rIdx === model.rows.length - 1) rEl.classList.add('border-bottom-bold');
+                const rowRef = [];
+                for (let c = 0; c < model.cols; c++) {
+                    const cellData = rData[c] || { v: '', c: false };
+                    const matRow = rIdx + 1;
+                    const cell = createColCell({
+                        value: cellData.v,
+                        comma: cellData.c,
+                        onChange: () => syncModelFromDOM(refs),
+                        onMoveFocus: (dr, dc) => moveMatrixFocus(matRow, c, dr, dc, false)
+                    });
+                    rowRef.push(cell);
+                    rEl.appendChild(cell.wrap);
+                }
+                refs.rows.push(rowRef);
+                refs.allMatrix.push(rowRef);
+                rowsWrap.appendChild(rEl);
+            });
+
+            // 3) Строка ответа
+            const ansRowEl = document.createElement('div');
+            ansRowEl.className = 'col-row';
+            const ansMatRow = refs.allMatrix.length;
+            for (let c = 0; c < model.cols; c++) {
+                const cellData = model.ans[c] || { v: '', c: false };
+                const cell = createColCell({
+                    value: cellData.v,
+                    comma: cellData.c,
+                    onChange: () => syncModelFromDOM(refs),
+                    onMoveFocus: (dr, dc) => moveMatrixFocus(ansMatRow, c, dr, dc, model.rtlAnswer)
+                });
+                refs.ans.push(cell);
+                ansRowEl.appendChild(cell.wrap);
+            }
+            refs.allMatrix.push(refs.ans);
+            rowsWrap.appendChild(ansRowEl);
+
+            gridArea.appendChild(rowsWrap);
+            container.appendChild(gridArea);
+
+            // Подвал
+            const footer = document.createElement('div');
+            footer.className = 'col-footer';
+            const hint = document.createElement('span');
+            hint.innerHTML = 'Запятая: клавиша <b>,</b> или<br>угол клетки';
+            const dirBtn = document.createElement('button');
+            dirBtn.className = 'dir-badge';
+            dirBtn.innerHTML = model.rtlAnswer ? '← Ответ справа<br>налево' : '→ Ответ слева<br>направо';
+            dirBtn.addEventListener('mousedown', stopProp);
+            dirBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                syncModelFromDOM(refs);
+                model.rtlAnswer = !model.rtlAnswer;
+                render();
+                scheduleSave();
+            });
+            footer.appendChild(hint);
+            footer.appendChild(dirBtn);
+            container.appendChild(footer);
+
+            function moveMatrixFocus(r, c, dr, dc, isRtl) {
+                let nr = r + dr;
+                let nc = c;
+                if (dc === 'next') nc = isRtl ? c - 1 : c + 1;
+                else if (dc === 'back') nc = isRtl ? c + 1 : c - 1;
+                else nc = c + dc;
+
+                if (refs.allMatrix[nr] && refs.allMatrix[nr][nc]) {
+                    refs.allMatrix[nr][nc].inp.focus();
+                    refs.allMatrix[nr][nc].inp.select();
+                }
+            }
+        }
+
+        render();
+        item._getColData = () => {
+            syncModelFromDOM(currentRefs);
+            return model;
+        };
+        item.appendChild(container);
+    }
+
+    // 2. ВИДЖЕТ УМНОЖЕНИЯ СТОЛБИКОМ
+    function buildColMulWidget(item, initColData) {
+        let model = initColData || {
+            cols: 5,
+            rtlCalc: true,
+            carryTop: Array(5).fill({ v: '', x: false }),
+            factors: [
+                Array(5).fill({ v: '', c: false }),
+                Array(5).fill({ v: '', c: false })
+            ],
+            carrySum: Array(5).fill({ v: '', x: false }),
+            partials: [
+                Array(5).fill({ v: '', c: false }),
+                Array(5).fill({ v: '', c: false })
+            ],
+            total: Array(5).fill({ v: '', c: false })
+        };
+
+        const container = document.createElement('div');
+        container.className = 'col-widget';
+        const stopProp = e => e.stopPropagation();
+        let currentRefs = null;
+
+        function syncModelFromDOM(refs) {
+            if (!refs) return;
+            model.carryTop = refs.carryTop.map(c => ({ v: c.inp.value, x: c.wrap.classList.contains('crossed') }));
+            model.factors = refs.factors.map(r => r.map(c => ({ v: c.inp.value, c: c.wrap.classList.contains('has-comma') })));
+            if (refs.carrySum.length) {
+                model.carrySum = refs.carrySum.map(c => ({ v: c.inp.value, x: c.wrap.classList.contains('crossed') }));
+            }
+            model.partials = refs.partials.map(r => r.map(c => ({ v: c.inp.value, c: c.wrap.classList.contains('has-comma') })));
+            if (refs.total.length) {
+                model.total = refs.total.map(c => ({ v: c.inp.value, c: c.wrap.classList.contains('has-comma') }));
+            }
+            scheduleSave();
+        }
+
+        function resizeCols(delta) {
+            syncModelFromDOM(currentRefs);
+            const newCols = Math.max(3, Math.min(12, model.cols + delta));
+            if (newCols === model.cols) return;
+            const adjustArr = (arr, defFactory) => delta > 0 ? [defFactory(), ...arr] : arr.slice(1);
+            model.cols = newCols;
+            model.carryTop = adjustArr(model.carryTop, () => ({ v: '', x: false }));
+            model.factors = model.factors.map(r => adjustArr(r, () => ({ v: '', c: false })));
+            model.carrySum = adjustArr(model.carrySum, () => ({ v: '', x: false }));
+            model.partials = model.partials.map(r => adjustArr(r, () => ({ v: '', c: false })));
+            model.total = adjustArr(model.total, () => ({ v: '', c: false }));
+            render();
+            scheduleSave();
+        }
+
+        function changePartials(delta) {
+            syncModelFromDOM(currentRefs);
+            const newCount = Math.max(1, Math.min(5, model.partials.length + delta));
+            if (newCount === model.partials.length) return;
+            if (delta > 0) {
+                model.partials.push(Array.from({ length: model.cols }, () => ({ v: '', c: false })));
+            } else {
+                model.partials.pop();
+            }
+            render();
+            scheduleSave();
+        }
+
+        function clearCarries() {
+            syncModelFromDOM(currentRefs);
+            model.carryTop = Array.from({ length: model.cols }, () => ({ v: '', x: false }));
+            model.carrySum = Array.from({ length: model.cols }, () => ({ v: '', x: false }));
+            render();
+            scheduleSave();
+        }
+
+        function render() {
+            container.innerHTML = '';
+            const refs = { carryTop: [], factors: [], carrySum: [], partials: [], total: [], allMatrix: [] };
+            currentRefs = refs;
+
+            const toolbar = document.createElement('div');
+            toolbar.className = 'col-toolbar';
+            const title = document.createElement('div');
+            title.className = 'col-title';
+            title.textContent = '× УМНОЖЕНИЕ';
+            toolbar.appendChild(title);
+
+            const btns = document.createElement('div');
+            btns.className = 'col-btn-group';
+            const makeBtn = (label, fn) => {
+                const b = document.createElement('button');
+                b.className = 'col-mini-btn';
+                b.textContent = label;
+                b.addEventListener('mousedown', stopProp);
+                b.addEventListener('touchstart', stopProp, { passive: false });
+                b.addEventListener('click', (e) => { e.stopPropagation(); fn(); });
+                return b;
+            };
+            btns.appendChild(makeBtn('− разр.', () => resizeCols(-1)));
+            btns.appendChild(makeBtn('+ разр.', () => resizeCols(1)));
+            btns.appendChild(makeBtn('+ ряд', () => changePartials(1)));
+            btns.appendChild(makeBtn('− ряд', () => changePartials(-1)));
+            btns.appendChild(makeBtn('🧹 в уме', clearCarries));
+            toolbar.appendChild(btns);
+            container.appendChild(toolbar);
+
+            const gridArea = document.createElement('div');
+            gridArea.className = 'col-grid-area';
+
+            // Левая колонка со знаками × и +
+            const gutter = document.createElement('div');
+            gutter.className = 'col-op-gutter';
+            gutter.style.justifyContent = 'flex-start';
+
+            const mulSym = document.createElement('div');
+            mulSym.className = 'col-op-symbol';
+            mulSym.style.marginTop = '46px';
+            mulSym.style.cursor = 'default';
+            mulSym.textContent = '×';
+            gutter.appendChild(mulSym);
+
+            if (model.partials.length >= 2) {
+                const plusSym = document.createElement('div');
+                plusSym.className = 'col-op-symbol';
+                plusSym.style.marginTop = (36 + 24 + (model.partials.length * 36) / 2 - 22) + 'px';
+                plusSym.style.cursor = 'default';
+                plusSym.textContent = '+';
+                gutter.appendChild(plusSym);
+            }
+            gridArea.appendChild(gutter);
+
+            const rowsWrap = document.createElement('div');
+            rowsWrap.className = 'col-rows-wrap';
+
+            // 1) Верхняя строка "в уме"
+            const carryTopEl = document.createElement('div');
+            carryTopEl.className = 'col-row';
+            for (let c = 0; c < model.cols; c++) {
+                const d = model.carryTop[c] || { v: '', x: false };
+                const cell = createColCell({
+                    value: d.v,
+                    crossed: d.x,
+                    isCarry: true,
+                    onChange: () => syncModelFromDOM(refs),
+                    onMoveFocus: (dr, dc) => moveFocus(0, c, dr, dc, false)
+                });
+                refs.carryTop.push(cell);
+                carryTopEl.appendChild(cell.wrap);
+            }
+            rowsWrap.appendChild(carryTopEl);
+            refs.allMatrix.push(refs.carryTop);
+
+            // 2) Два множителя
+            model.factors.forEach((fRow, fIdx) => {
+                const rEl = document.createElement('div');
+                rEl.className = 'col-row';
+                if (fIdx === 1) rEl.classList.add('border-bottom-bold');
+                const rowRef = [];
+                const matRow = refs.allMatrix.length;
+                for (let c = 0; c < model.cols; c++) {
+                    const d = fRow[c] || { v: '', c: false };
+                    const cell = createColCell({
+                        value: d.v,
+                        comma: d.c,
+                        onChange: () => syncModelFromDOM(refs),
+                        onMoveFocus: (dr, dc) => moveFocus(matRow, c, dr, dc, false)
+                    });
+                    rowRef.push(cell);
+                    rEl.appendChild(cell.wrap);
+                }
+                refs.factors.push(rowRef);
+                refs.allMatrix.push(rowRef);
+                rowsWrap.appendChild(rEl);
+            });
+
+            // 3) Если неполных произведений >= 2, добавляем строку "в уме" для их сложения
+            if (model.partials.length >= 2) {
+                const carrySumEl = document.createElement('div');
+                carrySumEl.className = 'col-row';
+                const matRow = refs.allMatrix.length;
+                for (let c = 0; c < model.cols; c++) {
+                    const d = model.carrySum[c] || { v: '', x: false };
+                    const cell = createColCell({
+                        value: d.v,
+                        crossed: d.x,
+                        isCarry: true,
+                        onChange: () => syncModelFromDOM(refs),
+                        onMoveFocus: (dr, dc) => moveFocus(matRow, c, dr, dc, false)
+                    });
+                    refs.carrySum.push(cell);
+                    carrySumEl.appendChild(cell.wrap);
+                }
+                rowsWrap.appendChild(carrySumEl);
+                refs.allMatrix.push(refs.carrySum);
+            }
+
+            // 4) Неполные произведения (со сдвигом влево)
+            model.partials.forEach((pRow, pIdx) => {
+                const rEl = document.createElement('div');
+                rEl.className = 'col-row';
+                if (model.partials.length >= 2 && pIdx === model.partials.length - 1) {
+                    rEl.classList.add('border-bottom-bold');
+                }
+                const rowRef = [];
+                const matRow = refs.allMatrix.length;
+                const startCol = Math.max(0, model.cols - 1 - pIdx);
+
+                for (let c = 0; c < model.cols; c++) {
+                    const d = pRow[c] || { v: '', c: false };
+                    const isShiftStart = (c === startCol);
+                    const isInactive = (c > startCol);
+                    const cell = createColCell({
+                        value: d.v,
+                        comma: d.c,
+                        shiftStart: isShiftStart,
+                        inactiveShift: isInactive,
+                        onChange: () => syncModelFromDOM(refs),
+                        onMoveFocus: (dr, dc) => moveFocus(matRow, c, dr, dc, model.rtlCalc)
+                    });
+                    rowRef.push(cell);
+                    rEl.appendChild(cell.wrap);
+                }
+                refs.partials.push(rowRef);
+                refs.allMatrix.push(rowRef);
+                rowsWrap.appendChild(rEl);
+            });
+
+            // 5) Итоговая сумма (если рядов >= 2)
+            if (model.partials.length >= 2) {
+                const totEl = document.createElement('div');
+                totEl.className = 'col-row';
+                const matRow = refs.allMatrix.length;
+                for (let c = 0; c < model.cols; c++) {
+                    const d = model.total[c] || { v: '', c: false };
+                    const cell = createColCell({
+                        value: d.v,
+                        comma: d.c,
+                        onChange: () => syncModelFromDOM(refs),
+                        onMoveFocus: (dr, dc) => moveFocus(matRow, c, dr, dc, model.rtlCalc)
+                    });
+                    refs.total.push(cell);
+                    totEl.appendChild(cell.wrap);
+                }
+                refs.allMatrix.push(refs.total);
+                rowsWrap.appendChild(totEl);
+            }
+
+            gridArea.appendChild(rowsWrap);
+            container.appendChild(gridArea);
+
+            const footer = document.createElement('div');
+            footer.className = 'col-footer';
+            const hint = document.createElement('span');
+            hint.innerHTML = 'Жёлтая клетка —<br>старт ряда';
+            const dirBtn = document.createElement('button');
+            dirBtn.className = 'dir-badge';
+            dirBtn.innerHTML = model.rtlCalc ? '← Вычисления<br>справа налево' : '→ Вычисления<br>слева направо';
+            dirBtn.addEventListener('mousedown', stopProp);
+            dirBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                syncModelFromDOM(refs);
+                model.rtlCalc = !model.rtlCalc;
+                render();
+                scheduleSave();
+            });
+            footer.appendChild(hint);
+            footer.appendChild(dirBtn);
+            container.appendChild(footer);
+
+            function moveFocus(r, c, dr, dc, isRtl) {
+                let nr = r + dr;
+                let nc = c;
+                if (dc === 'next') nc = isRtl ? c - 1 : c + 1;
+                else if (dc === 'back') nc = isRtl ? c + 1 : c - 1;
+                else nc = c + dc;
+
+                if (refs.allMatrix[nr] && refs.allMatrix[nr][nc]) {
+                    refs.allMatrix[nr][nc].inp.focus();
+                    refs.allMatrix[nr][nc].inp.select();
+                }
+            }
+        }
+
+        render();
+        item._getColData = () => {
+            syncModelFromDOM(currentRefs);
+            return model;
+        };
+        item.appendChild(container);
+    }
+
+    // 3. ВИДЖЕТ ДЕЛЕНИЯ УГОЛКОМ
+    function buildColDivWidget(item, initColData) {
+        let model = initColData || {
+            leftCols: 5,
+            rightCols: 4,
+            markers: Array(5).fill(''),
+            dividend: Array(5).fill({ v: '', c: false }),
+            divisor: Array(4).fill({ v: '', c: false }),
+            quotient: Array(4).fill({ v: '', c: false, dot: false }),
+            steps: [
+                {
+                    offset: 0,
+                    sub: Array(5).fill({ v: '', c: false }),
+                    rem: Array(5).fill({ v: '', c: false })
+                }
+            ]
+        };
+
+        const container = document.createElement('div');
+        container.className = 'col-widget';
+        const stopProp = e => e.stopPropagation();
+        let currentRefs = null;
+
+        function syncModelFromDOM(refs) {
+            if (!refs) return;
+            model.dividend = refs.dividend.map(c => ({ v: c.inp.value, c: c.wrap.classList.contains('has-comma') }));
+            model.divisor = refs.divisor.map(c => ({ v: c.inp.value, c: c.wrap.classList.contains('has-comma') }));
+            model.quotient = refs.quotient.map(c => ({
+                v: c.inp.value,
+                c: c.wrap.classList.contains('has-comma'),
+                dot: c.wrap.classList.contains('has-qdot')
+            }));
+            model.steps.forEach((st, idx) => {
+                if (refs.steps[idx]) {
+                    st.sub = refs.steps[idx].sub.map(c => ({ v: c.inp.value, c: c.wrap.classList.contains('has-comma') }));
+                    st.rem = refs.steps[idx].rem.map(c => ({ v: c.inp.value, c: c.wrap.classList.contains('has-comma') }));
+                }
+            });
+            scheduleSave();
+        }
+
+        function resizeDivCols(delta) {
+            syncModelFromDOM(currentRefs);
+            const newLeft = Math.max(3, Math.min(10, model.leftCols + delta));
+            const newRight = Math.max(3, Math.min(8, model.rightCols + delta));
+            const adjustEnd = (arr, len, factory) => {
+                const copy = arr.slice(0, len);
+                while (copy.length < len) copy.push(factory());
+                return copy;
+            };
+            model.leftCols = newLeft;
+            model.rightCols = newRight;
+            model.markers = adjustEnd(model.markers, newLeft, () => '');
+            model.dividend = adjustEnd(model.dividend, newLeft, () => ({ v: '', c: false }));
+            model.divisor = adjustEnd(model.divisor, newRight, () => ({ v: '', c: false }));
+            model.quotient = adjustEnd(model.quotient, newRight, () => ({ v: '', c: false, dot: false }));
+            model.steps.forEach(st => {
+                st.offset = Math.min(st.offset, newLeft - 1);
+                st.sub = adjustEnd(st.sub, newLeft, () => ({ v: '', c: false }));
+                st.rem = adjustEnd(st.rem, newLeft, () => ({ v: '', c: false }));
+            });
+            render();
+            scheduleSave();
+        }
+
+        function changeSteps(delta) {
+            syncModelFromDOM(currentRefs);
+            const newCount = Math.max(1, Math.min(8, model.steps.length + delta));
+            if (newCount === model.steps.length) return;
+            if (delta > 0) {
+                const prevOffset = model.steps[model.steps.length - 1]?.offset || 0;
+                model.steps.push({
+                    offset: Math.min(model.leftCols - 1, prevOffset + 1),
+                    sub: Array.from({ length: model.leftCols }, () => ({ v: '', c: false })),
+                    rem: Array.from({ length: model.leftCols }, () => ({ v: '', c: false }))
+                });
+            } else {
+                model.steps.pop();
+            }
+            render();
+            scheduleSave();
+        }
+
+        function render() {
+            container.innerHTML = '';
+            const refs = { dividend: [], divisor: [], quotient: [], steps: [], leftMatrix: [], rightMatrix: [] };
+            currentRefs = refs;
+
+            // Шапка в одну строку (как на скриншоте)
+            const toolbar = document.createElement('div');
+            toolbar.className = 'col-toolbar inline-header';
+            const title = document.createElement('div');
+            title.className = 'col-title';
+            title.textContent = '÷ УГОЛОК';
+            toolbar.appendChild(title);
+
+            const btns = document.createElement('div');
+            btns.className = 'col-btn-group';
+            const makeBtn = (label, fn) => {
+                const b = document.createElement('button');
+                b.className = 'col-mini-btn';
+                b.textContent = label;
+                b.addEventListener('mousedown', stopProp);
+                b.addEventListener('touchstart', stopProp, { passive: false });
+                b.addEventListener('click', (e) => { e.stopPropagation(); fn(); });
+                return b;
+            };
+            btns.appendChild(makeBtn('− разр.', () => resizeDivCols(-1)));
+            btns.appendChild(makeBtn('+ разр.', () => resizeDivCols(1)));
+            btns.appendChild(makeBtn('+ шаг', () => changeSteps(1)));
+            btns.appendChild(makeBtn('− шаг', () => changeSteps(-1)));
+            toolbar.appendChild(btns);
+            container.appendChild(toolbar);
+
+            // Тело уголка
+            const layout = document.createElement('div');
+            layout.className = 'div-layout';
+
+            // ЛЕВАЯ ЧАСТЬ (дуги + делимое + шаги вычитания)
+            const leftCol = document.createElement('div');
+            leftCol.className = 'div-left-col';
+
+            // Ряд наметок над делимым (⌒ / ↓)
+            const markerRow = document.createElement('div');
+            markerRow.className = 'div-marker-row';
+            const cycleStates = ['', '⌒', '↓'];
+            for (let c = 0; c < model.leftCols; c++) {
+                const mCell = document.createElement('div');
+                mCell.className = 'div-marker-cell';
+                mCell.textContent = model.markers[c] || '';
+                mCell.title = 'Клик: дуга неполного делимого ⌒ / стрелка сноса ↓';
+                mCell.addEventListener('mousedown', stopProp);
+                mCell.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    syncModelFromDOM(refs);
+                    const cur = model.markers[c] || '';
+                    const next = cycleStates[(cycleStates.indexOf(cur) + 1) % cycleStates.length];
+                    model.markers[c] = next;
+                    mCell.textContent = next;
+                    scheduleSave();
+                });
+                markerRow.appendChild(mCell);
+            }
+            leftCol.appendChild(markerRow);
+
+            // Строка делимого
+            const divWrap = document.createElement('div');
+            divWrap.className = 'div-step-row-wrap';
+            const divSpacer = document.createElement('div');
+            divSpacer.className = 'div-step-controls';
+            divWrap.appendChild(divSpacer);
+
+            const divRowEl = document.createElement('div');
+            divRowEl.className = 'col-row';
+            for (let c = 0; c < model.leftCols; c++) {
+                const d = model.dividend[c] || { v: '', c: false };
+                const cell = createColCell({
+                    value: d.v,
+                    comma: d.c,
+                    onChange: () => syncModelFromDOM(refs),
+                    onMoveFocus: (dr, dc) => moveLeftFocus(0, c, dr, dc)
+                });
+                refs.dividend.push(cell);
+                divRowEl.appendChild(cell.wrap);
+            }
+            refs.leftMatrix.push(refs.dividend);
+            divWrap.appendChild(divRowEl);
+            leftCol.appendChild(divWrap);
+
+            // Шаги вычитания
+            model.steps.forEach((stepObj, sIdx) => {
+                const stepRef = { sub: [], rem: [] };
+                refs.steps.push(stepRef);
+
+                // 1) Строка вычитаемого
+                const subWrap = document.createElement('div');
+                subWrap.className = 'div-step-row-wrap';
+
+                const subControls = document.createElement('div');
+                subControls.className = 'div-step-controls';
+                subWrap.appendChild(subControls);
+
+                // Плавающий минус перед первой активной клеткой шага
+                const minusEl = document.createElement('div');
+                minusEl.className = 'div-floating-minus';
+                minusEl.textContent = '−';
+                minusEl.style.left = (32 + stepObj.offset * 35 - 18) + 'px';
+                subWrap.appendChild(minusEl);
+
+                const subRowEl = document.createElement('div');
+                subRowEl.className = 'col-row';
+                const subMatRow = refs.leftMatrix.length;
+
+                for (let c = 0; c < model.leftCols; c++) {
+                    const d = stepObj.sub[c] || { v: '', c: false };
+                    const cell = createColCell({
+                        value: d.v,
+                        comma: d.c,
+                        onChange: () => syncModelFromDOM(refs),
+                        onMoveFocus: (dr, dc) => moveLeftFocus(subMatRow, c, dr, dc)
+                    });
+                    stepRef.sub.push(cell);
+                    subRowEl.appendChild(cell.wrap);
+                }
+                refs.leftMatrix.push(stepRef.sub);
+
+                // Короткая горизонтальная линия вычитания (начинается от сдвига шага)
+                const stepLine = document.createElement('div');
+                stepLine.className = 'div-step-line';
+                const lineLeft = stepObj.offset * 35;
+                const lineWidth = (model.leftCols - stepObj.offset) * 35 + 1;
+                stepLine.style.left = lineLeft + 'px';
+                stepLine.style.width = lineWidth + 'px';
+                subRowEl.appendChild(stepLine);
+
+                subWrap.appendChild(subRowEl);
+                leftCol.appendChild(subWrap);
+
+                // 2) Строка остатка (с кнопками сдвига ‹ › слева)
+                const remWrap = document.createElement('div');
+                remWrap.className = 'div-step-row-wrap';
+
+                const remControls = document.createElement('div');
+                remControls.className = 'div-step-controls';
+                const btnL = document.createElement('button');
+                btnL.className = 'div-shift-btn';
+                btnL.textContent = '‹';
+                btnL.title = 'Сдвинуть шаг влево';
+                btnL.addEventListener('mousedown', stopProp);
+                btnL.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    syncModelFromDOM(refs);
+                    stepObj.offset = Math.max(0, stepObj.offset - 1);
+                    render();
+                    scheduleSave();
+                });
+
+                const btnR = document.createElement('button');
+                btnR.className = 'div-shift-btn';
+                btnR.textContent = '›';
+                btnR.title = 'Сдвинуть шаг вправо';
+                btnR.addEventListener('mousedown', stopProp);
+                btnR.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    syncModelFromDOM(refs);
+                    stepObj.offset = Math.min(model.leftCols - 1, stepObj.offset + 1);
+                    render();
+                    scheduleSave();
+                });
+                remControls.appendChild(btnL);
+                remControls.appendChild(btnR);
+                remWrap.appendChild(remControls);
+
+                const remRowEl = document.createElement('div');
+                remRowEl.className = 'col-row';
+                const remMatRow = refs.leftMatrix.length;
+
+                for (let c = 0; c < model.leftCols; c++) {
+                    const d = stepObj.rem[c] || { v: '', c: false };
+                    const cell = createColCell({
+                        value: d.v,
+                        comma: d.c,
+                        onChange: () => syncModelFromDOM(refs),
+                        onMoveFocus: (dr, dc) => moveLeftFocus(remMatRow, c, dr, dc)
+                    });
+                    stepRef.rem.push(cell);
+                    remRowEl.appendChild(cell.wrap);
+                }
+                refs.leftMatrix.push(stepRef.rem);
+                remWrap.appendChild(remRowEl);
+                leftCol.appendChild(remWrap);
+            });
+
+            layout.appendChild(leftCol);
+
+            // ПРАВАЯ ЧАСТЬ (пустой отступ 22px сверху + уголок с делителем и частным)
+            const rightCol = document.createElement('div');
+            rightCol.className = 'div-right-col';
+
+            const topSpacer = document.createElement('div');
+            topSpacer.className = 'div-top-spacer';
+            rightCol.appendChild(topSpacer);
+
+            const cornerBox = document.createElement('div');
+            cornerBox.className = 'div-corner-box';
+
+            // Делитель
+            const divisorRowEl = document.createElement('div');
+            divisorRowEl.className = 'div-divisor-row';
+            for (let c = 0; c < model.rightCols; c++) {
+                const d = model.divisor[c] || { v: '', c: false };
+                const cell = createColCell({
+                    value: d.v,
+                    comma: d.c,
+                    onChange: () => syncModelFromDOM(refs),
+                    onMoveFocus: (dr, dc) => moveRightFocus(0, c, dr, dc)
+                });
+                refs.divisor.push(cell);
+                divisorRowEl.appendChild(cell.wrap);
+            }
+            refs.rightMatrix.push(refs.divisor);
+            cornerBox.appendChild(divisorRowEl);
+
+            // Частное
+            const quotientRowEl = document.createElement('div');
+            quotientRowEl.className = 'div-quotient-row';
+            for (let c = 0; c < model.rightCols; c++) {
+                const d = model.quotient[c] || { v: '', c: false, dot: false };
+                const cell = createColCell({
+                    value: d.v,
+                    comma: d.c,
+                    isQuotient: true,
+                    qDot: d.dot,
+                    onChange: () => syncModelFromDOM(refs),
+                    onMoveFocus: (dr, dc) => moveRightFocus(1, c, dr, dc)
+                });
+                refs.quotient.push(cell);
+                quotientRowEl.appendChild(cell.wrap);
+            }
+            refs.rightMatrix.push(refs.quotient);
+            cornerBox.appendChild(quotientRowEl);
+
+            rightCol.appendChild(cornerBox);
+            layout.appendChild(rightCol);
+            container.appendChild(layout);
+
+            // Подвал
+            const footer = document.createElement('div');
+            footer.className = 'col-footer';
+            footer.innerHTML = '<span>Над делимым: клик для дуги ⌒ или сноса ↓</span><span>‹ › — сдвиг шага</span>';
+            container.appendChild(footer);
+
+            function moveLeftFocus(r, c, dr, dc) {
+                let nr = r + dr;
+                let nc = c;
+                if (dc === 'next') nc = c + 1;
+                else if (dc === 'back') nc = c - 1;
+                else nc = c + dc;
+                if (refs.leftMatrix[nr] && refs.leftMatrix[nr][nc]) {
+                    refs.leftMatrix[nr][nc].inp.focus();
+                    refs.leftMatrix[nr][nc].inp.select();
+                }
+            }
+
+            function moveRightFocus(r, c, dr, dc) {
+                let nr = r + dr;
+                let nc = c;
+                if (dc === 'next') nc = c + 1;
+                else if (dc === 'back') nc = c - 1;
+                else nc = c + dc;
+                if (refs.rightMatrix[nr] && refs.rightMatrix[nr][nc]) {
+                    refs.rightMatrix[nr][nc].inp.focus();
+                    refs.rightMatrix[nr][nc].inp.select();
+                }
+            }
+        }
+
+        render();
+        item._getColData = () => {
+            syncModelFromDOM(currentRefs);
+            return model;
+        };
+        item.appendChild(container);
+    }
+
+    /* =========================================================
+       СОЗДАНИЕ ВСЕХ ЭЛЕМЕНТОВ ДОСКИ
+       ========================================================= */
+    function createItem(type, val, worldX, worldY, initData = null) {
+        const item = document.createElement('div');
+        item.className = 'board-item';
+        item.dataset.type = type;
+        if (val !== undefined && val !== null) item.dataset.val = val;
+        item.style.zIndex = ++state.zIndex;
+        item.style.left = worldX + 'px';
+        item.style.top = worldY + 'px';
+
+        const del = document.createElement('button');
+        del.type = 'button';
+        del.className = 'delete-btn';
+        del.setAttribute('aria-label', 'Удалить элемент');
+        del.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
+
+        const stopDrag = (e) => e.stopPropagation();
+        const removeFn = (e) => {
+            e.stopPropagation();
+            item.remove();
+            updateSelectionUI();
+            checkEmptyState();
+            scheduleSave();
+        };
+        del.addEventListener('mousedown', stopDrag);
+        del.addEventListener('touchstart', stopDrag, { passive: false });
+        del.addEventListener('click', removeFn);
+        item.appendChild(del);
+
+        if (type === 'number') {
+            item.classList.add('item-single');
+            item.appendChild(autoInput(''));
+        } else if (type === 'var') {
+            item.classList.add('item-single');
+            const span = document.createElement('span');
+            span.className = 'operator-text';
+            span.style.fontFamily = "'Cambria Math', serif";
+            span.style.fontStyle = 'italic';
+            span.textContent = val;
+            item.appendChild(span);
+        } else if (type === 'op-mul') {
+            item.classList.add('item-single');
+            const span = document.createElement('span');
+            span.className = 'operator-text';
+            span.style.fontSize = '20px';
+            span.style.padding = '0 8px';
+            span.textContent = '×';
+            item.appendChild(span);
+        } else if (type === 'fraction') {
+            item.classList.add('item-fraction');
+            item.appendChild(fractionDom());
+        } else if (type === 'mixed') {
+            item.classList.add('item-fraction');
+            const wrap = document.createElement('div');
+            wrap.className = 'mixed-container';
+            const intPart = document.createElement('div');
+            intPart.style.display = 'flex';
+            intPart.style.alignItems = 'center';
+            intPart.style.height = '100%';
+            intPart.appendChild(autoInput(''));
+            intPart.style.fontSize = '1.2em';
+            wrap.appendChild(intPart);
+            wrap.appendChild(fractionDom());
+            item.appendChild(wrap);
+        } else if (type === 'power') {
+            item.classList.add('item-auto');
+            const wrap = document.createElement('div');
+            wrap.className = 'power-wrap';
+            const base = autoInput('', { fontSize: 24, fontWeight: '400', extraClass: 'power-base-input', minW: 18, pad: 4 });
+            const exp = autoInput('', { fontSize: 16, fontWeight: '700', extraClass: 'exp-input', placeholder: 'y', minW: 14, pad: 3 });
+            wrap.appendChild(base);
+            wrap.appendChild(exp);
+            item.appendChild(wrap);
+        } else if (type === 'frac-power') {
+            item.classList.add('item-fraction');
+            const wrap = document.createElement('div');
+            wrap.className = 'frac-power-wrap';
+            const lParen = document.createElement('span');
+            lParen.className = 'operator-text';
+            lParen.textContent = '(';
+            lParen.style.fontSize = '40px';
+            lParen.style.fontWeight = 'normal';
+            lParen.style.padding = '0 1px';
+            const rParen = document.createElement('span');
+            rParen.className = 'operator-text';
+            rParen.textContent = ')';
+            rParen.style.fontSize = '40px';
+            rParen.style.fontWeight = 'normal';
+            rParen.style.padding = '0 1px';
+            const exp = autoInput('', { fontSize: 16, fontWeight: '700', extraClass: 'exp-input', placeholder: 'x', minW: 14, pad: 3 });
+            wrap.appendChild(lParen);
+            wrap.appendChild(fractionDom());
+            wrap.appendChild(rParen);
+            wrap.appendChild(exp);
+            item.appendChild(wrap);
+        } else if (type === 'sqrt') {
+            item.classList.add('item-auto');
+            const wrap = document.createElement('div');
+            wrap.style.display = 'flex';
+            wrap.style.alignItems = 'flex-end';
+            const sym = document.createElement('span');
+            sym.textContent = '√';
+            sym.style.fontSize = '34px';
+            sym.style.lineHeight = '30px';
+            sym.style.color = '#0f172a';
+            sym.style.paddingRight = '2px';
+            const inner = document.createElement('div');
+            inner.style.borderTop = '2px solid #0f172a';
+            inner.style.paddingTop = '2px';
+            inner.style.marginLeft = '-2px';
+            inner.appendChild(autoInput(''));
+            wrap.appendChild(sym);
+            wrap.appendChild(inner);
+            item.appendChild(wrap);
+        } else if (type === 'col-add') {
+            item.classList.add('item-auto');
+            buildColAddWidget(item, initData ? initData.colData : null);
+        } else if (type === 'col-mul') {
+            item.classList.add('item-auto');
+            buildColMulWidget(item, initData ? initData.colData : null);
+        } else if (type === 'col-div') {
+            item.classList.add('item-auto');
+            buildColDivWidget(item, initData ? initData.colData : null);
+        } else if (type === 'fraction-bar') {
+            item.classList.add('item-single');
+            item.classList.add('item-fraction-bar');
+            let width = 120;
+            const wrapper = document.createElement('div');
+            wrapper.style.display = 'flex';
+            wrapper.style.alignItems = 'center';
+            wrapper.style.height = '100%'; 
+            const line = document.createElement('div');
+            line.style.height = '3px';
+            line.style.backgroundColor = 'var(--text-color)';
+            line.style.width = width + 'px';
+            line.style.borderRadius = '2px';
+            const handle = document.createElement('div');
+            handle.className = 'segment-resize-handle';
+            handle.innerHTML = '⇹';
+            handle.style.marginLeft = '12px';
+            handle.style.marginTop = '0';
+
+            const startHandleDrag = (e) => {
+                e.stopPropagation();
+                const startX = getPos(e).x;
+                const startW = parseFloat(line.style.width) || width;
+                const onDragMove = (ev) => {
+                    const dx = (getPos(ev).x - startX) / state.scale;
+                    width = Math.max(30, startW + dx);
+                    line.style.width = width + 'px';
+                };
+                const onDragUp = () => { 
+                    window.removeEventListener('mousemove', onDragMove);
+                    window.removeEventListener('touchmove', onDragMove);
+                    window.removeEventListener('mouseup', onDragUp);
+                    window.removeEventListener('touchend', onDragUp);
+                    scheduleSave(); 
+                };
+                window.addEventListener('mousemove', onDragMove);
+                window.addEventListener('touchmove', onDragMove, { passive: false });
+                window.addEventListener('mouseup', onDragUp);
+                window.addEventListener('touchend', onDragUp);
+            };
+            handle.addEventListener('mousedown', startHandleDrag);
+            handle.addEventListener('touchstart', startHandleDrag, { passive: false });
+
+            wrapper.appendChild(line);
+            wrapper.appendChild(handle);
+            item.appendChild(wrapper);
+        } else if (type === 'segment') {
+            item.classList.add('item-auto');
+            let isAuto = true;
+            let localUnitPx = 20;
+            let rowsData = []; 
+            const wrapper = document.createElement('div');
+            wrapper.className = 'seg-container';
+            const header = document.createElement('div');
+            header.className = 'seg-header';
+            const scaleWrap = document.createElement('div');
+            scaleWrap.className = 'scale-wrap';
+            scaleWrap.appendChild(document.createTextNode('1 ед = '));
+            const scaleInput = document.createElement('input');
+            scaleInput.className = 'scale-input';
+            scaleInput.value = '20';
+            scaleWrap.appendChild(scaleInput);
+            scaleWrap.appendChild(document.createTextNode(' px'));
+            const autoLabel = document.createElement('label');
+            autoLabel.className = 'auto-scale-label';
+            const autoCb = document.createElement('input');
+            autoCb.type = 'checkbox';
+            autoCb.checked = true;
+            autoLabel.appendChild(autoCb);
+            autoLabel.appendChild(document.createTextNode('Автомасштаб'));
+            const leftHeaderGroup = document.createElement('div');
+            leftHeaderGroup.style.display = 'flex';
+            leftHeaderGroup.style.alignItems = 'center';
+            leftHeaderGroup.style.gap = '16px';
+            leftHeaderGroup.appendChild(scaleWrap);
+            leftHeaderGroup.appendChild(autoLabel);
+            const addBtn = document.createElement('button');
+            addBtn.className = 'action-btn btn-primary';
+            addBtn.innerHTML = '➕ Отрезок';
+            header.appendChild(leftHeaderGroup);
+            header.appendChild(addBtn);
+            wrapper.appendChild(header);
+            const rowsContainer = document.createElement('div');
+            rowsContainer.className = 'seg-rows';
+            wrapper.appendChild(rowsContainer);
+
+            const updateContainer = () => {
+                if (isAuto && rowsData.length > 0) {
+                    let maxLen = Math.max(...rowsData.map(r => r.step * r.parts));
+                    if (maxLen > 0) {
+                        localUnitPx = Math.min(100, Math.max(0.1, 400 / maxLen));
+                        scaleInput.value = parseFloat(localUnitPx.toFixed(2));
+                    }
+                }
+                rowsData.forEach(r => r.renderGraphics());
+            };
+
+            scaleInput.addEventListener('input', (e) => {
+                let v = parseFloat(e.target.value.replace(',', '.'));
+                if (!isNaN(v) && v > 0) {
+                    localUnitPx = v;
+                    isAuto = false;
+                    autoCb.checked = false;
+                    updateContainer();
+                }
+            });
+            scaleInput.addEventListener('mousedown', e => e.stopPropagation());
+            scaleInput.addEventListener('touchstart', e => e.stopPropagation());
+            autoCb.addEventListener('change', (e) => {
+                isAuto = e.target.checked;
+                updateContainer();
+            });
+
+            const addSegment = (defaultStep, defaultParts = 3) => {
+                const rowModel = { step: parseFloat(defaultStep) || 1, parts: parseInt(defaultParts) || 3, renderGraphics: null };
+                rowsData.push(rowModel);
+                const row = document.createElement('div');
+                row.className = 'seg-row';
+                const topArea = document.createElement('div');
+                topArea.className = 'seg-top';
+                const graphics = document.createElement('div');
+                graphics.className = 'segment-graphics';
+                const handle = document.createElement('div');
+                handle.className = 'segment-resize-handle';
+                handle.innerHTML = '⇹';
+                topArea.appendChild(graphics);
+                topArea.appendChild(handle);
+                const bottomArea = document.createElement('div');
+                bottomArea.className = 'seg-bottom';
+                bottomArea.appendChild(document.createTextNode('Шаг:'));
+                const stepInput = autoInput(rowModel.step.toString(), { fontSize: 16 });
+                bottomArea.appendChild(stepInput);
+                const divider = document.createElement('span');
+                divider.textContent = '|';
+                divider.style.color = '#cbd5e1';
+                divider.style.margin = '0 6px';
+                bottomArea.appendChild(divider);
+                bottomArea.appendChild(document.createTextNode('Длина:'));
+                const lenInput = autoInput((rowModel.step * rowModel.parts).toString(), { fontSize: 16 });
+                bottomArea.appendChild(lenInput);
+                const delRowBtn = document.createElement('button');
+                delRowBtn.className = 'seg-row-del';
+                delRowBtn.innerHTML = '🗑 Удалить';
+                delRowBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    row.remove();
+                    rowsData = rowsData.filter(r => r !== rowModel);
+                    updateContainer();
+                    scheduleSave();
+                };
+                bottomArea.appendChild(delRowBtn);
+                row.appendChild(topArea);
+                row.appendChild(bottomArea);
+                rowsContainer.appendChild(row);
+
+                stepInput.addEventListener('input', () => {
+                    rowModel.step = parseInputVal(stepInput.value);
+                    updateInputUI(lenInput, rowModel.step * rowModel.parts);
+                    updateContainer();
+                });
+                lenInput.addEventListener('input', () => {
+                    let totalLen = parseInputVal(lenInput.value);
+                    rowModel.step = totalLen / rowModel.parts;
+                    updateInputUI(stepInput, rowModel.step);
+                    updateContainer();
+                });
+
+                rowModel.renderGraphics = () => {
+                    graphics.innerHTML = '';
+                    const partWidth = Math.max(5, rowModel.step * localUnitPx);
+                    const totalWidth = rowModel.parts * partWidth;
+                    graphics.style.width = totalWidth + 'px';
+                    const mainLine = document.createElement('div');
+                    mainLine.className = 'segment-main-line';
+                    mainLine.style.width = totalWidth + 'px';
+                    graphics.appendChild(mainLine);
+                    for (let i = 0; i <= rowModel.parts; i++) {
+                        const tick = document.createElement('div');
+                        tick.className = 'segment-tick';
+                        tick.style.left = (i * partWidth) + 'px';
+                        graphics.appendChild(tick);
+                        const label = document.createElement('div');
+                        label.className = 'segment-label';
+                        label.style.left = (i * partWidth) + 'px';
+                        label.textContent = parseFloat((i * rowModel.step).toFixed(3));
+                        graphics.appendChild(label);
+                    }
+                };
+
+                const startResize = (e) => {
+                    e.stopPropagation();
+                    const startX = getPos(e).x;
+                    const startParts = rowModel.parts;
+                    isAuto = false;
+                    autoCb.checked = false;
+                    const currentPartWidth = Math.max(5, rowModel.step * localUnitPx);
+                    const onMoveHandle = (ev) => {
+                        const dx = (getPos(ev).x - startX) / state.scale;
+                        let newParts = startParts + Math.round(dx / currentPartWidth);
+                        newParts = Math.max(1, Math.min(newParts, 150)); 
+                        if (newParts !== rowModel.parts) {
+                            rowModel.parts = newParts;
+                            updateInputUI(lenInput, rowModel.step * rowModel.parts);
+                            updateContainer();
+                        }
+                    };
+                    const onUpHandle = () => { 
+                        window.removeEventListener('mousemove', onMoveHandle);
+                        window.removeEventListener('touchmove', onMoveHandle);
+                        window.removeEventListener('mouseup', onUpHandle);
+                        window.removeEventListener('touchend', onUpHandle);
+                        scheduleSave(); 
+                    };
+                    window.addEventListener('mousemove', onMoveHandle);
+                    window.addEventListener('touchmove', onMoveHandle, { passive: false });
+                    window.addEventListener('mouseup', onUpHandle);
+                    window.addEventListener('touchend', onUpHandle);
+                };
+                handle.addEventListener('mousedown', startResize);
+                handle.addEventListener('touchstart', startResize, { passive: false });
+
+                updateContainer();
+                if (!isRestoring) setTimeout(() => stepInput.focus(), 10);
+            };
+
+            const blockEvents = e => e.stopPropagation();
+            addBtn.addEventListener('click', (e) => { e.stopPropagation(); addSegment(1); });
+            addBtn.addEventListener('mousedown', blockEvents);
+            addBtn.addEventListener('touchstart', blockEvents, { passive: false });
+
+            if (initData && initData.rows) {
+                isAuto = false;
+                autoCb.checked = false;
+                if (initData.scale) {
+                    scaleInput.value = initData.scale;
+                    localUnitPx = parseFloat(initData.scale);
+                }
+                initData.rows.forEach(r => {
+                    const step = parseFloat(r.step) || 1;
+                    const len = parseFloat(r.len) || 3;
+                    addSegment(step, Math.round(len / step) || 3);
+                });
+            } else {
+                addSegment(1);
+            }
+            item.appendChild(wrapper);
+        } else {
+            item.classList.add('item-single');
+            const span = document.createElement('span');
+            span.className = 'operator-text';
+            span.textContent = val;
+            item.appendChild(span);
+        }
+
+        const onDragStart = (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.type === 'checkbox') return;
+            if (e.type === 'mousedown' && e.button !== 0) return; 
+
+            e.stopPropagation();
+
+            if (e.shiftKey || e.ctrlKey || e.metaKey) {
+                item.classList.toggle('selected');
+                updateSelectionUI();
+                if (!item.classList.contains('selected')) return;
+            } else if (!item.classList.contains('selected')) {
+                clearSelection();
+                item.classList.add('selected');
+                updateSelectionUI();
+            }
+
+            startItemDrag(e, item);
+        };
+        
+        item.addEventListener('mousedown', onDragStart);
+        item.addEventListener('touchstart', onDragStart, { passive: false });
+
+        surface.appendChild(item);
+        
+        const firstInput = item.querySelector('input');
+        if (firstInput && type !== 'segment' && type !== 'fraction-bar' && !isRestoring) {
+            setTimeout(() => firstInput.focus(), 10);
+        }
+
+        checkEmptyState();
+        return item;
+    }
+
+    function autoInput(val, opts = {}) {
+        const fontSize = opts.fontSize || 24;
+        const fontWeight = opts.fontWeight || '400';
+        const minW = opts.minW || 22;
+        const pad = opts.pad !== undefined ? opts.pad : 6;
+
+        const inp = document.createElement('input');
+        inp.className = 'smart-input' + (opts.extraClass ? ' ' + opts.extraClass : '');
+        inp.value = val;
+        inp.placeholder = opts.placeholder || '?';
+        inp.style.fontSize = fontSize + 'px';
+        inp.style.fontWeight = fontWeight;
+
+        const resize = () => {
+            const textToMeasure = inp.value || inp.placeholder || '?';
+            const exactW = measureTextWidth(textToMeasure, fontSize, fontWeight);
+            inp.style.width = Math.max(minW, exactW + pad) + 'px';
+        };
+        inp.addEventListener('input', resize);
+        setTimeout(resize, 0);
+        return inp;
+    }
+
+    function fractionDom() {
+        const b = document.createElement('div');
+        b.className = 'fraction-box';
+        const n = document.createElement('div');
+        n.className = 'numerator';
+        n.appendChild(autoInput(''));
+        const d = document.createElement('div');
+        d.className = 'denominator';
+        d.appendChild(autoInput(''));
+        b.appendChild(n);
+        b.appendChild(d);
+        return b;
+    }
+
+    document.querySelectorAll('.palette-item').forEach(p => {
+        const addFromPalette = () => {
+            const rect = viewport.getBoundingClientRect();
+            const worldPos = screenToWorld(rect.left + rect.width / 2, rect.top + rect.height / 2);
+            const item = createItem(p.dataset.type, p.dataset.val, worldPos.x - 40, worldPos.y - 30);
+            clearSelection();
+            item.classList.add('selected');
+            updateSelectionUI();
+            snapItem(item);
+            scheduleSave();
+            closeSidebarMobile();
+        };
+        p.addEventListener('click', addFromPalette);
+    });
+
+    function startItemDrag(e, item) {
+        dragState.activeItem = item;
+        const pos = getPos(e);
+        const worldPos = screenToWorld(pos.x, pos.y);
+        dragState.startWorldX = worldPos.x;
+        dragState.startWorldY = worldPos.y;
+
+        const selectedEls = Array.from(document.querySelectorAll('.board-item.selected'));
+        if (!selectedEls.includes(item)) {
+            selectedEls.push(item);
+        }
+
+        dragState.selectedItems = selectedEls.map(el => {
+            el.classList.add('dragging');
+            el.style.zIndex = ++state.zIndex;
+            return {
+                el,
+                origX: parseFloat(el.style.left) || 0,
+                origY: parseFloat(el.style.top) || 0
+            };
+        });
+    }
+
+    function snapItem(item) {
+        const grid = 10;
+        const x = parseFloat(item.style.left) || 0;
+        const y = parseFloat(item.style.top) || 0;
+        item.style.left = (Math.round(x / grid) * grid) + 'px';
+        item.style.top = (Math.round(y / grid) * grid) + 'px';
+    }
+
+    function clearAll() { 
+        if (confirm('Очистить всю доску?')) {
+            surface.innerHTML = ''; 
+            updateSelectionUI();
+            checkEmptyState();
+            scheduleSave();
+            closeSidebarMobile();
+        }
+    }
+    
+    window.addEventListener('keydown', (e) => {
+        const active = document.activeElement;
+        if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable)) return;
+
+        if ((e.ctrlKey || e.metaKey) && !e.altKey) {
+            const key = e.key.toLowerCase();
+            if (key === 'z') {
+                e.preventDefault();
+                if (e.shiftKey) redo(); else undo();
+                return;
+            }
+            if (key === 'y') {
+                e.preventDefault();
+                redo();
+                return;
+            }
+        }
+
+        if (active && active.closest?.('#sidebar')) return;
+
+        if (e.key === 'Delete' || e.key === 'Backspace') {
+            deleteSelected();
+            return;
+        }
+
+        const step = e.shiftKey ? 20 : 10;
+        if (e.key === 'ArrowLeft') { e.preventDefault(); nudgeSelected(-step, 0); }
+        else if (e.key === 'ArrowRight') { e.preventDefault(); nudgeSelected(step, 0); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); nudgeSelected(0, -step); }
+        else if (e.key === 'ArrowDown') { e.preventDefault(); nudgeSelected(0, step); }
+    });
+
+    document.addEventListener('DOMContentLoaded', loadBoardState);
