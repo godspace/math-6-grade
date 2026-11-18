@@ -1,0 +1,14 @@
+/* Файл: tools/tailwind.input.css
+   Входной файл для сборки локального CSS вместо CDN cdn.tailwindcss.com.
+   Подключён только в двух страницах: trainers/fractions/mixed.html и mixed_complex.html.
+
+   Пересборка (Tailwind standalone v3.4.17, Node не нужен):
+     tailwindcss.exe -i tools/tailwind.input.css -o assets/tailwind.css ^
+       --content "trainers/fractions/mixed.html,trainers/fractions/mixed_complex.html" --minify
+   Бинарник: https://github.com/tailwindlabs/tailwindcss/releases/download/v3.4.17/tailwindcss-windows-x64.exe
+   После пересборки — `python -X utf8 tools/page_console.py "trainers/fractions/mixed*.html" --offline`.
+*/
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
