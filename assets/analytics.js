@@ -19,6 +19,79 @@ ym(106746549, 'init', {
     trackLinks: true
 });
 
+// --- Прогресс миссий (локально, без бэкенда, §23 плана) ---
+// Один ключ на весь сайт: mg6.progress.v1 → { v, updated, m: { id: { s, w, l, d } } }
+window.MissionStore = {
+    KEY: 'mg6.progress.v1',
+    _mem: null, // запасное хранилище, если localStorage недоступен (приватный режим)
+
+    read() {
+        let state = null;
+        try {
+            const raw = localStorage.getItem(this.KEY);
+            state = raw ? JSON.parse(raw) : null;
+        } catch (err) {
+            console.warn('[MissionStore] чтение прогресса недоступно:', err && err.message);
+        }
+        if (!state || state.v !== 1 || typeof state.m !== 'object' || !state.m) {
+            state = this._mem || { v: 1, m: {} };
+        }
+        this._mem = state;
+        return state;
+    },
+
+    write(state) {
+        if (!state || state.v !== 1 || typeof state.m !== 'object' || !state.m) return;
+        state.updated = Date.now();
+        this._mem = state;
+        try {
+            localStorage.setItem(this.KEY, JSON.stringify(state));
+        } catch (err) {
+            console.warn('[MissionStore] сохранение прогресса недоступно:', err && err.message);
+        }
+    },
+
+    record(goal, params) {
+        const trainer = params && params.trainer;
+        if (!trainer || typeof trainer !== 'string') return null;
+        const state = this.read();
+        const now = Date.now();
+        const entry = state.m[trainer] || {};
+        if (goal === 'trainer_started') {
+            if (!entry.s) entry.s = now;
+        } else if (goal === 'task_solved' || goal === 'reward_shown') {
+            entry.w = (entry.w || 0) + 1;
+            entry.l = now;
+        } else if (goal === 'course_finished') {
+            if (!entry.d) entry.d = now;
+            entry.l = now;
+        } else {
+            return entry; // неизвестное событие — состояние не меняем
+        }
+        state.m[trainer] = entry;
+        this.write(state);
+        return entry;
+    },
+
+    get(id) {
+        return this.read().m[id] || null;
+    },
+
+    reset() {
+        this._mem = { v: 1, m: {} };
+        try {
+            localStorage.removeItem(this.KEY);
+        } catch (err) {
+            console.warn('[MissionStore] сброс прогресса недоступен:', err && err.message);
+        }
+    }
+};
+
+// Единая точка записи событий прогресса: страницы зовут window.trackGoal(...)
+window.trackGoal = function (goal, params) {
+    if (window.MissionStore) window.MissionStore.record(goal, params || {});
+};
+
 // --- Глобальная система наград и лутбоксов (Adv.Cake) ---
 window.RewardSystem = {
     // Базовая ссылка (склеена с лендингом и токеном, ждёт только параметр sub1)
@@ -151,7 +224,12 @@ window.RewardSystem = {
         document.body.appendChild(lifeline);
     },
 
-    showWin(customMessage, subId = 'general') {
+    showWin(customMessage, subId = 'general', opts) {
+        // Прогресс миссий: победа = reward_shown, финальный экран = course_finished (§23.4)
+        if (window.trackGoal) {
+            window.trackGoal('reward_shown', { trainer: subId });
+            if (opts && opts.final) window.trackGoal('course_finished', { trainer: subId });
+        }
         if (customMessage) {
             document.getElementById('lootbox-message').innerHTML = customMessage + "<br><br>Ты получаешь редкий лут: 2 бесплатных занятия с крутыми преподавателями.";
         }

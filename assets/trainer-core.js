@@ -312,7 +312,7 @@ window.TrainerCore = (function () {
         refs.input.disabled = true;
         refs.victory.classList.add('active');
         if (window.RewardSystem) {
-            window.RewardSystem.showWin('Все ' + cfg.totalLevels + ' уровней пройдены!', cfg.id);
+            window.RewardSystem.showWin('Все ' + cfg.totalLevels + ' уровней пройдены!', cfg.id, { final: true });
         }
         startConfetti();
     }
