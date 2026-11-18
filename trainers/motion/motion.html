@@ -273,6 +273,15 @@
         .msg-success { color: #2e7d32; }
         .msg-error { color: #c62828; }
 
+    /* SEO-блок (S4): объяснение алгоритма под тренажёром */
+    .seo-note { width: calc(100% - 24px); max-width: 720px; box-sizing: border-box; margin: 22px auto 18px; padding: 20px 22px; border-radius: 16px; background: #fff; border: 1px solid #e5e7eb; box-shadow: 0 8px 20px rgba(15,23,42,.06); color: #1f2937; font-size: 15px; line-height: 1.65; text-align: left; }
+    .seo-note h2 { margin: 0 0 10px; font-size: clamp(1.05rem, 2.5vw, 1.3rem); font-weight: 800; line-height: 1.3; color: #111827; }
+    .seo-note p { margin: 0 0 10px; }
+    .seo-note ol { margin: 0 0 10px; padding-left: 22px; }
+    .seo-note li { margin: 4px 0; }
+    .seo-note a { color: #4f46e5; font-weight: 600; }
+    .seo-note .seo-example { padding: 10px 12px; border-radius: 12px; background: #f3f4f6; }
+    @media (max-width: 420px) { .seo-note { padding: 14px; font-size: 14.5px; } }
     </style>
 </head>
 <body>
@@ -366,6 +375,19 @@
             <button class="btn btn-next" id="btnNext" onclick="Game.generateRandom()">СГЕНЕРИРОВАТЬ ДРУГУЮ</button>
         </div>
     </div>
+
+    <section class="seo-note">
+        <h2>Четыре ситуации одной задачи на движение</h2>
+        <p>При равномерном движении путь равен скорости, умноженной на время. Одна и та же задача про пункты А и Б даёт четыре разных ответа: важно не только перемножить числа, но и понять, сближаются объекты или удаляются друг от друга.</p>
+        <ol>
+            <li>Выберите вкладку: «Навстречу», «Врозь», «Вдогонку (вправо)» или «Вдогонку (влево)».</li>
+            <li>Выпишите скорости и время из условия, а расстояние между пунктами прибавьте к пройденному пути или вычтите из него.</li>
+            <li>Удерживайте «ГАЗ», чтобы время пошло вперёд, или «РЕВЕРС» — чтобы назад; отпустите кнопку, и машины остановятся.</li>
+            <li>Введите четыре ответа — по одному на каждую ситуацию — и нажмите «Проверить все».</li>
+        </ol>
+        <p class="seo-example">Разбор: между пунктами 120 км, автомобиль едет со скоростью 60 км/ч, грузовик — 50 км/ч, время — 1 час. Навстречу скорости складываются: 110 км/ч, значит разрыв сократится до 120 − 110 = 10 км. Врозь разрыв вырастет до 230 км. Вдогонку работает разность 10 км/ч: при движении вправо разрыв станет 110 км, влево — 130 км.</p>
+        <p>Похожие текстовые задачи и темы собраны в <a href="../vpr/index.html">плане подготовки к ВПР</a>.</p>
+    </section>
 </div>
 
 <script>

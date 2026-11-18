@@ -42,6 +42,17 @@
     <link rel="manifest" href="/math-6-grade/site.webmanifest">
 
     <link rel="stylesheet" href="../../assets/math_board.css">
+
+    <style>
+        /* SEO-блок (S4): пояснение к инструментам в конце сайдбара */
+        .seo-note { margin: 6px 0 0; padding: 12px 12px 14px; border-radius: 12px; background: #fff; border: 1px solid #e2e8f0; color: #1f2937; font-size: 12.5px; line-height: 1.55; text-align: left; user-select: text; -webkit-user-select: text; }
+        .seo-note h2 { margin: 0 0 8px; font-size: 0.95rem; font-weight: 800; line-height: 1.3; color: var(--primary-color); }
+        .seo-note p { margin: 0 0 8px; }
+        .seo-note ol { margin: 0 0 8px; padding-left: 18px; }
+        .seo-note li { margin: 3px 0; }
+        .seo-note a { color: var(--primary-color); font-weight: 700; }
+        .seo-note .seo-example { padding: 8px 10px; border-radius: 10px; background: #f1f5f9; }
+    </style>
     <script src="../../assets/analytics.js" defer></script>
 </head>
 <body>
@@ -148,6 +159,19 @@
     
     <button class="action-btn btn-reset" data-action="reset-view">🎯 Центр камеры</button>
     <button class="action-btn btn-danger" data-action="clear-all">🗑 Очистить всё</button>
+
+    <section class="seo-note">
+        <h2>Что можно решать на доске</h2>
+        <p>Это интерактивный конструктор: любой элемент ставится на рабочее поле и перетаскивается мышью или пальцем. В палитре — числа, переменная x, обыкновенная и смешанная дробь, знаки действий и скобки, степени и корни, общая черта дроби и блок отрезков.</p>
+        <ol>
+            <li>Нажмите инструмент в палитре — элемент появится на доске.</li>
+            <li>Перетащите его на нужное место: рамкой (кнопка «Выделение» или Shift с мышью) собирается группа, которую двигают стрелками.</li>
+            <li>Ошиблись — отмените действие кнопкой ↶ или сочетанием Ctrl+Z, вернуть отменённое поможет Ctrl+Shift+Z.</li>
+            <li>Масштаб меняют кнопками «−» и «+», «Центр камеры» возвращает вид, «Очистить всё» начинает лист заново.</li>
+        </ol>
+        <p class="seo-example">Деление уголком: выберите инструмент «Уголок» и подпишите рядом делимое и делитель. Пример 156 : 12 = 13 — двенадцать на единицу даёт 12, остаток 3, сносим шестёрку, получаем 36, двенадцать на три равно 36, остаток 0. Проверка: 13 · 12 = 156.</p>
+        <p>Пошаговые тренировки по этой теме — <a href="multiplication.html">умножение</a> и <a href="division.html">деление дробей</a>.</p>
+    </section>
 </aside>
 
 <div id="viewport">

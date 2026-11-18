@@ -297,6 +297,15 @@
             .fraction-row { flex-direction: column; gap: 15px; }
             .operator { transform: rotate(90deg); margin: 0; }
         }
+    /* SEO-блок (S4): объяснение алгоритма под тренажёром */
+    .seo-note { max-width: 720px; margin: 26px auto 6px; padding: 20px 22px; border-radius: 16px; background: #fff; border: 1px solid #e5e7eb; box-shadow: 0 8px 20px rgba(15,23,42,.06); color: #1f2937; font-size: 15px; line-height: 1.65; text-align: left; }
+    .seo-note h2 { margin: 0 0 10px; font-size: clamp(1.05rem, 2.5vw, 1.3rem); font-weight: 800; line-height: 1.3; color: #111827; }
+    .seo-note p { margin: 0 0 10px; }
+    .seo-note ol { margin: 0 0 10px; padding-left: 22px; }
+    .seo-note li { margin: 4px 0; }
+    .seo-note a { color: #4f46e5; font-weight: 600; }
+    .seo-note .seo-example { padding: 10px 12px; border-radius: 12px; background: #f3f4f6; }
+    @media (max-width: 420px) { .seo-note { padding: 14px; font-size: 14.5px; } }
     </style>
 </head>
 <body>
@@ -405,6 +414,19 @@
         </div>
         <button class="btn" onclick="location.reload()">Начать заново</button>
     </div>
+
+    <section class="seo-note">
+        <h2>Процент от числа: как считать без калькулятора</h2>
+        <p>Процент — это сотая доля числа, поэтому p процентов записываются дробью с числителем p и знаменателем 100. Тренажёр придумывает задачу про скидку, учеников или заряд батареи, а вы собираете решение из дробей и сокращаете множители.</p>
+        <ol>
+            <li>Нажмите «Решить задачу» и прочитайте условие — над ним полоса, которая показывает, какую часть числа мы ищем.</li>
+            <li>Запишите процент дробью «процент наверху, сотня внизу», а само число — дробью со знаменателем единица.</li>
+            <li>Разложите числители и знаменатели на простые множители и сократите одинаковые.</li>
+            <li>Перемножьте остатки и введите целое число в поле «Ответ».</li>
+        </ol>
+        <p class="seo-example">Разбор: найти 15 процентов от 240. Получаем произведение 15/100 и 240/1. Сверху стоит 3 · 5 · 240, снизу 2 · 2 · 5 · 5. Сокращаем пятёрку, остаётся 3 · 240 и знаменатель 20. Делим 240 на 20, получаем 12, умножаем на 3 — ответ 36. Проверка: 240 · 0,15 = 36.</p>
+        <p>Обратная задача — найти целое по его части — разобрана в <a href="number-by.html">«Мастере Целого»</a>, а сравнение долей в процентах ждёт в тренажёре <a href="ratio.html">«Мастер Долей»</a>.</p>
+    </section>
 </div>
 
 <script>

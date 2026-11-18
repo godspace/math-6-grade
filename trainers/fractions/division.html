@@ -350,6 +350,15 @@
         .victory-icon { font-size: 5rem; margin-bottom: 20px; animation: bounce 2s infinite; }
         @keyframes bounce { 0%, 100% {transform: translateY(0);} 50% {transform: translateY(-20px);} }
 
+    /* SEO-блок (S4): объяснение алгоритма под тренажёром */
+    .seo-note { max-width: 720px; margin: 26px auto 6px; padding: 20px 22px; border-radius: 16px; background: #fff; border: 1px solid #e5e7eb; box-shadow: 0 8px 20px rgba(15,23,42,.06); color: #1f2937; font-size: 15px; line-height: 1.65; text-align: left; }
+    .seo-note h2 { margin: 0 0 10px; font-size: clamp(1.05rem, 2.5vw, 1.3rem); font-weight: 800; line-height: 1.3; color: #111827; }
+    .seo-note p { margin: 0 0 10px; }
+    .seo-note ol { margin: 0 0 10px; padding-left: 22px; }
+    .seo-note li { margin: 4px 0; }
+    .seo-note a { color: #4f46e5; font-weight: 600; }
+    .seo-note .seo-example { padding: 10px 12px; border-radius: 12px; background: #f3f4f6; }
+    @media (max-width: 420px) { .seo-note { padding: 14px; font-size: 14.5px; } }
     </style>
 </head>
 <body>
@@ -435,6 +444,19 @@
             <span>Проверить</span>
         </button>
     </div>
+
+    <section class="seo-note">
+        <h2>Деление дробей: перевернуть и умножить</h2>
+        <p>Деление заменяют умножением на обратную дробь: у делителя меняют местами числитель и знаменатель. Целое число — тоже дробь со знаменателем единица, поэтому правило годится и для случая «целое делим на дробь», и для «дробь делим на целое».</p>
+        <ol>
+            <li>На первом шаге перепишите пример как умножение: переверните вторую дробь и введите её числитель и знаменатель в подсвеченные поля.</li>
+            <li>Перенесите множители в «Шаг 2»: числители — в верхнюю строку, знаменатели — в нижнюю.</li>
+            <li>Сократите одинаковые числа между строками и перемножьте остатки.</li>
+            <li>Введите несократимый ответ в «Шаг 3» и нажмите «Проверить».</li>
+        </ol>
+        <p class="seo-example">Разбор: две третьих разделить на четыре. Переворачиваем делитель и получаем умножение на одну четвёртую: сверху 2, снизу 3 · 4 = 12, то есть две двенадцатых. Сокращаем на два — одна шестая. Проверка: 1/6 · 4 = 4/6 = 2/3, деление выполнено верно.</p>
+        <p>Уровни идут от «целого на дробь» к сложному сокращению и «мастеру деления», в каждом от трёх до пяти примеров. Для сравнения откройте <a href="multiplication.html">умножение дробей</a> и закрепите тему на <a href="math_board.html">доске-конструкторе</a>.</p>
+    </section>
 
 </div>
 

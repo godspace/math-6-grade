@@ -331,6 +331,16 @@
             .grid { grid-template-columns: repeat(3, 1fr); max-width: 700px; }
             .card { height: 120px; font-size: 3rem; }
         }
+
+        /* SEO-блок (S4): шпаргалка под игрой */
+        .seo-note { width: 100%; max-width: 720px; box-sizing: border-box; margin: 26px 0 6px; padding: 20px 22px; border-radius: 16px; background: #fff; border: 1px solid #e5e7eb; box-shadow: 0 8px 20px rgba(15,23,42,.06); color: #1f2937; font-size: 15px; line-height: 1.65; text-align: left; }
+        .seo-note h2 { margin: 0 0 10px; font-size: clamp(1.05rem, 2.5vw, 1.3rem); font-weight: 800; line-height: 1.3; color: #111827; }
+        .seo-note p { margin: 0 0 10px; }
+        .seo-note ol { margin: 0 0 10px; padding-left: 22px; }
+        .seo-note li { margin: 4px 0; }
+        .seo-note a { color: #4f46e5; font-weight: 600; }
+        .seo-note .seo-example { padding: 10px 12px; border-radius: 12px; background: #f3f4f6; }
+        @media (max-width: 420px) { .seo-note { padding: 14px; font-size: 14.5px; } }
     </style>
 </head>
 <body>
@@ -367,6 +377,20 @@
         <p>Ты прошел все миссии кибер-сканера.</p>
         <button class="btn-next" onclick="resetGame()">Играть снова</button>
     </div>
+
+    <section class="seo-note">
+        <h2>Признаки делимости: шпаргалка и правила игры</h2>
+        <p>Признак делимости позволяет узнать, делится ли число на другое, вообще не выполняя деление: достаточно посмотреть на последние цифры или сложить цифры числа. Тренажёр-сканер выдаёт шесть карточек и одно число-цель — нужно убрать все карточки, числа на которых делятся на цель, и не тронуть остальные.</p>
+        <ol>
+            <li>Прочитайте цель в блоке «Уничтожь числа, делящиеся на» — она задана для текущей миссии.</li>
+            <li>Проверьте каждую карточку по правилу: на 2 — чётная последняя цифра, на 5 — 0 или 5, на 10 — только 0.</li>
+            <li>Для 3 и 9 сложите цифры числа и проверьте сумму, для 4 смотрите только две последние цифры.</li>
+            <li>Для 6 нужны оба условия сразу: число чётное и сумма цифр делится на три.</li>
+            <li>Ошиблись — комбо сбрасывается; кнопка «Напомнить правило» подскажет формулировку и не отнимет попытку.</li>
+        </ol>
+        <p class="seo-example">Разбор: число 3456. На 2 делится, потому что последняя цифра 6. Сумма цифр 3 + 4 + 5 + 6 = 18, значит число делится и на 3, и на 9, а следовательно и на 6. Две последние цифры — 56, оно делится на 4. Проверка: 3456 : 9 = 384, 3456 : 4 = 864.</p>
+        <p>Признаки пригодятся перед <a href="gcd.html">поиском НОД</a> и <a href="lcm.html">НОК</a>: по ним сразу видно, какие простые множители есть у числа.</p>
+    </section>
 
     <script>
         // Методическая база

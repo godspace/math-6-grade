@@ -425,6 +425,15 @@
             .anchor-body { flex-direction: column; gap: 8px; }
             .anchor-arrow-right { transform: rotate(90deg); margin: 4px 0; }
         }
+    /* SEO-блок (S4): объяснение алгоритма под тренажёром */
+    .seo-note { max-width: 720px; margin: 26px auto 6px; padding: 20px 22px; border-radius: 16px; background: #fff; border: 1px solid #e5e7eb; box-shadow: 0 8px 20px rgba(15,23,42,.06); color: #1f2937; font-size: 15px; line-height: 1.65; text-align: left; }
+    .seo-note h2 { margin: 0 0 10px; font-size: clamp(1.05rem, 2.5vw, 1.3rem); font-weight: 800; line-height: 1.3; color: #111827; }
+    .seo-note p { margin: 0 0 10px; }
+    .seo-note ol { margin: 0 0 10px; padding-left: 22px; }
+    .seo-note li { margin: 4px 0; }
+    .seo-note a { color: #4f46e5; font-weight: 600; }
+    .seo-note .seo-example { padding: 10px 12px; border-radius: 12px; background: #f3f4f6; }
+    @media (max-width: 420px) { .seo-note { padding: 14px; font-size: 14.5px; } }
     </style>
 </head>
 <body>
@@ -621,6 +630,19 @@
         </div>
         <button class="btn" onclick="location.reload()">Начать заново</button>
     </div>
+
+    <section class="seo-note">
+        <h2>Как найти число по его проценту</h2>
+        <p>Если известно, сколько процентов числа составляет известная часть, само число находят обратным действием — делением. Удобно записать это уравнением «икс умножить на дробь процента равно известной части» и найти неизвестный множитель.</p>
+        <ol>
+            <li>Пройдите разминку: найдите неизвестный множитель в простом уравнении, выбрав знак деления.</li>
+            <li>Соберите уравнение задачи: вставьте в три слота карточки с неизвестным, долей в процентах и известной частью и нажмите «Проверить уравнение».</li>
+            <li>В основном блоке запишите часть и процент дробями, затем переверните дробь процента: деление станет умножением.</li>
+            <li>Разложите числа на простые множители, сократите и введите целое число в итоговое поле.</li>
+        </ol>
+        <p class="seo-example">Разбор: 12 процентов числа равны 18. Уравнение выглядит так: икс · 12/100 = 18, значит икс = 18 : 12/100 = 18 · 100/12. Восемнадцать и двенадцать делятся на шесть, получаем 3 · 100 : 2 = 150. Проверка: 150 · 0,12 = 18 — сходится.</p>
+        <p>Прямая задача разобрана в <a href="percent-of.html">поиске процента от числа</a>; на пятом уровне этого тренажёра встречаются косвенные задачи со скидками.</p>
+    </section>
 </div>
 
 <script>

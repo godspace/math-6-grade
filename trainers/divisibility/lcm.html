@@ -331,6 +331,16 @@
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
     pointer-events: none; z-index: 100;
   }
+
+  /* SEO-блок (S4): объяснение алгоритма под тренажёром */
+  .seo-note { max-width: 720px; margin: 26px auto 6px; padding: 20px 22px; border-radius: 16px; background: #fff; border: 1px solid #e5e7eb; box-shadow: 0 8px 20px rgba(15,23,42,.06); color: #1f2937; font-size: 15px; line-height: 1.65; text-align: left; }
+  .seo-note h2 { margin: 0 0 10px; font-size: clamp(1.05rem, 2.5vw, 1.3rem); font-weight: 800; line-height: 1.3; color: #111827; }
+  .seo-note p { margin: 0 0 10px; }
+  .seo-note ol { margin: 0 0 10px; padding-left: 22px; }
+  .seo-note li { margin: 4px 0; }
+  .seo-note a { color: #4f46e5; font-weight: 600; }
+  .seo-note .seo-example { padding: 10px 12px; border-radius: 12px; background: #f3f4f6; }
+  @media (max-width: 420px) { .seo-note { padding: 14px; font-size: 14.5px; } }
 </style>
 </head>
 <body>
@@ -367,6 +377,20 @@
   
   <p id="message"></p>
   <button id="restart-btn" class="btn hidden" onclick="initGame()" style="background: var(--text-main); box-shadow: 0 6px 15px rgba(45, 52, 54, 0.3);">Новое задание 🎲</button>
+
+  <section class="seo-note">
+    <h2>Как найти НОК двух и трёх чисел</h2>
+    <p>НОК — наименьшее общее кратное: самое маленькое число, которое делится на каждое число набора без остатка. Собирают его иначе, чем НОД: за основу берут разложение одного числа и дополняют его тем, чего не хватает остальным.</p>
+    <ol>
+      <li>Разложите все числа набора на простые множители и заполните окошки.</li>
+      <li>Выберите одно разложение как основу — его множители войдут в ответ целиком.</li>
+      <li>Сверяйте с основой остальные числа: недостающий простой множитель добавляйте к ней.</li>
+      <li>Перемножьте основу с добавками и введите результат в поле «НОК =».</li>
+      <li>Проверьте ответ на панели «Проверка»: разделите НОК на каждое число набора — остатка быть не должно.</li>
+    </ol>
+    <p class="seo-example">Разбор: числа 10, 15 и 25. Раскладываем: 10 = 2 · 5, 15 = 3 · 5, 25 = 5 · 5. За основу возьмём разложение числа 25 — две пятёрки, добавим двойку из десятки и тройку из пятнадцати: 5 · 5 · 2 · 3 = 150. Проверка: 150 : 10 = 15, 150 : 15 = 10, 150 : 25 = 6.</p>
+    <p>Полезно увидеть оба алгоритма рядом: сначала <a href="gcd.html">НОД по тем же числам</a>, потом это задание. Какие числа делятся на 2, 3, 5, 9 и 10, разобрано в игре <a href="signs.html">«Признаки делимости»</a>.</p>
+  </section>
 </div>
 
 <script>
