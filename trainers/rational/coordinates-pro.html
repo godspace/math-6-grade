@@ -206,6 +206,45 @@
     @media (max-width: 420px) { .seo-note { padding: 14px; font-size: 14.5px; } }
     </style>
 <script src="../../assets/analytics.js"></script>
+<!-- ─── S5a: перелинковка ─── -->
+<style>
+    /* S5a: ссылка на каталог и блок «Смотри также» */
+    .seo-links { width: 100%; max-width: 720px; margin: 26px auto 4px; padding: 16px 18px; border-radius: 14px; background: #f8fafc; border: 1px solid #e5e7eb; text-align: left; user-select: text; -webkit-user-select: text; }
+    .seo-links .seo-back { display: inline-block; margin: 0 0 10px; color: #4338ca; font-size: 14px; font-weight: 700; text-decoration: none; }
+    .seo-links .seo-back:hover { text-decoration: underline; }
+    .see-also-title { margin: 0 0 8px; font-size: 15px; font-weight: 800; color: #111827; }
+    .see-also ul { margin: 0; padding-left: 20px; }
+    .see-also li { margin: 5px 0; font-size: 15px; line-height: 1.5; color: #374151; }
+    .see-also a { color: #4f46e5; font-weight: 600; text-decoration: none; }
+    .see-also a:hover { text-decoration: underline; }
+    @media (max-width: 420px) { .seo-links { margin-top: 20px; padding: 13px 14px; } .see-also li { font-size: 14.5px; } }
+</style>
+<!-- ─── S5a: хлебные крошки ─── -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Тренажёры по математике 6 класс",
+      "item": "https://godspace.github.io/math-6-grade/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Рациональные числа"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Координатная прямая PRO",
+      "item": "https://godspace.github.io/math-6-grade/trainers/rational/coordinates-pro.html"
+    }
+  ]
+}
+</script>
 </head>
 <body>
 
@@ -241,6 +280,18 @@
         <p class="seo-example">Разбор: найдите расстояние между точками с координатами минус одна целая две десятых и ноль целых семь десятых. От минус 1,2 до нуля — 1,2 единицы, от нуля до 0,7 — ещё 0,7, всего 1,9. Проверка: 0,7 − (−1,2) = 1,9, модуль разности положителен.</p>
         <p>Действия с положительными и отрицательными числами отрабатываются в тренажёре <a href="phone-balance.html">«Мобильный баланс»</a>. Перед ответом проговорите проверку: с какой стороны от нуля стоит точка, сколько единиц до неё и совпадает ли знак результата со знаком координаты.</p>
     </section>
+<!-- ─── S5a: ссылка на каталог + «Смотри также» ─── -->
+<div class="seo-links">
+  <a class="seo-back" href="../../index.html">← Все тренажёры</a>
+  <nav class="see-also" aria-label="Смотри также">
+    <h2 class="see-also-title">Смотри также</h2>
+    <ul>
+      <li><a href="phone-balance.html">Положительные и отрицательные числа: баланс</a></li>
+      <li><a href="../motion/motion.html">Задачи на движение и координата</a></li>
+      <li><a href="../fractions/comparison.html">Сравнение дробей и чисел по величине</a></li>
+    </ul>
+  </nav>
+</div>
 </div>
 
 <script>
