@@ -354,7 +354,7 @@
 | 0 | `plan: 6.2–6.4 — карта дублирования, inline-блоки, ранжирование` | этот файл, `tools/dup_scan.py`, `tools/inventory-before-2026-11-18.json` | страницы не затронуты; `git diff --stat` — только эти 3 файла |
 | 1 | `construct: убрать polyfill.io` (п.2) — **сделано, `4cd5792`** | 9 `trainers/equations/construct/task*.html` (−1 строка) | все 9 задач + `check.py`: 9/9 задач проходят 3 этапа, `check.py` 38/38 |
 | 2a | `utils: assets/trainers-utils.js (divisibility)` (п.1) — **сделано, `8fb34d2`** | `assets/trainers-utils.js` (новый, 861 симв.) + `gcd`, `lcm` (`primes` — по решению §17); 3 файла, +32 / −43 | `gcd` −18 строк / −450 симв. inline-JS, `lcm` −21 / −559; `page_console.py` 4/4 + `check.py` 38/38; факт — §17.7 |
-| 2b | `utils: assets/trainers-utils.js (fractions)` (п.1) — **подготовлено, §18** | `assets/trainers-utils.js` + `addition`, `comparison`, `division`, `multiplication`, `mixed`, `mixed_complex` (`conversion` не меняется) — 7 файлов | −37 строк / −1 340 симв. inline-JS; `page_console.py` 8/8 PASS (2 контрольные: `conversion`, `math_board`); `check.py` 38/38 |
+| 2b | `utils: assets/trainers-utils.js (fractions)` (п.1) — **сделано, `c27abec`** | `assets/trainers-utils.js` (+5 строк / +268 симв.) + `addition`, `comparison`, `division`, `multiplication`, `mixed`, `mixed_complex` (`conversion` не меняется); 7 файлов, +13 / −50 | −42 строки / −1 565 симв. inline-JS (оценка −37 / −1 340: вместе с блоками ушли комментарии и пустые строки, §18.3 п.4); `page_console.py` 8/8 PASS (2 контрольные: `conversion`, `math_board`); `check.py` 38/38; факт — §18.9 |
 | 2c | `utils: percents, geometry, rational, motion, equations` | остальные страницы с утилитами | по 1 странице каждого раздела + `check.py` |
 | 3a | `percents: assets/percents.css` (п.3) | 4 страницы `percents` | 4 страницы, скриншоты |
 | 3b | `percents: assets/percents-common.js` (п.3) | те же 4 | 4 страницы по 3 задания |
@@ -584,6 +584,32 @@ python -X utf8 tools/utils_scan.py --pages "trainers/fractions/*.html" --names g
 | `rand` | `fractions/conversion:380`, `fractions/division:465` | 2 | другое имя; переименование 13 вызовов — отдельным коммитом |
 
 Порядок 2c: сначала `percents` (там же `primeFactors` ×3 и уже готовые `getRandomInt`/`pickRandom` → 4 страницы), затем `geometry`/`rational` (`shuffleArray`, `vibrate`), `equations`/`construct` — вместе с шагом 5a.
+
+### 18.9 Факт: шаг 2b выполнен (`c27abec`, 2026-11-18)
+
+`assets/trainers-utils.js`: +5 строк / +268 симв. (28 → 33 строки, 861 → 1 129 симв.) — добавлены `getRandomInt` и `pickRandom` под заголовком `// --- Случайные числа ---`, в `lcm` добавлен `Math.abs`, шапка файла переписана под правило §18.2 (чистые функции — с численной сверкой; с DOM — только дословно). Из 6 страниц удалены все 15 объявлений по §18.1 и добавлено подключение модуля перед `analytics.js` — строки совпали с планом: `multiplication` 46, `addition` 47, `comparison` 46, `division` 48, `mixed` 50, `mixed_complex` 49. `conversion.html` не тронут.
+
+| файл | строк | симв. | inline-JS |
+|---|---|---|---|
+| `assets/trainers-utils.js` | 28 → 33 (+5) | 861 → 1 129 (+268) | — (внешний файл) |
+| `trainers/fractions/addition.html` | 776 → 769 (−7) | 30 308 → 30 181 (−127) | 13 260 → 13 074 (−186) |
+| `trainers/fractions/comparison.html` | 951 → 942 (−9) | 37 551 → 37 288 (−263) | 18 947 → 18 625 (−322) |
+| `trainers/fractions/division.html` | 741 → 741 (0) | 25 937 → 25 938 (+1) | 11 086 → 11 028 (−58) |
+| `trainers/fractions/mixed.html` | 691 → 688 (−3) | 30 791 → 30 645 (−146) | 22 380 → 22 175 (−205) |
+| `trainers/fractions/mixed_complex.html` | 741 → 737 (−4) | 41 511 → 41 331 (−180) | 23 169 → 22 930 (−239) |
+| `trainers/fractions/multiplication.html` | 801 → 782 (−19) | 29 463 → 28 967 (−496) | 12 997 → 12 442 (−555) |
+
+По проекту (`inventory.py` «до/после»): HTML 26 469 → 26 427 строк (−42), 1 130 730 → 1 129 519 симв. (−1 211), inline-JS 601 794 → 600 229 (−1 565); inline-CSS 250 242 и `on*` 184 без изменений; JS-файлов 3 (102 961 → 103 229 симв., +268). `git diff --stat`: 7 файлов, +13 / −50.
+
+Расхождение с оценкой §18.1 (−37 строк / −1 340 симв. inline-JS ±40): факт −42 строки / −1 565 симв., потому что вместе с блоками ушли комментарии `// Функция для вычисления НОД/НОК` (`comparison`), `// --- Math Utilities ---` (`mixed_complex`) и пустые строки внутри блоков — это предписано §18.3 п.4. По символам файлов −1 211: 1 517 симв. удалённых объявлений минус 306 симв. шести тегов подключения (у `division` поэтому +1 симв. по файлу при −1 строке).
+
+Проверки:
+- `python tools/check.py` — 38/38 (до и после), exit 0.
+- `page_console.py` по 8 файлам раздела `--offline --budget 2500` — **8/8 PASS, 0 ошибок JS, 0 предупреждений**; DOM против §18.6 в пределах ±2 000: `addition` 41 048 (−132), `comparison` 48 364 (−274), `conversion` 33 016 (0 — контроль), `division` 37 499 (−104), `multiplication` 40 199 (−388), `mixed` 42 253 (−120), `mixed_complex` 52 977 (−177), `math_board` 20 900 (0 — контроль). `SyntaxError` из §18.3 п.1 не возник: `const gcd`/`lcm`/`getRandomInt` в `mixed`/`mixed_complex` удалены в том же коммите.
+- Харнесс §18.2 (`%TEMP%`, не в репозитории; headless Edge `--dump-dom`) — **15/15 сверок, 0 расхождений**: `gcd` против 3 разных тел страниц (4 варианта) — по 90 000 пар, `a, b ∈ 1..300`; `lcm` против `Math.abs`-варианта (`addition`/`comparison`) и варианта `mixed` без `abs` — 0 расхождений; `primeFactors` против варианта `multiplication` для `n ∈ 2..5000` — массивы совпали по составу и порядку; `getRandomInt` и `pickRandom` при одинаковом потоке `Math.random` (детерминированный LCG) — 5 диапазонов × 1 000 вызовов, 0 расхождений; границы `getRandomInt`: `[3,7]` — 5/5 значений, `[1,1]` — 1/1, `[2,9]` — 8/8, все значения целые и внутри диапазона.
+- `dup_scan.py` «до/после» (число файлов с объявлением): `gcd` 6 → **0**, `lcm` 4 → **0**, `getRandomInt` 9 → **6**, `pickRandom` 5 → **4**, `primeFactors` 4 → **3** (`number-by`, `percent-of`, `ratio` — это 2c); `animate` 8 и `fireConfetti` 4 без изменений. В `trainers/fractions/*.html` объявлений `gcd|lcm|getRandomInt|pickRandom|primeFactors` — 0.
+- Ручной проход по 6 изменённым страницам (по одному заданию) — за пользователем: headless не кликает.
+- Откат: `git revert` одного коммита `c27abec`; коммит с планом — только документация, на работу страниц не влияет.
 
 
 
