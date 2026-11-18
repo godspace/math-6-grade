@@ -732,7 +732,7 @@ function showVictory() {
     startConfetti();
     
     if (window.RewardSystem) {
-        setTimeout(() => window.RewardSystem.showWin("Сертификат Мастера Дробей получен!", "fraction_multiplication"), 1500);
+        setTimeout(() => window.RewardSystem.showWin("Сертификат Мастера Дробей получен!", "fraction_multiplication", { final: true }), 1500);
     }
 }
 

@@ -851,7 +851,7 @@ function showVictory() {
     startConfetti();
 
     if (window.RewardSystem) {
-        setTimeout(() => window.RewardSystem.showWin("Мастер Долей! Все 5 заданий пройдены", "ratio"), 1500);
+        setTimeout(() => window.RewardSystem.showWin("Мастер Долей! Все 5 заданий пройдены", "ratio", { final: true }), 1500);
     }
 }
 

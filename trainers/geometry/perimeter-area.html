@@ -325,6 +325,8 @@
 
     function loadLevel() {
         if(curLvlIdx >= levels.length) {
+            // Прогресс миссий: все 20 уровней = миссия пройдена (§23.7)
+            if (window.trackGoal) window.trackGoal('course_finished', { trainer: 'perimeter_area' });
             document.querySelector('.main-card').innerHTML = `
                 <h2 style='color:var(--success)'>Курс пройден! 🎓</h2>
                 <p>Ты отлично справляешься с геометрией и процентами.</p>

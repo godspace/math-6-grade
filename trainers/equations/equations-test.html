@@ -440,6 +440,8 @@
     }
 
     function finishExam() {
+        // Прогресс миссий: завершение работы = миссия пройдена (§23.7)
+        if (window.trackGoal) window.trackGoal('course_finished', { trainer: 'equations_test' });
         clearInterval(timerInterval);
         session.status = "finished";
         session.finishTime = Date.now();

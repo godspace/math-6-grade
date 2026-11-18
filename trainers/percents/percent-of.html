@@ -888,7 +888,7 @@ function showVictory() {
     startConfetti();
     
     if (window.RewardSystem) {
-        setTimeout(() => window.RewardSystem.showWin("Мастер Процентов! Сертификат получен", "percent_of"), 1500);
+        setTimeout(() => window.RewardSystem.showWin("Мастер Процентов! Сертификат получен", "percent_of", { final: true }), 1500);
     }
 }
 

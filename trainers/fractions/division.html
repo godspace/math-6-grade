@@ -699,7 +699,7 @@
                 document.getElementById('victoryScreen').style.display = 'flex';
                 // Интеграция: финальный лутбокс
                 if (window.RewardSystem) {
-                    setTimeout(() => window.RewardSystem.showWin("Сертификат Мастера получен!", "fraction_division"), 1500);
+                    setTimeout(() => window.RewardSystem.showWin("Сертификат Мастера получен!", "fraction_division", { final: true }), 1500);
                 }
                 return;
             }

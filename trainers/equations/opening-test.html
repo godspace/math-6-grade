@@ -358,6 +358,8 @@
 
     function logout() {
         if(confirm("Завершить работу?")) {
+            // Прогресс миссий: завершение теста = миссия пройдена (§23.7)
+            if (window.trackGoal) window.trackGoal('course_finished', { trainer: 'opening_test' });
             location.reload(); // Перезагрузка возвращает на экран входа
         }
     }

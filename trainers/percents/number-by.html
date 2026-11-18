@@ -1272,7 +1272,7 @@ function showVictory() {
     startConfetti();
 
     if (window.RewardSystem) {
-        setTimeout(() => window.RewardSystem.showWin("Мастер Целого! Сертификат получен", "number_by"), 1500);
+        setTimeout(() => window.RewardSystem.showWin("Мастер Целого! Сертификат получен", "number_by", { final: true }), 1500);
     }
 }
 

@@ -675,7 +675,7 @@ function showVictory() {
     startConfetti();
 
     if (window.RewardSystem) {
-        setTimeout(() => window.RewardSystem.showWin("Архитектор Процентов! Все 5 планов готовы", "percent_tiles"), 1500);
+        setTimeout(() => window.RewardSystem.showWin("Архитектор Процентов! Все 5 планов готовы", "percent_tiles", { final: true }), 1500);
     }
 }
 

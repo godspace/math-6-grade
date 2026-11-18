@@ -389,6 +389,11 @@
                 this.ui.feedback.innerHTML = '<span class="correct">Верно! Молодец.</span>';
                 this.state.score++;
                 this.ui.score.textContent = this.state.score;
+                // Прогресс миссий: 5 верных ответов в режиме = миссия пройдена (§23.7)
+                if (window.trackGoal) {
+                    window.trackGoal('task_solved', { trainer: 'coordinates_pro' });
+                    if (this.state.score >= 5) window.trackGoal('course_finished', { trainer: 'coordinates_pro' });
+                }
             } else {
                 this.ui.feedback.innerHTML = `<span class="wrong">Ошибка. Правильно: ${rightAns}</span>`;
             }

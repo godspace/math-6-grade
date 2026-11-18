@@ -54,11 +54,11 @@
         }
     }
 
-    function renderMissions(known, external) {
+    function renderMissions(known, silent) {
         var links = document.querySelectorAll('a[data-mission]');
         Array.prototype.forEach.call(links, function (link) {
             var id = link.getAttribute('data-mission');
-            if (external[id]) {
+            if (silent[id]) {
                 link.classList.remove('is-done', 'is-active');
                 return;
             }
@@ -83,9 +83,10 @@
             zones[name].forEach(function (id) { known[id] = name; });
             renderZone(name, zones[name]);
         });
-        var external = {};
-        (window.MG6_EXTERNAL || []).forEach(function (id) { external[id] = true; });
-        renderMissions(known, external);
+        var silent = {};
+        (window.MG6_EXTERNAL || []).forEach(function (id) { silent[id] = true; });
+        (window.MG6_UNTRACKED || []).forEach(function (id) { silent[id] = true; });
+        renderMissions(known, silent);
         document.body.dataset.progressReady = '1';
     }
 

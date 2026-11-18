@@ -614,6 +614,8 @@
                 this.ui.btnCheck.style.display = 'none';
                 this.ui.btnNext.style.display = 'block';
                 this.state.isResolved = true;
+                // Прогресс миссий: все 4 поля верно = миссия пройдена (§23.7)
+                if (window.trackGoal) window.trackGoal('course_finished', { trainer: 'motion' });
             } else {
                 this.ui.feedback.innerHTML = `<span class="msg-error">Где-то ошибка. Перепроверь выделенные красным ответы, прокатившись по вкладкам.</span>`;
             }

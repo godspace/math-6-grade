@@ -483,6 +483,8 @@
             partsContainer.style.opacity = '1';
             generateLevel(currentLevel);
         } else {
+            // Прогресс миссий: последний уровень = миссия пройдена (§23.7)
+            if (window.trackGoal) window.trackGoal('course_finished', { trainer: 'phone_balance' });
             alert("Поздравляем! Тренажёр полностью пройден!");
             currentLevel = 1;
             partsContainer.style.pointerEvents = 'auto';

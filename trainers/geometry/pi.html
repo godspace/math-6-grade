@@ -567,6 +567,8 @@
     }
 
     function showFinal() {
+        // Прогресс миссий: итог эксперимента = миссия пройдена (§23.7)
+        if (window.trackGoal) window.trackGoal('course_finished', { trainer: 'pi' });
         const sum = resultsHistory.reduce((a,b)=>a+b, 0);
         const avg = sum / resultsHistory.length;
         document.getElementById('avgResult').innerText = avg.toFixed(2);

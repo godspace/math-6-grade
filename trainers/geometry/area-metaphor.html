@@ -522,6 +522,8 @@
 
     function startFinalPhase() {
         state.isCompleted = true;
+        // Прогресс миссий: финальная сборка круга = миссия пройдена (§23.7)
+        if (window.trackGoal) window.trackGoal('course_finished', { trainer: 'area_metaphor' });
         document.getElementById('hintText').style.display = 'none';
         document.getElementById('finalAssemblyWrapper').style.display = 'flex';
         document.getElementById('statsBox').classList.add('done');
