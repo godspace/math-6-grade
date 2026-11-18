@@ -113,6 +113,7 @@
 - `tools/inventory.py` — замер всего проекта (HTML/JS/CSS/картинки, inline-блоки, `on*`, дубли). Базовая точка «до»: 45 HTML / 1 132 349 симв. / inline-JS 602 803 / inline-CSS 250 242 / `on*` 184. Снимок «до» в JSON: `tools/inventory-before-2026-11-18.json`.
 - `tools/dup_scan.py` — замер дублирования (шаги 6.2–6.3): экономия по зонам (head/CSS/JS/body), топ общих блоков, экономия внутри кластеров страниц, повторяемые функции, `on*`, внешние `<script src>`. Запуск: `python -X utf8 tools/dup_scan.py` (текст) или `--json`; методика и ограничения — в шапке файла.
 - `tools/size.py` — замер доски (HTML + `assets/math_board.css` + `assets/math_board.js`), 2979 стр. / 125 363 симв. / ~31 341 токенов. Переписывать не нужно: `inventory.py` покрывает его цифры.
+- `tools/page_console.py` — проверка **изменённых страниц** без ручного прохода: `python -X utf8 tools/page_console.py "trainers/divisibility/*.html" --offline` → `[PASS]/[FAIL]` по каждой странице, число ошибок JS (`Uncaught …`, `is not defined`), опционально `--expect "текст"` (маркер отрисовался) и `--dump-dir` (сохранить DOM). `--offline` блокирует CDN/шрифты/счётчики: быстрее и детерминированнее. Код возврата 0/1/2.
 - Логи: `[Console]::OutputEncoding=[Text.Encoding]::UTF8; python -X utf8 tools/<tool>.py | Out-File -Encoding utf8 <файл>` — иначе PowerShell 5.1 пишет UTF-16 и кириллица ломается.
 - Git: `main` = `origin/main`, рабочее дерево чистое (сверять `git status -sb`). Хеши: доска 4.1 `4831f2d`, 4.2 `c256858`, 5.1 `758a8bd`, 5.2 `a29b94f`; подготовка этапа 6: `05e7fe7` (`tools/inventory.py`), `45f6c01` (этот документ), `ae2a37b` (`.gitignore`).
 
@@ -348,7 +349,7 @@
 |---|---|---|---|
 | 0 | `plan: 6.2–6.4 — карта дублирования, inline-блоки, ранжирование` | этот файл, `tools/dup_scan.py`, `tools/inventory-before-2026-11-18.json` | страницы не затронуты; `git diff --stat` — только эти 3 файла |
 | 1 | `construct: убрать polyfill.io` (п.2) — **сделано, `4cd5792`** | 9 `trainers/equations/construct/task*.html` (−1 строка) | все 9 задач + `check.py`: 9/9 задач проходят 3 этапа, `check.py` 38/38 |
-| 2a | `utils: assets/trainers-utils.js (divisibility)` (п.1) | `assets/trainers-utils.js` + `gcd`, `lcm`, `primes`, `signs` | 4 страницы + `check.py` |
+| 2a | `utils: assets/trainers-utils.js (divisibility)` (п.1) | `assets/trainers-utils.js` + `gcd`, `lcm` (`primes` — по решению §17) | `page_console.py` 4/4 + `check.py`; точный объём и базовая линия — §17 |
 | 2b | `utils: fractions` | `addition`, `comparison`, `conversion`, `division`, `multiplication`, `mixed`, `mixed_complex` | 7 страниц + `check.py` |
 | 2c | `utils: percents, geometry, rational, motion, equations` | остальные страницы с утилитами | по 1 странице каждого раздела + `check.py` |
 | 3a | `percents: assets/percents.css` (п.3) | 4 страницы `percents` | 4 страницы, скриншоты |
@@ -377,6 +378,59 @@
 - [x] Указаны зависимости: п.1 → п.3/п.5/п.7 (общий файл нужен раньше кластеров), п.10 → п.11 (сначала файлы, потом ссылки), группа B — после A.
 - [x] Гипотезы §6 проверены, две опровергнуты с цифрами (§14.4), исключения обоснованы (§14.5).
 - [x] План не исполнялся: изменены только `PROJECT_OPTIMIZATION_PLAN.md`, `tools/dup_scan.py`, `tools/inventory-before-2026-11-18.json`.
-- [ ] После первого исполненного шага — заполнить здесь факт: номер пункта, хеш коммита, новые цифры `inventory.py`/`dup_scan.py`.
+- [x] После первого исполненного шага — факт заполнен: п.2 (`polyfill.io`), `4cd5792` (9 задач «construct», −9 строк, −720 симв.); план — `fd768af`; `check.py` 38/38 до и после; `inventory.py` — изменены только эти 9 файлов, inline-JS/CSS/`on*`/картинки без изменений; ссылок на `polyfill` в проекте не осталось.
+
+## 17. Handoff: шаг 2a — `assets/trainers-utils.js` (divisibility)
+
+Отдельная задача (не продолжение этой). Контекст: §14.6 п.2, §15 строка 2a. Цель — первый общий файл утилит: канон функций в `assets/trainers-utils.js`, локальные копии из страниц удалить. Поведение и внешний вид страниц не меняются, сборки нет.
+
+### 17.1 Что где лежит (замерено 2026-11-18)
+
+| файл | строки | функция | тело | решение |
+|---|---|---|---|---|
+| `trainers/divisibility/gcd.html` | 372 | `vibrate(ms)` | идентично `lcm:384` | перенести |
+| | 374–380 | `isPrime` | канон (`num < 2`, перебор до √) | перенести |
+| | 382–389 | `getPrimeFactors` | идентично `lcm:397–404` | перенести |
+| | 778–812 | `fireConfetti` + вложенный `animate` | палитра с `#6C5CE7` | **оставить локально** |
+| `trainers/divisibility/lcm.html` | 384 | `vibrate(ms)` | копия | перенести |
+| | 386–392 | `isPrime` | копия канона | перенести |
+| | 394–395 | `gcd`, `lcm` | однострочники | перенести как есть |
+| | 397–404 | `getPrimeFactors` | копия | перенести |
+| | 829–863 | `fireConfetti` + `animate` | палитра с `#8E44AD` | **оставить локально** |
+| `trainers/divisibility/primes.html` | 546–554 | `isPrime` | другое тело (`num <= 3` + шаг 6, 6k±1) | **оставить локально** |
+| `trainers/divisibility/signs.html` | — | утилит из списка нет | — | не трогать |
+
+Почему `primes.html` и `fireConfetti` остаются: это другие варианты тела, а не копии; свести их к канону = изменить код страницы (правило §14.2 п.1: «варианты тела, отличные от канона, остаются локальными»). Палитры `fireConfetti` отличаются намеренно (цвет раздела), перенос потребует параметра цвета — это отдельная задача, не 2a.
+
+### 17.2 Подключение
+
+`<script src="../../assets/trainers-utils.js"></script>` в `<head>` **перед** `analytics.js` (сейчас это единственный внешний скрипт, строка 48 каждой страницы), без `defer`/`async` — inline-скрипт страницы должен видеть функции к моменту выполнения. `analytics.js` уже с `defer`, порядок относительно него не важен.
+
+### 17.3 Ожидаемый выигрыш
+
+`gcd.html` −17 строк, `lcm.html` −21 строка; по §12.2: `isPrime` 288 + `gcd` 210 + `lcm` 108 + `primeFactors` 735 ≈ **1 341 симв.** inline-JS, плюс ~80 симв. подключения на страницу. Это малая часть п.1 (15 410) — основной объём дадут 2b/2c.
+
+### 17.4 Порядок работы
+
+1. `git status -sb` — чисто, `main` = `origin/main`.
+2. Снять «до»: `python -X utf8 tools/inventory.py --json > %TEMP%\inv_before_2a.json`, `python -X utf8 tools/dup_scan.py > %TEMP%\dup_before_2a.txt`.
+3. Базовые линии уже сняты 2026-11-18: `check.py` 38/38 (exit 0), `page_console.py --offline` по 4 страницам — 4/4 PASS, 0 ошибок JS, 0 предупреждений.
+4. Создать `assets/trainers-utils.js`: `gcd`, `lcm`, `isPrime`, `primeFactors` (каноническое имя — `primeFactors` по §14.2; в страницах вызовы `getPrimeFactors(...)` заменить на `primeFactors(...)` — мест немного).
+5. В `gcd.html` и `lcm.html` удалить перечисленные копии, добавить подключение.
+6. Проверить: `python tools/check.py` (38/38) → `python -X utf8 tools/page_console.py "trainers/divisibility/*.html" --offline` (4/4 PASS) → вручную пройти 3 этапа в `gcd.html` и `lcm.html` (подсветка простых, сборка множителей, конфетти и подсказка в конце).
+7. Снять «после»: `inventory.py --json`, `dup_scan.py` — `isPrime`/`primeFactors` исчезают из списка повторяемых функций.
+8. Коммиты: `utils: assets/trainers-utils.js (divisibility)` — только `assets/trainers-utils.js`, `trainers/divisibility/gcd.html`, `trainers/divisibility/lcm.html`; затем отдельный `plan: шаг 2a — факт и цифры` (§14.2 п.1, §15 строка 2a, этот раздел).
+
+### 17.5 Приёмка
+
+- [ ] `gcd`/`lcm`/`isPrime`/`primeFactors` определены только в `assets/trainers-utils.js` (для этих страниц).
+- [ ] `git diff --stat` — только целевые 3 файла; inline-CSS, `on*`, картинки не изменены.
+- [ ] `check.py` 38/38; `page_console.py` 4/4 PASS; ручной проход `gcd`/`lcm`.
+- [ ] `dup_scan`: `isPrime` и `primeFactors` ушли из списка повторяемых функций.
+- [ ] Откат = `git revert` одного коммита (модуль появляется раньше удаления копий, промежуточное состояние работоспособно).
+
+### 17.6 Что не входит в 2a
+
+`primes.html` (другой `isPrime`), `signs.html` (утилит нет), `fireConfetti`/`animate` (варианты тела и цвет раздела), CSS, `on*`-атрибуты, остальные разделы (2b/2c).
 
 
