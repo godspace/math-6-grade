@@ -132,7 +132,7 @@
 2. `favicon-32.png` — **0 ссылок** во всех 45 HTML и в манифесте (в разметке используется `favicon-32x32.png`). Мёртвый файл, 2 495 Б.
 3. «Экономия ~38 КБ на первую загрузку» (§6.5) — **неверно**: иконки манифеста запрашиваются при установке PWA, а не при обычном открытии страницы. Выигрыш — только размер репозитория: 37 764 Б.
 4. `assets/analytics.js` **не дублируется** inline-скриптами, кроме одной страницы: `trainers/equations/equations_construct-2.html` подключает внешний файл (стр. 48) и содержит свой inline-сниппет Метрики (стр. 15–25) → `ym('init')` вызывается дважды. Это единственный HTML с `mc.yandex.ru/metrika/tag.js` в разметке.
-5. Внешние подключения: `polyfill.io` — ровно 9 задач `construct` (`?features=es6`), Tailwind CDN — 2 файла (`fractions/mixed.html`, `fractions/mixed_complex.html`), MathJax CDN — 9, Firebase — 11, Google Fonts — 14.
+5. Внешние подключения: `polyfill.io` — было ровно 9 задач `construct` (`?features=es6`), **удалено в п.2 (`4cd5792`)**, Tailwind CDN — 2 файла (`fractions/mixed.html`, `fractions/mixed_complex.html`), MathJax CDN — 9, Firebase — 11, Google Fonts — 14.
 6. 44 файла в замерах 6.2–6.3 = 45 HTML − `tests/math_board.smoke.html` (фикстура). Карта §13 печатает 41 строку: ещё 3 файла без inline-блоков — `googlea5f7d80234f87164.html`, `yandex_aac7bac5791c1d01.html` (подтверждение прав) и `head-snippet.html`.
 
 ## 12. Шаг 6.2: карта дублирования (измерено)
@@ -283,7 +283,7 @@
 | № | объект и что делаем | K1 | K2 | K3 | K4 | P | измеренный выигрыш | способ проверки |
 |---|---|---|---|---|---|---|---|---|
 | 1 | 14 общих утилит из inline-JS → `assets/trainers-utils.js`: `getRandomInt` (7 файлов, 1 вариант тела), `pickRandom` (5/1), `declOfNum` (7/2), `gcd` (5/4), `lcm` (3/2), `isPrime` (3/2), `primeFactors` (4/3), `shuffleArray` (3/2), `vibrate` (3/2), `animate` (8/5), `setFeedback` (5/3), `showVictory` (5/5), `startConfetti` (6/5), `fireConfetti` (4/4); варианты тела, отличные от канона, остаются локальными | 3 | 5 | 2 | 2 | **9.0** | **15 410 симв.**, 68 вхождений → 14 | все страницы-кандидаты (8–17): задание проходится, в консоли нет `is not defined`; `check.py` 38/38; `dup_scan` — функция ушла из списка |
-| 2 | Убрать `polyfill.io` (`?features=es6`) из 9 задач `construct`: домен мёртв/скомпрометирован, а inline-код страниц и так на ES6 | 1 | 4 | 2 | 3 | **6.5** | −9 внешних подключений (≈35–60 КБ и блокирующее ожидание на каждой из 9 страниц); ≈700 симв. | DevTools: запрос исчез; на всех 9 задачах рисуются формулы MathJax и работает drag&drop; консоль чистая |
+| 2 | Убрать `polyfill.io` (`?features=es6`) из 9 задач `construct`: домен мёртв/скомпрометирован, а inline-код страниц и так на ES6 | 1 | 4 | 2 | 3 | **6.5** | −9 внешних подключений (≈35–60 КБ и блокирующее ожидание на каждой из 9 страниц); ≈700 симв. | DevTools: запрос исчез; на всех 9 задачах рисуются формулы MathJax и работает drag&drop; консоль чистая. **Сделано — `4cd5792`, факт ниже** |
 | 3 | Кластер `percents` (4 страницы) → `assets/percents-common.js` + `assets/percents.css`: палитра/карточки/кнопки, `startConfetti`, `updateLiveCancellation`, общий цикл задач | 3 | 4 | 3 | 4 | **6.0** | **28 891 симв.** (JS 18 140 + CSS 10 751) | все 4 страницы (`number-by`, `ratio`, `percent-of`, `tiles`) проходятся по 3 задания; скриншоты до/после; `inventory.py` — inline-CSS/JS раздела падают |
 | 4 | `index.html`: inline-CSS 10 776 → `assets/index.css` (по образцу доски, дословно) | 3 | 1 | 2 | 3 | **5.5** | **16 333 симв.** (вся inline-CSS файла) | скриншот лендинга до/после при 1440 и 390 px; переходы по всем карточкам; `inventory.py` |
 | 5 | Кластер `construct` (9 задач) → `trainers/equations/construct/construct-core.js`: `initProblem` (21 716), `checkAnswer` (19 023), `generateTask` (13 885), `checkSolution` (11 183), `handleTextDrop`+`setupDragAndDrop` (6 762), `nextTask` (1 842); данные задач остаются в HTML | 4 | 5 | 4 | 3 | **5.3** | **52 190 симв.** — крупнейший кандидат проекта | все 9 задач: сборка уравнения, проверка, переход, сохранение в Firebase; `check.py` 38/38; `dup_scan` — экономия кластера падает до ~0 |
@@ -291,6 +291,9 @@
 | 7 | Firebase-слой 11 страниц → `assets/firebase-save.js`: `firebaseConfig` + `autoSaveToFirebase` (2 варианта тела) + инициализация с проверкой `typeof firebase` | 3 | 4 | 4 | 2 | **4.0** | **12 700 симв.** (8 861 по телам + ≈3 850 конфигов) | на каждой из 11 страниц пройти задание: запись в Realtime DB и offline-ветка («Firebase заблокирован») |
 | 8 | `trainers/equations/equations_construct.html`: inline-CSS 9 804 + inline-JS 9 326 → `assets/equations-construct.css` и `assets/equations-construct.js` | 3 | 1 | 3 | 3 | **3.7** | **24 867 симв.** | страница проходится целиком (62 `on*` — все кнопки); скриншот; `inventory.py` |
 | 9 | `equations_construct-2.html`: убрать inline-сниппет Метрики (стр. 15–25), оставить `assets/analytics.js` → один `ym('init')` вместо двух | 1 | 1 | 2 | 2 | **3.0** | ≈600 симв.; корректный учёт визитов (сейчас двойной) | DevTools → Network: один `tag.js`; Метрика «в реальном времени» — 1 визит; задание проходится |
+
+**Факт по п.2 — сделано, `4cd5792`.** Из всех 9 задач `construct` удалена ровно одна строка
+`<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>` (была 8-й строкой). `git diff --stat` — 9 файлов, −9 строк; `tools/inventory.py` — HTML 1 132 349 → 1 131 629 симв. (−720 = по 80 на файл), inline-JS/inline-CSS/`on*`/картинки не изменились. Headless-прогон (Edge, `--dump-dom`) всех 9 задач: Этап 1 — drag&drop собирается верно (`correct` = все зоны) и Этап 2 активируется; Этап 2 — верное уравнение принимается (`success-text`); Этап 3 — активен, формула перерисована MathJax (`mjx-container` в `#stage3-eq-display` = 1, всего по странице 23–49), консоль без ошибок. `python tools/check.py` — 38/38.
 
 **Сумма группы A ≈ 162 000 симв.** Пункты 1, 3, 5, 7 частично пересекаются (одни и те же строки), поэтому сумма не аддитивна — это верхняя граница.
 
@@ -331,7 +334,7 @@
 
 ### 14.6 Ответ на вопрос «что делать первым»
 
-1. **П.2 — убрать `polyfill.io`** (9 строк, ~10 минут, риск ≈ 0): минус 9 подключений к мёртвому домену на 9 страницах раздела `construct`.
+1. **П.2 — убрать `polyfill.io`** — **сделано (`4cd5792`)**: 9 строк, ~10 минут, риск ≈ 0; минус 9 подключений к мёртвому домену на 9 страницах раздела `construct`.
 2. **П.1 — `assets/trainers-utils.js`**, начиная с утилит с **одним вариантом тела** (`getRandomInt`, `pickRandom`), затем с двумя (`declOfNum`, `gcd`, `lcm`, `isPrime`, `shuffleArray`, `vibrate`): 15 410 симв., 68 вхождений → 14, поведение не меняется.
 3. **П.3 — `percents`**: 28 891 симв. на 4 страницах, лучший удельный выигрыш (`ratio`: 58 % JS и 77 % CSS — копия).
 4. Дальше по таблице. П.5 (`construct`, 52 190) — самый большой объём и самый высокий риск, поэтому после п.1–4, когда общий JS-файл уже обкатан на безопасных утилитах.
@@ -344,7 +347,7 @@
 | № | коммит | файлы | проверка |
 |---|---|---|---|
 | 0 | `plan: 6.2–6.4 — карта дублирования, inline-блоки, ранжирование` | этот файл, `tools/dup_scan.py`, `tools/inventory-before-2026-11-18.json` | страницы не затронуты; `git diff --stat` — только эти 3 файла |
-| 1 | `construct: убрать polyfill.io` (п.2) | 9 `trainers/equations/construct/task*.html` (−1 строка) | все 9 задач + `check.py` |
+| 1 | `construct: убрать polyfill.io` (п.2) — **сделано, `4cd5792`** | 9 `trainers/equations/construct/task*.html` (−1 строка) | все 9 задач + `check.py`: 9/9 задач проходят 3 этапа, `check.py` 38/38 |
 | 2a | `utils: assets/trainers-utils.js (divisibility)` (п.1) | `assets/trainers-utils.js` + `gcd`, `lcm`, `primes`, `signs` | 4 страницы + `check.py` |
 | 2b | `utils: fractions` | `addition`, `comparison`, `conversion`, `division`, `multiplication`, `mixed`, `mixed_complex` | 7 страниц + `check.py` |
 | 2c | `utils: percents, geometry, rational, motion, equations` | остальные страницы с утилитами | по 1 странице каждого раздела + `check.py` |
