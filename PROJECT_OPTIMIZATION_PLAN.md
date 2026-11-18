@@ -356,7 +356,8 @@
 | 2a | `utils: assets/trainers-utils.js (divisibility)` (п.1) — **сделано, `8fb34d2`** | `assets/trainers-utils.js` (новый, 861 симв.) + `gcd`, `lcm` (`primes` — по решению §17); 3 файла, +32 / −43 | `gcd` −18 строк / −450 симв. inline-JS, `lcm` −21 / −559; `page_console.py` 4/4 + `check.py` 38/38; факт — §17.7 |
 | 2b | `utils: assets/trainers-utils.js (fractions)` (п.1) — **сделано, `c27abec`** | `assets/trainers-utils.js` (+5 строк / +268 симв.) + `addition`, `comparison`, `division`, `multiplication`, `mixed`, `mixed_complex` (`conversion` не меняется); 7 файлов, +13 / −50 | −42 строки / −1 565 симв. inline-JS (оценка −37 / −1 340: вместе с блоками ушли комментарии и пустые строки, §18.3 п.4); `page_console.py` 8/8 PASS (2 контрольные: `conversion`, `math_board`); `check.py` 38/38; факт — §18.9 |
 | 2b.1 | `tailwind: assets/tailwind.css вместо cdn.tailwindcss.com` (доступность + перф) — **сделано, `173ddc7`** | `trainers/fractions/mixed.html`, `mixed_complex.html` (по 1 замене), новые `assets/tailwind.css` (12 941 Б, minified) и `tools/tailwind.input.css` (834 Б) | `page_console.py` 2/2 PASS, `check.py` 38/38, скриншоты 1280×1000; факт — §19 |
-| 2c | `utils: percents, geometry, rational, motion, equations` | остальные страницы с утилитами | по 1 странице каждого раздела + `check.py` |
+| 2c-1 | `utils: percents` (п.1) — **сделано, `1a45f5f`** | 4 страницы `percents`: подключён `assets/trainers-utils.js`, удалены локальные `getRandomInt` (3 файла) и `pickRandom` (4); `primeFactors` оставлен локально — другой вариант тела | `page_console.py` 4/4 PASS, `check.py` 38/38, `dup_scan` `getRandomInt` 6 → 3, `pickRandom` 4 → 1; факт — §20 |
+| 2c-2 | `utils: geometry, rational, motion, equations` | остальные страницы с утилитами | по 1 странице каждого раздела + `check.py` |
 | 3a | `percents: assets/percents.css` (п.3) | 4 страницы `percents` | 4 страницы, скриншоты |
 | 3b | `percents: assets/percents-common.js` (п.3) | те же 4 | 4 страницы по 3 задания |
 | 4 | `index: assets/index.css` (п.4) | `index.html` + новый `assets/index.css` | лендинг 1440/390 px, все переходы |
@@ -651,5 +652,37 @@ python -X utf8 tools/utils_scan.py --pages "trainers/fractions/*.html" --names g
 - Пересборка нужна только при появлении в этих страницах новых Tailwind-классов: команда — в шапке `tools/tailwind.input.css`, версия сборщика зафиксирована там же.
 - Бинарник сборщика в репозиторий не входит (`%TEMP%`); `node` не требуется.
 - Откат: вернуть один тег `<script src="https://cdn.tailwindcss.com"></script>` в обе страницы (CSS-файл можно оставить неиспользуемым).
+
+
+## 20. Шаг 2c-1: `percents` — общие утилиты + шаблон нового тренажёра (2026-11-18)
+
+### 20.1 Что сделано (`1a45f5f`)
+
+- Подключён `assets/trainers-utils.js` (обычный `<script>` без `defer`, строка перед `analytics.js`) в 4 страницы раздела: `number-by`, `percent-of`, `ratio`, `tiles`.
+- Удалены локальные копии: `getRandomInt` (3 файла), `pickRandom` (4 файла) — тела совпадали с каноном побайтово.
+- `primeFactors` **оставлен локальным** в 3 файлах: другой вариант тела (`n === 1 → [1]` и защита от нецелых; канон для 1 возвращает `[]`), а вызовы `primeFactors(part)` допускают `part = 1`, поэтому нормализация изменила бы подсказки-множители. Правило §14.2 п.1: варианты тел остаются на месте.
+- Дифф: 4 файла, +21 / −7 строк. Выигрыш шага — не символы, а канон и подготовка 3a/3b перед добавлением новых страниц раздела.
+- Проверки: `page_console.py --offline` — **4/4 PASS** (0 ошибок JS, 0 предупреждений); `check.py` — **38/38**; `dup_scan` — `getRandomInt` 6 → **3** файла, `pickRandom` 4 → **1**, `primeFactors` 3 → 3 (сознательно).
+- Откат: `git revert 1a45f5f`.
+
+### 20.2 Шаблон нового тренажёра `percents` (для шага 5)
+
+Пока 3a/3b не сделаны, страница копирует блоки `<style>` и `<script>` целиком (733–1 317 строк). После 3a/3b — 150–250 строк: разметка + данные задач.
+
+Порядок в `<head>` (сверху вниз, образец — `trainers/percents/ratio.html`):
+
+1. SEO-блок: `title`, `description`, `keywords`, `author`, `robots`, `canonical` — уникальные для страницы.
+2. Open Graph: `og:type`, `og:title`, `og:description`, `og:url`, `og:site_name`.
+3. JSON-LD `LearningResource`: `name`, `description`, `educationalLevel` («6 класс»), `learningResourceType`, `inLanguage`, `isAccessibleForFree`, `teaches`, `url`.
+4. Шесть ссылок на иконки + `site.webmanifest` (как в остальных страницах).
+5. Google Fonts (Nunito 400–900).
+6. `<script src="../../assets/trainers-utils.js"></script>` (без `defer`), затем `assets/analytics.js` с `defer`; после 3a — `<link rel="stylesheet" href="../../assets/percents.css">`, после 3b — `<script src="../../assets/percents-common.js"></script>`.
+7. MathJax и Firebase не подключаются (в разделе 0 упоминаний).
+
+Инлайн `<script>` страницы: только данные задач + `generateTask` + свой `checkAnswer`; `drawFrame`/`animateTaskIntro` — по образцу соседней страницы.
+
+Регистрация на главной: карточка в зону 5 `missions-list` (`index.html`, после `tiles.html`) + URL в `sitemap.xml`. Сейчас в `sitemap.xml` 40 URL, из страниц отсутствуют `percents/tiles.html`, `fractions/conversion.html`, `privacy.html` — добавить вместе с новыми.
+
+Проверки новой страницы: `page_console.py --offline` (0 ошибок JS), 3 задания вручную, скриншоты 1440 и 390 px, уникальность `title`/`canonical`, валидность `sitemap.xml` (`[xml](Get-Content sitemap.xml)`).
 
 
