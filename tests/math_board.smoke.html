@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>math_board smoke</title>
+<meta name="robots" content="noindex">
+<style>
+    body { margin: 0; padding: 12px; font: 13px/1.5 Consolas, monospace; }
+    #log { margin: 0; white-space: pre-wrap; }
+</style>
+</head>
+<!-- data-test / data-err читает tools/check.py после --dump-dom -->
+<body data-test="" data-err="">
+<pre id="log">запуск…</pre>
+
+<!-- Доска грузится как есть: trainers/fractions/math_board.html не копируется и не меняется -->
+<iframe id="board" title="math_board под проверкой"
+        style="position:fixed;left:-4000px;top:0;width:1280px;height:800px;border:0"></iframe>
+
+<script>
+(function () {
+    'use strict';
+
+    const BOARD_SRC = '../trainers/fractions/math_board.html';
+    const WAIT_MS = 600;    // > debounce 400 мс в scheduleSave()
+    const GUARD_MS = 15000; // страховка от зависшего iframe
+
+    const log = document.getElementById('log');
+    const frame = document.getElementById('board');
+    const lines = [];
+    let passed = 0;
+    let failed = 0;
+    const failures = [];
+    let finished = false;
+
+    function say(text) {
+        lines.push(text);
+        log.textContent = lines.join('\n');
+    }
+
+    function check(name, ok, detail) {
+        if (ok) {
+            passed++;
+            say('PASS  ' + name);
+            return true;
+        }
+        failed++;
+        const msg = detail === undefined ? 'условие ложно' : String(detail);
+        failures.push(name + ': ' + msg);
+        say('FAIL  ' + name + ' — ' + msg);
+        return false;
+    }
+
+    function wait(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function finish() {
+        if (finished) return;
+        finished = true;
+        say('ИТОГО: pass=' + passed + ' fail=' + failed);
+        document.body.setAttribute('data-test', 'pass=' + passed + ';fail=' + failed + ';total=' + (passed + failed));
+        document.body.setAttribute('data-err', failures.join(' | ').replace(/"/g, "'").replace(/[\r\n]+/g, ' '));
+        document.title = failed === 0 ? 'SMOKE OK' : 'SMOKE FAIL';
+    }
+
+    function countItems(doc) {
+        return doc.querySelectorAll('#surface .board-item').length;
+    }
+
+    function stored(win) {
+        try {
+            return win.localStorage.getItem('mathBoardData');
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function parseStored(win) {
+        const raw = stored(win);
+        if (!raw) return null;
+        try {
+            return JSON.parse(raw);
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function clickPalette(doc, type) {
+        const btn = doc.querySelector('.palette-item[data-type="' + type + '"]');
+        check('Панель: кнопка ' + type, !!btn);
+        if (btn) btn.click();
+        return btn;
+    }
+
+    async function run(win, doc) {
+        const api = ['serializeBoard', 'applyBoardState', 'createItem', 'undo', 'redo', 'saveBoardState'];
+        check('API доски доступен', api.every(fn => typeof win[fn] === 'function'),
+            'нет: ' + api.filter(fn => typeof win[fn] !== 'function').join(', '));
+        check('Рабочая область #surface найдена', !!doc.getElementById('surface'));
+        check('Старт с пустой доски', win.serializeBoard().items.length === 0,
+            'items=' + win.serializeBoard().items.length);
+
+        // 1. Добавление с палитры (каждое действие ждёт debounce 400 мс,
+        //    иначе три клика дают один снимок истории)
+        clickPalette(doc, 'number');
+        check('Добавлено число', countItems(doc) === 1, 'items=' + countItems(doc));
+        await wait(WAIT_MS);
+        clickPalette(doc, 'var');
+        await wait(WAIT_MS);
+        clickPalette(doc, 'fraction');
+        await wait(WAIT_MS);
+        check('Три элемента на доске', countItems(doc) === 3, 'items=' + countItems(doc));
+
+        // 2. Контракт item в serializeBoard()
+        const snapshot = win.serializeBoard();
+        check('serializeBoard: 3 items', snapshot.items.length === 3, 'items=' + snapshot.items.length);
+        check('Контракт item (type/left/top/zIndex/inputs)',
+            snapshot.items.every(it => it.type && 'left' in it && 'top' in it &&
+                typeof it.zIndex === 'number' && Array.isArray(it.inputs)),
+            JSON.stringify(snapshot.items[0] || {}));
+
+        // 3. Debounce-сохранение
+        const saved = parseStored(win);
+        check('localStorage: mathBoardData записан', !!saved, 'ключ пуст или не JSON');
+        check('localStorage: 3 items', !!saved && saved.items.length === 3,
+            saved ? 'items=' + saved.items.length : 'нет данных');
+        check('localStorage: zIndex > 0', !!saved && saved.items.every(it => it.zIndex > 0));
+
+        const undoBtn = doc.getElementById('undo-btn');
+        const redoBtn = doc.getElementById('redo-btn');
+        check('Кнопка ↶ активна / ↷ заблокирована',
+            !!undoBtn && !undoBtn.disabled && !!redoBtn && redoBtn.disabled,
+            'undo.disabled=' + (undoBtn && undoBtn.disabled) + ' redo.disabled=' + (redoBtn && redoBtn.disabled));
+
+        // 4. undo()/redo()
+        win.undo();
+        check('undo() убрал элемент', countItems(doc) === 2, 'items=' + countItems(doc));
+        win.redo();
+        check('redo() вернул элемент', countItems(doc) === 3, 'items=' + countItems(doc));
+
+        // 5. Горячие клавиши (фокус не в input)
+        if (doc.activeElement && doc.activeElement.blur) doc.activeElement.blur();
+        win.dispatchEvent(new win.KeyboardEvent('keydown', { key: 'z', ctrlKey: true, bubbles: true, cancelable: true }));
+        check('Ctrl+Z отменяет', countItems(doc) === 2, 'items=' + countItems(doc));
+        win.dispatchEvent(new win.KeyboardEvent('keydown', { key: 'z', ctrlKey: true, shiftKey: true, bubbles: true, cancelable: true }));
+        check('Ctrl+Shift+Z повторяет', countItems(doc) === 3, 'items=' + countItems(doc));
+
+        // 6. Ввод в .smart-input и его сохранение
+        const numberInput = doc.querySelector('.board-item[data-type="number"] .smart-input');
+        check('У числа есть .smart-input', !!numberInput);
+        if (numberInput) {
+            numberInput.focus();
+            numberInput.value = '5';
+            numberInput.dispatchEvent(new win.Event('input', { bubbles: true }));
+            numberInput.blur();
+        }
+        await wait(WAIT_MS);
+        const afterInput = parseStored(win);
+        check('Ввод сохраняется в localStorage',
+            !!afterInput && afterInput.items.some(it => it.type === 'number' && it.inputs[0] === '5'),
+            afterInput ? JSON.stringify(afterInput.items.map(it => it.type + ':' + it.inputs.join(','))) : 'нет данных');
+
+        // 7. Восстановление состояния без дублей
+        if (afterInput) win.applyBoardState(afterInput);
+        check('Восстановление не дублирует элементы', countItems(doc) === 3, 'items=' + countItems(doc));
+        const restoredInput = doc.querySelector('.board-item[data-type="number"] .smart-input');
+        check('Восстановление сохранило ввод', !!restoredInput && restoredInput.value === '5',
+            restoredInput ? 'value=' + restoredInput.value : 'input не найден');
+
+        // 8. Виджет «Столбик» -> colData
+        clickPalette(doc, 'col-add');
+        await wait(WAIT_MS);
+        check('Столбик добавлен', !!doc.querySelector('.board-item[data-type="col-add"]'));
+        const colItem = win.serializeBoard().items.find(it => it.type === 'col-add');
+        check('colData в снимке', !!colItem && !!colItem.colData && typeof colItem.colData === 'object',
+            colItem ? 'colData=' + JSON.stringify(colItem.colData) : 'элемент не найден');
+        win.undo();
+        check('undo() убрал столбик',
+            !doc.querySelector('.board-item[data-type="col-add"]') && countItems(doc) === 3,
+            'items=' + countItems(doc));
+
+        // 9. Крестик удаления
+        const delBtn = doc.querySelector('.board-item .delete-btn');
+        check('Крестик удаления — <button>', !!delBtn && delBtn.tagName === 'BUTTON');
+        if (delBtn) delBtn.click();
+        await wait(WAIT_MS);
+        check('Крестик удаляет элемент', countItems(doc) === 2, 'items=' + countItems(doc));
+        win.undo();
+        check('undo() возвращает удалённый элемент', countItems(doc) === 3, 'items=' + countItems(doc));
+
+        // 10. Итоговое состояние записано
+        await wait(WAIT_MS);
+        const finalState = parseStored(win);
+        check('Финальное состояние сохранено (3 items)', !!finalState && finalState.items.length === 3,
+            finalState ? 'items=' + finalState.items.length : 'нет данных');
+    }
+
+    function start() {
+        try {
+            localStorage.removeItem('mathBoardData');
+        } catch (e) {
+            /* доступ к localStorage может быть запрещён — проверим внутри iframe */
+        }
+
+        frame.addEventListener('load', function onLoad() {
+            let win = null;
+            let doc = null;
+            try {
+                win = frame.contentWindow;
+                doc = frame.contentDocument;
+            } catch (e) {
+                doc = null;
+            }
+            if (!doc || !win) {
+                check('Доступ к странице доски', false,
+                    'iframe недоступен: запускайте через tools/check.py (--allow-file-access-from-files)');
+                finish();
+                return;
+            }
+            setTimeout(function () {
+                run(win, doc).catch(function (err) {
+                    check('Исключение в тесте', false, (err && err.message) || String(err));
+                }).then(finish, finish);
+            }, 100);
+        });
+
+        frame.src = BOARD_SRC;
+    }
+
+    setTimeout(function () {
+        if (!finished) {
+            check('Тест завершился сам', false, 'таймаут ' + GUARD_MS + ' мс');
+            finish();
+        }
+    }, GUARD_MS);
+
+    start();
+})();
+</script>
+</body>
+</html>
