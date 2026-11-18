@@ -1,0 +1,507 @@
+﻿{
+  "root": "C:/Users/godspace/Desktop/PROJECTS/math-6-grade",
+  "totals": {
+    ".html": {
+      "files": 45,
+      "lines": 26517,
+      "chars": 1132349,
+      "inline_css": 250242,
+      "inline_js": 602803,
+      "handlers": 184
+    },
+    ".js": {
+      "files": 2,
+      "lines": 2322,
+      "chars": 102100,
+      "inline_css": 0,
+      "inline_js": 0,
+      "handlers": 2
+    },
+    ".css": {
+      "files": 2,
+      "lines": 944,
+      "chars": 34447,
+      "inline_css": 0,
+      "inline_js": 0,
+      "handlers": 0
+    }
+  },
+  "images_total_bytes": 186944,
+  "files": [
+    {
+      "path": "assets/analytics.js",
+      "ext": ".js",
+      "lines": 316,
+      "chars": 16906,
+      "inline_css": 0,
+      "inline_js": 0,
+      "handlers": 2
+    },
+    {
+      "path": "assets/math_board.css",
+      "ext": ".css",
+      "lines": 790,
+      "chars": 29579,
+      "inline_css": 0,
+      "inline_js": 0,
+      "handlers": 0
+    },
+    {
+      "path": "assets/math_board.js",
+      "ext": ".js",
+      "lines": 2006,
+      "chars": 85194,
+      "inline_css": 0,
+      "inline_js": 0,
+      "handlers": 0
+    },
+    {
+      "path": "googlea5f7d80234f87164.html",
+      "ext": ".html",
+      "lines": 1,
+      "chars": 53,
+      "inline_css": 0,
+      "inline_js": 0,
+      "handlers": 0
+    },
+    {
+      "path": "head-snippet.html",
+      "ext": ".html",
+      "lines": 7,
+      "chars": 492,
+      "inline_css": 0,
+      "inline_js": 0,
+      "handlers": 0
+    },
+    {
+      "path": "index.html",
+      "ext": ".html",
+      "lines": 884,
+      "chars": 41519,
+      "inline_css": 16333,
+      "inline_js": 4418,
+      "handlers": 0
+    },
+    {
+      "path": "privacy.html",
+      "ext": ".html",
+      "lines": 32,
+      "chars": 2301,
+      "inline_css": 376,
+      "inline_js": 0,
+      "handlers": 0
+    },
+    {
+      "path": "tests/math_board.smoke.html",
+      "ext": ".html",
+      "lines": 308,
+      "chars": 13804,
+      "inline_css": 123,
+      "inline_js": 13114,
+      "handlers": 0
+    },
+    {
+      "path": "trainers/divisibility/gcd.html",
+      "ext": ".html",
+      "lines": 818,
+      "chars": 27280,
+      "inline_css": 6882,
+      "inline_js": 16225,
+      "handlers": 2
+    },
+    {
+      "path": "trainers/divisibility/lcm.html",
+      "ext": ".html",
+      "lines": 869,
+      "chars": 28313,
+      "inline_css": 7121,
+      "inline_js": 17107,
+      "handlers": 2
+    },
+    {
+      "path": "trainers/divisibility/primes.html",
+      "ext": ".html",
+      "lines": 931,
+      "chars": 34550,
+      "inline_css": 13850,
+      "inline_js": 16735,
+      "handlers": 2
+    },
+    {
+      "path": "trainers/divisibility/signs.html",
+      "ext": ".html",
+      "lines": 610,
+      "chars": 21690,
+      "inline_css": 8291,
+      "inline_js": 10060,
+      "handlers": 1
+    },
+    {
+      "path": "trainers/equations/construct/style.css",
+      "ext": ".css",
+      "lines": 154,
+      "chars": 4868,
+      "inline_css": 0,
+      "inline_js": 0,
+      "handlers": 0
+    },
+    {
+      "path": "trainers/equations/construct/task1.html",
+      "ext": ".html",
+      "lines": 383,
+      "chars": 16767,
+      "inline_css": 0,
+      "inline_js": 13404,
+      "handlers": 2
+    },
+    {
+      "path": "trainers/equations/construct/task2.html",
+      "ext": ".html",
+      "lines": 402,
+      "chars": 17689,
+      "inline_css": 311,
+      "inline_js": 13751,
+      "handlers": 2
+    },
+    {
+      "path": "trainers/equations/construct/task3.html",
+      "ext": ".html",
+      "lines": 387,
+      "chars": 17260,
+      "inline_css": 0,
+      "inline_js": 13592,
+      "handlers": 2
+    },
+    {
+      "path": "trainers/equations/construct/task4.html",
+      "ext": ".html",
+      "lines": 408,
+      "chars": 18322,
+      "inline_css": 0,
+      "inline_js": 14427,
+      "handlers": 2
+    },
+    {
+      "path": "trainers/equations/construct/task5.html",
+      "ext": ".html",
+      "lines": 464,
+      "chars": 21235,
+      "inline_css": 326,
+      "inline_js": 16466,
+      "handlers": 2
+    },
+    {
+      "path": "trainers/equations/construct/task6.html",
+      "ext": ".html",
+      "lines": 391,
+      "chars": 17997,
+      "inline_css": 0,
+      "inline_js": 13756,
+      "handlers": 2
+    },
+    {
+      "path": "trainers/equations/construct/task7.html",
+      "ext": ".html",
+      "lines": 424,
+      "chars": 19506,
+      "inline_css": 172,
+      "inline_js": 15039,
+      "handlers": 2
+    },
+    {
+      "path": "trainers/equations/construct/task8.html",
+      "ext": ".html",
+      "lines": 436,
+      "chars": 20004,
+      "inline_css": 172,
+      "inline_js": 15447,
+      "handlers": 2
+    },
+    {
+      "path": "trainers/equations/construct/task9.html",
+      "ext": ".html",
+      "lines": 411,
+      "chars": 18788,
+      "inline_css": 172,
+      "inline_js": 14574,
+      "handlers": 2
+    },
+    {
+      "path": "trainers/equations/construct/teacher.html",
+      "ext": ".html",
+      "lines": 120,
+      "chars": 5142,
+      "inline_css": 1187,
+      "inline_js": 2787,
+      "handlers": 1
+    },
+    {
+      "path": "trainers/equations/equations-test.html",
+      "ext": ".html",
+      "lines": 570,
+      "chars": 28013,
+      "inline_css": 6000,
+      "inline_js": 16092,
+      "handlers": 10
+    },
+    {
+      "path": "trainers/equations/equations.html",
+      "ext": ".html",
+      "lines": 764,
+      "chars": 30463,
+      "inline_css": 7295,
+      "inline_js": 18307,
+      "handlers": 4
+    },
+    {
+      "path": "trainers/equations/equations_construct-2.html",
+      "ext": ".html",
+      "lines": 272,
+      "chars": 12830,
+      "inline_css": 2405,
+      "inline_js": 5565,
+      "handlers": 3
+    },
+    {
+      "path": "trainers/equations/equations_construct.html",
+      "ext": ".html",
+      "lines": 1244,
+      "chars": 81101,
+      "inline_css": 11676,
+      "inline_js": 13191,
+      "handlers": 62
+    },
+    {
+      "path": "trainers/equations/opening-test.html",
+      "ext": ".html",
+      "lines": 509,
+      "chars": 19897,
+      "inline_css": 6203,
+      "inline_js": 8775,
+      "handlers": 9
+    },
+    {
+      "path": "trainers/equations/opening.html",
+      "ext": ".html",
+      "lines": 851,
+      "chars": 41521,
+      "inline_css": 12891,
+      "inline_js": 24251,
+      "handlers": 0
+    },
+    {
+      "path": "trainers/fractions/addition.html",
+      "ext": ".html",
+      "lines": 776,
+      "chars": 30308,
+      "inline_css": 8927,
+      "inline_js": 13260,
+      "handlers": 0
+    },
+    {
+      "path": "trainers/fractions/comparison.html",
+      "ext": ".html",
+      "lines": 951,
+      "chars": 37551,
+      "inline_css": 10876,
+      "inline_js": 18947,
+      "handlers": 0
+    },
+    {
+      "path": "trainers/fractions/conversion.html",
+      "ext": ".html",
+      "lines": 589,
+      "chars": 22378,
+      "inline_css": 6895,
+      "inline_js": 9143,
+      "handlers": 6
+    },
+    {
+      "path": "trainers/fractions/division.html",
+      "ext": ".html",
+      "lines": 741,
+      "chars": 25937,
+      "inline_css": 9215,
+      "inline_js": 11086,
+      "handlers": 1
+    },
+    {
+      "path": "trainers/fractions/math_board.html",
+      "ext": ".html",
+      "lines": 183,
+      "chars": 10590,
+      "inline_css": 0,
+      "inline_js": 704,
+      "handlers": 0
+    },
+    {
+      "path": "trainers/fractions/mixed.html",
+      "ext": ".html",
+      "lines": 691,
+      "chars": 30791,
+      "inline_css": 3899,
+      "inline_js": 22380,
+      "handlers": 3
+    },
+    {
+      "path": "trainers/fractions/mixed_complex.html",
+      "ext": ".html",
+      "lines": 741,
+      "chars": 41511,
+      "inline_css": 2128,
+      "inline_js": 23169,
+      "handlers": 10
+    },
+    {
+      "path": "trainers/fractions/multiplication.html",
+      "ext": ".html",
+      "lines": 801,
+      "chars": 29463,
+      "inline_css": 10075,
+      "inline_js": 12997,
+      "handlers": 1
+    },
+    {
+      "path": "trainers/geometry/area-metaphor.html",
+      "ext": ".html",
+      "lines": 954,
+      "chars": 44234,
+      "inline_css": 9827,
+      "inline_js": 27965,
+      "handlers": 9
+    },
+    {
+      "path": "trainers/geometry/area.html",
+      "ext": ".html",
+      "lines": 688,
+      "chars": 30880,
+      "inline_css": 9129,
+      "inline_js": 17803,
+      "handlers": 6
+    },
+    {
+      "path": "trainers/geometry/perimeter-area.html",
+      "ext": ".html",
+      "lines": 455,
+      "chars": 16728,
+      "inline_css": 3563,
+      "inline_js": 11234,
+      "handlers": 3
+    },
+    {
+      "path": "trainers/geometry/pi.html",
+      "ext": ".html",
+      "lines": 829,
+      "chars": 35339,
+      "inline_css": 8568,
+      "inline_js": 22170,
+      "handlers": 4
+    },
+    {
+      "path": "trainers/motion/motion.html",
+      "ext": ".html",
+      "lines": 626,
+      "chars": 25101,
+      "inline_css": 8258,
+      "inline_js": 11932,
+      "handlers": 6
+    },
+    {
+      "path": "trainers/percents/number-by.html",
+      "ext": ".html",
+      "lines": 1317,
+      "chars": 53693,
+      "inline_css": 15560,
+      "inline_js": 26406,
+      "handlers": 8
+    },
+    {
+      "path": "trainers/percents/percent-of.html",
+      "ext": ".html",
+      "lines": 938,
+      "chars": 38915,
+      "inline_css": 11372,
+      "inline_js": 20474,
+      "handlers": 1
+    },
+    {
+      "path": "trainers/percents/ratio.html",
+      "ext": ".html",
+      "lines": 896,
+      "chars": 37402,
+      "inline_css": 11091,
+      "inline_js": 19376,
+      "handlers": 1
+    },
+    {
+      "path": "trainers/percents/tiles.html",
+      "ext": ".html",
+      "lines": 733,
+      "chars": 25333,
+      "inline_css": 9358,
+      "inline_js": 11052,
+      "handlers": 4
+    },
+    {
+      "path": "trainers/rational/coordinates-pro.html",
+      "ext": ".html",
+      "lines": 608,
+      "chars": 20758,
+      "inline_css": 4192,
+      "inline_js": 15040,
+      "handlers": 3
+    },
+    {
+      "path": "trainers/rational/phone-balance.html",
+      "ext": ".html",
+      "lines": 498,
+      "chars": 18739,
+      "inline_css": 5523,
+      "inline_js": 10582,
+      "handlers": 4
+    },
+    {
+      "path": "yandex_aac7bac5791c1d01.html",
+      "ext": ".html",
+      "lines": 6,
+      "chars": 161,
+      "inline_css": 0,
+      "inline_js": 0,
+      "handlers": 0
+    }
+  ],
+  "images": [
+    {
+      "path": "apple-touch-icon.png",
+      "bytes": 35269
+    },
+    {
+      "path": "assets/my_QR.png",
+      "bytes": 5987
+    },
+    {
+      "path": "favicon-16x16.png",
+      "bytes": 925
+    },
+    {
+      "path": "favicon-180x180.png",
+      "bytes": 35269
+    },
+    {
+      "path": "favicon-32.png",
+      "bytes": 2495
+    },
+    {
+      "path": "favicon-32x32.png",
+      "bytes": 2495
+    },
+    {
+      "path": "favicon-48x48.png",
+      "bytes": 4684
+    },
+    {
+      "path": "favicon.ico",
+      "bytes": 99820
+    }
+  ]
+}
