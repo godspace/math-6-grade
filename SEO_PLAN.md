@@ -341,6 +341,24 @@ SEO-обвязка новой страницы: `title` «Подготовка �
 
 Замер: `python -X utf8 tools/seo_audit.py --md seo_report.md` (код возврата 1, пока есть ERR).
 
+### 12.1 S7 — очередь переобхода (Яндекс.Вебмастер, лимит 10 адресов/сутки на хост `godspace.github.io`)
+
+Порядок = приоритет: сначала изменённые в S4–S6 страницы, внутри — по спросу тем; витрина ВПР идёт сразу после главной. Все 12 адресов отвечают 200, `canonical` на странице совпадает с отправляемым адресом (у главной — со слэшем, без `index.html`).
+
+1. `https://godspace.github.io/math-6-grade/`
+2. `https://godspace.github.io/math-6-grade/trainers/vpr/index.html`
+3. `https://godspace.github.io/math-6-grade/trainers/equations/equations.html`
+4. `https://godspace.github.io/math-6-grade/trainers/fractions/addition.html`
+5. `https://godspace.github.io/math-6-grade/trainers/fractions/comparison.html`
+6. `https://godspace.github.io/math-6-grade/trainers/fractions/mixed.html`
+7. `https://godspace.github.io/math-6-grade/trainers/fractions/conversion.html`
+8. `https://godspace.github.io/math-6-grade/trainers/geometry/area.html`
+9. `https://godspace.github.io/math-6-grade/trainers/geometry/perimeter-area.html`
+10. `https://godspace.github.io/math-6-grade/trainers/rational/phone-balance.html`
+
+На следующий день (лимит общий на хост, поэтому остальные 8 слотов в первый день не тратим): `trainers/percents/base-change.html`, `trainers/percents/tiles.html`. В Google Search Console квоты нет — те же 12 адресов через «Проверка URL → Запросить индексирование». Повторно тот же адрес отправляем не раньше чем через 2–3 дня и только если он не переобошёлся.
+
+
 ## 13. Отдельная задача для `vpr-math-6` (не делать в этом репозитории)
 
 Сайт `https://godspace.github.io/vpr-math-6/` — одна страница `index.html` (17 заданий, 23 балла, таймер, оценка, прогресс в `localStorage`, Метрика 107714636). Интент — «решать вариант онлайн». Состояние на 2026-11-18: `title` и `description` есть, `canonical` нет, OG нет, JSON-LD нет, текста почти нет, ссылок на `math-6-grade` нет.
