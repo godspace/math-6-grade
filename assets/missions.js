@@ -6,12 +6,12 @@ window.MG6_ZONES = {
     divisibility: ['primes', 'divisibility_signs', 'gcd', 'lcm'],
     geometry:     ['pi', 'area_metaphor', 'area_constructor', 'perimeter_area'],
     percents:     ['percent_of', 'number_by', 'ratio', 'percent_tiles', 'base_change'],
-    rational:     ['motion', 'coordinates_pro', 'phone_balance']
-    // survival (ВПР, бизнес-симулятор) — внешние origin, прогресс не собирается
+    rational:     ['motion', 'coordinates_pro', 'phone_balance'],
+    survival:     ['vpr']
 };
 
 // Внешние миссии: в разметке помечены data-mission, но в знаменатель не входят (§23.1).
-window.MG6_EXTERNAL = ['vpr', 'business'];
+window.MG6_EXTERNAL = ['business'];
 
 // Без прогресса по существу: песочница без цели и финального экрана (§23.7, P3).
 window.MG6_UNTRACKED = ['math_board'];
