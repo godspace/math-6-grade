@@ -1071,8 +1071,8 @@ P2 (assets/missions.js, assets/progress.js, index.html): манифест по �
 - 21 страница без `description`/`canonical`/JSON-LD/OG (`geometry/*`, `rational/*`, `motion`, `equations-test`/`construct*`, `construct/task1..9`, `privacy`);
 - 9 страниц без H1 в HTML (`gcd`, `lcm`, `signs`, `equations`, `opening-test`, `math_board`, `perimeter-area`, `motion`, `coordinates-pro`);
 - `og:image` нет ни у одной страницы; 39 страниц «тонкие» (<120 слов текста);
-- `sitemap.xml` без `fractions/conversion.html`, `percents/tiles.html`, зато с записью чужого проекта `vpr-math-6`;
-- **своей страницы под ВПР на сайте нет** — только внешняя ссылка на `godspace.github.io/vpr-math-6/`, поэтому запрос «Подготовка к ВПР по математике 6 класс» упирается в главную.
+- `sitemap.xml` без `fractions/conversion.html`, `percents/tiles.html`, зато с записью `vpr-math-6` (свой второй проект — другой хост, в этот sitemap не входит);
+- **своей страницы под ВПР на сайте нет** — только внешняя ссылка на свой `godspace.github.io/vpr-math-6/`. Решение: `math-6-grade` — витрина «подготовка» (`trainers/vpr/`), `vpr-math-6` — сам вариант; детали и ТЗ для второго репозитория — `SEO_PLAN.md` §6.3 и §13.
 
 Дальше: шаги S1–S7 в `SEO_PLAN.md` §6, по одной задаче Cline на шаг. Правило §18.2 (перенос утилит) и границы §3 там же.
 
