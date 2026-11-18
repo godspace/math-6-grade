@@ -112,9 +112,10 @@
 - `tools/check.py` — smoke-проверка доски в headless Edge, базовая линия **38/38** (exit 0). Должна оставаться зелёной после каждого шага этапа 6.
 - `tools/inventory.py` — замер всего проекта (HTML/JS/CSS/картинки, inline-блоки, `on*`, дубли). Базовая точка «до»: 45 HTML / 1 132 349 симв. / inline-JS 602 803 / inline-CSS 250 242 / `on*` 184. Снимок «до» в JSON: `tools/inventory-before-2026-11-18.json`.
 - `tools/dup_scan.py` — замер дублирования (шаги 6.2–6.3): экономия по зонам (head/CSS/JS/body), топ общих блоков, экономия внутри кластеров страниц, повторяемые функции, `on*`, внешние `<script src>`. Запуск: `python -X utf8 tools/dup_scan.py` (текст) или `--json`; методика и ограничения — в шапке файла.
+- `tools/utils_scan.py` — карта утилит для шагов 2a/2b/2c: по каждому имени функции — где объявлена (`файл:строка`), сколько вариантов тела, какая длина, совпадает ли тело с `assets/trainers-utils.js`. В отличие от `dup_scan.py` показывает стрелки (`const name = ... =>`) и номера строк. Запуск: `python -X utf8 tools/utils_scan.py [--pages "trainers/fractions/*.html"] [--names gcd lcm] [--json]`; код возврата 0/2. Появился вместе с подготовкой шага 2b (§18.1).
 - `tools/size.py` — замер доски (HTML + `assets/math_board.css` + `assets/math_board.js`), 2979 стр. / 125 363 симв. / ~31 341 токенов. Переписывать не нужно: `inventory.py` покрывает его цифры.
 - `tools/page_console.py` — проверка **изменённых страниц** без ручного прохода: `python -X utf8 tools/page_console.py "trainers/divisibility/*.html" --offline` → `[PASS]/[FAIL]` по каждой странице, число ошибок JS (`Uncaught …`, `is not defined`), опционально `--expect "текст"` (маркер отрисовался) и `--dump-dir` (сохранить DOM). `--offline` блокирует CDN/шрифты/счётчики: быстрее и детерминированнее. Код возврата 0/1/2.
-- `assets/trainers-utils.js` — общий модуль утилит страниц-тренажёров: с шага 2a там `vibrate`, `isPrime`, `gcd`, `lcm`, `primeFactors` (§17.7). Подключается обычным `<script>` (без `defer`) в `<head>` перед `analytics.js`; новая утилита добавляется сюда, только если её тело в страницах идентично — варианты тела остаются локальными (§14.2 п.1).
+- `assets/trainers-utils.js` — общий модуль утилит страниц-тренажёров: с шага 2a там `vibrate`, `isPrime`, `gcd`, `lcm`, `primeFactors` (§17.7), шаг 2b добавляет `getRandomInt`, `pickRandom` (§18). Подключается обычным `<script>` (без `defer`) в `<head>` перед `analytics.js`. Правило приёма: функция с DOM/разметкой переносится, только если её тело в страницах дословно идентично; чистая функция (только аргументы → значение) может быть нормализована к канону после численной сверки (§14.2 п.1, §18.2). В страницах с `const gcd/lcm/...` объявления обязательно удаляются в том же коммите, что и подключение модуля (§18.3 п.1).
 - Логи: `[Console]::OutputEncoding=[Text.Encoding]::UTF8; python -X utf8 tools/<tool>.py | Out-File -Encoding utf8 <файл>` — иначе PowerShell 5.1 пишет UTF-16 и кириллица ломается.
 - Git: `main` = `origin/main`, рабочее дерево чистое (сверять `git status -sb`). Хеши: доска 4.1 `4831f2d`, 4.2 `c256858`, 5.1 `758a8bd`, 5.2 `a29b94f`; подготовка этапа 6: `05e7fe7` (`tools/inventory.py`), `45f6c01` (этот документ), `ae2a37b` (`.gitignore`).
 
@@ -284,7 +285,7 @@
 
 | № | объект и что делаем | K1 | K2 | K3 | K4 | P | измеренный выигрыш | способ проверки |
 |---|---|---|---|---|---|---|---|---|
-| 1 | 14 общих утилит из inline-JS → `assets/trainers-utils.js`: `getRandomInt` (7 файлов, 1 вариант тела), `pickRandom` (5/1), `declOfNum` (7/2), `gcd` (5/4), `lcm` (3/2), `isPrime` (3/2), `primeFactors` (4/3), `shuffleArray` (3/2), `vibrate` (3/2), `animate` (8/5), `setFeedback` (5/3), `showVictory` (5/5), `startConfetti` (6/5), `fireConfetti` (4/4); варианты тела, отличные от канона, остаются локальными | 3 | 5 | 2 | 2 | **9.0** | **15 410 симв.**, 68 вхождений → 14 | все страницы-кандидаты (8–17): задание проходится, в консоли нет `is not defined`; `check.py` 38/38; `dup_scan` — функция ушла из списка |
+| 1 | 14 общих утилит из inline-JS → `assets/trainers-utils.js`: `getRandomInt` (7 файлов, 1 вариант тела), `pickRandom` (5/1), `declOfNum` (7/2), `gcd` (5/4), `lcm` (3/2), `isPrime` (3/2), `primeFactors` (4/3), `shuffleArray` (3/2), `vibrate` (3/2), `animate` (8/5), `setFeedback` (5/3), `showVictory` (5/5), `startConfetti` (6/5), `fireConfetti` (4/4); варианты тела, отличные от канона, остаются локальными; для чистых функций (без DOM) допустима нормализация к канону после численной сверки — §18.2 | 3 | 5 | 2 | 2 | **9.0** | **15 410 симв.**, 68 вхождений → 14 | все страницы-кандидаты (8–17): задание проходится, в консоли нет `is not defined`; `check.py` 38/38; `dup_scan` — функция ушла из списка |
 | 2 | Убрать `polyfill.io` (`?features=es6`) из 9 задач `construct`: домен мёртв/скомпрометирован, а inline-код страниц и так на ES6 | 1 | 4 | 2 | 3 | **6.5** | −9 внешних подключений (≈35–60 КБ и блокирующее ожидание на каждой из 9 страниц); ≈700 симв. | DevTools: запрос исчез; на всех 9 задачах рисуются формулы MathJax и работает drag&drop; консоль чистая. **Сделано — `4cd5792`, факт ниже** |
 | 3 | Кластер `percents` (4 страницы) → `assets/percents-common.js` + `assets/percents.css`: палитра/карточки/кнопки, `startConfetti`, `updateLiveCancellation`, общий цикл задач | 3 | 4 | 3 | 4 | **6.0** | **28 891 симв.** (JS 18 140 + CSS 10 751) | все 4 страницы (`number-by`, `ratio`, `percent-of`, `tiles`) проходятся по 3 задания; скриншоты до/после; `inventory.py` — inline-CSS/JS раздела падают |
 | 4 | `index.html`: inline-CSS 10 776 → `assets/index.css` (по образцу доски, дословно) | 3 | 1 | 2 | 3 | **5.5** | **16 333 симв.** (вся inline-CSS файла) | скриншот лендинга до/после при 1440 и 390 px; переходы по всем карточкам; `inventory.py` |
@@ -339,7 +340,7 @@
 ### 14.6 Ответ на вопрос «что делать первым»
 
 1. **П.2 — убрать `polyfill.io`** — **сделано (`4cd5792`)**: 9 строк, ~10 минут, риск ≈ 0; минус 9 подключений к мёртвому домену на 9 страницах раздела `construct`.
-2. **П.1 — `assets/trainers-utils.js`**, начиная с утилит с **одним вариантом тела** (`getRandomInt`, `pickRandom`), затем с двумя (`declOfNum`, `gcd`, `lcm`, `isPrime`, `shuffleArray`, `vibrate`): 15 410 симв., 68 вхождений → 14, поведение не меняется. **Первый шаг (2a, divisibility) сделан — `8fb34d2`, §17.7**; дальше 2b (`fractions`), 2c (остальные разделы).
+2. **П.1 — `assets/trainers-utils.js`**, начиная с утилит с **одним вариантом тела** (`getRandomInt`, `pickRandom`), затем с двумя (`declOfNum`, `gcd`, `lcm`, `isPrime`, `shuffleArray`, `vibrate`): 15 410 симв., 68 вхождений → 14, поведение не меняется. **Первый шаг (2a, divisibility) сделан — `8fb34d2`, §17.7**; дальше 2b (`fractions`), 2c (остальные разделы). **2b подготовлен — §18**: в `fractions` дословных совпадений нет, поэтому замер дал другой набор (`gcd`, `lcm`, `getRandomInt`, `pickRandom`, `primeFactors` — 1 340 симв.); `declOfNum`/`shuffleArray`/`vibrate` в этом разделе не встречаются и уходят в 2c.
 3. **П.3 — `percents`**: 28 891 симв. на 4 страницах, лучший удельный выигрыш (`ratio`: 58 % JS и 77 % CSS — копия).
 4. Дальше по таблице. П.5 (`construct`, 52 190) — самый большой объём и самый высокий риск, поэтому после п.1–4, когда общий JS-файл уже обкатан на безопасных утилитах.
 5. Группа B — только после A; внутри: п.10 (~10 минут) → п.11 → п.12.
@@ -353,7 +354,7 @@
 | 0 | `plan: 6.2–6.4 — карта дублирования, inline-блоки, ранжирование` | этот файл, `tools/dup_scan.py`, `tools/inventory-before-2026-11-18.json` | страницы не затронуты; `git diff --stat` — только эти 3 файла |
 | 1 | `construct: убрать polyfill.io` (п.2) — **сделано, `4cd5792`** | 9 `trainers/equations/construct/task*.html` (−1 строка) | все 9 задач + `check.py`: 9/9 задач проходят 3 этапа, `check.py` 38/38 |
 | 2a | `utils: assets/trainers-utils.js (divisibility)` (п.1) — **сделано, `8fb34d2`** | `assets/trainers-utils.js` (новый, 861 симв.) + `gcd`, `lcm` (`primes` — по решению §17); 3 файла, +32 / −43 | `gcd` −18 строк / −450 симв. inline-JS, `lcm` −21 / −559; `page_console.py` 4/4 + `check.py` 38/38; факт — §17.7 |
-| 2b | `utils: fractions` | `addition`, `comparison`, `conversion`, `division`, `multiplication`, `mixed`, `mixed_complex` | 7 страниц + `check.py` |
+| 2b | `utils: assets/trainers-utils.js (fractions)` (п.1) — **подготовлено, §18** | `assets/trainers-utils.js` + `addition`, `comparison`, `division`, `multiplication`, `mixed`, `mixed_complex` (`conversion` не меняется) — 7 файлов | −37 строк / −1 340 симв. inline-JS; `page_console.py` 8/8 PASS (2 контрольные: `conversion`, `math_board`); `check.py` 38/38 |
 | 2c | `utils: percents, geometry, rational, motion, equations` | остальные страницы с утилитами | по 1 странице каждого раздела + `check.py` |
 | 3a | `percents: assets/percents.css` (п.3) | 4 страницы `percents` | 4 страницы, скриншоты |
 | 3b | `percents: assets/percents-common.js` (п.3) | те же 4 | 4 страницы по 3 задания |
@@ -459,6 +460,132 @@
 - Ручной проход 3 этапов в браузере не выполнялся: headless-инструмент не кликает по странице. Косвенное покрытие — этапы 2–5 в `gcd`/`lcm` вызывают только `isPrime`, `primeFactors`, `vibrate` и `gcd`/`lcm`, тела которых перенесены дословно (сверка 6/6), и страница загружается без ошибок JS.
 
 Вывод по шагу: сеть на страницу — +1 запрос 51 симв. подключения (861 Б, кэшируется между страницами раздела), поэтому выигрыш 2a — не символы, а канон для 2b/2c. Из 15 410 симв. п.1 закрыто 1 009 симв. inline-JS; `assets/trainers-utils.js` — теперь единственное место, куда добавляются утилиты следующих разделов (правило §14.2 п.1: варианты тела остаются локальными).
+
+## 18. Шаг 2b: `fractions` — подготовка (2026-11-18)
+
+Раздел = 8 HTML: `addition`, `comparison`, `conversion`, `division`, `multiplication`, `mixed`, `mixed_complex` (7 тренажёров) + `math_board.html` (копия доски на `assets/math_board.js`, своих утилит не имеет — не трогаем).
+
+### 18.1 Замер: что реально дублируется
+
+Снято автоматически новым инструментом `tools/utils_scan.py` (не в репозитории до этого шага, добавлен вместе с подготовкой): разбор всех объявлений `function NAME(...)` и `const NAME = ... =>` в `trainers/**/*.html`, группировка по нормализованному телу, сверка с `assets/trainers-utils.js`. Воспроизведение:
+
+```
+python -X utf8 tools/utils_scan.py --pages "trainers/fractions/*.html" --names gcd lcm getRandomInt pickRandom primeFactors rand
+```
+
+| утилита | где объявлена (файл:строка) | симв. | вариантов тела | решение |
+|---|---|---|---|---|
+| `gcd` | `addition:515`, `comparison:588`, `division:466`, `multiplication:485` (`function`), `mixed:240`, `mixed_complex:297` (`const`-стрелка) | 390 | 4 | **в модуль** (канон уже есть с 2a) |
+| `lcm` | `addition:519`, `comparison:593` (`Math.abs(a*b)/gcd`), `mixed:241`, `mixed_complex:298` | 272 | 2 | **в модуль**; канон получает `Math.abs` |
+| `getRandomInt` | `multiplication:483` (`function`), `mixed:239`, `mixed_complex:299` (стрелки) | 279 | 2 | **в модуль** (добавить, канон — форма `function`) |
+| `pickRandom` | `multiplication:484` | 80 | 1 | **в модуль** (добавить) |
+| `primeFactors` | `multiplication:487` (15 строк) | 319 | тело ≠ модуль | **в модуль** после харнесса эквивалентности |
+| `rand` | `conversion:380` (стрелка), `division:465` (`function`) | 170 | 2 | остаётся локально: другое имя, 13 вызовов → переименование отдельным шагом |
+| `fireConfetti`, `animate` | `conversion:558`, `conversion:571`, `multiplication:779` | — | у каждого свои (разные `canvas id` и физика частиц) | остаётся локально (§14.2 п.1) |
+| `startConfetti`, `showVictory`, `setFeedback` | `multiplication:758`, `747`, `740` | — | у каждого свои | остаётся локально |
+| `simplifyFraction`, `getFactors` | `addition:523`, `division:468` | — | по 1 варианту, привязаны к своей разметке | остаётся локально |
+
+Итог замера: **15 объявлений / 1 340 симв.** inline-JS уходят из 6 страниц в 5 функций модуля. Ожидаемо по `inventory.py`: HTML −37 строк (+1–5 пустых, если удаляются вместе с блоком), inline-JS −1 340 симв. ±40, `assets/trainers-utils.js` +≈215 симв. / +5 строк. `conversion.html` в этом шаге **не меняется** (у него только `rand`/`fireConfetti`/`animate`).
+
+Поправка к прежней гипотезе: `declOfNum` и `shuffleArray` в разделе `fractions` **не встречаются вообще** (они в `equations`/`construct` и `geometry`/`rational`), поэтому «начинать с утилит с одним телом» для 2b не работает — там нет канонических дословных совпадений, см. §18.2.
+
+### 18.2 Решение о канонизации (уточнение правила §14.2 п.1)
+
+Правило 2a «переносим только дословно идентичное тело» в `fractions` даёт **ноль**: ни одно объявление `gcd`/`lcm`/`getRandomInt` не совпадает с модулем посимвольно (4, 2 и 2 варианта тела соответственно), а `primeFactors` отличается реализацией цикла.
+
+Решение: правило **разделяется по типу функции**:
+
+- **Чистая функция** (нет DOM, нет глобального состояния, только аргументы → значение) — тело можно нормализовать к канону модуля, **если эквивалентность подтверждена численным харнессом**. Сюда входят `gcd`, `lcm`, `getRandomInt`, `pickRandom`, `primeFactors`.
+- **Функция с DOM/разметкой/цветом раздела** (`animate`, `startConfetti`, `showVictory`, `setFeedback`, `fireConfetti`, `simplifyFraction`, `getFactors`) — по-прежнему только дословное совпадение, иначе остаётся локальной.
+
+Проверки эквивалентности (харнесс в `%TEMP%`, не в репозитории; как в 2a):
+
+| что сверяем | диапазон | критерий |
+|---|---|---|
+| `gcd`: 4 варианта страниц ↔ модуль | `a, b ∈ 1..300` (90 000 пар) | 0 расхождений |
+| `lcm`: `Math.abs(a*b)/gcd` ↔ `(a*b)/gcd` | `a, b ∈ 1..300` | 0 расхождений (все вызовы — положительные знаменатели) |
+| `primeFactors`: вариант `multiplication` ↔ модуль | `n ∈ 2..5000` | массивы совпадают по составу и порядку |
+| `getRandomInt`: 1 000 вызовов, `min > max` не встречается | `[3,7]`, `[1,1]`, `[2,9]` | все значения целые и внутри диапазона, обе границы достигаются |
+
+Изменение канона в модуле (единственное в этом шаге):
+
+```js
+// было (2a):  function lcm(a, b) { return (a * b) / gcd(a, b); }
+// станет:     function lcm(a, b) { return Math.abs(a * b) / gcd(a, b); }
+```
+
+Причина: `Math.abs` уже есть в `addition`/`comparison`, для страниц 2a (`gcd`/`lcm` раздела `divisibility`) результат не меняется (все аргументы положительные), зато после шага в проекте один вариант `lcm`, а не три.
+
+Практическое следствие для 2c: `gcd`/`lcm`/`getRandomInt`/`pickRandom`/`primeFactors` больше не переписываются — страницы следующих разделов просто теряют объявления и подключают модуль (плюс сверка `primeFactors` из `percents`, где 2 других варианта тела).
+
+### 18.3 Готчи шага (на чём легко упасть)
+
+1. **`mixed.html` и `mixed_complex.html` объявляют `const gcd`, `const lcm`, `const getRandomInt`.** Если подключить модуль, но забыть удалить эти строки, будет `Uncaught SyntaxError: Identifier 'gcd' has already been declared`, и **весь** inline-скрипт страницы не выполнится (пустая доска, «мертвые» кнопки). Удаление объявлений и подключение модуля должны быть в одном коммите; первый индикатор — консоль в `page_console.py`.
+2. Подключение — `<script src="../../assets/trainers-utils.js"></script>` **без `defer`**, вставлять перед `analytics.js` (строки до правок: `addition` 47, `comparison` 46, `division` 48, `multiplication` 46, `mixed` 50, `mixed_complex` 49). В `mixed`/`mixed_complex` выше стоит `cdn.tailwindcss.com` — порядок: tailwind → `trainers-utils.js` → `analytics.js`.
+3. Номера строк после вставки тега сдвигаются на +1 — удалять копии **по тексту функции** (якорь — сигнатура + тело), а не по номеру строки; либо правки от конца файла к началу.
+4. В `multiplication.html` `primeFactors` — 15 строк: удалять блок целиком вместе с пустой строкой перед `function generateTask`, иначе останется «висячая» пустая строка (как в 2a: `gcd` дал −18 строк вместо −17).
+5. `rand` в `division.html`/`conversion.html` в этом шаге **не переименовывать** и `conversion.html` не трогать вообще.
+6. Модуль не переносить в конец `<body>` и не добавлять ему `defer`: inline-скрипт страницы вызывает утилиты до `DOMContentLoaded`.
+
+### 18.4 Порядок работ (один проход, ~40 минут)
+
+1. `git status -sb` — дерево чистое, `main` = `origin/main`. Снять «до»: `python -X utf8 tools/inventory.py --json > %TEMP%\inv_before_2b.json`, `python -X utf8 tools/dup_scan.py > %TEMP%\dup_before_2b.txt` (в PowerShell 5.1 `>` пишет UTF-16 — для сравнения использовать `Out-File -Encoding utf8` или читать с `-Encoding Unicode`).
+2. `assets/trainers-utils.js`: добавить `getRandomInt`, `pickRandom`; в `lcm` добавить `Math.abs`; заголовки-комментарии по разделам (`// --- Случайные числа ---`). Ожидаемо +5 строк / +≈215 симв.
+3. `multiplication.html`: удалить `getRandomInt` (483), `pickRandom` (484), `gcd` (485), `primeFactors` (487–501); подключить модуль на строке 46.
+4. `addition.html`: удалить `gcd` (515–517), `lcm` (519–521); подключение на 47.
+5. `comparison.html`: удалить `gcd` (588–590), `lcm` (593–595); подключение на 46.
+6. `division.html`: удалить `gcd` (466); подключение на 48.
+7. `mixed.html`: удалить `getRandomInt` (239), `gcd` (240), `lcm` (241); подключение на 50. `mixed_complex.html`: удалить 297–299; подключение на 49.
+8. Проверки §18.5 → коммит `utils: assets/trainers-utils.js (fractions)` (7 файлов: модуль + 6 страниц) → отдельный коммит `plan: шаг 2b — факт и цифры`.
+
+### 18.5 Приёмка шага 2b
+
+- `python tools/check.py` — **38/38**, exit 0 (до и после).
+- `python -X utf8 tools/page_console.py` по 8 файлам раздела (`addition comparison conversion division multiplication mixed mixed_complex math_board`) `--offline` — **8/8 PASS, 0 ошибок JS**, exit 0. Дополнительно к «до»: размер итогового DOM в пределах **±2 000 симв.** от базовой линии §18.6 (текст задания случайный, поэтому точного совпадения не будет; падение inline-скрипта даёт просадку в разы и `SyntaxError`).
+- Харнесс §18.2 — 4 сверки, **0 расхождений**, exit 0.
+- `inventory.py` «до/после»: HTML −37 строк, симв. −1 340 ±40, inline-JS −1 340 ±40; inline-CSS и `on*` без изменений; JS-файлов по-прежнему 3.
+- `dup_scan.py` «до/после»: `gcd` 6 → **0**, `lcm` 4 → **0**, `getRandomInt` 9 → **6** (остаются `equations` ×2, `percents` ×3, `phone-balance`), `pickRandom` 5 → **4**, `primeFactors` 4 → **3** (`number-by`, `percent-of`, `ratio` — это 2c).
+- `git diff --stat` — только 7 целевых файлов (6 страниц + модуль), ничего лишнего.
+- Ручной проход (за пользователем, headless не кликает): по одному заданию на каждой из 6 изменённых страниц — `addition`/`comparison` (пример отрисовался, «Проверить» работает, знаменатель общий), `division`/`multiplication` (разложение на множители и сокращение подсвечиваются), `mixed`/`mixed_complex` (пошаговые кнопки реагируют, консоль пустая). `conversion` и `math_board` — контрольные, изменений нет.
+- Откат: `git revert` одного коммита `utils: ... (fractions)`.
+
+### 18.6 Базовая линия «до» (снята 2026-11-18, после шага 2a)
+
+- `check.py` — 38/38, exit 0.
+- `page_console.py --offline`, бюджет 2 500 мс, все **8/8 PASS**, 0 ошибок JS, 0 предупреждений; DOM: `addition` ≈41 180, `comparison` ≈48 638, `conversion` ≈33 016, `division` ≈37 603, `multiplication` ≈40 587, `mixed` ≈42 373, `mixed_complex` ≈53 154, `math_board` ≈20 900 симв.
+- `inventory.py`: HTML 26 469 строк / 1 130 730 симв., inline-JS 601 794 симв., inline-CSS 250 242, `on*` 184, JS-файлов 3 (102 961 симв.); `assets/trainers-utils.js` — 28 строк / 861 симв., 5 функций.
+- `dup_scan.py` (число файлов с объявлением): `getRandomInt` 9, `animate` 8, `declOfNum` 7, `nextTask` 7, `gcd` 6, `startConfetti` 6, `pickRandom` 5, `setFeedback` 5, `showVictory` 5, `lcm` 4, `primeFactors` 4, `fireConfetti` 4, `shuffleArray` 3, `vibrate` 1.
+
+### 18.7 Стартовый промпт для новой задачи (копировать целиком)
+
+```text
+Шаг 2b из PROJECT_OPTIMIZATION_PLAN.md: раздел fractions.
+Прочитай §18 (подготовка 2b) и §17.7 (как делался 2a) — этого достаточно, страницы целиком не читай.
+
+Сделай:
+1. git status -sb (дерево чистое), снять «до»: inventory.py --json, dup_scan.py (см. §18.4 п.1).
+2. В assets/trainers-utils.js добавить getRandomInt и pickRandom, в lcm добавить Math.abs (§18.2).
+3. Удалить копии и подключить модуль по таблице §18.1: multiplication (getRandomInt, pickRandom, gcd, primeFactors), addition (gcd, lcm), comparison (gcd, lcm), division (gcd), mixed (getRandomInt, gcd, lcm), mixed_complex (то же). conversion.html не трогать.
+4. Проверить: check.py 38/38; page_console.py по 8 файлам раздела --offline = 8/8 PASS, 0 ошибок JS; харнесс эквивалентности §18.2 (gcd/lcm 1..300, primeFactors 2..5000, getRandomInt границы) — 0 расхождений; inventory/dup_scan «после» против §18.6.
+5. Коммит `utils: assets/trainers-utils.js (fractions)` — только 7 файлов, затем отдельный коммит `plan: шаг 2b — факт и цифры` (§18 дополнить блоком «Факт», §15 строка 2b).
+
+Главный риск: в mixed.html и mixed_complex.html объявлены const gcd/lcm/getRandomInt — их надо удалить в том же коммите, иначе SyntaxError и мёртвая страница (§18.3 п.1).
+```
+
+### 18.8 Что остаётся на 2c (после 2b)
+
+| утилита | где | вариантов тела | почему не в 2b |
+|---|---|---|---|
+| `primeFactors` | `percents/number-by:668`, `percent-of:442`, `ratio:454` | 2 других варианта (`return [1]` для 1, проверка нецелого) | другой раздел, нужна отдельная сверка поведения |
+| `declOfNum` | `construct/task6–9` (4), `equations`/`equations_construct` (3) | 2 | лучше вместе с 5a (`construct-core.js`), иначе двойная правка тех же файлов |
+| `shuffleArray` | `geometry/area:329`, `area-metaphor:442`, `rational/phone-balance:276` | 2 (мутация входного массива) | 3 файла разных разделов |
+| `vibrate` | `geometry/area-metaphor:385` | 1, но `ms = 50` по умолчанию (канон без параметра) | вариант тела; либо принять канон, либо оставить |
+| `animate`, `startConfetti`, `fireConfetti`, `showVictory`, `setFeedback` | 8 / 6 / 4 / 5 / 5 файлов | 5 / 5 / 4 / 5 / 3 | зависят от разметки и цвета раздела — кандидаты в `percents-common.js` (шаг 3b) и `trainers-theme.css` (шаг 6), не в модуль |
+| `rand` | `fractions/conversion:380`, `fractions/division:465` | 2 | другое имя; переименование 13 вызовов — отдельным коммитом |
+
+Порядок 2c: сначала `percents` (там же `primeFactors` ×3 и уже готовые `getRandomInt`/`pickRandom` → 4 страницы), затем `geometry`/`rational` (`shuffleArray`, `vibrate`), `equations`/`construct` — вместе с шагом 5a.
+
+
 
 
 

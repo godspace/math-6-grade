@@ -8,3 +8,5 @@
 - Один этап работы = одна задача в Cline; не смешивай этапы.
 - Перед правками проверяй, что меняешь только целевой файл.
 - После правок HTML-страниц — `python -X utf8 tools/page_console.py "<страницы>" --offline` (ошибки JS в консоли, exit 1 при падении).
+- Общие утилиты страниц-тренажёров — только `assets/trainers-utils.js` (`<script>` без `defer` перед `analytics.js`). Перенос: чистая функция — после численной сверки с каноном (PROJECT_OPTIMIZATION_PLAN.md §18.2), функция с DOM — только при дословном совпадении. Локальные объявления (`function`/`const`) удалять в том же коммите, иначе `Identifier '...' has already been declared` и мёртвая страница.
+- PowerShell 5.1: `python ... > файл` пишет UTF-16 — используй `[Console]::OutputEncoding=[Text.Encoding]::UTF8` и `python ... | Out-File -Encoding utf8`, иначе кириллица в логах ломается.
