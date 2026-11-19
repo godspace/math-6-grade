@@ -35,7 +35,7 @@
         "description": "Что входит в ВПР по математике за 6 класс, какие темы за каким типом задания стоят, план подготовки на четыре недели и пробный вариант онлайн.",
         "inLanguage": "ru",
         "datePublished": "2026-11-18",
-        "dateModified": "2026-11-18",
+        "dateModified": "2026-11-19",
         "author": { "@type": "Person", "name": "Козлов Сергей Владимирович" },
         "mainEntityOfPage": { "@type": "WebPage", "@id": "https://godspace.github.io/math-6-grade/trainers/vpr/index.html" },
         "about": [
@@ -198,6 +198,142 @@
         .page-footer a:hover { text-decoration: underline; }
         .page-footer p { margin: 10px 0 0; }
 
+        /* ─── S6.3: превью заданий — витрина показывает, что ждёт в тренажёрах ─── */
+        .vpr-showcase {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+            gap: 26px;
+            align-items: center;
+            margin: 20px 0 10px;
+            padding: 22px;
+            border: 1px solid #dbe4ff;
+            border-radius: 20px;
+            background:
+                radial-gradient(circle at 8% 0%, rgba(67, 97, 238, 0.14), transparent 52%),
+                linear-gradient(145deg, #f6f8ff 0%, #eef1ff 100%);
+        }
+        .vpr-showcase h2 { margin: 0 0 10px; padding-left: 0; border-left: 0; font-size: 1.28rem; }
+        .showcase-eyebrow {
+            display: inline-block;
+            margin-bottom: 8px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--primary-dark);
+        }
+        .vpr-showcase p { margin: 0 0 14px; font-size: 0.95rem; color: #3d4348; }
+        .showcase-chips { display: flex; flex-wrap: wrap; gap: 7px; margin: 0 0 16px; padding: 0; list-style: none; }
+        .showcase-chips li {
+            padding: 4px 11px;
+            border: 1px solid #cdd7ee;
+            border-radius: 999px;
+            background: #fff;
+            font-size: 0.76rem;
+            font-weight: 700;
+            color: #475569;
+        }
+        .showcase-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+        .showcase-actions .cta { padding: 11px 20px; font-size: 0.95rem; }
+        .showcase-jump { font-size: 0.88rem; font-weight: 700; color: var(--primary); text-decoration: none; }
+        .showcase-jump:hover { text-decoration: underline; }
+
+        /* Макет задания — только оформление, ссылка целиком ведёт в пробный вариант */
+        .task-mock {
+            display: block;
+            overflow: hidden;
+            border: 1px solid #d7dced;
+            border-radius: 16px;
+            background: #fff;
+            text-decoration: none;
+            box-shadow: 0 16px 34px rgba(45, 52, 54, 0.16);
+            transition: transform 0.22s ease, box-shadow 0.22s ease;
+        }
+        .task-mock:hover { transform: translateY(-3px); box-shadow: 0 22px 44px rgba(67, 97, 238, 0.26); }
+        .task-mock:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+        .mock-topbar { display: flex; align-items: center; gap: 5px; padding: 8px 12px; border-bottom: 1px solid #e6ebf5; background: #f8fafc; }
+        .mock-dot { width: 8px; height: 8px; border-radius: 50%; background: #d6dde9; }
+        .mock-url { margin-left: 6px; font-size: 0.72rem; font-weight: 700; color: #64748b; }
+        .mock-body {
+            padding: 14px 16px 16px;
+            background-color: #fff;
+            background-image:
+                linear-gradient(#eef1f7 1px, transparent 1px),
+                linear-gradient(90deg, #eef1f7 1px, transparent 1px);
+            background-size: 22px 22px;
+        }
+        .mock-task { margin: 0 0 10px; font-size: 0.86rem; font-weight: 700; color: #475569; }
+        .mock-expr {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            margin-bottom: 14px;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            font-size: 1.45rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .mock-frac { display: inline-flex; flex-direction: column; align-items: center; font-size: 1rem; font-weight: 700; line-height: 1.1; }
+        .mock-frac > span:last-child { padding-top: 2px; border-top: 2px solid currentColor; }
+        .mock-answer { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .mock-input {
+            min-width: 84px;
+            padding: 6px 12px;
+            border: 2px dashed #c7d2fe;
+            border-radius: 10px;
+            background: #fff;
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: #1e293b;
+            text-align: center;
+        }
+        .mock-btn { padding: 6px 14px; border-radius: 999px; background: var(--primary); color: #fff; font-size: 0.8rem; font-weight: 800; }
+        .mock-ok { padding: 4px 10px; border-radius: 999px; background: rgba(46, 196, 182, 0.16); color: #17857b; font-size: 0.78rem; font-weight: 800; }
+        .mock-foot {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 9px 14px;
+            border-top: 1px solid #e6ebf5;
+            background: #fff;
+            font-size: 0.76rem;
+            font-weight: 700;
+            color: #64748b;
+        }
+        .mock-foot .mock-cta { color: var(--accent); }
+
+        /* Шесть карточек-превью: тип задания виден сразу, один клик — и тренажёр открыт */
+        .quick-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin: 0 0 14px; }
+        #start { scroll-margin-top: 90px; }
+        .quick-card {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            padding: 13px 15px;
+            border: 1px solid var(--tile-border);
+            border-radius: 16px;
+            background: #fff;
+            color: var(--text);
+            text-decoration: none;
+            transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+        }
+        .quick-card:hover, .quick-card:focus-visible { transform: translateY(-2px); border-color: var(--primary); box-shadow: 0 12px 24px rgba(67, 97, 238, 0.18); }
+        .quick-card:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+        .quick-tag { font-size: 0.68rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--primary); }
+        .quick-task { font-size: 1rem; font-weight: 700; color: #1e293b; }
+        .quick-name { margin-top: auto; font-size: 0.84rem; font-weight: 700; color: var(--text-muted); }
+        .quick-card:hover .quick-name, .quick-card:focus-visible .quick-name { color: var(--primary); }
+
+        @media (max-width: 760px) {
+            .vpr-showcase { grid-template-columns: 1fr; gap: 18px; padding: 18px 16px; border-radius: 18px; }
+            .vpr-showcase h2 { font-size: 1.15rem; }
+            .quick-grid { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 440px) { .quick-grid { grid-template-columns: 1fr; } }
+        @media (prefers-reduced-motion: reduce) { .task-mock, .quick-card { transition: none; } }
+
+
         @media (max-width: 640px) {
             body { padding: 72px 10px 28px; font-size: 16px; }
             .card { padding: 22px 18px 22px; border-radius: 18px; }
@@ -245,6 +381,84 @@
 
         <p class="lead">ВПР по математике в 6 классе проверяет программу всего года: дроби, делимость, проценты, уравнения, координаты, геометрию и текстовые задачи. На этой странице собрано главное для подготовки — что входит в работу, какая тема стоит за каким типом задания, план на четыре недели и ссылки на тренажёры. Интерактивный вариант можно решить отдельно.</p>
         <p class="updated">Материал обновлён в ноябре 2026 года. Автор: Козлов Сергей Владимирович.</p>
+        <!-- ─── S6.3: превью заданий + быстрый вход в тренажёры ─── -->
+        <section class="vpr-showcase" aria-labelledby="showcase-title">
+            <div class="showcase-text">
+                <span class="showcase-eyebrow">Превью · без регистрации</span>
+                <h2 id="showcase-title">Как выглядят задания</h2>
+                <p>Короткая задача, ответ одной строкой и проверка сразу: решил — идёшь дальше, ошибся — тренажёр показывает шаг, на котором потерялся ответ. Ниже — типы заданий из работы и шесть карточек, с которых удобно начать.</p>
+                <ul class="showcase-chips">
+                    <li>Короткий ответ</li>
+                    <li>Проверка сразу</li>
+                    <li>Шаг за шагом</li>
+                    <li>17 заданий · 23 балла</li>
+                </ul>
+                <div class="showcase-actions">
+                    <a class="cta" href="https://godspace.github.io/vpr-math-6/index.html" target="_blank" rel="noopener">пробный вариант →</a>
+                    <a class="showcase-jump" href="#start">↓ сразу к тренажёрам</a>
+                </div>
+            </div>
+
+            <a class="task-mock" href="https://godspace.github.io/vpr-math-6/index.html" target="_blank" rel="noopener" aria-label="Открыть пробный вариант ВПР по математике 6 класс с такими же заданиями">
+                <div class="mock-topbar" aria-hidden="true">
+                    <span class="mock-dot"></span><span class="mock-dot"></span><span class="mock-dot"></span>
+                    <span class="mock-url">ВПР · задание 1 из 17</span>
+                </div>
+                <div class="mock-body" aria-hidden="true">
+                    <p class="mock-task">Найдите значение выражения</p>
+                    <div class="mock-expr">
+                        <span class="mock-frac"><span>3</span><span>4</span></span>
+                        <span>+</span>
+                        <span class="mock-frac"><span>1</span><span>6</span></span>
+                    </div>
+                    <div class="mock-answer">
+                        <span class="mock-input">11/12</span>
+                        <span class="mock-btn">Проверить</span>
+                        <span class="mock-ok">верно ✓</span>
+                    </div>
+                </div>
+                <div class="mock-foot" aria-hidden="true">
+                    <span>Ошибка — разбор шага</span>
+                    <span class="mock-cta">попробовать →</span>
+                </div>
+            </a>
+        </section>
+
+
+        <h2 id="start">С чего начать: шесть карточек-превью</h2>
+        <p>В каждой карточке — реальный тип задания из тренажёра: нажмите, чтобы открыть упражнение сразу, не дочитывая страницу. Полная таблица «тип задания → тема → тренажёр» — ниже.</p>
+        <div class="quick-grid">
+            <a class="quick-card" href="../fractions/addition.html">
+                <span class="quick-tag">Дроби</span>
+                <span class="quick-task">3/4 + 1/6 = ?</span>
+                <span class="quick-name">Сложение дробей →</span>
+            </a>
+            <a class="quick-card" href="../divisibility/gcd.html">
+                <span class="quick-tag">Делимость</span>
+                <span class="quick-task">НОД(84, 126) = ?</span>
+                <span class="quick-name">НОД и НОК →</span>
+            </a>
+            <a class="quick-card" href="../percents/percent-of.html">
+                <span class="quick-tag">Проценты</span>
+                <span class="quick-task">15% от 400 ₽ = ?</span>
+                <span class="quick-name">Процент от числа →</span>
+            </a>
+            <a class="quick-card" href="../equations/equations.html">
+                <span class="quick-tag">Уравнения</span>
+                <span class="quick-task">3x − 7 = 14</span>
+                <span class="quick-name">Решение уравнений →</span>
+            </a>
+            <a class="quick-card" href="../rational/phone-balance.html">
+                <span class="quick-tag">Координаты</span>
+                <span class="quick-task">−3 + 5 = ?</span>
+                <span class="quick-name">Числа с минусом →</span>
+            </a>
+            <a class="quick-card" href="../geometry/area.html">
+                <span class="quick-tag">Геометрия</span>
+                <span class="quick-task">S = πr², r = 3</span>
+                <span class="quick-name">Окружность и круг →</span>
+            </a>
+        </div>
 
         <h2>Что входит в ВПР по математике за 6 класс</h2>
         <p>Работа составлена по программе 6 класса и проверяет не отдельные правила, а умение ими пользоваться: считать, переводить величины, читать условие и записывать ответ. Ниже — блоки, которые встречаются из года в год. Конкретные номера заданий и точную структуру сверяйте с демоверсией своего года.</p>
