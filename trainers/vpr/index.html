@@ -235,8 +235,6 @@
         }
         .showcase-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
         .showcase-actions .cta { padding: 11px 20px; font-size: 0.95rem; }
-        .showcase-jump { font-size: 0.88rem; font-weight: 700; color: var(--primary); text-decoration: none; }
-        .showcase-jump:hover { text-decoration: underline; }
 
         /* Макет задания — только оформление, ссылка целиком ведёт в пробный вариант */
         .task-mock {
@@ -303,35 +301,11 @@
         }
         .mock-foot .mock-cta { color: var(--accent); }
 
-        /* Шесть карточек-превью: тип задания виден сразу, один клик — и тренажёр открыт */
-        .quick-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin: 0 0 14px; }
-        #start { scroll-margin-top: 90px; }
-        .quick-card {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            padding: 13px 15px;
-            border: 1px solid var(--tile-border);
-            border-radius: 16px;
-            background: #fff;
-            color: var(--text);
-            text-decoration: none;
-            transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
-        }
-        .quick-card:hover, .quick-card:focus-visible { transform: translateY(-2px); border-color: var(--primary); box-shadow: 0 12px 24px rgba(67, 97, 238, 0.18); }
-        .quick-card:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-        .quick-tag { font-size: 0.68rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--primary); }
-        .quick-task { font-size: 1rem; font-weight: 700; color: #1e293b; }
-        .quick-name { margin-top: auto; font-size: 0.84rem; font-weight: 700; color: var(--text-muted); }
-        .quick-card:hover .quick-name, .quick-card:focus-visible .quick-name { color: var(--primary); }
-
         @media (max-width: 760px) {
             .vpr-showcase { grid-template-columns: 1fr; gap: 18px; padding: 18px 16px; border-radius: 18px; }
             .vpr-showcase h2 { font-size: 1.15rem; }
-            .quick-grid { grid-template-columns: 1fr 1fr; }
         }
-        @media (max-width: 440px) { .quick-grid { grid-template-columns: 1fr; } }
-        @media (prefers-reduced-motion: reduce) { .task-mock, .quick-card { transition: none; } }
+        @media (prefers-reduced-motion: reduce) { .task-mock { transition: none; } }
 
 
         @media (max-width: 640px) {
@@ -381,12 +355,12 @@
 
         <p class="lead">ВПР по математике в 6 классе проверяет программу всего года: дроби, делимость, проценты, уравнения, координаты, геометрию и текстовые задачи. На этой странице собрано главное для подготовки — что входит в работу, какая тема стоит за каким типом задания, план на четыре недели и ссылки на тренажёры. Интерактивный вариант можно решить отдельно.</p>
         <p class="updated">Материал обновлён в ноябре 2026 года. Автор: Козлов Сергей Владимирович.</p>
-        <!-- ─── S6.3: превью заданий + быстрый вход в тренажёры ─── -->
+        <!-- ─── S6.3: превью задания ─── -->
         <section class="vpr-showcase" aria-labelledby="showcase-title">
             <div class="showcase-text">
                 <span class="showcase-eyebrow">Превью · без регистрации</span>
                 <h2 id="showcase-title">Как выглядят задания</h2>
-                <p>Короткая задача, ответ одной строкой и проверка сразу: решил — идёшь дальше, ошибся — тренажёр показывает шаг, на котором потерялся ответ. Ниже — типы заданий из работы и шесть карточек, с которых удобно начать.</p>
+                <p>Короткая задача, ответ одной строкой и проверка сразу: решил — идёшь дальше, ошибся — тренажёр показывает шаг, на котором потерялся ответ.</p>
                 <ul class="showcase-chips">
                     <li>Короткий ответ</li>
                     <li>Проверка сразу</li>
@@ -395,7 +369,6 @@
                 </ul>
                 <div class="showcase-actions">
                     <a class="cta" href="https://godspace.github.io/vpr-math-6/index.html" target="_blank" rel="noopener">пробный вариант →</a>
-                    <a class="showcase-jump" href="#start">↓ сразу к тренажёрам</a>
                 </div>
             </div>
 
@@ -423,42 +396,6 @@
                 </div>
             </a>
         </section>
-
-
-        <h2 id="start">С чего начать: шесть карточек-превью</h2>
-        <p>В каждой карточке — реальный тип задания из тренажёра: нажмите, чтобы открыть упражнение сразу, не дочитывая страницу. Полная таблица «тип задания → тема → тренажёр» — ниже.</p>
-        <div class="quick-grid">
-            <a class="quick-card" href="../fractions/addition.html">
-                <span class="quick-tag">Дроби</span>
-                <span class="quick-task">3/4 + 1/6 = ?</span>
-                <span class="quick-name">Сложение дробей →</span>
-            </a>
-            <a class="quick-card" href="../divisibility/gcd.html">
-                <span class="quick-tag">Делимость</span>
-                <span class="quick-task">НОД(84, 126) = ?</span>
-                <span class="quick-name">НОД и НОК →</span>
-            </a>
-            <a class="quick-card" href="../percents/percent-of.html">
-                <span class="quick-tag">Проценты</span>
-                <span class="quick-task">15% от 400 ₽ = ?</span>
-                <span class="quick-name">Процент от числа →</span>
-            </a>
-            <a class="quick-card" href="../equations/equations.html">
-                <span class="quick-tag">Уравнения</span>
-                <span class="quick-task">3x − 7 = 14</span>
-                <span class="quick-name">Решение уравнений →</span>
-            </a>
-            <a class="quick-card" href="../rational/phone-balance.html">
-                <span class="quick-tag">Координаты</span>
-                <span class="quick-task">−3 + 5 = ?</span>
-                <span class="quick-name">Числа с минусом →</span>
-            </a>
-            <a class="quick-card" href="../geometry/area.html">
-                <span class="quick-tag">Геометрия</span>
-                <span class="quick-task">S = πr², r = 3</span>
-                <span class="quick-name">Окружность и круг →</span>
-            </a>
-        </div>
 
         <h2>Что входит в ВПР по математике за 6 класс</h2>
         <p>Работа составлена по программе 6 класса и проверяет не отдельные правила, а умение ими пользоваться: считать, переводить величины, читать условие и записывать ответ. Ниже — блоки, которые встречаются из года в год. Конкретные номера заданий и точную структуру сверяйте с демоверсией своего года.</p>
